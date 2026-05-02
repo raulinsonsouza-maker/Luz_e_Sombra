@@ -54,7 +54,7 @@ pnpm workspace monorepo using TypeScript. This is the **Da Sombra à Luz** Portu
 - `/avaliacao` — Roda da Vida assessment form (13 steps)
 - `/resultado/:id` — Assessment result with radar chart + evolution line chart
 - `/historico` — Assessment history with comparison
-- `/numerologia` — Numerology analysis (year personal + universal + monthly map)
+- `/numerologia` — Numerology analysis: full permanent profile (Caminho de Vida, Expressão, Alma, Personalidade), year analysis (Pessoal + Universal + Combinação), monthly map
 - `/admin` — Admin panel (CRUD for users, admin-only)
 
 ## Default Admin Credentials
