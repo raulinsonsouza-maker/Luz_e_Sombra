@@ -18,6 +18,20 @@ export default function LandingPage() {
 
   return (
     <div style={{ background: "#0f0c09", color: "#f7f2ec", fontFamily: "system-ui, sans-serif" }}>
+      <style>{`
+        @media (max-width: 639px) {
+          .lp-hero-inner { padding: 60px 20px !important; }
+          .lp-sec { padding-top: 64px !important; padding-bottom: 64px !important; }
+          .lp-sec-final { padding-top: 80px !important; padding-bottom: 80px !important; }
+          .lp-cta-group { flex-direction: column !important; align-items: stretch !important; }
+          .lp-cta-primary { width: 100% !important; justify-content: center !important; box-sizing: border-box; }
+          .lp-cta-secondary { width: 100% !important; justify-content: center !important; box-sizing: border-box; text-align: center; }
+          .lp-stats { gap: 16px !important; margin-top: 40px !important; padding-top: 24px !important; }
+          .lp-mod1-inner { padding: 24px !important; }
+          .lp-mod-inner { padding: 24px !important; }
+          .lp-final-btn { width: 100% !important; justify-content: center !important; box-sizing: border-box; }
+        }
+      `}</style>
 
       {/* ── TOP NAV ──────────────────────────────────────────────────── */}
       <nav style={{
@@ -54,7 +68,7 @@ export default function LandingPage() {
         <div style={{ position: "absolute", bottom: "-15%", left: "-10%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(156,119,66,0.08) 0%, transparent 65%)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", top: "40%", left: "50%", width: 900, height: 900, borderRadius: "50%", background: "radial-gradient(circle, rgba(200,165,107,0.04) 0%, transparent 60%)", transform: "translateX(-50%)", pointerEvents: "none" }} />
 
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "80px 24px", position: "relative", zIndex: 1, width: "100%" }}>
+        <div className="lp-hero-inner" style={{ maxWidth: 1200, margin: "0 auto", padding: "80px 24px", position: "relative", zIndex: 1, width: "100%", boxSizing: "border-box" }}>
           <div style={{ maxWidth: 820 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
               <div style={{ width: 32, height: 1, background: "#c8a56b" }} />
@@ -79,8 +93,9 @@ export default function LandingPage() {
               Uma jornada estruturada de autoconhecimento profundo — com ferramentas que revelam quem você é, o que bloqueia seu crescimento e onde está seu maior potencial.
             </p>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center" }}>
+            <div className="lp-cta-group" style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center" }}>
               <button
+                className="lp-cta-primary"
                 onClick={handleCTA}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 10,
@@ -98,6 +113,7 @@ export default function LandingPage() {
                 <ArrowRight size={18} />
               </button>
               <a
+                className="lp-cta-secondary"
                 href="#modulos"
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 8,
@@ -115,7 +131,7 @@ export default function LandingPage() {
             </div>
 
             {/* Social proof strip */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 32, marginTop: 64, paddingTop: 40, borderTop: "1px solid rgba(200,165,107,0.1)" }}>
+            <div className="lp-stats" style={{ display: "flex", flexWrap: "wrap", gap: 32, marginTop: 64, paddingTop: 40, borderTop: "1px solid rgba(200,165,107,0.1)" }}>
               {[
                 { numero: "12", label: "Áreas da vida mapeadas" },
                 { numero: "33", label: "Números analisados em profundidade" },
@@ -135,7 +151,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── MANIFESTO ────────────────────────────────────────────────── */}
-      <section style={{ background: "#0d0a07", padding: "100px 24px" }}>
+      <section className="lp-sec" style={{ background: "#0d0a07", padding: "100px 24px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, marginBottom: 64 }}>
             {[
@@ -171,7 +187,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── MÓDULOS ──────────────────────────────────────────────────── */}
-      <section id="modulos" style={{ padding: "100px 24px", background: "#0f0c09" }}>
+      <section id="modulos" className="lp-sec" style={{ padding: "100px 24px", background: "#0f0c09" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ marginBottom: 64 }}>
             <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(200,165,107,0.6)", marginBottom: 16 }}>
@@ -186,12 +202,8 @@ export default function LandingPage() {
           </div>
 
           {/* Module 1 — Roda da Vida */}
-          <div style={{
-            display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: 24, marginBottom: 24,
-          }}>
-            <div style={{
-              gridColumn: "span 2",
+          <div style={{ marginBottom: 24 }}>
+            <div className="lp-mod1-inner" style={{
               padding: "48px", borderRadius: 24,
               background: "linear-gradient(135deg, rgba(200,165,107,0.08) 0%, rgba(156,119,66,0.04) 100%)",
               border: "1px solid rgba(200,165,107,0.2)",
@@ -238,7 +250,7 @@ export default function LandingPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }}>
 
             {/* Module 2 — Numerologia */}
-            <div style={{
+            <div className="lp-mod-inner" style={{
               padding: 40, borderRadius: 24,
               background: "linear-gradient(135deg, rgba(156,119,66,0.07) 0%, rgba(200,165,107,0.03) 100%)",
               border: "1px solid rgba(200,165,107,0.15)",
@@ -279,7 +291,7 @@ export default function LandingPage() {
             </div>
 
             {/* Module 3 — Histórico */}
-            <div style={{
+            <div className="lp-mod-inner" style={{
               padding: 40, borderRadius: 24,
               background: "linear-gradient(135deg, rgba(200,165,107,0.05) 0%, rgba(156,119,66,0.03) 100%)",
               border: "1px solid rgba(200,165,107,0.15)",
@@ -323,7 +335,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── COMO FUNCIONA ─────────────────────────────────────────────── */}
-      <section style={{ background: "#0d0a07", padding: "100px 24px" }}>
+      <section className="lp-sec" style={{ background: "#0d0a07", padding: "100px 24px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 64 }}>
             <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(200,165,107,0.6)", marginBottom: 16 }}>
@@ -376,7 +388,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── QUOTE SECTION ─────────────────────────────────────────────── */}
-      <section style={{
+      <section className="lp-sec" style={{
         padding: "100px 24px",
         background: "linear-gradient(135deg, #1a1208 0%, #0f0c09 50%, #140f07 100%)",
         position: "relative", overflow: "hidden",
@@ -405,7 +417,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── DIFERENCIAIS ─────────────────────────────────────────────── */}
-      <section style={{ background: "#0f0c09", padding: "100px 24px" }}>
+      <section className="lp-sec" style={{ background: "#0f0c09", padding: "100px 24px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 24 }}>
             {[
@@ -433,7 +445,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA ────────────────────────────────────────────────── */}
-      <section style={{
+      <section className="lp-sec-final" style={{
         padding: "120px 24px",
         background: "linear-gradient(160deg, #1e1812 0%, #2f251b 50%, #1a1208 100%)",
         position: "relative", overflow: "hidden",
@@ -456,6 +468,7 @@ export default function LandingPage() {
           </p>
 
           <button
+            className="lp-final-btn"
             onClick={handleCTA}
             style={{
               display: "inline-flex", alignItems: "center", gap: 12,

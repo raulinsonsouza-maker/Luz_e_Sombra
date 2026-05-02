@@ -150,15 +150,15 @@ export default function HistoricoPage() {
                     const ant = anterior[area.key as keyof Avaliacao] as number;
                     const dif = atual - ant;
                     return (
-                      <div key={area.key} className="flex items-center justify-between p-3 rounded-xl"
+                      <div key={area.key} className="flex items-center justify-between p-3 rounded-xl gap-2"
                         style={{ background: "rgba(200,165,107,0.03)" }}>
-                        <div className="flex items-center gap-3 flex-1">
-                          {renderTendencia(dif)}
-                          <span className="text-sm text-brand-dark">{area.nome}</span>
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <span className="flex-shrink-0">{renderTendencia(dif)}</span>
+                          <span className="text-sm text-brand-dark truncate">{area.nome}</span>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-xs text-brand-medium">{ant} → {atual}</span>
-                          <span className={`text-sm font-semibold min-w-[48px] text-right flex items-center justify-end gap-1 ${dif > 0 ? "text-green-600" : dif < 0 ? "text-red-500" : "text-brand-medium opacity-40"}`}>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-xs text-brand-medium whitespace-nowrap">{ant}→{atual}</span>
+                          <span className={`text-sm font-semibold min-w-[40px] text-right flex items-center justify-end gap-0.5 ${dif > 0 ? "text-green-600" : dif < 0 ? "text-red-500" : "text-brand-medium opacity-40"}`}>
                             {dif > 0 ? <ArrowUp className="w-3 h-3" /> : dif < 0 ? <ArrowDown className="w-3 h-3" /> : null}
                             {dif !== 0 ? (dif > 0 ? "+" : "") + dif.toFixed(1) : "—"}
                           </span>

@@ -65,7 +65,7 @@ export default function MeuPerfilPage() {
 
   return (
     <div className="luxury-shell">
-      <div className="luxury-container max-w-lg py-10">
+      <div className="max-w-lg mx-auto px-4 py-10">
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-gold/15 border border-brand-gold/30 mb-4">
             <User className="w-8 h-8 text-brand-bronze" />
@@ -184,7 +184,7 @@ export default function MeuPerfilPage() {
           <button
             type="submit"
             disabled={saving}
-            className="luxury-btn w-full flex items-center justify-center gap-2 disabled:opacity-60"
+            className="luxury-btn-primary w-full disabled:opacity-60"
           >
             {saving ? "Salvando..." : "Salvar alterações"}
           </button>

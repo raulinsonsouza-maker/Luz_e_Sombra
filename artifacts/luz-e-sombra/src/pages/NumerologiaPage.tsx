@@ -666,11 +666,11 @@ export default function NumerologiaPage() {
           <div className="p-8 md:p-12">
             {/* Header */}
             <div className="text-center mb-10">
-              <p className="text-xs font-semibold tracking-[0.35em] uppercase mb-4"
+              <p className="text-xs font-semibold tracking-[0.12em] sm:tracking-[0.3em] uppercase mb-4"
                 style={{ color: "rgba(200,165,107,0.6)" }}>
                 Análise · Numerológica · Pessoal
               </p>
-              <h1 className="font-tan-mon-cheri text-5xl md:text-6xl mb-3"
+              <h1 className="font-tan-mon-cheri text-4xl md:text-6xl mb-3"
                 style={{ color: "#c8a56b" }}>
                 Numerologia
               </h1>
@@ -687,34 +687,34 @@ export default function NumerologiaPage() {
             </div>
 
             {/* User identity block */}
-            <div className="rounded-2xl p-6 mb-8 relative overflow-hidden"
+            <div className="rounded-2xl p-5 mb-8 relative overflow-hidden"
               style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.18)" }}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-5">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="flex items-start gap-4 min-w-0">
                   {/* Avatar circle */}
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
                     style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.15), rgba(156,119,66,0.1))", border: "1px solid rgba(200,165,107,0.3)" }}>
-                    <User className="w-6 h-6" style={{ color: "#c8a56b" }} />
+                    <User className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: "#c8a56b" }} />
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-1.5"
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold tracking-[0.15em] uppercase mb-1"
                       style={{ color: "rgba(200,165,107,0.5)" }}>
                       Analisando o destino de
                     </p>
-                    <p className="font-tan-mon-cheri text-2xl md:text-3xl mb-2"
+                    <p className="font-tan-mon-cheri text-xl sm:text-2xl md:text-3xl mb-1.5 leading-tight"
                       style={{ color: "#e8d5b0" }}>
                       {user?.nome || "—"}
                     </p>
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-2.5 flex-wrap">
                       {user?.dataNascimento ? (
                         <>
-                          <span className="flex items-center gap-1.5 text-sm"
+                          <span className="flex items-center gap-1.5 text-xs sm:text-sm"
                             style={{ color: "rgba(200,165,107,0.7)" }}>
-                            <Calendar className="w-3.5 h-3.5" />
+                            <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
                             {formatarDataBrasileira(user.dataNascimento)}
                           </span>
                           {calcularIdade(user.dataNascimento) !== null && (
-                            <span className="text-xs px-2.5 py-0.5 rounded-full font-medium"
+                            <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                               style={{ background: "rgba(200,165,107,0.12)", color: "#c8a56b", border: "1px solid rgba(200,165,107,0.25)" }}>
                               {calcularIdade(user.dataNascimento)} anos
                             </span>
@@ -731,7 +731,7 @@ export default function NumerologiaPage() {
 
                 {/* Edit profile link */}
                 <a href="/perfil"
-                  className="flex items-center gap-1.5 text-xs font-medium flex-shrink-0 transition-opacity hover:opacity-80"
+                  className="flex items-center gap-1.5 text-xs font-medium flex-shrink-0 self-start sm:mt-0 transition-opacity hover:opacity-80"
                   style={{ color: "rgba(200,165,107,0.5)" }}>
                   <ExternalLink className="w-3 h-3" />
                   Editar perfil
