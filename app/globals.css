@@ -1,0 +1,495 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.cdnfonts.com/css/tan-mon-cheri');
+
+:root {
+  --foreground-rgb: 41, 31, 24;
+  --background-start-rgb: 247, 242, 236;
+  --background-end-rgb: 255, 252, 247;
+  --brand-dark: #2f251b;
+  --brand-medium: #5f4a2f;
+  --brand-darker: #1e1812;
+  --brand-gold: #c8a56b;
+  --brand-bronze: #9c7742;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(200,165,107,0.18), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(156,119,66,0.12), transparent 55%),
+    linear-gradient(to bottom, rgb(var(--background-start-rgb)), rgb(var(--background-end-rgb)));
+  font-size: 17px;
+  letter-spacing: 0.01em;
+}
+
+@layer components {
+  .luxury-shell {
+    @apply min-h-screen bg-gradient-to-br from-amber-50 via-stone-50 to-yellow-50;
+  }
+
+  .luxury-container {
+    @apply max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-10;
+  }
+
+  .luxury-card {
+    @apply bg-white/90 backdrop-blur-sm border border-brand-gold/25 rounded-luxury shadow-luxury;
+  }
+
+  .luxury-card-strong {
+    @apply bg-white border-2 border-brand-gold/20 rounded-luxury shadow-luxury-lg;
+  }
+
+  .luxury-title {
+    @apply font-tan-mon-cheri text-brand-dark;
+  }
+
+  .luxury-input {
+    @apply w-full px-4 py-3 border border-brand-gold/35 rounded-xl bg-white text-brand-dark placeholder:text-brand-medium/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2;
+  }
+
+  .luxury-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-brand-bronze to-brand-gold text-white font-semibold shadow-luxury hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2 transition-all;
+  }
+
+  .luxury-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-brand-gold/40 text-brand-dark bg-white/80 hover:bg-brand-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2 transition-all;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Custom Slider Styles */
+.luxury-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  height: 12px;
+}
+
+/* Track (barra de fundo) */
+.luxury-range::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 12px;
+  background: linear-gradient(to right, #fed7aa, #d0b280, #98794c);
+  border-radius: 8px;
+  border: 2px solid #d0b280;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.luxury-range::-moz-range-track {
+  width: 100%;
+  height: 12px;
+  background: linear-gradient(to right, #fed7aa, #d0b280, #98794c);
+  border-radius: 8px;
+  border: 2px solid #d0b280;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Webkit browsers (Chrome, Safari) */
+.luxury-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 24px;
+  width: 24px;
+  background: linear-gradient(135deg, #98794c 0%, #d0b280 100%);
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.luxury-range::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(152, 121, 76, 0.4);
+}
+
+/* Firefox */
+.luxury-range::-moz-range-thumb {
+  height: 24px;
+  width: 24px;
+  background: linear-gradient(135deg, #98794c 0%, #d0b280 100%);
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.luxury-range::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(152, 121, 76, 0.4);
+}
+
+/* ============================================
+   ESTILOS DE IMPRESSÃO - PDF OTIMIZADO PARA A4
+   ============================================ */
+
+@media print {
+  /* Configuração da página A4 */
+  @page {
+    size: A4;
+    margin: 1.5cm 2cm;
+  }
+
+  /* Reset de fundo e cores */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    background: white !important;
+    color: #291f18 !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Container principal */
+  .min-h-screen {
+    min-height: auto !important;
+    background: white !important;
+  }
+
+  /* Esconder elementos de navegação */
+  .no-print,
+  button,
+  nav,
+  header button,
+  footer button,
+  [role="navigation"],
+  .cursor-pointer {
+    display: none !important;
+  }
+
+  /* Títulos otimizados */
+  h1 {
+    font-size: 24pt !important;
+    color: #46331e !important;
+    margin-bottom: 0.5cm !important;
+    page-break-after: avoid !important;
+    font-weight: 700 !important;
+  }
+
+  h2 {
+    font-size: 18pt !important;
+    color: #46331e !important;
+    margin-top: 0.8cm !important;
+    margin-bottom: 0.4cm !important;
+    page-break-after: avoid !important;
+    font-weight: 600 !important;
+  }
+
+  h3 {
+    font-size: 14pt !important;
+    color: #69502e !important;
+    margin-top: 0.5cm !important;
+    margin-bottom: 0.3cm !important;
+    page-break-after: avoid !important;
+    font-weight: 600 !important;
+  }
+
+  /* Parágrafos e textos */
+  p {
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+    margin-bottom: 0.3cm !important;
+    orphans: 3 !important;
+    widows: 3 !important;
+  }
+
+  /* Gráfico - garantir que fique bem */
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid !important;
+    margin: 0.5cm auto !important;
+    display: block !important;
+  }
+
+  /* Cards e containers */
+  .bg-white,
+  .rounded-3xl,
+  .shadow-2xl {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Bordas sutis para separação */
+  .border-brand-gold,
+  .border {
+    border: 1px solid #d0b280 !important;
+    border-radius: 0.2cm !important;
+  }
+
+  /* Backgrounds gradientes - converter para sólidos */
+  .bg-gradient-to-br,
+  .bg-gradient-to-r,
+  .bg-gradient-to-l {
+    background: white !important;
+  }
+
+  .from-brand-gold,
+  .to-brand-bronze {
+    background: #f5f5f0 !important;
+  }
+
+  /* Grid de informações */
+  .grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.5cm !important;
+    page-break-inside: avoid !important;
+    margin: 0.5cm 0 !important;
+  }
+
+  /* Média geral - destaque */
+  .inline-block {
+    display: inline-block !important;
+  }
+
+  /* Notas por área - grids de 2 colunas em md */
+  @media (min-width: 768px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+
+  /* Barras de progresso - fundo */
+  .w-full[class*="bg-"] {
+    background: #e8e8e8 !important;
+    height: 0.3cm !important;
+    border-radius: 0.15cm !important;
+  }
+
+  /* Barras de progresso - preenchimento com gradiente */
+  [class*="from-brand-bronze"][class*="to-brand-gold"] {
+    background: linear-gradient(to right, #98794c, #d0b280) !important;
+    height: 0.3cm !important;
+    border-radius: 0.15cm !important;
+  }
+
+  /* Ícones - ajustar tamanho */
+  svg {
+    width: 0.8cm !important;
+    height: 0.8cm !important;
+    color: #98794c !important;
+  }
+
+  /* Quebras de página estratégicas */
+  .page-break-before {
+    page-break-before: always !important;
+  }
+
+  .page-break-after {
+    page-break-after: always !important;
+  }
+
+  .page-break-inside-avoid {
+    page-break-inside: avoid !important;
+  }
+
+  /* Seções importantes não quebram */
+  .rounded-2xl,
+  .rounded-xl {
+    page-break-inside: avoid !important;
+    background: #fafaf8 !important;
+    padding: 0.4cm !important;
+    margin: 0.3cm 0 !important;
+    border: 1px solid #e8e8e8 !important;
+    border-radius: 0.2cm !important;
+  }
+
+  /* Tabela de dados */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 0.5cm 0 !important;
+    page-break-inside: avoid !important;
+  }
+
+  th, td {
+    padding: 0.2cm !important;
+    text-align: left !important;
+    border-bottom: 1px solid #e8e8e8 !important;
+  }
+
+  th {
+    font-weight: 600 !important;
+    color: #46331e !important;
+    background: #fafaf8 !important;
+  }
+
+  /* Espaçamentos otimizados */
+  .mb-8, .mb-6, .mb-4 {
+    margin-bottom: 0.5cm !important;
+  }
+
+  .mt-8, .mt-6, .mt-4 {
+    margin-top: 0.5cm !important;
+  }
+
+  .p-8, .p-6, .p-4 {
+    padding: 0.4cm !important;
+  }
+
+  /* Centralização de conteúdo */
+  .text-center {
+    text-align: center !important;
+  }
+
+  .mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  /* Flex para layout */
+  .flex {
+    display: flex !important;
+  }
+
+  .flex-wrap {
+    flex-wrap: wrap !important;
+  }
+
+  .gap-4 {
+    gap: 0.3cm !important;
+  }
+
+  .justify-center {
+    justify-content: center !important;
+  }
+
+  .items-center {
+    align-items: center !important;
+  }
+
+  /* Números e valores - destaque */
+  .text-4xl, .text-3xl, .text-2xl {
+    font-size: 16pt !important;
+    font-weight: 700 !important;
+    color: #98794c !important;
+  }
+
+  /* Cores de texto otimizadas para impressão */
+  .text-brand-dark {
+    color: #46331e !important;
+  }
+
+  .text-brand-medium {
+    color: #69502e !important;
+  }
+
+  .text-brand-bronze {
+    color: #98794c !important;
+  }
+
+  /* Header do documento */
+  .max-w-6xl, .max-w-4xl, .max-w-2xl {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Fontes especiais - garantir carregamento */
+  .font-tan-mon-cheri {
+    font-family: 'Tan Mon Cheri', serif !important;
+  }
+
+  /* Links - remover sublinhado */
+  a {
+    color: #46331e !important;
+    text-decoration: none !important;
+  }
+
+  /* Rodapé do PDF */
+  .print-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 9pt;
+    color: #999;
+    border-top: 1px solid #e8e8e8;
+    padding-top: 0.3cm;
+  }
+
+  /* Cabeçalho do PDF */
+  .print-header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 9pt;
+    color: #999;
+    border-bottom: 1px solid #e8e8e8;
+    padding-bottom: 0.3cm;
+    margin-bottom: 0.5cm;
+  }
+
+  /* Forçar uma página por vez */
+  article, section {
+    page-break-after: auto !important;
+  }
+
+  /* Evitar quebra em listas */
+  ul, ol {
+    page-break-inside: avoid !important;
+  }
+
+  li {
+    page-break-inside: avoid !important;
+  }
+
+  /* Optimizar imagens */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Sombras - remover para economia de tinta */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Garantir contraste */
+  .opacity-50, .opacity-60, .opacity-70 {
+    opacity: 1 !important;
+  }
+
+  /* Animações - desabilitar */
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
