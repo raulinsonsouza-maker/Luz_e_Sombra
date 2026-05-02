@@ -3,8 +3,8 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import {
   Calendar, TrendingUp, Heart, Briefcase, DollarSign, Activity,
-  AlertCircle, Brain, Lightbulb, ChevronRight, Target, Sparkles,
-  User, Star, Zap, Shield, Eye, Hash, BookOpen, Compass,
+  AlertCircle, Brain, Lightbulb, ChevronRight, Sparkles,
+  User, Star, Zap, Shield, Eye, Hash, BookOpen, Compass, Quote,
 } from "lucide-react";
 
 import { ANOS_UNIVERSAIS, ANOS_PESSOAIS, COMBINACOES, NUMEROS_DE_VIDA } from "@/lib/numerologia-data";
@@ -18,7 +18,6 @@ import {
   calcularNumerodaAlma,
   calcularNumerodaPersonalidade,
   formatarDataBrasileira,
-  reduzirNumeroForcando,
 } from "@/lib/numerologia-utils";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -75,8 +74,10 @@ export default function NumerologiaPage() {
 
   const [dataNascimento, setDataNascimento] = useState("");
   const [nome, setNome] = useState("");
-  const [anoAnalise, setAnoAnalise] = useState(new Date().getFullYear());
-  const [mostrarMestres, setMostrarMestres] = useState(true);
+  const ANOS_DISPONIVEIS = [2025, 2026];
+  const anoAtual = new Date().getFullYear();
+  const anoDefault = ANOS_DISPONIVEIS.includes(anoAtual) ? anoAtual : ANOS_DISPONIVEIS[0];
+  const [anoAnalise, setAnoAnalise] = useState(anoDefault);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [resultado, setResultado] = useState<ReturnType<typeof calcular> | null>(null);
@@ -94,38 +95,29 @@ export default function NumerologiaPage() {
 
   // ── Calculation ──────────────────────────────────────────────────────────
 
-  function calcular(data: string, nomeCompleto: string, ano: number, mestres: boolean) {
+  // Master numbers (11, 22, 33) are always preserved — this is the standard numerological approach
+  function calcular(data: string, nomeCompleto: string, ano: number) {
     const dataFormatada = formatarDataBrasileira(data);
     const partes = dataFormatada.split("/");
     if (partes.length !== 3) return null;
 
-    // Permanent numbers
     const numerodeVida = calcularNumerodeVida(dataFormatada);
     const expressao = nomeCompleto.trim() ? calcularNumerodeExpressao(nomeCompleto) : null;
     const alma = nomeCompleto.trim() ? calcularNumerodaAlma(nomeCompleto) : null;
     const personalidade = nomeCompleto.trim() ? calcularNumerodaPersonalidade(nomeCompleto) : null;
 
-    // Reduce if master numbers not preserved
-    function ajustar(v: number) {
-      if (!mestres && (v === 11 || v === 22 || v === 33)) return reduzirNumeroForcando(v);
-      return v;
-    }
+    const vidaVal = numerodeVida?.valor ?? null;
+    const exprVal = expressao?.valor ?? null;
+    const almaVal = alma?.valor ?? null;
+    const persVal = personalidade?.valor ?? null;
 
-    const vidaVal = numerodeVida ? ajustar(numerodeVida.valor) : null;
-    const exprVal = expressao ? ajustar(expressao.valor) : null;
-    const almaVal = alma ? ajustar(alma.valor) : null;
-    const persVal = personalidade ? ajustar(personalidade.valor) : null;
-
-    // Year numbers
     const anoUniversal = calcularAnoUniversal(ano);
     const anoPessoalObj = calcularAnoPessoal(dataFormatada, ano);
     if (!anoPessoalObj) return null;
-    let apVal = anoPessoalObj.reduzido;
-    if (!mestres && (apVal === 11 || apVal === 22 || apVal === 33)) apVal = reduzirNumeroForcando(anoPessoalObj.somaTotal);
+    const apVal = anoPessoalObj.reduzido;
 
     return {
-      data, nomeCompleto, ano, mestres,
-      // permanent
+      data, nomeCompleto, ano,
       numerodeVida: vidaVal,
       numerodeVidaRaw: numerodeVida,
       numerodeVidaInfo: vidaVal ? NUMEROS_DE_VIDA[vidaVal] : null,
@@ -134,12 +126,11 @@ export default function NumerologiaPage() {
       almaVal,
       almaInfo: almaVal ? NUMEROS_DE_VIDA[almaVal] : null,
       persVal,
-      // year
-      anoUniversal: { ...anoUniversal, reduzido: ajustar(anoUniversal.reduzido) },
+      anoUniversal,
       anoPessoal: { ...anoPessoalObj, reduzido: apVal },
       interpretacaoAnoPessoal: ANOS_PESSOAIS[apVal],
-      analiseUniversal: ANOS_UNIVERSAIS[ajustar(anoUniversal.reduzido)],
-      combinacao: COMBINACOES[`${ajustar(anoUniversal.reduzido)}-${apVal}`],
+      analiseUniversal: ANOS_UNIVERSAIS[anoUniversal.reduzido],
+      combinacao: COMBINACOES[`${anoUniversal.reduzido}-${apVal}`],
       meses: calcularMesesPessoais(apVal, ano),
     };
   }
@@ -147,10 +138,10 @@ export default function NumerologiaPage() {
   function handleCalcular() {
     setErro("");
     if (!dataNascimento) {
-      setErro("Data de nascimento não encontrada. Entre em contato com o administrador.");
+      setErro("Data de nascimento não encontrada. Acesse seu perfil para atualizar.");
       return;
     }
-    const r = calcular(dataNascimento, nome, anoAnalise, mostrarMestres);
+    const r = calcular(dataNascimento, nome, anoAnalise);
     if (r) {
       setResultado(r);
       setAbaAtiva("perfil");
@@ -584,28 +575,49 @@ export default function NumerologiaPage() {
           {resultado.meses.map((mes: MesPessoal, idx: number) => (
             <div key={idx} className="luxury-card-strong p-6 transition-all hover:shadow-lg"
               style={{ border: "1px solid rgba(200,165,107,0.18)" }}>
+
+              {/* Header */}
               <div className="flex items-center justify-between mb-4 pb-4"
                 style={{ borderBottom: "1px solid rgba(200,165,107,0.15)" }}>
                 <div>
-                  <h3 className="font-semibold text-brand-dark">{mes.mesNome}</h3>
-                  <p className="text-xs text-brand-bronze mt-0.5">{mes.energia}</p>
+                  <h3 className="font-tan-mon-cheri text-lg text-brand-dark">{mes.mesNome}</h3>
+                  <p className="text-xs text-brand-bronze mt-0.5 font-semibold tracking-wide uppercase">{mes.energia}</p>
                 </div>
                 <NumBadge n={mes.reduzido} size="sm" />
               </div>
-              <p className="text-sm text-brand-darker leading-relaxed mb-4 italic">{mes.descricao}</p>
+
+              {/* Short description */}
+              <p className="text-sm text-brand-darker leading-relaxed mb-4">{mes.descricao}</p>
+
+              {/* Deep insight */}
+              <div className="p-4 rounded-xl mb-4"
+                style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.15)" }}>
+                <p className="text-xs text-brand-darker leading-relaxed">{mes.profundidade}</p>
+              </div>
+
+              {/* Reflection question */}
+              <div className="flex items-start gap-3 p-4 rounded-xl mb-4"
+                style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.25)" }}>
+                <Quote className="w-4 h-4 text-brand-bronze flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-brand-darker leading-relaxed italic">{mes.reflexao}</p>
+              </div>
+
+              {/* Areas */}
               {mes.areas.length > 0 && (
-                <div className="mb-3">
+                <div className="mb-4">
                   <p className="text-xs font-semibold tracking-wider uppercase text-brand-bronze mb-2">Áreas em destaque</p>
                   <div className="flex flex-wrap gap-1.5">
                     {mes.areas.map((a, i) => <Tag key={i}>{a}</Tag>)}
                   </div>
                 </div>
               )}
+
+              {/* Actions */}
               {mes.acoes.length > 0 && (
-                <div className="mb-3">
+                <div className="mb-4">
                   <p className="text-xs font-semibold tracking-wider uppercase text-brand-bronze mb-2">Ações recomendadas</p>
-                  <ul className="space-y-1">
-                    {mes.acoes.slice(0, 4).map((a, i) => (
+                  <ul className="space-y-1.5">
+                    {mes.acoes.map((a, i) => (
                       <li key={i} className="text-xs text-brand-darker flex items-start gap-2">
                         <span className="text-brand-bronze mt-0.5 flex-shrink-0">—</span><span>{a}</span>
                       </li>
@@ -613,11 +625,13 @@ export default function NumerologiaPage() {
                   </ul>
                 </div>
               )}
+
+              {/* Avoid */}
               {mes.evitar.length > 0 && (
-                <div>
+                <div className="pt-3" style={{ borderTop: "1px solid rgba(200,165,107,0.1)" }}>
                   <p className="text-xs font-semibold tracking-wider uppercase text-brand-medium/60 mb-2">O que evitar</p>
-                  <ul className="space-y-1">
-                    {mes.evitar.slice(0, 3).map((e, i) => (
+                  <ul className="space-y-1.5">
+                    {mes.evitar.map((e, i) => (
                       <li key={i} className="text-xs text-brand-medium flex items-start gap-2">
                         <span className="text-brand-medium/40 mt-0.5 flex-shrink-0">—</span><span>{e}</span>
                       </li>
@@ -662,21 +676,16 @@ export default function NumerologiaPage() {
               <label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-2">
                 Ano de Análise
               </label>
-              <input type="number" value={anoAnalise} onChange={e => setAnoAnalise(parseInt(e.target.value))}
-                min={2020} max={2050} className="luxury-input" />
+              <select
+                value={anoAnalise}
+                onChange={e => setAnoAnalise(parseInt(e.target.value))}
+                className="luxury-input"
+              >
+                {ANOS_DISPONIVEIS.map(a => (
+                  <option key={a} value={a}>{a}</option>
+                ))}
+              </select>
             </div>
-          </div>
-
-          <div className="flex items-center gap-6 mb-8">
-            <label className="text-xs font-semibold tracking-widest uppercase text-brand-medium">Números Mestres</label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="radio" checked={mostrarMestres} onChange={() => setMostrarMestres(true)} className="w-4 h-4 accent-brand-bronze" />
-              <span className="text-sm text-brand-dark">Preservar (11, 22, 33)</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="radio" checked={!mostrarMestres} onChange={() => setMostrarMestres(false)} className="w-4 h-4 accent-brand-bronze" />
-              <span className="text-sm text-brand-dark">Reduzir</span>
-            </label>
           </div>
 
           {erro && (
