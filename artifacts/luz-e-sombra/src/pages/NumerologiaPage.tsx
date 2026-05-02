@@ -745,12 +745,12 @@ export default function NumerologiaPage() {
                 style={{ color: "rgba(200,165,107,0.5)" }}>
                 Selecione o ano de análise
               </p>
-              <div className="flex gap-3 justify-center">
+              <div className="flex gap-3 justify-center max-w-xs mx-auto w-full">
                 {ANOS_DISPONIVEIS.map(ano => (
                   <button
                     key={ano}
                     onClick={() => setAnoAnalise(ano)}
-                    className="px-10 py-3.5 rounded-xl font-tan-mon-cheri text-xl transition-all"
+                    className="flex-1 py-3.5 rounded-xl font-tan-mon-cheri text-xl transition-all"
                     style={anoAnalise === ano
                       ? { background: "linear-gradient(135deg, #9c7742, #c8a56b)", color: "#fff", boxShadow: "0 4px 20px rgba(200,165,107,0.3)" }
                       : { background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.2)", color: "rgba(200,165,107,0.5)" }}
@@ -776,7 +776,7 @@ export default function NumerologiaPage() {
               className="w-full py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-3 transition-all hover:opacity-90 active:scale-[0.99]"
               style={{ background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)", color: "#fff", boxShadow: "0 6px 30px rgba(200,165,107,0.25)", letterSpacing: "0.05em" }}>
               <Sparkles className="w-5 h-5" />
-              Gerar Análise Numerológica Completa
+              Revelar Minha Análise
             </button>
           </div>
 
