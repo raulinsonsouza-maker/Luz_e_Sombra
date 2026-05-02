@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useLocation, Link } from "wouter";
+import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { Home, Target, Calendar, History, Shield, LogOut, Menu, X } from "lucide-react";
+import { Home, Target, Hash, History, Shield, LogOut, Menu, X } from "lucide-react";
 
 export default function SiteHeader() {
   const [location, navigate] = useLocation();
@@ -17,7 +17,7 @@ export default function SiteHeader() {
   const links = [
     { href: "/", label: "Início", icon: Home },
     { href: "/avaliacao", label: "Avaliação", icon: Target },
-    { href: "/numerologia", label: "Numerologia", icon: Calendar },
+    { href: "/numerologia", label: "Numerologia", icon: Hash },
     { href: "/historico", label: "Histórico", icon: History },
   ];
 
@@ -26,109 +26,178 @@ export default function SiteHeader() {
     navigate("/login");
   };
 
+  const isActive = (href: string) =>
+    href === "/" ? location === "/" : location.startsWith(href);
+
   return (
-    <header className="sticky top-0 z-40 border-b border-brand-gold/25 bg-white/90 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
-          <button
-            onClick={() => navigate("/")}
-            className="inline-flex items-center gap-3 text-brand-dark hover:text-brand-bronze transition-colors"
-          >
-            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full overflow-hidden shadow-luxury">
-              <img src="/logo-luxury.svg" alt="Logo Da Sombra à Luz" width={40} height={40} />
-            </div>
-            <div className="text-left">
-              <p className="text-base font-semibold leading-none">Da Sombra à Luz</p>
-              <p className="text-xs text-brand-medium">Experiência Premium</p>
-            </div>
-          </button>
+    <>
+      <header
+        className="sticky top-0 z-40"
+        style={{
+          background: "linear-gradient(160deg, #1e1812 0%, #2f251b 60%, #3d2f1f 100%)",
+          borderBottom: "1px solid rgba(200,165,107,0.15)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between h-16">
 
-          <nav className="hidden md:flex items-center gap-2 rounded-2xl border border-brand-gold/20 bg-white/80 p-1">
-            {links.map(({ href, label, icon: Icon }) => {
-              const active = location === href || (href !== "/" && location.startsWith(href));
-              return (
-                <button
-                  key={href}
-                  type="button"
-                  onClick={() => navigate(href)}
-                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                    active
-                      ? "bg-brand-gold/25 text-brand-dark border border-brand-gold/40 shadow-sm"
-                      : "text-brand-medium hover:text-brand-dark hover:bg-brand-gold/10"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </button>
-              );
-            })}
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={() => navigate("/admin")}
-                className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                  location.startsWith("/admin")
-                    ? "bg-purple-100 text-purple-700 border border-purple-200 shadow-sm"
-                    : "text-purple-700 hover:bg-purple-50"
-                }`}
+            {/* Brand */}
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-3 group"
+            >
+              <div
+                className="w-px h-7 transition-opacity group-hover:opacity-100 opacity-70"
+                style={{ background: "linear-gradient(to bottom, transparent, #c8a56b, transparent)" }}
+              />
+              <span
+                className="font-tan-mon-cheri text-lg tracking-wide transition-colors"
+                style={{ color: "#f7f2ec" }}
               >
-                <Shield className="w-4 h-4" />
-                Admin
-              </button>
-            )}
-          </nav>
+                Da Sombra à Luz
+              </span>
+            </button>
 
-          <div className="flex items-center gap-2">
-            <div className="hidden lg:block text-right">
-              <p className="text-xs text-brand-medium">Olá,</p>
-              <p className="text-sm font-semibold text-brand-dark">{primeiroNome}</p>
+            {/* Desktop nav */}
+            <nav className="hidden md:flex items-center gap-1">
+              {links.map(({ href, label, icon: Icon }) => {
+                const active = isActive(href);
+                return (
+                  <button
+                    key={href}
+                    type="button"
+                    onClick={() => navigate(href)}
+                    className="relative flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all rounded-lg"
+                    style={{
+                      color: active ? "#c8a56b" : "rgba(247,242,236,0.5)",
+                    }}
+                    onMouseEnter={e => {
+                      if (!active) (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.85)";
+                    }}
+                    onMouseLeave={e => {
+                      if (!active) (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.5)";
+                    }}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {label}
+                    {active && (
+                      <span
+                        className="absolute bottom-0 left-4 right-4 h-px rounded-full"
+                        style={{ background: "#c8a56b" }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/admin")}
+                  className="relative flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all rounded-lg ml-1"
+                  style={{
+                    color: location.startsWith("/admin") ? "#c8a56b" : "rgba(200,165,107,0.5)",
+                    border: "1px solid rgba(200,165,107,0.25)",
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.5)";
+                    (e.currentTarget as HTMLElement).style.color = "#c8a56b";
+                  }}
+                  onMouseLeave={e => {
+                    if (!location.startsWith("/admin")) {
+                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.25)";
+                      (e.currentTarget as HTMLElement).style.color = "rgba(200,165,107,0.5)";
+                    }
+                  }}
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  Admin
+                </button>
+              )}
+            </nav>
+
+            {/* Right side */}
+            <div className="flex items-center gap-4">
+              <div className="hidden lg:flex items-center gap-3">
+                <div className="w-px h-5" style={{ background: "rgba(200,165,107,0.2)" }} />
+                <div className="text-right">
+                  <p className="text-xs" style={{ color: "rgba(200,165,107,0.5)", letterSpacing: "0.1em" }}>
+                    Olá,
+                  </p>
+                  <p className="text-sm font-medium" style={{ color: "rgba(247,242,236,0.8)" }}>
+                    {primeiroNome}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all"
+                style={{ color: "rgba(247,242,236,0.45)", border: "1px solid rgba(200,165,107,0.15)" }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.color = "#c8a56b";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.4)";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.45)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.15)";
+                }}
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Sair</span>
+              </button>
+
+              {/* Mobile menu toggle */}
+              <button
+                onClick={() => setMobileOpen(v => !v)}
+                className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg"
+                style={{ color: "rgba(247,242,236,0.6)", border: "1px solid rgba(200,165,107,0.2)" }}
+              >
+                {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              </button>
             </div>
-            <button
-              onClick={() => setMobileOpen(v => !v)}
-              className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-brand-gold/30 text-brand-dark"
-            >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-brand-gold/40 text-brand-dark hover:bg-brand-gold/10 transition-all"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Sair</span>
-            </button>
           </div>
         </div>
+
+        {/* Mobile drawer */}
         {mobileOpen && (
-          <div className="md:hidden mt-3 rounded-2xl border border-brand-gold/20 bg-white/95 p-2 space-y-1">
-            {links.map(({ href, label, icon: Icon }) => {
-              const active = location === href || (href !== "/" && location.startsWith(href));
-              return (
+          <div
+            className="md:hidden border-t"
+            style={{ borderColor: "rgba(200,165,107,0.15)", background: "rgba(30,24,18,0.98)" }}
+          >
+            <div className="px-4 py-3 space-y-1">
+              {links.map(({ href, label, icon: Icon }) => {
+                const active = isActive(href);
+                return (
+                  <button
+                    key={`m-${href}`}
+                    type="button"
+                    onClick={() => { setMobileOpen(false); navigate(href); }}
+                    className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-all"
+                    style={{
+                      color: active ? "#c8a56b" : "rgba(247,242,236,0.55)",
+                      background: active ? "rgba(200,165,107,0.08)" : "transparent",
+                    }}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {label}
+                  </button>
+                );
+              })}
+              {isAdmin && (
                 <button
-                  key={`m-${href}`}
                   type="button"
-                  onClick={() => { setMobileOpen(false); navigate(href); }}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm w-full ${
-                    active ? "bg-brand-gold/20 text-brand-dark" : "text-brand-medium"
-                  }`}
+                  onClick={() => { setMobileOpen(false); navigate("/admin"); }}
+                  className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium"
+                  style={{ color: "rgba(200,165,107,0.7)", border: "1px solid rgba(200,165,107,0.2)" }}
                 >
-                  <Icon className="w-4 h-4" />
-                  {label}
+                  <Shield className="w-4 h-4" />
+                  Admin
                 </button>
-              );
-            })}
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={() => { setMobileOpen(false); navigate("/admin"); }}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-purple-700 bg-purple-50 w-full"
-              >
-                <Shield className="w-4 h-4" />
-                Admin
-              </button>
-            )}
+              )}
+            </div>
           </div>
         )}
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

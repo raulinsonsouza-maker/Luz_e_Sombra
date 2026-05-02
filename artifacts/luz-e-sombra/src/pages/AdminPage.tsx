@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { Users, Plus, Edit2, Trash2, Check, X, Loader2, Search } from "lucide-react";
+import { Users, Plus, Edit2, Trash2, Check, X, Loader2, Search, CheckCircle, AlertCircle } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 
 interface Usuario {
@@ -17,7 +17,8 @@ interface Usuario {
   _count: { avaliacoes: number };
 }
 
-const emptyForm = { username: "", senha: "", nome: "", email: "", dataNascimento: "", isAdmin: false };
+type FormValues = { username: string; senha: string; nome: string; email: string; dataNascimento: string; isAdmin: boolean };
+const emptyForm: FormValues = { username: "", senha: "", nome: "", email: "", dataNascimento: "", isAdmin: false };
 
 export default function AdminPage() {
   const [, navigate] = useLocation();
@@ -32,7 +33,7 @@ export default function AdminPage() {
   const [busca, setBusca] = useState("");
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 8;
-  const [novoUsuario, setNovoUsuario] = useState(emptyForm);
+  const [novoUsuario, setNovoUsuario] = useState<FormValues>(emptyForm);
 
   useEffect(() => {
     if (status === "unauthenticated") navigate("/admin/login");
@@ -68,10 +69,7 @@ export default function AdminPage() {
     try {
       const res = await apiFetch("/usuarios", {
         method: "POST",
-        body: JSON.stringify({
-          ...novoUsuario,
-          username: novoUsuario.username.trim().toLowerCase(),
-        }),
+        body: JSON.stringify({ ...novoUsuario, username: novoUsuario.username.trim().toLowerCase() }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -93,7 +91,12 @@ export default function AdminPage() {
     if (!usuarioEditando) return;
     setSalvando(true);
     try {
-      const payload: any = { nome: novoUsuario.nome, email: novoUsuario.email, dataNascimento: novoUsuario.dataNascimento, isAdmin: novoUsuario.isAdmin };
+      const payload: Record<string, unknown> = {
+        nome: novoUsuario.nome,
+        email: novoUsuario.email,
+        dataNascimento: novoUsuario.dataNascimento,
+        isAdmin: novoUsuario.isAdmin,
+      };
       if (novoUsuario.senha) payload.senha = novoUsuario.senha;
       const res = await apiFetch(`/usuarios/${usuarioEditando.id}`, { method: "PUT", body: JSON.stringify(payload) });
       const data = await res.json();
@@ -145,38 +148,49 @@ export default function AdminPage() {
   const usuariosPaginados = usuariosFiltrados.slice((pagina - 1) * itensPorPagina, pagina * itensPorPagina);
 
   if (status === "loading" || carregando) {
-    return <div className="luxury-shell flex items-center justify-center"><Loader2 className="w-12 h-12 text-brand-bronze animate-spin" /></div>;
+    return <div className="luxury-shell flex items-center justify-center"><Loader2 className="w-10 h-10 text-brand-bronze animate-spin" /></div>;
   }
 
+  const inputClass = "w-full px-4 py-2.5 rounded-xl text-sm text-brand-dark outline-none transition-all"
+    + " disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-brand-gold/5";
+  const inputStyle = { border: "1.5px solid rgba(200,165,107,0.35)", background: "#fff" };
+
   return (
-    <div className="luxury-shell py-12 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="luxury-shell py-10 px-4">
+      <div className="max-w-7xl mx-auto space-y-5">
+
         {mensagem && (
-          <div className={`mb-4 p-4 rounded-xl border ${mensagem.tipo === "sucesso" ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
-            {mensagem.texto}
+          <div className="flex items-center gap-3 p-4 rounded-xl"
+            style={mensagem.tipo === "sucesso"
+              ? { background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.25)" }
+              : { background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)" }}>
+            {mensagem.tipo === "sucesso"
+              ? <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+              : <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />}
+            <p className={`text-sm font-medium ${mensagem.tipo === "sucesso" ? "text-green-700" : "text-red-700"}`}>
+              {mensagem.texto}
+            </p>
           </div>
         )}
 
-        <div className="luxury-card-strong p-6 md:p-8 mb-6">
+        {/* Header */}
+        <div className="luxury-card-strong p-6 md:p-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-brand-bronze to-brand-gold rounded-full flex items-center justify-center shadow-luxury">
-                <Users className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="font-tan-mon-cheri text-5xl text-brand-dark">Gerenciar Usuários</h1>
-                <p className="text-brand-medium">{usuariosFiltrados.length} usuário{usuariosFiltrados.length !== 1 ? "s" : ""} encontrado{usuariosFiltrados.length !== 1 ? "s" : ""}</p>
-              </div>
+            <div>
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-1">Administração</p>
+              <h1 className="font-tan-mon-cheri text-4xl md:text-5xl text-brand-dark">Gerenciar Usuários</h1>
+              <p className="text-brand-medium mt-1 text-sm">{usuariosFiltrados.length} usuário{usuariosFiltrados.length !== 1 ? "s" : ""}</p>
             </div>
-            <button onClick={() => setMostrarModal(true)} className="px-6 py-3 bg-gradient-to-r from-brand-bronze to-brand-gold text-white font-semibold rounded-xl hover:from-brand-dark hover:to-brand-medium transition-all shadow-lg flex items-center gap-2">
-              <Plus className="w-5 h-5" />
+            <button onClick={() => setMostrarModal(true)} className="luxury-btn-primary">
+              <Plus className="w-4 h-4" />
               Novo Usuário
             </button>
           </div>
         </div>
 
-        <div className="luxury-card-strong p-4 md:p-6 mb-4">
-          <div className="relative max-w-md">
+        {/* Search */}
+        <div className="luxury-card-strong p-4">
+          <div className="relative max-w-sm">
             <Search className="w-4 h-4 text-brand-medium absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               value={busca}
@@ -187,50 +201,68 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Table */}
         <div className="luxury-card-strong overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-brand-gold/10 to-brand-bronze/10">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-brand-dark">Usuário</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-brand-dark">Nome</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-brand-dark">Email</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-brand-dark">Avaliações</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-brand-dark">Status</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-brand-dark">Admin</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-brand-dark">Ações</th>
+              <thead>
+                <tr style={{ background: "rgba(200,165,107,0.06)", borderBottom: "1px solid rgba(200,165,107,0.15)" }}>
+                  <th className="px-6 py-4 text-left text-xs font-semibold tracking-widest uppercase text-brand-medium">Usuário</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold tracking-widest uppercase text-brand-medium">Nome</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold tracking-widest uppercase text-brand-medium">Email</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold tracking-widest uppercase text-brand-medium">Aval.</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold tracking-widest uppercase text-brand-medium">Status</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold tracking-widest uppercase text-brand-medium">Role</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold tracking-widest uppercase text-brand-medium">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-brand-gold/20">
-                {usuariosPaginados.map(u => (
-                  <tr key={u.id} className="hover:bg-brand-gold/5 transition-colors">
+              <tbody>
+                {usuariosPaginados.map((u, i) => (
+                  <tr key={u.id}
+                    className="transition-colors"
+                    style={{ borderTop: i > 0 ? "1px solid rgba(200,165,107,0.1)" : undefined }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(200,165,107,0.03)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  >
                     <td className="px-6 py-4">
-                      <div className="font-medium text-brand-dark">{u.username}</div>
-                      {u.primeiroAcesso && <span className="text-xs text-brand-medium">Primeiro acesso</span>}
+                      <div className="font-medium text-brand-dark text-sm">{u.username}</div>
+                      {u.primeiroAcesso && <span className="text-xs text-brand-medium opacity-60">Primeiro acesso pendente</span>}
                     </td>
-                    <td className="px-6 py-4 text-brand-darker">{u.nome}</td>
-                    <td className="px-6 py-4 text-brand-darker text-sm">{u.email || "-"}</td>
+                    <td className="px-6 py-4 text-brand-darker text-sm">{u.nome}</td>
+                    <td className="px-6 py-4 text-brand-medium text-xs">{u.email || "—"}</td>
                     <td className="px-6 py-4 text-center">
-                      <span className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-brand-gold/20 text-brand-dark text-sm font-semibold">
+                      <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold"
+                        style={{ background: "rgba(200,165,107,0.12)", color: "#5f4a2f" }}>
                         {u._count.avaliacoes}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <button onClick={() => toggleAtivo(u)} className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-colors ${u.ativo ? "bg-green-100 text-green-800 hover:bg-green-200" : "bg-red-100 text-red-800 hover:bg-red-200"}`}>
+                      <button onClick={() => toggleAtivo(u)}
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-colors"
+                        style={u.ativo
+                          ? { background: "rgba(34,197,94,0.08)", color: "#15803d", border: "1px solid rgba(34,197,94,0.2)" }
+                          : { background: "rgba(239,68,68,0.06)", color: "#dc2626", border: "1px solid rgba(239,68,68,0.2)" }}>
                         {u.ativo ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
                         {u.ativo ? "Ativo" : "Inativo"}
                       </button>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      {u.isAdmin ? <span className="inline-flex px-3 py-1 rounded-full bg-brand-bronze/20 text-brand-bronze text-xs font-semibold">Admin</span> : <span className="text-brand-medium text-xs">-</span>}
+                      {u.isAdmin
+                        ? <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold"
+                            style={{ background: "rgba(200,165,107,0.15)", color: "#9c7742", border: "1px solid rgba(200,165,107,0.3)" }}>
+                            Admin
+                          </span>
+                        : <span className="text-brand-medium text-xs opacity-40">—</span>}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => abrirEdicao(u)} className="p-2 text-brand-bronze hover:bg-brand-gold/20 rounded-lg transition-colors" title="Editar">
-                          <Edit2 className="w-4 h-4" />
+                        <button onClick={() => abrirEdicao(u)} title="Editar"
+                          className="p-2 rounded-lg transition-colors hover:bg-brand-gold/15 text-brand-bronze">
+                          <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => setUsuarioParaDeletar(u)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Deletar">
-                          <Trash2 className="w-4 h-4" />
+                        <button onClick={() => setUsuarioParaDeletar(u)} title="Deletar"
+                          className="p-2 rounded-lg transition-colors hover:bg-red-50 text-red-400">
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
@@ -240,56 +272,81 @@ export default function AdminPage() {
             </table>
             {usuariosFiltrados.length === 0 && (
               <div className="text-center py-12">
-                <Users className="w-12 h-12 text-brand-medium mx-auto mb-4 opacity-50" />
-                <p className="text-brand-medium">Nenhum usuário encontrado</p>
+                <Users className="w-10 h-10 text-brand-medium mx-auto mb-3 opacity-20" />
+                <p className="text-brand-medium text-sm">Nenhum usuário encontrado</p>
               </div>
             )}
           </div>
         </div>
 
         {totalPaginas > 1 && (
-          <div className="flex items-center justify-between mt-4 luxury-card p-3">
-            <p className="text-sm text-brand-medium">Página {pagina} de {totalPaginas}</p>
+          <div className="flex items-center justify-between luxury-card p-3">
+            <p className="text-xs text-brand-medium">Página {pagina} de {totalPaginas}</p>
             <div className="flex gap-2">
-              <button onClick={() => setPaginaAtual(p => Math.max(1, p - 1))} disabled={pagina === 1} className="luxury-btn-secondary px-3 py-2 disabled:opacity-50">Anterior</button>
-              <button onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas} className="luxury-btn-secondary px-3 py-2 disabled:opacity-50">Próxima</button>
+              <button onClick={() => setPaginaAtual(p => Math.max(1, p - 1))} disabled={pagina === 1}
+                className="luxury-btn-secondary px-3 py-1.5 text-sm disabled:opacity-40">Anterior</button>
+              <button onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}
+                className="luxury-btn-secondary px-3 py-1.5 text-sm disabled:opacity-40">Próxima</button>
             </div>
           </div>
         )}
       </div>
 
+      {/* Create/Edit modal */}
       {mostrarModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
           <div className="luxury-card-strong p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-semibold text-brand-dark mb-6">{usuarioEditando ? "Editar Usuário" : "Novo Usuário"}</h2>
+            <h2 className="font-tan-mon-cheri text-2xl text-brand-dark mb-6">
+              {usuarioEditando ? "Editar Usuário" : "Novo Usuário"}
+            </h2>
             <form onSubmit={usuarioEditando ? salvarEdicao : criarUsuario} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-brand-dark mb-1">Usuário *</label>
-                <input type="text" required={!usuarioEditando} disabled={!!usuarioEditando} value={novoUsuario.username} onChange={e => setNovoUsuario({ ...novoUsuario, username: e.target.value.trim().toLowerCase() })} className="w-full px-4 py-2 border-2 border-brand-gold/30 rounded-xl focus:outline-none focus:border-brand-gold disabled:bg-gray-100 disabled:cursor-not-allowed" placeholder="username" />
+                <label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-1.5">Usuário *</label>
+                <input type="text" required={!usuarioEditando} disabled={!!usuarioEditando}
+                  value={novoUsuario.username}
+                  onChange={e => setNovoUsuario({ ...novoUsuario, username: e.target.value.trim().toLowerCase() })}
+                  className={inputClass} style={inputStyle} placeholder="username" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-brand-dark mb-1">Senha {usuarioEditando ? "(deixe em branco para não alterar)" : "*"}</label>
-                <input type="password" required={!usuarioEditando} value={novoUsuario.senha} onChange={e => setNovoUsuario({ ...novoUsuario, senha: e.target.value })} className="w-full px-4 py-2 border-2 border-brand-gold/30 rounded-xl focus:outline-none focus:border-brand-gold" placeholder="••••••••" />
+                <label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-1.5">
+                  Senha {usuarioEditando ? "(em branco para não alterar)" : "*"}
+                </label>
+                <input type="password" required={!usuarioEditando}
+                  value={novoUsuario.senha}
+                  onChange={e => setNovoUsuario({ ...novoUsuario, senha: e.target.value })}
+                  className={inputClass} style={inputStyle} placeholder="••••••••" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-brand-dark mb-1">Nome Completo *</label>
-                <input type="text" required value={novoUsuario.nome} onChange={e => setNovoUsuario({ ...novoUsuario, nome: e.target.value })} className="w-full px-4 py-2 border-2 border-brand-gold/30 rounded-xl focus:outline-none focus:border-brand-gold" placeholder="Nome Completo" />
+                <label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-1.5">Nome Completo *</label>
+                <input type="text" required value={novoUsuario.nome}
+                  onChange={e => setNovoUsuario({ ...novoUsuario, nome: e.target.value })}
+                  className={inputClass} style={inputStyle} placeholder="Nome Completo" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-brand-dark mb-1">Email</label>
-                <input type="email" value={novoUsuario.email} onChange={e => setNovoUsuario({ ...novoUsuario, email: e.target.value })} className="w-full px-4 py-2 border-2 border-brand-gold/30 rounded-xl focus:outline-none focus:border-brand-gold" placeholder="email@exemplo.com" />
+                <label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-1.5">Email</label>
+                <input type="email" value={novoUsuario.email}
+                  onChange={e => setNovoUsuario({ ...novoUsuario, email: e.target.value })}
+                  className={inputClass} style={inputStyle} placeholder="email@exemplo.com" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-brand-dark mb-1">Data de Nascimento</label>
-                <input type="date" value={novoUsuario.dataNascimento} onChange={e => setNovoUsuario({ ...novoUsuario, dataNascimento: e.target.value })} className="w-full px-4 py-2 border-2 border-brand-gold/30 rounded-xl focus:outline-none focus:border-brand-gold" />
+                <label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-1.5">Data de Nascimento</label>
+                <input type="date" value={novoUsuario.dataNascimento}
+                  onChange={e => setNovoUsuario({ ...novoUsuario, dataNascimento: e.target.value })}
+                  className={inputClass} style={inputStyle} />
               </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="isAdmin" checked={novoUsuario.isAdmin} onChange={e => setNovoUsuario({ ...novoUsuario, isAdmin: e.target.checked })} className="w-4 h-4 text-brand-bronze border-brand-gold/30 rounded focus:ring-brand-gold" />
-                <label htmlFor="isAdmin" className="text-sm text-brand-dark">Administrador</label>
-              </div>
-              <div className="flex gap-3 mt-6">
-                <button type="button" onClick={fecharModal} className="flex-1 px-4 py-3 border-2 border-brand-gold/30 text-brand-dark font-semibold rounded-xl hover:bg-brand-gold/10 transition-all">Cancelar</button>
-                <button type="submit" disabled={salvando} className="flex-1 px-4 py-3 bg-gradient-to-r from-brand-bronze to-brand-gold text-white font-semibold rounded-xl hover:from-brand-dark hover:to-brand-medium transition-all disabled:opacity-50">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" id="isAdmin" checked={novoUsuario.isAdmin}
+                  onChange={e => setNovoUsuario({ ...novoUsuario, isAdmin: e.target.checked })}
+                  className="w-4 h-4 rounded accent-brand-bronze" />
+                <span className="text-sm text-brand-dark">Administrador</span>
+              </label>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={fecharModal}
+                  className="flex-1 py-3 rounded-xl border font-medium text-sm transition-all text-brand-dark"
+                  style={{ borderColor: "rgba(200,165,107,0.3)" }}>
+                  Cancelar
+                </button>
+                <button type="submit" disabled={salvando} className="flex-1 luxury-btn-primary disabled:opacity-50">
                   {salvando ? (usuarioEditando ? "Salvando..." : "Criando...") : (usuarioEditando ? "Salvar" : "Criar")}
                 </button>
               </div>
@@ -298,16 +355,24 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* Delete confirmation */}
       {usuarioParaDeletar && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl shadow-2xl p-6 max-w-md w-full border-2 border-red-200">
-            <h3 className="text-xl font-semibold text-brand-dark mb-3">Confirmar exclusão</h3>
-            <p className="text-sm text-brand-darker mb-6">
-              Tem certeza que deseja excluir o usuário <strong>{usuarioParaDeletar.username}</strong>? Esta ação não pode ser desfeita.
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="luxury-card-strong p-8 max-w-sm w-full">
+            <h3 className="font-tan-mon-cheri text-xl text-brand-dark mb-2">Confirmar exclusão</h3>
+            <p className="text-sm text-brand-medium mb-6 leading-relaxed">
+              Tem certeza que deseja excluir o usuário <strong className="text-brand-dark">{usuarioParaDeletar.username}</strong>? Esta ação não pode ser desfeita.
             </p>
             <div className="flex gap-3">
-              <button onClick={() => setUsuarioParaDeletar(null)} className="flex-1 px-4 py-2 border-2 border-brand-gold/30 text-brand-dark font-semibold rounded-xl hover:bg-brand-gold/10 transition-all">Cancelar</button>
-              <button onClick={() => deletarUsuario(usuarioParaDeletar.id)} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all">Deletar</button>
+              <button onClick={() => setUsuarioParaDeletar(null)}
+                className="flex-1 py-2.5 rounded-xl border text-brand-dark font-medium text-sm"
+                style={{ borderColor: "rgba(200,165,107,0.3)" }}>
+                Cancelar
+              </button>
+              <button onClick={() => deletarUsuario(usuarioParaDeletar.id)}
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl text-sm transition-colors">
+                Excluir
+              </button>
             </div>
           </div>
         </div>

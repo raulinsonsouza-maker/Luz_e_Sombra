@@ -2,12 +2,12 @@ import { Suspense, useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { AREAS_DA_VIDA, FormData } from "@/lib/types";
-import { ChevronLeft, ChevronRight, User, Calendar, Sparkles, Heart, Home } from "lucide-react";
+import { ChevronLeft, ChevronRight, User, Calendar, Sparkles, Heart, Star, TrendingUp } from "lucide-react";
 import AreaIcon from "@/components/AreaIcon";
 import { apiFetch } from "@/lib/auth";
 
 function AvaliacaoContent() {
-  const [location, navigate] = useLocation();
+  const [, navigate] = useLocation();
   const { user, status, updateUser } = useAuth();
   const urlParams = new URLSearchParams(window.location.search);
   const forcarNovo = urlParams.get("novo") === "true";
@@ -121,72 +121,78 @@ function AvaliacaoContent() {
       return (
         <div className="space-y-6 animate-fadeIn">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-brand-gold/20 to-brand-bronze/20 rounded-2xl border-2 border-brand-gold/40 mb-6 mx-auto">
-              <Sparkles className="w-10 h-10 text-brand-bronze" strokeWidth={1.5} />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 mx-auto"
+              style={{ background: "rgba(200,165,107,0.1)", border: "1px solid rgba(200,165,107,0.3)" }}>
+              <Sparkles className="w-8 h-8 text-brand-bronze" strokeWidth={1.5} />
             </div>
-            <h2 className="font-tan-mon-cheri text-3xl md:text-4xl text-brand-dark mb-3">
+            <h2 className="font-tan-mon-cheri text-3xl md:text-4xl text-brand-dark mb-2">
               Roda da Vida
             </h2>
-            <p className="text-brand-medium text-lg">
-              Vamos começar sua avaliação
-            </p>
+            <p className="text-brand-medium">Vamos começar sua avaliação</p>
           </div>
 
           {primeiroAcesso ? (
-            <div className="text-left bg-gradient-to-br from-purple-100 to-violet-100 rounded-2xl p-6 mb-6 border-2 border-purple-300">
-              <p className="text-purple-900 leading-relaxed font-semibold mb-2">
-                🌟 Bem-vindo(a) à sua primeira avaliação!
-              </p>
-              <p className="text-purple-800 leading-relaxed">
-                Para começar, vamos fazer sua primeira avaliação da Roda da Vida.
-                Seus dados já foram preenchidos automaticamente. Confirme-os e siga para avaliar as áreas da sua vida.
-              </p>
+            <div className="rounded-2xl p-6 mb-2"
+              style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.25)" }}>
+              <div className="flex items-start gap-3">
+                <Star className="w-4 h-4 text-brand-bronze flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-brand-dark font-semibold text-sm mb-1">Primeira avaliação</p>
+                  <p className="text-brand-medium text-sm leading-relaxed">
+                    Seus dados foram preenchidos automaticamente. Confirme e siga para avaliar cada área da sua vida.
+                  </p>
+                </div>
+              </div>
             </div>
           ) : (
-            <div className="text-left bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl p-6 mb-6 border-2 border-green-300">
-              <p className="text-green-900 leading-relaxed font-semibold mb-2">
-                📈 Nova Avaliação para Acompanhar sua Evolução
-              </p>
-              <p className="text-green-800 leading-relaxed">
-                Esta nova avaliação será <strong>adicionada</strong> ao seu histórico (não sobrescreve as anteriores).
-              </p>
+            <div className="rounded-2xl p-6 mb-2"
+              style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.25)" }}>
+              <div className="flex items-start gap-3">
+                <TrendingUp className="w-4 h-4 text-brand-bronze flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-brand-dark font-semibold text-sm mb-1">Nova avaliação</p>
+                  <p className="text-brand-medium text-sm leading-relaxed">
+                    Esta avaliação será adicionada ao seu histórico e não substitui as anteriores.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
-          <div className="text-left bg-gradient-to-br from-brand-gold/10 to-brand-bronze/10 rounded-2xl p-6 mb-6 border border-brand-gold/30">
-            <p className="text-brand-darker leading-relaxed mb-4">
-              Este formulário é o primeiro passo do seu processo de transformação.
-            </p>
-            <p className="text-brand-darker leading-relaxed mb-4 flex items-start gap-2">
-              <Heart className="w-5 h-5 text-brand-gold flex-shrink-0 mt-0.5" fill="currentColor" strokeWidth={2} />
-              <span><strong className="text-brand-bronze">Não existe certo ou errado</strong> — apenas o que você sente agora.</span>
-            </p>
+          <div className="rounded-2xl p-6"
+            style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.2)" }}>
+            <div className="flex items-start gap-3">
+              <Heart className="w-4 h-4 text-brand-bronze flex-shrink-0 mt-0.5" />
+              <p className="text-brand-medium text-sm leading-relaxed">
+                <span className="font-semibold text-brand-dark">Não existe certo ou errado</span> — apenas o que você sente neste momento.
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div>
-              <label className="flex items-center text-sm font-medium text-brand-dark mb-2">
-                <User className="w-4 h-4 mr-2 text-brand-bronze" />
+              <label className="flex items-center text-xs font-semibold tracking-widest uppercase text-brand-medium mb-2">
+                <User className="w-3.5 h-3.5 mr-2 text-brand-bronze" />
                 Nome Completo
               </label>
               <input
                 type="text"
                 value={formData.nome}
                 onChange={e => setFormData({ ...formData, nome: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-brand-gold/50 rounded-xl focus:ring-2 focus:ring-brand-bronze focus:border-brand-gold transition-all"
+                className="luxury-input"
                 placeholder="Digite seu nome completo"
               />
             </div>
             <div>
-              <label className="flex items-center text-sm font-medium text-brand-dark mb-2">
-                <Calendar className="w-4 h-4 mr-2 text-brand-bronze" />
+              <label className="flex items-center text-xs font-semibold tracking-widest uppercase text-brand-medium mb-2">
+                <Calendar className="w-3.5 h-3.5 mr-2 text-brand-bronze" />
                 Data de Nascimento
               </label>
               <input
                 type="date"
                 value={formData.dataNascimento}
                 onChange={e => setFormData({ ...formData, dataNascimento: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-brand-gold/50 rounded-xl focus:ring-2 focus:ring-brand-bronze focus:border-brand-gold transition-all"
+                className="luxury-input"
               />
             </div>
           </div>
@@ -201,17 +207,17 @@ function AvaliacaoContent() {
       <div className="space-y-8 animate-fadeIn">
         <div className="text-center mb-8">
           <AreaIcon iconName={area.icon} className="mb-6 mx-auto" />
-          <h2 className="font-tan-mon-cheri text-3xl md:text-4xl text-brand-dark mb-3">
+          <h2 className="font-tan-mon-cheri text-3xl md:text-4xl text-brand-dark mb-2">
             {area.titulo}
           </h2>
-          <p className="text-brand-medium text-lg">{area.descricao}</p>
+          <p className="text-brand-medium">{area.descricao}</p>
         </div>
 
         <div className="space-y-4">
           <div className="flex justify-between items-center px-1">
-            <span className="text-sm text-brand-medium">Muito ruim</span>
-            <span className="text-3xl font-bold text-brand-bronze">{currentValue}</span>
-            <span className="text-sm text-brand-medium">Excelente</span>
+            <span className="text-xs tracking-widest uppercase text-brand-medium">Muito ruim</span>
+            <span className="font-tan-mon-cheri text-4xl text-brand-bronze">{currentValue}</span>
+            <span className="text-xs tracking-widest uppercase text-brand-medium">Excelente</span>
           </div>
 
           <input
@@ -223,7 +229,7 @@ function AvaliacaoContent() {
             className="w-full luxury-range"
           />
 
-          <div className="flex justify-between text-xs text-brand-medium/60">
+          <div className="flex justify-between text-xs text-brand-medium/50">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
               <span key={num}>{num}</span>
             ))}
@@ -239,36 +245,28 @@ function AvaliacaoContent() {
     return (
       <div className="luxury-shell flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-bronze"></div>
-          <p className="mt-4 text-brand-medium">Verificando avaliações anteriores...</p>
+          <div className="inline-block animate-spin rounded-full h-10 w-10 border-2 border-brand-gold border-t-transparent"></div>
+          <p className="mt-4 text-brand-medium text-sm">Verificando avaliações anteriores...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="luxury-shell flex items-center justify-center p-4">
+    <div className="luxury-shell flex items-center justify-center p-4 py-10">
       <div className="max-w-2xl w-full">
-        <div className="mb-4">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-brand-medium hover:text-brand-dark transition-colors"
-          >
-            <Home className="w-5 h-5" />
-            <span className="font-medium">Voltar ao Portal</span>
-          </button>
-        </div>
 
+        {/* Progress */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-brand-medium">
+            <span className="text-xs font-semibold tracking-widest uppercase text-brand-medium">
               Etapa {currentStep + 1} de {totalSteps}
             </span>
-            <span className="text-sm font-medium text-brand-medium">{Math.round(progress)}%</span>
+            <span className="text-xs text-brand-medium">{Math.round(progress)}%</span>
           </div>
-          <div className="w-full bg-brand-gold/20 rounded-full h-2.5">
+          <div className="w-full bg-brand-gold/15 rounded-full h-1">
             <div
-              className="bg-gradient-to-r from-brand-bronze to-brand-gold h-2.5 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-brand-bronze to-brand-gold h-1 rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -277,23 +275,24 @@ function AvaliacaoContent() {
         <div className="luxury-card-strong p-8 md:p-12">
           {renderStep()}
 
-          <div className="flex gap-4 mt-8">
+          <div className="flex gap-4 mt-10">
             <button
               onClick={handleBack}
               disabled={currentStep === 0}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border-2 border-brand-gold text-brand-dark font-semibold rounded-xl hover:bg-brand-gold/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl border font-medium text-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ borderColor: "rgba(200,165,107,0.4)", color: "#5f4a2f" }}
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
               Voltar
             </button>
 
             <button
               onClick={handleNext}
               disabled={!isStepValid()}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-bronze to-brand-gold text-white font-semibold rounded-xl hover:from-brand-dark hover:to-brand-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="flex-1 luxury-btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {currentStep === totalSteps - 1 ? "Ver Resultado" : "Próximo"}
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -306,10 +305,7 @@ export default function AvaliacaoPage() {
   return (
     <Suspense fallback={
       <div className="luxury-shell flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-bronze"></div>
-          <p className="mt-4 text-brand-medium">Carregando avaliação...</p>
-        </div>
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-brand-gold border-t-transparent"></div>
       </div>
     }>
       <AvaliacaoContent />

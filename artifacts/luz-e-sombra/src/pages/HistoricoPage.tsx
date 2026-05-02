@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { ArrowLeft, TrendingUp, TrendingDown, Minus, Calendar, Target, Loader2 } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Target, Loader2, ArrowRight, ArrowUp, ArrowDown } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 
 interface Avaliacao {
@@ -60,16 +60,16 @@ export default function HistoricoPage() {
     return vals.reduce((a, b) => a + b, 0) / vals.length;
   }
 
-  function renderIconeTendencia(diferenca: number) {
+  function renderTendencia(diferenca: number) {
     if (diferenca > 0.5) return <TrendingUp className="w-4 h-4 text-green-600" />;
-    if (diferenca < -0.5) return <TrendingDown className="w-4 h-4 text-red-600" />;
-    return <Minus className="w-4 h-4 text-gray-400" />;
+    if (diferenca < -0.5) return <TrendingDown className="w-4 h-4 text-red-500" />;
+    return <Minus className="w-4 h-4 text-brand-medium opacity-40" />;
   }
 
   if (status === "loading" || carregando) {
     return (
       <div className="luxury-shell flex items-center justify-center">
-        <Loader2 className="w-12 h-12 text-brand-bronze animate-spin" />
+        <Loader2 className="w-10 h-10 text-brand-bronze animate-spin" />
       </div>
     );
   }
@@ -81,79 +81,86 @@ export default function HistoricoPage() {
   const anterior = avaliacoesOrdenadas[1];
 
   return (
-    <div className="luxury-shell py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <button onClick={() => navigate("/")} className="inline-flex items-center gap-2 text-brand-dark hover:text-brand-bronze transition-colors mb-4">
-            <ArrowLeft className="w-5 h-5" />
-            Voltar ao Início
-          </button>
-          <div className="flex items-center gap-4 mb-2">
-            <div className="w-16 h-16 bg-gradient-to-br from-brand-bronze to-brand-gold rounded-full flex items-center justify-center shadow-lg">
-              <Calendar className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="font-tan-mon-cheri text-4xl text-brand-dark">Histórico de Avaliações</h1>
-              <p className="text-brand-medium">
-                {avaliacoes.length} avaliação{avaliacoes.length !== 1 ? "ões" : ""} realizada{avaliacoes.length !== 1 ? "s" : ""}
-              </p>
-            </div>
-          </div>
+    <div className="luxury-shell py-10 px-4">
+      <div className="max-w-5xl mx-auto space-y-6">
+
+        {/* Header */}
+        <div>
+          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-2">Evolução</p>
+          <h1 className="font-tan-mon-cheri text-4xl md:text-5xl text-brand-dark">
+            Histórico de Avaliações
+          </h1>
+          {avaliacoes.length > 0 && (
+            <p className="text-brand-medium mt-2">
+              {avaliacoes.length} avaliação{avaliacoes.length !== 1 ? "ões" : ""} realizada{avaliacoes.length !== 1 ? "s" : ""}
+            </p>
+          )}
         </div>
 
         {avaliacoes.length === 0 ? (
           <div className="luxury-card-strong p-12 text-center">
-            <Target className="w-16 h-16 text-brand-medium mx-auto mb-4 opacity-50" />
-            <h2 className="text-2xl font-semibold text-brand-dark mb-2">Nenhuma avaliação ainda</h2>
-            <p className="text-brand-medium mb-6">Faça sua primeira avaliação da Roda da Vida para começar a acompanhar sua evolução.</p>
-            <button onClick={() => navigate("/avaliacao")} className="px-8 py-4 bg-gradient-to-r from-brand-bronze to-brand-gold text-white font-semibold rounded-xl hover:from-brand-dark hover:to-brand-medium transition-all">
+            <Target className="w-12 h-12 text-brand-medium mx-auto mb-4 opacity-30" />
+            <h2 className="font-tan-mon-cheri text-2xl text-brand-dark mb-2">Nenhuma avaliação ainda</h2>
+            <p className="text-brand-medium text-sm mb-6 max-w-sm mx-auto">
+              Faça sua primeira avaliação da Roda da Vida para começar a acompanhar sua evolução.
+            </p>
+            <button onClick={() => navigate("/avaliacao")} className="luxury-btn-primary">
               Fazer Avaliação
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6">
+
+            {/* Comparison */}
             {anterior && (
               <div className="luxury-card-strong p-8">
-                <h2 className="text-2xl font-semibold text-brand-dark mb-6">📊 Comparação de Evolução</h2>
-                <div className="grid md:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-gradient-to-br from-brand-gold/10 to-brand-bronze/10 rounded-xl p-6 border border-brand-gold/30">
-                    <p className="text-sm text-brand-medium mb-2">Mais Recente</p>
-                    <p className="text-xs text-brand-darker mb-4">{new Date(mais.dataAvaliacao).toLocaleDateString("pt-BR")}</p>
-                    <div className="flex items-center gap-4">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-brand-bronze to-brand-gold flex items-center justify-center shadow-lg">
-                        <span className="text-2xl font-bold text-white">{calcularMedia(mais).toFixed(1)}</span>
-                      </div>
-                      <div><p className="text-xs text-brand-medium">Média Geral</p><p className="text-sm font-semibold text-brand-dark">de 10</p></div>
+                <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-6">
+                  Comparação de Evolução
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 mb-8">
+                  <div className="p-6 rounded-2xl"
+                    style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.3)" }}>
+                    <p className="text-xs tracking-widest uppercase text-brand-medium mb-1">Mais Recente</p>
+                    <p className="text-xs text-brand-medium mb-4">
+                      {new Date(mais.dataAvaliacao).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                    </p>
+                    <div className="flex items-end gap-3">
+                      <span className="font-tan-mon-cheri text-6xl text-brand-bronze leading-none">{calcularMedia(mais).toFixed(1)}</span>
+                      <span className="text-brand-medium mb-2">/10</span>
                     </div>
                   </div>
-                  <div className="bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl p-6 border border-gray-300">
-                    <p className="text-sm text-gray-600 mb-2">Anterior</p>
-                    <p className="text-xs text-gray-700 mb-4">{new Date(anterior.dataAvaliacao).toLocaleDateString("pt-BR")}</p>
-                    <div className="flex items-center gap-4">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center shadow-lg">
-                        <span className="text-2xl font-bold text-white">{calcularMedia(anterior).toFixed(1)}</span>
-                      </div>
-                      <div><p className="text-xs text-gray-600">Média Geral</p><p className="text-sm font-semibold text-gray-700">de 10</p></div>
+                  <div className="p-6 rounded-2xl"
+                    style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
+                    <p className="text-xs tracking-widest uppercase text-brand-medium mb-1">Anterior</p>
+                    <p className="text-xs text-brand-medium mb-4">
+                      {new Date(anterior.dataAvaliacao).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                    </p>
+                    <div className="flex items-end gap-3">
+                      <span className="font-tan-mon-cheri text-6xl text-brand-dark opacity-40 leading-none">{calcularMedia(anterior).toFixed(1)}</span>
+                      <span className="text-brand-medium mb-2 opacity-40">/10</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <h3 className="text-lg font-semibold text-brand-dark mb-4">Evolução por Área</h3>
+                <p className="text-xs font-semibold tracking-[0.2em] uppercase text-brand-medium mb-4">Evolução por Área</p>
+                <div className="space-y-2">
                   {AREAS.map(area => {
                     const atual = mais[area.key as keyof Avaliacao] as number;
                     const ant = anterior[area.key as keyof Avaliacao] as number;
                     const dif = atual - ant;
                     return (
-                      <div key={area.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <div key={area.key} className="flex items-center justify-between p-3 rounded-xl"
+                        style={{ background: "rgba(200,165,107,0.03)" }}>
                         <div className="flex items-center gap-3 flex-1">
-                          {renderIconeTendencia(dif)}
-                          <span className="text-sm font-medium text-brand-dark">{area.nome}</span>
+                          {renderTendencia(dif)}
+                          <span className="text-sm text-brand-dark">{area.nome}</span>
                         </div>
                         <div className="flex items-center gap-4">
-                          <span className="text-sm text-gray-600">{ant} → {atual}</span>
-                          <span className={`text-sm font-semibold min-w-[60px] text-right ${dif > 0 ? "text-green-600" : dif < 0 ? "text-red-600" : "text-gray-400"}`}>
-                            {dif > 0 ? "+" : ""}{dif.toFixed(1)}
+                          <span className="text-xs text-brand-medium">{ant} → {atual}</span>
+                          <span className={`text-sm font-semibold min-w-[48px] text-right flex items-center justify-end gap-1 ${dif > 0 ? "text-green-600" : dif < 0 ? "text-red-500" : "text-brand-medium opacity-40"}`}>
+                            {dif > 0 ? <ArrowUp className="w-3 h-3" /> : dif < 0 ? <ArrowDown className="w-3 h-3" /> : null}
+                            {dif !== 0 ? (dif > 0 ? "+" : "") + dif.toFixed(1) : "—"}
                           </span>
                         </div>
                       </div>
@@ -163,37 +170,43 @@ export default function HistoricoPage() {
               </div>
             )}
 
+            {/* Full history */}
             <div className="luxury-card-strong p-8">
-              <h2 className="text-2xl font-semibold text-brand-dark mb-6">📅 Histórico Completo</h2>
-              <div className="space-y-4">
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-6">
+                Histórico Completo
+              </p>
+              <div className="space-y-3">
                 {avaliacoesOrdenadas.map((avaliacao, index) => (
-                  <div
+                  <button
                     key={avaliacao.id}
-                    className="p-6 bg-gradient-to-br from-brand-gold/5 to-brand-bronze/5 rounded-xl border border-brand-gold/20 hover:border-brand-gold/40 transition-all cursor-pointer"
+                    className="w-full flex items-center justify-between p-5 rounded-xl text-left group transition-all hover:shadow-md"
+                    style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}
                     onClick={() => navigate(`/resultado/${avaliacao.id}`)}
+                    onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(200,165,107,0.4)")}
+                    onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(200,165,107,0.15)")}
                   >
-                    <div className="flex items-center justify-between flex-wrap gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-bronze to-brand-gold flex items-center justify-center shadow-md">
-                          <span className="text-xl font-bold text-white">{calcularMedia(avaliacao).toFixed(1)}</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-brand-dark">Avaliação #{avaliacoes.length - index}</p>
-                          <p className="text-xs text-brand-medium">
-                            {new Date(avaliacao.dataAvaliacao).toLocaleDateString("pt-BR", {
-                              day: "2-digit", month: "long", year: "numeric"
-                            })}
-                          </p>
-                        </div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-center w-14 h-14 rounded-xl flex-shrink-0"
+                        style={{ background: "linear-gradient(135deg, #9c7742, #c8a56b)" }}>
+                        <span className="font-tan-mon-cheri text-xl text-white">{calcularMedia(avaliacao).toFixed(1)}</span>
                       </div>
-                      <button className="px-4 py-2 bg-brand-gold/20 text-brand-dark font-medium rounded-lg hover:bg-brand-gold/30 transition-colors text-sm">
-                        Ver Detalhes →
-                      </button>
+                      <div>
+                        <p className="font-medium text-brand-dark text-sm">
+                          Avaliação #{avaliacoes.length - index}
+                        </p>
+                        <p className="text-xs text-brand-medium mt-0.5">
+                          {new Date(avaliacao.dataAvaliacao).toLocaleDateString("pt-BR", {
+                            day: "2-digit", month: "long", year: "numeric"
+                          })}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                    <ArrowRight className="w-4 h-4 text-brand-medium group-hover:text-brand-bronze group-hover:translate-x-0.5 transition-all" />
+                  </button>
                 ))}
               </div>
             </div>
+
           </div>
         )}
       </div>
