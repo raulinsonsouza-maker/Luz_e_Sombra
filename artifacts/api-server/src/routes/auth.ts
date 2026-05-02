@@ -6,7 +6,10 @@ import { eq } from "drizzle-orm";
 
 const router = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || "luz-e-sombra-secret-key-2024";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required but was not set.");
+}
 const JWT_EXPIRES_IN = "30d";
 
 export function signToken(payload: object): string {
