@@ -335,7 +335,7 @@ export default function NumerologiaPage() {
         {numerodeVida && expressaoVal && almaVal && (
           <div className="luxury-card-strong p-8"
             style={{ background: "linear-gradient(160deg, #1e1812 0%, #2f251b 60%, #3d2f1f 100%)" }}>
-            <SectionLabel><span style={{ color: "rgba(200,165,107,0.6)" }}>Síntese do Perfil</span></SectionLabel>
+            <SectionLabel><span style={{ color: "rgba(200,165,107,0.9)" }}>Síntese do Perfil</span></SectionLabel>
             <h3 className="font-tan-mon-cheri text-2xl mb-6" style={{ color: "#f7f2ec" }}>
               O Triângulo Numerológico
             </h3>
@@ -349,11 +349,11 @@ export default function NumerologiaPage() {
                   style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.2)" }}>
                   <div className="font-tan-mon-cheri text-5xl mb-3" style={{ color: "#c8a56b" }}>{n}</div>
                   <p className="text-sm font-semibold mb-1" style={{ color: "#f7f2ec" }}>{label}</p>
-                  <p className="text-xs" style={{ color: "rgba(200,165,107,0.6)" }}>{desc}</p>
+                  <p className="text-xs" style={{ color: "rgba(247,242,236,0.65)" }}>{desc}</p>
                 </div>
               ))}
             </div>
-            <p className="text-sm mt-6 leading-relaxed" style={{ color: "rgba(247,242,236,0.65)" }}>
+            <p className="text-sm mt-6 leading-relaxed" style={{ color: "rgba(247,242,236,0.88)" }}>
               Seu Caminho de Vida ({numerodeVida}) define sua jornada central.
               Seu número de Expressão ({expressaoVal}) mostra como você manifesta seus dons no mundo.
               Seu número da Alma ({almaVal}) revela o que sua essência mais profunda anseia viver.
@@ -392,7 +392,7 @@ export default function NumerologiaPage() {
               style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
               <p className="text-xs tracking-widest uppercase text-brand-medium mb-4">Ano Universal {resultado.ano}</p>
               <div className="flex items-end gap-4 mb-4">
-                <span className="font-tan-mon-cheri text-8xl opacity-40 text-brand-dark leading-none">{anoUniversal.reduzido}</span>
+                <span className="font-tan-mon-cheri text-8xl text-brand-dark leading-none" style={{ opacity: 0.65 }}>{anoUniversal.reduzido}</span>
                 <div className="mb-3">
                   <p className="text-xs text-brand-medium">Energia coletiva global</p>
                 </div>
@@ -515,7 +515,7 @@ export default function NumerologiaPage() {
             <div className="flex items-center gap-3 mb-6">
               <Hash className="w-5 h-5 text-brand-bronze" />
               <div>
-                <SectionLabel><span style={{ color: "rgba(200,165,107,0.6)" }}>Combinação Pessoal × Universal</span></SectionLabel>
+                <SectionLabel><span style={{ color: "rgba(200,165,107,0.9)" }}>Combinação Pessoal × Universal</span></SectionLabel>
                 <p className="font-medium" style={{ color: "#f7f2ec" }}>{combinacao.tema}</p>
               </div>
             </div>
@@ -532,7 +532,7 @@ export default function NumerologiaPage() {
                     <Icon className="w-4 h-4 text-brand-bronze" />
                     <h3 className="font-semibold text-sm" style={{ color: "#f7f2ec" }}>{label}</h3>
                   </div>
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(200,165,107,0.7)" }}>{val}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.88)" }}>{val}</p>
                 </div>
               ))}
             </div>
@@ -541,7 +541,7 @@ export default function NumerologiaPage() {
                 <ChevronRight className="w-4 h-4 text-brand-bronze" />
                 <h3 className="font-semibold text-sm" style={{ color: "#f7f2ec" }}>Recomendações Práticas</h3>
               </div>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.75)" }}>{combinacao.recomendacoes}</p>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.92)" }}>{combinacao.recomendacoes}</p>
             </div>
           </div>
         )}
@@ -667,14 +667,14 @@ export default function NumerologiaPage() {
             {/* Header */}
             <div className="text-center mb-10">
               <p className="text-xs font-semibold tracking-[0.12em] sm:tracking-[0.3em] uppercase mb-4"
-                style={{ color: "rgba(200,165,107,0.6)" }}>
+                style={{ color: "rgba(200,165,107,0.85)" }}>
                 Análise · Numerológica · Pessoal
               </p>
               <h1 className="font-tan-mon-cheri text-4xl md:text-6xl mb-3"
                 style={{ color: "#c8a56b" }}>
                 Numerologia
               </h1>
-              <p className="text-sm" style={{ color: "rgba(200,165,107,0.5)" }}>
+              <p className="text-sm" style={{ color: "rgba(247,242,236,0.65)" }}>
                 Decifre os padrões do seu destino
               </p>
             </div>
@@ -698,7 +698,7 @@ export default function NumerologiaPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold tracking-[0.15em] uppercase mb-1"
-                      style={{ color: "rgba(200,165,107,0.5)" }}>
+                      style={{ color: "rgba(200,165,107,0.8)" }}>
                       Analisando o destino de
                     </p>
                     <p className="font-tan-mon-cheri text-xl sm:text-2xl md:text-3xl mb-1.5 leading-tight"
@@ -709,7 +709,7 @@ export default function NumerologiaPage() {
                       {user?.dataNascimento ? (
                         <>
                           <span className="flex items-center gap-1.5 text-xs sm:text-sm"
-                            style={{ color: "rgba(200,165,107,0.7)" }}>
+                            style={{ color: "rgba(247,242,236,0.75)" }}>
                             <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
                             {formatarDataBrasileira(user.dataNascimento)}
                           </span>
@@ -732,7 +732,7 @@ export default function NumerologiaPage() {
                 {/* Edit profile link */}
                 <a href="/perfil"
                   className="flex items-center gap-1.5 text-xs font-medium flex-shrink-0 self-start sm:mt-0 transition-opacity hover:opacity-80"
-                  style={{ color: "rgba(200,165,107,0.5)" }}>
+                  style={{ color: "rgba(200,165,107,0.75)" }}>
                   <ExternalLink className="w-3 h-3" />
                   Editar perfil
                 </a>
@@ -742,7 +742,7 @@ export default function NumerologiaPage() {
             {/* Year selection */}
             <div className="mb-8">
               <p className="text-xs font-semibold tracking-[0.25em] uppercase text-center mb-4"
-                style={{ color: "rgba(200,165,107,0.5)" }}>
+                style={{ color: "rgba(200,165,107,0.9)" }}>
                 Selecione o ano de análise
               </p>
               <div className="flex gap-3 justify-center max-w-xs mx-auto w-full">
@@ -753,7 +753,7 @@ export default function NumerologiaPage() {
                     className="flex-1 py-3.5 rounded-xl font-tan-mon-cheri text-xl transition-all"
                     style={anoAnalise === ano
                       ? { background: "linear-gradient(135deg, #9c7742, #c8a56b)", color: "#fff", boxShadow: "0 4px 20px rgba(200,165,107,0.3)" }
-                      : { background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.2)", color: "rgba(200,165,107,0.5)" }}
+                      : { background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.25)", color: "rgba(247,242,236,0.7)" }}
                   >
                     {ano}
                   </button>
