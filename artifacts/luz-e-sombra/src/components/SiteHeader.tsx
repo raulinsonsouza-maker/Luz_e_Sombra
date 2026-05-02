@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { Home, Target, Hash, History, Shield, LogOut, Menu, X } from "lucide-react";
+import { Home, Target, Hash, History, Shield, LogOut, Menu, X, UserCircle } from "lucide-react";
 
 export default function SiteHeader() {
   const [location, navigate] = useLocation();
@@ -117,17 +117,29 @@ export default function SiteHeader() {
 
             {/* Right side */}
             <div className="flex items-center gap-4">
-              <div className="hidden lg:flex items-center gap-3">
+              <button
+                onClick={() => navigate("/perfil")}
+                className="hidden lg:flex items-center gap-3 rounded-lg px-2 py-1 transition-all"
+                title="Meu Perfil"
+                style={{ color: location === "/perfil" ? "#c8a56b" : "rgba(247,242,236,0.6)" }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.color = "#c8a56b";
+                }}
+                onMouseLeave={e => {
+                  if (location !== "/perfil") (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.6)";
+                }}
+              >
                 <div className="w-px h-5" style={{ background: "rgba(200,165,107,0.2)" }} />
+                <UserCircle className="w-4 h-4" />
                 <div className="text-right">
                   <p className="text-xs" style={{ color: "rgba(200,165,107,0.5)", letterSpacing: "0.1em" }}>
                     Olá,
                   </p>
-                  <p className="text-sm font-medium" style={{ color: "rgba(247,242,236,0.8)" }}>
+                  <p className="text-sm font-medium" style={{ color: "inherit" }}>
                     {primeiroNome}
                   </p>
                 </div>
-              </div>
+              </button>
 
               <button
                 onClick={handleLogout}
@@ -183,6 +195,18 @@ export default function SiteHeader() {
                   </button>
                 );
               })}
+              <button
+                type="button"
+                onClick={() => { setMobileOpen(false); navigate("/perfil"); }}
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-all"
+                style={{
+                  color: location === "/perfil" ? "#c8a56b" : "rgba(247,242,236,0.55)",
+                  background: location === "/perfil" ? "rgba(200,165,107,0.08)" : "transparent",
+                }}
+              >
+                <UserCircle className="w-4 h-4" />
+                Meu Perfil
+              </button>
               {isAdmin && (
                 <button
                   type="button"

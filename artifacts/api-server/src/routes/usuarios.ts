@@ -16,6 +16,66 @@ function validarEmail(e: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 }
 
+// PUT /api/usuarios/me — update own profile (name, birth date, password)
+router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const { nome, dataNascimento, senhaAtual, novaSenha } = req.body as {
+      nome?: unknown; dataNascimento?: unknown;
+      senhaAtual?: unknown; novaSenha?: unknown;
+    };
+    const updates: UsuarioUpdates = {};
+
+    if (nome !== undefined) {
+      const nomeNorm = String(nome ?? "").trim();
+      if (!nomeNorm) return res.status(400).json({ error: "Nome não pode ser vazio" });
+      updates.nome = nomeNorm;
+    }
+
+    if (dataNascimento !== undefined) {
+      updates.dataNascimento = typeof dataNascimento === "string" ? dataNascimento || null : null;
+    }
+
+    if (novaSenha !== undefined && novaSenha !== "") {
+      if (!senhaAtual) {
+        return res.status(400).json({ error: "Senha atual é obrigatória para alterar a senha" });
+      }
+      const [currentUser] = await db.select().from(usuariosTable).where(eq(usuariosTable.id, req.user!.id)).limit(1);
+      if (!currentUser) return res.status(404).json({ error: "Usuário não encontrado" });
+      const senhaCorreta = await bcrypt.compare(String(senhaAtual), currentUser.senha);
+      if (!senhaCorreta) return res.status(400).json({ error: "Senha atual incorreta" });
+      const novaSenhaStr = String(novaSenha);
+      if (!validarSenha(novaSenhaStr)) return res.status(400).json({ error: "Nova senha inválida. Use pelo menos 6 caracteres." });
+      updates.senha = await bcrypt.hash(novaSenhaStr, 10);
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "Nenhum dado para atualizar" });
+    }
+
+    updates.atualizadoEm = new Date();
+
+    const [updated] = await db.update(usuariosTable)
+      .set(updates)
+      .where(eq(usuariosTable.id, req.user!.id))
+      .returning({
+        id: usuariosTable.id,
+        username: usuariosTable.username,
+        nome: usuariosTable.nome,
+        email: usuariosTable.email,
+        dataNascimento: usuariosTable.dataNascimento,
+        primeiroAcesso: usuariosTable.primeiroAcesso,
+        ativo: usuariosTable.ativo,
+        isAdmin: usuariosTable.isAdmin,
+      });
+
+    if (!updated) return res.status(404).json({ error: "Usuário não encontrado" });
+    return res.json(updated);
+  } catch (error) {
+    req.log.error({ error }, "Erro ao atualizar perfil");
+    return res.status(500).json({ error: "Erro ao atualizar perfil" });
+  }
+});
+
 // PUT /api/usuarios/primeiro-acesso/me — MUST be before /:id to avoid route collision
 router.put("/primeiro-acesso/me", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
