@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   Calendar, TrendingUp, Heart, Briefcase, DollarSign, Activity,
   AlertCircle, Brain, Lightbulb, ChevronRight, Sparkles,
-  User, Star, Zap, Shield, Eye, Hash, BookOpen, Compass, Quote,
+  User, Star, Zap, Shield, Eye, Hash, BookOpen, Compass, Quote, ExternalLink,
 } from "lucide-react";
 
 import { ANOS_UNIVERSAIS, ANOS_PESSOAIS, COMBINACOES, NUMEROS_DE_VIDA } from "@/lib/numerologia-data";
@@ -68,17 +68,25 @@ function InfoCard({ icon: Icon, label, children }: { icon: typeof Briefcase; lab
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
+function calcularIdade(dataNascimentoISO: string): number | null {
+  const partes = dataNascimentoISO.split('-');
+  if (partes.length !== 3) return null;
+  const nascimento = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - nascimento.getFullYear();
+  const m = hoje.getMonth() - nascimento.getMonth();
+  if (m < 0 || (m === 0 && hoje.getDate() < nascimento.getDate())) idade--;
+  return idade;
+}
+
 export default function NumerologiaPage() {
   const [, navigate] = useLocation();
   const { user, status } = useAuth();
 
-  const [dataNascimento, setDataNascimento] = useState("");
-  const [nome, setNome] = useState("");
   const ANOS_DISPONIVEIS = [2025, 2026];
   const anoAtual = new Date().getFullYear();
   const anoDefault = ANOS_DISPONIVEIS.includes(anoAtual) ? anoAtual : ANOS_DISPONIVEIS[0];
   const [anoAnalise, setAnoAnalise] = useState(anoDefault);
-  const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [resultado, setResultado] = useState<ReturnType<typeof calcular> | null>(null);
   const [abaAtiva, setAbaAtiva] = useState<"perfil" | "ano" | "meses">("perfil");
@@ -86,16 +94,10 @@ export default function NumerologiaPage() {
   useEffect(() => {
     if (status === "loading") return;
     if (status === "unauthenticated") { navigate("/login"); return; }
-    if (user) {
-      if (user.dataNascimento) setDataNascimento(user.dataNascimento);
-      if (user.nome) setNome(user.nome);
-    }
-    setCarregando(false);
   }, [status, user]);
 
   // ── Calculation ──────────────────────────────────────────────────────────
 
-  // Master numbers (11, 22, 33) are always preserved — this is the standard numerological approach
   function calcular(data: string, nomeCompleto: string, ano: number) {
     const dataFormatada = formatarDataBrasileira(data);
     const partes = dataFormatada.split("/");
@@ -137,18 +139,20 @@ export default function NumerologiaPage() {
 
   function handleCalcular() {
     setErro("");
-    if (!dataNascimento) {
-      setErro("Data de nascimento não encontrada. Acesse seu perfil para atualizar.");
+    const dataNasc = user?.dataNascimento ?? "";
+    const nomeUser = user?.nome ?? "";
+    if (!dataNasc) {
+      setErro("Data de nascimento não encontrada. Acesse seu perfil para cadastrar.");
       return;
     }
-    const r = calcular(dataNascimento, nome, anoAnalise);
+    const r = calcular(dataNasc, nomeUser, anoAnalise);
     if (r) {
       setResultado(r);
       setAbaAtiva("perfil");
     }
   }
 
-  if (carregando || status === "loading") {
+  if (status === "loading") {
     return (
       <div className="luxury-shell flex items-center justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-brand-gold border-t-transparent" />
@@ -652,54 +656,132 @@ export default function NumerologiaPage() {
     <div className="luxury-shell py-10 px-4">
       <div className="max-w-5xl mx-auto space-y-6">
 
-        {/* Input card */}
-        <div className="luxury-card-strong p-8 md:p-10">
-          <SectionLabel>Análise Completa</SectionLabel>
-          <h1 className="font-tan-mon-cheri text-4xl md:text-5xl text-brand-dark mb-8">
-            Numerologia
-          </h1>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-            <div className="md:col-span-2">
-              <label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-2">
-                <User className="w-3 h-3 inline mr-1.5 text-brand-bronze" />Nome Completo
-              </label>
-              <input type="text" value={nome} onChange={e => setNome(e.target.value)}
-                className="luxury-input" placeholder="Para calcular expressão e alma" />
+        {/* Hero card */}
+        <div className="rounded-3xl overflow-hidden"
+          style={{ background: "linear-gradient(160deg, #1e1812 0%, #2f251b 60%, #1e1812 100%)", border: "1px solid rgba(200,165,107,0.2)" }}>
+
+          {/* Gold top bar */}
+          <div className="h-px w-full" style={{ background: "linear-gradient(90deg, transparent, #c8a56b 40%, #9c7742 60%, transparent)" }} />
+
+          <div className="p-8 md:p-12">
+            {/* Header */}
+            <div className="text-center mb-10">
+              <p className="text-xs font-semibold tracking-[0.35em] uppercase mb-4"
+                style={{ color: "rgba(200,165,107,0.6)" }}>
+                Análise · Numerológica · Pessoal
+              </p>
+              <h1 className="font-tan-mon-cheri text-5xl md:text-6xl mb-3"
+                style={{ color: "#c8a56b" }}>
+                Numerologia
+              </h1>
+              <p className="text-sm" style={{ color: "rgba(200,165,107,0.5)" }}>
+                Decifre os padrões do seu destino
+              </p>
             </div>
-            <div>
-              <label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-2">
-                <Calendar className="w-3 h-3 inline mr-1.5 text-brand-bronze" />Nascimento
-              </label>
-              <input type="date" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} className="luxury-input" />
+
+            {/* Decorative divider */}
+            <div className="flex items-center gap-4 mb-10">
+              <div className="flex-1 h-px" style={{ background: "rgba(200,165,107,0.15)" }} />
+              <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#c8a56b" }} />
+              <div className="flex-1 h-px" style={{ background: "rgba(200,165,107,0.15)" }} />
             </div>
-            <div>
-              <label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-2">
-                Ano de Análise
-              </label>
-              <select
-                value={anoAnalise}
-                onChange={e => setAnoAnalise(parseInt(e.target.value))}
-                className="luxury-input"
-              >
-                {ANOS_DISPONIVEIS.map(a => (
-                  <option key={a} value={a}>{a}</option>
+
+            {/* User identity block */}
+            <div className="rounded-2xl p-6 mb-8 relative overflow-hidden"
+              style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.18)" }}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-5">
+                  {/* Avatar circle */}
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.15), rgba(156,119,66,0.1))", border: "1px solid rgba(200,165,107,0.3)" }}>
+                    <User className="w-6 h-6" style={{ color: "#c8a56b" }} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-1.5"
+                      style={{ color: "rgba(200,165,107,0.5)" }}>
+                      Analisando o destino de
+                    </p>
+                    <p className="font-tan-mon-cheri text-2xl md:text-3xl mb-2"
+                      style={{ color: "#e8d5b0" }}>
+                      {user?.nome || "—"}
+                    </p>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {user?.dataNascimento ? (
+                        <>
+                          <span className="flex items-center gap-1.5 text-sm"
+                            style={{ color: "rgba(200,165,107,0.7)" }}>
+                            <Calendar className="w-3.5 h-3.5" />
+                            {formatarDataBrasileira(user.dataNascimento)}
+                          </span>
+                          {calcularIdade(user.dataNascimento) !== null && (
+                            <span className="text-xs px-2.5 py-0.5 rounded-full font-medium"
+                              style={{ background: "rgba(200,165,107,0.12)", color: "#c8a56b", border: "1px solid rgba(200,165,107,0.25)" }}>
+                              {calcularIdade(user.dataNascimento)} anos
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-sm" style={{ color: "rgba(200,165,107,0.4)" }}>
+                          Nascimento não cadastrado
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Edit profile link */}
+                <a href="/perfil"
+                  className="flex items-center gap-1.5 text-xs font-medium flex-shrink-0 transition-opacity hover:opacity-80"
+                  style={{ color: "rgba(200,165,107,0.5)" }}>
+                  <ExternalLink className="w-3 h-3" />
+                  Editar perfil
+                </a>
+              </div>
+            </div>
+
+            {/* Year selection */}
+            <div className="mb-8">
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-center mb-4"
+                style={{ color: "rgba(200,165,107,0.5)" }}>
+                Selecione o ano de análise
+              </p>
+              <div className="flex gap-3 justify-center">
+                {ANOS_DISPONIVEIS.map(ano => (
+                  <button
+                    key={ano}
+                    onClick={() => setAnoAnalise(ano)}
+                    className="px-10 py-3.5 rounded-xl font-tan-mon-cheri text-xl transition-all"
+                    style={anoAnalise === ano
+                      ? { background: "linear-gradient(135deg, #9c7742, #c8a56b)", color: "#fff", boxShadow: "0 4px 20px rgba(200,165,107,0.3)" }
+                      : { background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.2)", color: "rgba(200,165,107,0.5)" }}
+                  >
+                    {ano}
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
+
+            {/* Error */}
+            {erro && (
+              <div className="flex items-start gap-3 p-4 rounded-xl mb-6"
+                style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)" }}>
+                <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                <p className="text-sm" style={{ color: "rgba(239,100,100,0.9)" }}>{erro}</p>
+              </div>
+            )}
+
+            {/* CTA */}
+            <button
+              onClick={handleCalcular}
+              className="w-full py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-3 transition-all hover:opacity-90 active:scale-[0.99]"
+              style={{ background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)", color: "#fff", boxShadow: "0 6px 30px rgba(200,165,107,0.25)", letterSpacing: "0.05em" }}>
+              <Sparkles className="w-5 h-5" />
+              Gerar Análise Numerológica Completa
+            </button>
           </div>
 
-          {erro && (
-            <div className="flex items-start gap-3 p-4 rounded-xl mb-6"
-              style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)" }}>
-              <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-red-700">{erro}</p>
-            </div>
-          )}
-
-          <button onClick={handleCalcular} className="w-full luxury-btn-primary py-4 text-base">
-            <Sparkles className="w-5 h-5" />
-            Gerar Análise Numerológica Completa
-          </button>
+          {/* Gold bottom bar */}
+          <div className="h-px w-full" style={{ background: "linear-gradient(90deg, transparent, #c8a56b 40%, #9c7742 60%, transparent)" }} />
         </div>
 
         {/* Results */}
