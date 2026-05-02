@@ -12,12 +12,24 @@ if (!JWT_SECRET) {
 }
 const JWT_EXPIRES_IN = "30d";
 
-export function signToken(payload: object): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as any);
+interface JwtPayload {
+  id: number;
+  username: string;
+  nome: string;
+  email: string | null;
+  primeiroAcesso: boolean;
+  isAdmin: boolean;
+  dataNascimento: string | null;
+  iat?: number;
+  exp?: number;
 }
 
-export function verifyToken(token: string): any {
-  return jwt.verify(token, JWT_SECRET);
+export function signToken(payload: Omit<JwtPayload, "iat" | "exp">): string {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+}
+
+export function verifyToken(token: string): JwtPayload {
+  return jwt.verify(token, JWT_SECRET) as JwtPayload;
 }
 
 // POST /api/auth/login
