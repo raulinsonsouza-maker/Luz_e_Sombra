@@ -347,7 +347,7 @@ export default function ResultadoPage() {
     <div className="luxury-shell flex items-center justify-center">
       <div className="text-center">
         <p className="text-xl text-brand-medium mb-4">Avaliação não encontrada</p>
-        <button onClick={() => navigate("/")} className="luxury-btn-primary">Voltar</button>
+        <button onClick={() => navigate("/dashboard")} className="luxury-btn-primary">Voltar</button>
       </div>
     </div>
   );
@@ -673,7 +673,7 @@ export default function ResultadoPage() {
 
         {/* ── Actions ─────────────────────────────────────────────────────── */}
         <div className="flex flex-wrap gap-3 justify-center pb-8 no-print">
-          <button onClick={() => navigate("/")} className="luxury-btn-primary">
+          <button onClick={() => navigate("/dashboard")} className="luxury-btn-primary">
             {primeiroAcesso ? <Sparkles className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
             {primeiroAcesso ? "Acessar Área de Membro" : "Início"}
           </button>

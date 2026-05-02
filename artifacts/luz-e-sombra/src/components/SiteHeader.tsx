@@ -8,14 +8,14 @@ export default function SiteHeader() {
   const { user, status, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isPublicPage = location === "/login" || location === "/admin/login";
+  const isPublicPage = location === "/" || location === "/login" || location === "/admin/login";
   if (isPublicPage || status !== "authenticated" || !user) return null;
 
   const isAdmin = Boolean(user.isAdmin);
   const primeiroNome = (user.nome || "Usuário").split(" ")[0];
 
   const links = [
-    { href: "/", label: "Início", icon: Home },
+    { href: "/dashboard", label: "Início", icon: Home },
     { href: "/avaliacao", label: "Avaliação", icon: Target },
     { href: "/numerologia", label: "Numerologia", icon: Hash },
     { href: "/historico", label: "Histórico", icon: History },
@@ -27,7 +27,7 @@ export default function SiteHeader() {
   };
 
   const isActive = (href: string) =>
-    href === "/" ? location === "/" : location.startsWith(href);
+    href === "/dashboard" ? location === "/dashboard" : location.startsWith(href);
 
   return (
     <>
@@ -43,7 +43,7 @@ export default function SiteHeader() {
 
             {/* Brand */}
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/dashboard")}
               className="flex items-center gap-3 group"
             >
               <div

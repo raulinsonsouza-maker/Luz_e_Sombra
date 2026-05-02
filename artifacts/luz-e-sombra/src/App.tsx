@@ -1,6 +1,7 @@
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import SiteHeader from "@/components/SiteHeader";
+import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import AdminLoginPage from "@/pages/AdminLoginPage";
 import HomePage from "@/pages/HomePage";
@@ -33,9 +34,10 @@ function Router() {
     <>
       <SiteHeader />
       <Switch>
+        <Route path="/" component={LandingPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/admin/login" component={AdminLoginPage} />
-        <Route path="/">
+        <Route path="/dashboard">
           <ProtectedRoute component={HomePage} />
         </Route>
         <Route path="/avaliacao">

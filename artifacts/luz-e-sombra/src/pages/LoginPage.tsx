@@ -18,7 +18,7 @@ export default function LoginPage() {
     setCarregando(true);
     const result = await login(username.trim().toLowerCase(), password);
     if (result.ok) {
-      navigate("/");
+      navigate("/dashboard");
     } else {
       setErro(result.error || "Usuário ou senha inválidos");
       setCarregando(false);
