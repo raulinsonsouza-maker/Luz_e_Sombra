@@ -1,11 +1,9 @@
 import bcrypt from "bcryptjs";
 import { db, usuariosTable } from "@workspace/db";
-import { eq, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { logger } from "./logger";
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
-const ADMIN_NOME = process.env.ADMIN_NOME || "Administrador";
+const IS_PROD = process.env.NODE_ENV === "production";
 
 export async function seedAdminIfNeeded(): Promise<void> {
   try {
@@ -20,11 +18,32 @@ export async function seedAdminIfNeeded(): Promise<void> {
       return;
     }
 
-    const senhaHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+    const adminUsername = process.env.ADMIN_USERNAME || "admin";
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminPassword) {
+      if (IS_PROD) {
+        logger.error(
+          "No admin user exists and ADMIN_PASSWORD env var is not set. " +
+          "Set ADMIN_PASSWORD to bootstrap the first admin account."
+        );
+        return;
+      }
+      // In development, use a clearly-temporary default and warn loudly
+      logger.warn(
+        "⚠️  DEVELOPMENT ONLY: Creating admin user with default password 'admin123'. " +
+        "Set ADMIN_PASSWORD env var to use a custom password. " +
+        "NEVER use this default in production."
+      );
+    }
+
+    const password = adminPassword || "admin123";
+    const senhaHash = await bcrypt.hash(password, 10);
+
     await db.insert(usuariosTable).values({
-      username: ADMIN_USERNAME,
+      username: adminUsername,
       senha: senhaHash,
-      nome: ADMIN_NOME,
+      nome: process.env.ADMIN_NOME || "Administrador",
       email: null,
       isAdmin: true,
       ativo: true,
@@ -32,8 +51,8 @@ export async function seedAdminIfNeeded(): Promise<void> {
     }).onConflictDoNothing();
 
     logger.info(
-      { username: ADMIN_USERNAME },
-      `Bootstrap: admin user '${ADMIN_USERNAME}' created. Change the password after first login.`
+      { username: adminUsername },
+      `Bootstrap: admin user '${adminUsername}' created. Change the password after first login.`
     );
   } catch (err) {
     logger.error({ err }, "Failed to seed admin user — server will still start.");
