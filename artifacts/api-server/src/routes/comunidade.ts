@@ -1,0 +1,195 @@
+import { Router, Response } from "express";
+import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
+import { db, comunidadeTable, reacoesTable, usuariosTable } from "@workspace/db";
+import { eq, desc, and, sql } from "drizzle-orm";
+import { ObjectStorageService } from "../lib/objectStorage";
+
+const router = Router();
+const objectStorage = new ObjectStorageService();
+
+// GET /api/comunidade — list posts with reactions
+router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const posts = await db
+      .select({
+        id: comunidadeTable.id,
+        autorId: comunidadeTable.autorId,
+        tipo: comunidadeTable.tipo,
+        conteudo: comunidadeTable.conteudo,
+        mediaUrl: comunidadeTable.mediaUrl,
+        criadoEm: comunidadeTable.criadoEm,
+        autorNome: usuariosTable.nome,
+      })
+      .from(comunidadeTable)
+      .leftJoin(usuariosTable, eq(usuariosTable.id, comunidadeTable.autorId))
+      .orderBy(desc(comunidadeTable.criadoEm));
+
+    const postIds = posts.map(p => p.id);
+    if (postIds.length === 0) return res.json([]);
+
+    const reacoes = await db
+      .select({
+        publicacaoId: reacoesTable.publicacaoId,
+        emoji: reacoesTable.emoji,
+        usuarioId: reacoesTable.usuarioId,
+        count: sql<number>`count(*)::int`.as("count"),
+      })
+      .from(reacoesTable)
+      .where(sql`${reacoesTable.publicacaoId} = ANY(${sql`ARRAY[${sql.join(postIds.map(id => sql`${id}`), sql`, `)}]::int[]`})`)
+      .groupBy(reacoesTable.publicacaoId, reacoesTable.emoji, reacoesTable.usuarioId);
+
+    const userId = req.user!.id;
+
+    const result = posts.map(post => {
+      const postReacoes = reacoes.filter(r => r.publicacaoId === post.id);
+      const contagens: Record<string, number> = {};
+      const minhasReacoes: string[] = [];
+
+      postReacoes.forEach(r => {
+        contagens[r.emoji] = (contagens[r.emoji] ?? 0) + Number(r.count);
+        if (r.usuarioId === userId) minhasReacoes.push(r.emoji);
+      });
+
+      return { ...post, reacoes: contagens, minhasReacoes };
+    });
+
+    return res.json(result);
+  } catch (err) {
+    req.log.error({ err }, "Erro ao buscar posts");
+    return res.status(500).json({ error: "Erro ao buscar publicações" });
+  }
+});
+
+// POST /api/comunidade — admin create post
+router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const { tipo, conteudo, mediaUrl } = req.body as {
+      tipo?: string; conteudo?: string; mediaUrl?: string;
+    };
+
+    if (!conteudo?.trim()) {
+      return res.status(400).json({ error: "Conteúdo é obrigatório" });
+    }
+    const tiposValidos = ["texto", "imagem", "video"];
+    if (tipo && !tiposValidos.includes(tipo)) {
+      return res.status(400).json({ error: "Tipo inválido" });
+    }
+
+    const [post] = await db
+      .insert(comunidadeTable)
+      .values({
+        autorId: req.user!.id,
+        tipo: tipo || "texto",
+        conteudo: conteudo.trim(),
+        mediaUrl: mediaUrl?.trim() || null,
+      })
+      .returning();
+
+    return res.status(201).json(post);
+  } catch (err) {
+    req.log.error({ err }, "Erro ao criar post");
+    return res.status(500).json({ error: "Erro ao criar publicação" });
+  }
+});
+
+// DELETE /api/comunidade/:id — admin delete
+router.delete("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
+    await db.delete(comunidadeTable).where(eq(comunidadeTable.id, id));
+    return res.json({ ok: true });
+  } catch (err) {
+    req.log.error({ err }, "Erro ao deletar post");
+    return res.status(500).json({ error: "Erro ao deletar publicação" });
+  }
+});
+
+// POST /api/comunidade/:id/reagir — toggle reaction
+router.post("/:id/reagir", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const publicacaoId = parseInt(req.params.id, 10);
+    if (isNaN(publicacaoId)) return res.status(400).json({ error: "ID inválido" });
+
+    const { emoji } = req.body as { emoji?: string };
+    const EMOJIS_VALIDOS = ["❤️", "🔥", "💫", "🙏", "✨"];
+    if (!emoji || !EMOJIS_VALIDOS.includes(emoji)) {
+      return res.status(400).json({ error: "Emoji inválido" });
+    }
+
+    const [post] = await db
+      .select({ id: comunidadeTable.id })
+      .from(comunidadeTable)
+      .where(eq(comunidadeTable.id, publicacaoId))
+      .limit(1);
+
+    if (!post) return res.status(404).json({ error: "Publicação não encontrada" });
+
+    const [existing] = await db
+      .select()
+      .from(reacoesTable)
+      .where(and(
+        eq(reacoesTable.publicacaoId, publicacaoId),
+        eq(reacoesTable.usuarioId, req.user!.id),
+        eq(reacoesTable.emoji, emoji),
+      ))
+      .limit(1);
+
+    if (existing) {
+      await db.delete(reacoesTable).where(eq(reacoesTable.id, existing.id));
+      return res.json({ ativo: false, emoji });
+    } else {
+      await db.insert(reacoesTable).values({
+        publicacaoId,
+        usuarioId: req.user!.id,
+        emoji,
+      });
+      return res.json({ ativo: true, emoji });
+    }
+  } catch (err) {
+    req.log.error({ err }, "Erro ao reagir");
+    return res.status(500).json({ error: "Erro ao processar reação" });
+  }
+});
+
+// POST /api/comunidade/upload-url — get presigned upload URL for image
+router.post("/upload-url", requireAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const uploadURL = await objectStorage.getObjectEntityUploadURL();
+    const objectPath = objectStorage.normalizeObjectEntityPath(uploadURL);
+    return res.json({ uploadURL, objectPath });
+  } catch (err) {
+    req.log.error({ err }, "Erro ao gerar URL de upload");
+    return res.status(500).json({ error: "Erro ao gerar URL de upload" });
+  }
+});
+
+// GET /api/comunidade/:id/imagem — stream image
+router.get("/:id/imagem", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
+
+    const [post] = await db
+      .select({ mediaUrl: comunidadeTable.mediaUrl, tipo: comunidadeTable.tipo })
+      .from(comunidadeTable)
+      .where(eq(comunidadeTable.id, id))
+      .limit(1);
+
+    if (!post || post.tipo !== "imagem" || !post.mediaUrl) {
+      return res.status(404).json({ error: "Imagem não encontrada" });
+    }
+
+    const file = await objectStorage.getObjectEntityFile(post.mediaUrl);
+    const response = await objectStorage.downloadObject(file, 3600);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    res.set("Content-Type", response.headers.get("content-type") || "image/jpeg");
+    res.set("Cache-Control", "private, max-age=3600");
+    return res.send(buffer);
+  } catch (err) {
+    req.log.error({ err }, "Erro ao carregar imagem");
+    return res.status(500).json({ error: "Erro ao carregar imagem" });
+  }
+});
+
+export default router;

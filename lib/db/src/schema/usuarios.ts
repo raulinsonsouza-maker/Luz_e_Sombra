@@ -1,4 +1,4 @@
-import { pgTable, text, serial, boolean, timestamp, integer, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, integer, index, jsonb, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -9,6 +9,7 @@ export const usuariosTable = pgTable("usuarios", {
   nome: text("nome").notNull(),
   email: text("email").unique(),
   dataNascimento: text("data_nascimento"),
+  fotoPerfil: text("foto_perfil"),
   primeiroAcesso: boolean("primeiro_acesso").notNull().default(true),
   ativo: boolean("ativo").notNull().default(true),
   isAdmin: boolean("is_admin").notNull().default(false),
@@ -80,6 +81,72 @@ export const missoesDiariasTable = pgTable("missoes_diarias", {
   usuarioDataIdx: index("idx_missoes_usuario_data").on(table.usuarioId, table.dataReferencia),
 }));
 
+// ── Comunidade ─────────────────────────────────────────────────────────────────
+
+export const comunidadeTable = pgTable("comunidade", {
+  id: serial("id").primaryKey(),
+  autorId: integer("autor_id").notNull().references(() => usuariosTable.id),
+  tipo: text("tipo").notNull().default("texto"), // texto | imagem | video
+  conteudo: text("conteudo").notNull(),
+  mediaUrl: text("media_url"),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  autorIdx: index("idx_comunidade_autor_id").on(table.autorId),
+  criadoEmIdx: index("idx_comunidade_criado_em").on(table.criadoEm),
+}));
+
+export const reacoesTable = pgTable("reacoes_comunidade", {
+  id: serial("id").primaryKey(),
+  publicacaoId: integer("publicacao_id").notNull().references(() => comunidadeTable.id, { onDelete: "cascade" }),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  emoji: text("emoji").notNull(),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  uniqueReacao: unique("uq_reacao_pub_usuario_emoji").on(table.publicacaoId, table.usuarioId, table.emoji),
+  publicacaoIdx: index("idx_reacoes_publicacao_id").on(table.publicacaoId),
+}));
+
+// ── Cursos ─────────────────────────────────────────────────────────────────────
+
+export const cursosTable = pgTable("cursos", {
+  id: serial("id").primaryKey(),
+  titulo: text("titulo").notNull(),
+  descricao: text("descricao").notNull(),
+  imagemUrl: text("imagem_url"),
+  categoria: text("categoria"),
+  nivel: text("nivel").default("todos"),
+  publicado: boolean("publicado").notNull().default(false),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+  atualizadoEm: timestamp("atualizado_em").notNull().defaultNow(),
+});
+
+export const aulasTable = pgTable("aulas", {
+  id: serial("id").primaryKey(),
+  cursoId: integer("curso_id").notNull().references(() => cursosTable.id, { onDelete: "cascade" }),
+  titulo: text("titulo").notNull(),
+  descricao: text("descricao"),
+  videoUrl: text("video_url"),
+  conteudo: text("conteudo"),
+  ordem: integer("ordem").notNull().default(0),
+  duracaoMin: integer("duracao_min"),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  cursoIdx: index("idx_aulas_curso_id").on(table.cursoId),
+  ordemIdx: index("idx_aulas_ordem").on(table.cursoId, table.ordem),
+}));
+
+export const progressoCursosTable = pgTable("progresso_cursos", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  aulaId: integer("aula_id").notNull().references(() => aulasTable.id, { onDelete: "cascade" }),
+  concluidaEm: timestamp("concluida_em").notNull().defaultNow(),
+}, (table) => ({
+  uniqueProgress: unique("uq_progresso_usuario_aula").on(table.usuarioId, table.aulaId),
+  usuarioIdx: index("idx_progresso_usuario_id").on(table.usuarioId),
+}));
+
+// ── Schemas & types ────────────────────────────────────────────────────────────
+
 export const insertUsuarioSchema = createInsertSchema(usuariosTable).omit({ id: true, criadoEm: true, atualizadoEm: true });
 export const insertAvaliacaoSchema = createInsertSchema(avaliacoesTable).omit({ id: true, criadaEm: true });
 
@@ -91,3 +158,8 @@ export type FotoTraco = typeof fotosTracoTable.$inferSelect;
 export type AnaliseTraco = typeof analiseTracoTable.$inferSelect;
 export type Gamificacao = typeof gamificacaoTable.$inferSelect;
 export type MissaoDiaria = typeof missoesDiariasTable.$inferSelect;
+export type Comunidade = typeof comunidadeTable.$inferSelect;
+export type Reacao = typeof reacoesTable.$inferSelect;
+export type Curso = typeof cursosTable.$inferSelect;
+export type Aula = typeof aulasTable.$inferSelect;
+export type ProgressoCurso = typeof progressoCursosTable.$inferSelect;

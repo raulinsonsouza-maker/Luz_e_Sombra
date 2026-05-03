@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { User, Calendar, Lock, CheckCircle, AlertCircle, Zap, Flame, Target, Star } from "lucide-react";
+import { User, Calendar, Lock, CheckCircle, AlertCircle, Zap, Flame, Target, Star, Camera, Loader2 } from "lucide-react";
 
 interface Progresso {
   xp: number;
@@ -28,8 +28,14 @@ export default function MeuPerfilPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [progresso, setProgresso] = useState<Progresso | null>(null);
 
+  const [fotoUrl, setFotoUrl] = useState<string | null>(null);
+  const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     buscarProgresso();
+    buscarFoto();
   }, []);
 
   async function buscarProgresso() {
@@ -37,6 +43,59 @@ export default function MeuPerfilPage() {
       const res = await apiFetch("/gamificacao/progresso");
       if (res.ok) setProgresso(await res.json());
     } catch {}
+  }
+
+  async function buscarFoto() {
+    try {
+      const res = await apiFetch("/usuarios/me/foto-perfil/view");
+      if (res.ok && res.headers.get("content-type")?.startsWith("image/")) {
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        setFotoUrl(blobUrl);
+      }
+    } catch {}
+  }
+
+  async function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const preview = URL.createObjectURL(file);
+    setFotoPreview(preview);
+    setUploadingFoto(true);
+    setErrorMsg(null);
+
+    try {
+      const urlRes = await apiFetch("/usuarios/me/foto-perfil/upload-url", { method: "POST" });
+      if (!urlRes.ok) throw new Error("Erro ao gerar URL de upload");
+      const { uploadURL, objectPath } = await urlRes.json();
+
+      await fetch(uploadURL, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type || "image/jpeg" },
+      });
+
+      const saveRes = await apiFetch("/usuarios/me/foto-perfil", {
+        method: "PUT",
+        body: JSON.stringify({ objectPath }),
+      });
+
+      if (saveRes.ok) {
+        setSuccessMsg("Foto de perfil atualizada!");
+        await buscarFoto();
+        setFotoPreview(null);
+      } else {
+        throw new Error("Erro ao salvar foto");
+      }
+    } catch {
+      setErrorMsg("Erro ao fazer upload da foto. Tente novamente.");
+      setFotoPreview(null);
+    }
+
+    setUploadingFoto(false);
+    if (fileRef.current) fileRef.current.value = "";
+    setTimeout(() => setSuccessMsg(null), 4000);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -84,6 +143,7 @@ export default function MeuPerfilPage() {
     } finally {
       setSaving(false);
     }
+    setTimeout(() => setSuccessMsg(null), 4000);
   }
 
   const primeiroNome = (user?.nome || "Usuário").split(" ")[0];
@@ -91,6 +151,7 @@ export default function MeuPerfilPage() {
     ? Math.min(100, Math.round((progresso.xpNoNivel / progresso.xpParaProximo) * 100))
     : 0;
   const missoesConc = progresso?.missoes.filter(m => m.concluida).length ?? 0;
+  const avatarSrc = fotoPreview || fotoUrl;
 
   return (
     <div
@@ -101,18 +162,49 @@ export default function MeuPerfilPage() {
 
         {/* Profile hero */}
         <div className="flex flex-col items-center mb-8">
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
-            style={{
-              background: "linear-gradient(135deg, rgba(200,165,107,0.2), rgba(156,119,66,0.1))",
-              border: "2px solid rgba(200,165,107,0.4)",
-              boxShadow: "0 0 30px rgba(200,165,107,0.15)",
-            }}
-          >
-            <span className="font-tan-mon-cheri text-3xl" style={{ color: "#c8a56b" }}>
-              {primeiroNome[0]?.toUpperCase() ?? "U"}
-            </span>
+          <div className="relative mb-4">
+            <div
+              className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center"
+              style={{
+                background: "linear-gradient(135deg, rgba(200,165,107,0.2), rgba(156,119,66,0.1))",
+                border: "2px solid rgba(200,165,107,0.4)",
+                boxShadow: "0 0 30px rgba(200,165,107,0.15)",
+              }}
+            >
+              {uploadingFoto ? (
+                <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#c8a56b" }} />
+              ) : avatarSrc ? (
+                <img src={avatarSrc} alt="Foto de perfil" className="w-full h-full object-cover" />
+              ) : (
+                <span className="font-tan-mon-cheri text-3xl" style={{ color: "#c8a56b" }}>
+                  {primeiroNome[0]?.toUpperCase() ?? "U"}
+                </span>
+              )}
+            </div>
+
+            {/* Camera button */}
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={uploadingFoto}
+              className="absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center transition-all"
+              style={{
+                background: "linear-gradient(135deg, #c8a56b, #9c7742)",
+                border: "2px solid #130f09",
+              }}
+              title="Alterar foto"
+            >
+              <Camera className="w-3.5 h-3.5" style={{ color: "#1a1208" }} />
+            </button>
+
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFotoChange}
+              className="hidden"
+            />
           </div>
+
           <h1 className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>
             {primeiroNome}
           </h1>
@@ -129,72 +221,52 @@ export default function MeuPerfilPage() {
               </span>
             </div>
           )}
+          <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.3)" }}>
+            Toque na câmera para alterar sua foto
+          </p>
         </div>
 
         {/* Stats cards */}
         {progresso && (
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <div
-              className="rounded-2xl p-4"
-              style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.15)" }}
-            >
+            <div className="rounded-2xl p-4" style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.15)" }}>
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="w-4 h-4" style={{ color: "#c8a56b" }} />
                 <span className="text-xs" style={{ color: "rgba(200,165,107,0.6)" }}>XP Total</span>
               </div>
               <p className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>{progresso.xp}</p>
               <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(200,165,107,0.1)" }}>
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${xpPct}%`, background: "linear-gradient(90deg, #9c7742, #c8a56b)" }}
-                />
+                <div className="h-full rounded-full" style={{ width: `${xpPct}%`, background: "linear-gradient(90deg, #9c7742, #c8a56b)" }} />
               </div>
               <p className="text-[10px] mt-1" style={{ color: "rgba(247,242,236,0.3)" }}>
                 {progresso.xpNoNivel}/{progresso.xpParaProximo} XP no nível
               </p>
             </div>
 
-            <div
-              className="rounded-2xl p-4"
-              style={{ background: "rgba(232,108,43,0.07)", border: "1px solid rgba(232,108,43,0.2)" }}
-            >
+            <div className="rounded-2xl p-4" style={{ background: "rgba(232,108,43,0.07)", border: "1px solid rgba(232,108,43,0.2)" }}>
               <div className="flex items-center gap-2 mb-2">
                 <Flame className="w-4 h-4" style={{ color: "#e86c2b" }} />
                 <span className="text-xs" style={{ color: "rgba(232,108,43,0.7)" }}>Sequência</span>
               </div>
-              <p className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>
-                {progresso.streakDias} dias
-              </p>
-              <p className="text-[10px]" style={{ color: "rgba(247,242,236,0.3)" }}>
-                Melhor: {progresso.melhorStreak} dias
-              </p>
+              <p className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>{progresso.streakDias} dias</p>
+              <p className="text-[10px]" style={{ color: "rgba(247,242,236,0.3)" }}>Melhor: {progresso.melhorStreak} dias</p>
             </div>
 
-            <div
-              className="rounded-2xl p-4"
-              style={{ background: "rgba(93,185,122,0.07)", border: "1px solid rgba(93,185,122,0.2)" }}
-            >
+            <div className="rounded-2xl p-4" style={{ background: "rgba(93,185,122,0.07)", border: "1px solid rgba(93,185,122,0.2)" }}>
               <div className="flex items-center gap-2 mb-2">
                 <Target className="w-4 h-4" style={{ color: "#5db97a" }} />
                 <span className="text-xs" style={{ color: "rgba(93,185,122,0.7)" }}>Missões hoje</span>
               </div>
-              <p className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>
-                {missoesConc}/{progresso.missoes.length}
-              </p>
+              <p className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>{missoesConc}/{progresso.missoes.length}</p>
               <p className="text-[10px]" style={{ color: "rgba(247,242,236,0.3)" }}>concluídas</p>
             </div>
 
-            <div
-              className="rounded-2xl p-4"
-              style={{ background: "rgba(91,155,213,0.07)", border: "1px solid rgba(91,155,213,0.2)" }}
-            >
+            <div className="rounded-2xl p-4" style={{ background: "rgba(91,155,213,0.07)", border: "1px solid rgba(91,155,213,0.2)" }}>
               <div className="flex items-center gap-2 mb-2">
                 <Star className="w-4 h-4" style={{ color: "#5b9bd5" }} />
                 <span className="text-xs" style={{ color: "rgba(91,155,213,0.7)" }}>Próximo nível</span>
               </div>
-              <p className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>
-                {progresso.xpParaProximo - progresso.xpNoNivel}
-              </p>
+              <p className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>{progresso.xpParaProximo - progresso.xpNoNivel}</p>
               <p className="text-[10px]" style={{ color: "rgba(247,242,236,0.3)" }}>XP restantes</p>
             </div>
           </div>
@@ -202,35 +274,19 @@ export default function MeuPerfilPage() {
 
         {/* Edit form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-
-          {/* Personal data */}
-          <div
-            className="rounded-2xl p-5 space-y-4"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}
-          >
+          <div className="rounded-2xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
             <div className="flex items-center gap-2 pb-3" style={{ borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
               <User className="w-4 h-4" style={{ color: "#c8a56b" }} />
-              <span className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.6)" }}>
-                Dados Pessoais
-              </span>
+              <span className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.6)" }}>Dados Pessoais</span>
             </div>
 
             <div className="space-y-1">
-              <label className="block text-sm font-medium" style={{ color: "rgba(247,242,236,0.7)" }}>
-                Nome completo
-              </label>
+              <label className="block text-sm font-medium" style={{ color: "rgba(247,242,236,0.7)" }}>Nome completo</label>
               <input
-                type="text"
-                value={nome}
-                onChange={e => setNome(e.target.value)}
+                type="text" value={nome} onChange={e => setNome(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
-                style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(200,165,107,0.2)",
-                  color: "#f7f2ec",
-                }}
-                placeholder="Seu nome completo"
-                required
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.2)", color: "#f7f2ec" }}
+                placeholder="Seu nome completo" required
               />
             </div>
 
@@ -242,37 +298,20 @@ export default function MeuPerfilPage() {
                 </span>
               </label>
               <input
-                type="date"
-                value={dataNascimento}
-                onChange={e => setDataNascimento(e.target.value)}
+                type="date" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(200,165,107,0.2)",
-                  color: "#f7f2ec",
-                  colorScheme: "dark",
-                }}
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.2)", color: "#f7f2ec", colorScheme: "dark" }}
               />
-              <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
-                Usada para cálculos de numerologia.
-              </p>
+              <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>Usada para cálculos de numerologia.</p>
             </div>
           </div>
 
-          {/* Password */}
-          <div
-            className="rounded-2xl p-5 space-y-4"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}
-          >
+          <div className="rounded-2xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
             <div className="flex items-center gap-2 pb-3" style={{ borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
               <Lock className="w-4 h-4" style={{ color: "#c8a56b" }} />
-              <span className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.6)" }}>
-                Alterar Senha
-              </span>
+              <span className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.6)" }}>Alterar Senha</span>
             </div>
-            <p className="text-xs -mt-2" style={{ color: "rgba(247,242,236,0.3)" }}>
-              Deixe em branco para manter a senha atual.
-            </p>
+            <p className="text-xs -mt-2" style={{ color: "rgba(247,242,236,0.3)" }}>Deixe em branco para manter a senha atual.</p>
 
             {[
               { id: "senhaAtual", label: "Senha atual", val: senhaAtual, set: setSenhaAtual, auto: "current-password" },
@@ -280,49 +319,33 @@ export default function MeuPerfilPage() {
               { id: "confirmar", label: "Confirmar nova senha", val: confirmarSenha, set: setConfirmarSenha, auto: "new-password" },
             ].map(f => (
               <div key={f.id} className="space-y-1">
-                <label className="block text-sm font-medium" style={{ color: "rgba(247,242,236,0.7)" }}>
-                  {f.label}
-                </label>
+                <label className="block text-sm font-medium" style={{ color: "rgba(247,242,236,0.7)" }}>{f.label}</label>
                 <input
-                  type="password"
-                  value={f.val}
-                  onChange={e => f.set(e.target.value)}
+                  type="password" value={f.val} onChange={e => f.set(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(200,165,107,0.2)",
-                    color: "#f7f2ec",
-                  }}
-                  placeholder="••••••••"
-                  autoComplete={f.auto}
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.2)", color: "#f7f2ec" }}
+                  placeholder="••••••••" autoComplete={f.auto}
                 />
               </div>
             ))}
           </div>
 
           {successMsg && (
-            <div
-              className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"
-              style={{ background: "rgba(93,185,122,0.1)", border: "1px solid rgba(93,185,122,0.3)", color: "#5db97a" }}
-            >
-              <CheckCircle className="w-4 h-4 shrink-0" />
-              {successMsg}
+            <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"
+              style={{ background: "rgba(93,185,122,0.1)", border: "1px solid rgba(93,185,122,0.3)", color: "#5db97a" }}>
+              <CheckCircle className="w-4 h-4 shrink-0" />{successMsg}
             </div>
           )}
 
           {errorMsg && (
-            <div
-              className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"
-              style={{ background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.25)", color: "#f87171" }}
-            >
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              {errorMsg}
+            <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"
+              style={{ background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.25)", color: "#f87171" }}>
+              <AlertCircle className="w-4 h-4 shrink-0" />{errorMsg}
             </div>
           )}
 
           <button
-            type="submit"
-            disabled={saving}
+            type="submit" disabled={saving}
             className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all disabled:opacity-50"
             style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
           >

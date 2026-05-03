@@ -76,6 +76,7 @@ router.post("/login", async (req: Request, res: Response) => {
         primeiroAcesso: usuario.primeiroAcesso,
         isAdmin: usuario.isAdmin,
         dataNascimento: usuario.dataNascimento,
+        fotoPerfil: usuario.fotoPerfil,
       },
     });
   } catch (error) {
@@ -114,6 +115,7 @@ router.get("/session", async (req: Request, res: Response) => {
         primeiroAcesso: usuario.primeiroAcesso,
         isAdmin: usuario.isAdmin,
         dataNascimento: usuario.dataNascimento,
+        fotoPerfil: usuario.fotoPerfil,
       },
     });
   } catch (error) {

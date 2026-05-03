@@ -3,8 +3,10 @@ import bcrypt from "bcryptjs";
 import { db, usuariosTable, avaliacoesTable } from "@workspace/db";
 import { eq, count } from "drizzle-orm";
 import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
+import { ObjectStorageService } from "../lib/objectStorage";
 
 const router = Router();
+const objectStorage = new ObjectStorageService();
 
 function validarUsername(u: string): boolean {
   return /^[a-z0-9._-]{3,30}$/.test(u);
@@ -15,6 +17,58 @@ function validarSenha(s: string): boolean {
 function validarEmail(e: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 }
+
+// POST /api/usuarios/me/foto-perfil/upload-url — get presigned upload URL
+router.post("/me/foto-perfil/upload-url", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const uploadURL = await objectStorage.getObjectEntityUploadURL();
+    const objectPath = objectStorage.normalizeObjectEntityPath(uploadURL);
+    return res.json({ uploadURL, objectPath });
+  } catch (err) {
+    req.log.error({ err }, "Erro ao gerar URL de upload de foto");
+    return res.status(500).json({ error: "Erro ao gerar URL de upload" });
+  }
+});
+
+// PUT /api/usuarios/me/foto-perfil — save objectPath after upload
+router.put("/me/foto-perfil", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const { objectPath } = req.body as { objectPath?: string };
+    if (!objectPath?.startsWith("/objects/")) {
+      return res.status(400).json({ error: "objectPath inválido" });
+    }
+    await db.update(usuariosTable)
+      .set({ fotoPerfil: objectPath, atualizadoEm: new Date() })
+      .where(eq(usuariosTable.id, req.user!.id));
+    return res.json({ ok: true });
+  } catch (err) {
+    req.log.error({ err }, "Erro ao salvar foto de perfil");
+    return res.status(500).json({ error: "Erro ao salvar foto de perfil" });
+  }
+});
+
+// GET /api/usuarios/me/foto-perfil/view — stream profile photo
+router.get("/me/foto-perfil/view", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const [usuario] = await db
+      .select({ fotoPerfil: usuariosTable.fotoPerfil })
+      .from(usuariosTable)
+      .where(eq(usuariosTable.id, req.user!.id))
+      .limit(1);
+
+    if (!usuario?.fotoPerfil) return res.status(404).json({ error: "Sem foto de perfil" });
+
+    const file = await objectStorage.getObjectEntityFile(usuario.fotoPerfil);
+    const response = await objectStorage.downloadObject(file, 3600);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    res.set("Content-Type", response.headers.get("content-type") || "image/jpeg");
+    res.set("Cache-Control", "private, max-age=3600");
+    return res.send(buffer);
+  } catch (err) {
+    req.log.error({ err }, "Erro ao carregar foto de perfil");
+    return res.status(404).json({ error: "Foto não encontrada" });
+  }
+});
 
 // PUT /api/usuarios/me — update own profile (name, birth date, password)
 router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {

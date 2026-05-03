@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { Home, Target, Hash, History, Shield, LogOut, UserCircle, Layers, Map, Flame } from "lucide-react";
+import { Home, Target, Hash, History, Shield, LogOut, UserCircle, Layers, Map, Flame, Users2, GraduationCap } from "lucide-react";
 
 export default function SiteHeader() {
   const [location, navigate] = useLocation();
@@ -13,13 +13,15 @@ export default function SiteHeader() {
   const primeiroNome = (user.nome || "Usuário").split(" ")[0];
 
   const links = [
-    { href: "/dashboard",        label: "Início",      icon: Home    },
-    { href: "/jornada",          label: "Jornada",     icon: Map     },
-    { href: "/missoes",          label: "Missões",     icon: Flame   },
-    { href: "/avaliacao",        label: "Avaliação",   icon: Target  },
-    { href: "/numerologia",      label: "Numerologia", icon: Hash    },
-    { href: "/traco-de-carater", label: "Traço",       icon: Layers  },
-    { href: "/historico",        label: "Histórico",   icon: History },
+    { href: "/dashboard",        label: "Início",      icon: Home       },
+    { href: "/comunidade",       label: "Comunidade",  icon: Users2     },
+    { href: "/cursos",           label: "Cursos",      icon: GraduationCap },
+    { href: "/jornada",          label: "Jornada",     icon: Map        },
+    { href: "/missoes",          label: "Missões",     icon: Flame      },
+    { href: "/avaliacao",        label: "Avaliação",   icon: Target     },
+    { href: "/numerologia",      label: "Numerologia", icon: Hash       },
+    { href: "/traco-de-carater", label: "Traço",       icon: Layers     },
+    { href: "/historico",        label: "Histórico",   icon: History    },
   ];
 
   const handleLogout = () => {
@@ -44,7 +46,7 @@ export default function SiteHeader() {
           {/* Brand */}
           <button
             onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-3 group"
+            className="flex items-center gap-3 group shrink-0"
           >
             <div
               className="w-px h-6 transition-opacity group-hover:opacity-100 opacity-60"
@@ -59,7 +61,7 @@ export default function SiteHeader() {
           </button>
 
           {/* Desktop nav */}
-          <nav className="flex items-center gap-0.5">
+          <nav className="flex items-center gap-0.5 overflow-x-auto">
             {links.map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
               return (
@@ -67,7 +69,7 @@ export default function SiteHeader() {
                   key={href}
                   type="button"
                   onClick={() => navigate(href)}
-                  className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all rounded-lg"
+                  className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all rounded-lg shrink-0"
                   style={{ color: active ? "#c8a56b" : "rgba(247,242,236,0.45)" }}
                   onMouseEnter={e => {
                     if (!active) (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.8)";
@@ -91,7 +93,7 @@ export default function SiteHeader() {
               <button
                 type="button"
                 onClick={() => navigate("/admin")}
-                className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all rounded-lg ml-1"
+                className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all rounded-lg ml-1 shrink-0"
                 style={{
                   color: location.startsWith("/admin") ? "#c8a56b" : "rgba(200,165,107,0.45)",
                   border: "1px solid rgba(200,165,107,0.2)",
@@ -114,7 +116,7 @@ export default function SiteHeader() {
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => navigate("/perfil")}
               className="flex items-center gap-2 rounded-lg px-2 py-1 transition-all"

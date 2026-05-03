@@ -1,13 +1,13 @@
 import { useLocation } from "wouter";
-import { Home, Map, Flame, LayoutGrid, User } from "lucide-react";
+import { Home, Map, Users2, GraduationCap, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const ITEMS = [
-  { href: "/dashboard", label: "Início",   icon: Home },
-  { href: "/jornada",   label: "Jornada",  icon: Map },
-  { href: "/missoes",   label: "Missões",  icon: Flame },
-  { href: "/avaliacao", label: "Avaliar",  icon: LayoutGrid },
-  { href: "/perfil",    label: "Perfil",   icon: User },
+  { href: "/dashboard",   label: "Início",     icon: Home },
+  { href: "/comunidade",  label: "Comunidade", icon: Users2 },
+  { href: "/cursos",      label: "Cursos",     icon: GraduationCap },
+  { href: "/jornada",     label: "Jornada",    icon: Map },
+  { href: "/perfil",      label: "Perfil",     icon: User },
 ];
 
 export default function BottomNav() {
@@ -36,12 +36,12 @@ export default function BottomNav() {
             <button
               key={href}
               onClick={() => navigate(href)}
-              className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all relative"
-              style={{ minWidth: 52 }}
+              className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-all relative"
+              style={{ minWidth: 48 }}
             >
               {active && (
                 <span
-                  className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
+                  className="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full"
                   style={{ background: "#c8a56b" }}
                 />
               )}
@@ -50,7 +50,7 @@ export default function BottomNav() {
                 style={{ color: active ? "#c8a56b" : "rgba(247,242,236,0.3)", strokeWidth: active ? 2.2 : 1.6 }}
               />
               <span
-                className="text-[10px] font-medium tracking-wide transition-all"
+                className="text-[9px] font-medium tracking-wide transition-all"
                 style={{ color: active ? "#c8a56b" : "rgba(247,242,236,0.3)" }}
               >
                 {label}

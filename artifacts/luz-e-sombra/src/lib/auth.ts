@@ -6,6 +6,7 @@ export interface User {
   primeiroAcesso: boolean;
   isAdmin: boolean;
   dataNascimento: string | null;
+  fotoPerfil: string | null;
 }
 
 const TOKEN_KEY = "luz_e_sombra_token";
