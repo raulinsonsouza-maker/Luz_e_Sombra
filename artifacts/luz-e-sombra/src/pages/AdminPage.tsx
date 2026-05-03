@@ -125,7 +125,7 @@ export default function AdminPage() {
         </div>
 
         {/* Tab bar */}
-        <div className="max-w-7xl mx-auto px-5 flex overflow-x-auto">
+        <div className="max-w-7xl mx-auto px-5 flex overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => setAba(key)}
               className="flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all shrink-0 relative"

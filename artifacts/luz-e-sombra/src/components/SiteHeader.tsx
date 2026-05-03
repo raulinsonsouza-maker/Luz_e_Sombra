@@ -43,7 +43,7 @@ export default function SiteHeader() {
       }}
     >
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-14">
+        <div className="flex items-center justify-between gap-3 h-14 min-h-14">
 
           {/* Brand */}
           <button
@@ -62,8 +62,11 @@ export default function SiteHeader() {
             </span>
           </button>
 
-          {/* Desktop nav */}
-          <nav className="flex items-center gap-0.5 overflow-x-auto">
+          {/* Desktop nav: overflow-x sem faixa branca do scrollbar nativo (scroll ainda funciona) */}
+          <nav
+            className="flex min-w-0 flex-1 items-center justify-center gap-0.5 overflow-x-auto overscroll-x-contain px-1
+              [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
             {links.map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
               return (
