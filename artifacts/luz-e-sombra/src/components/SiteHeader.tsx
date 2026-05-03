@@ -6,13 +6,13 @@ import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
 export default function SiteHeader() {
   const [location, navigate] = useLocation();
   const { user, status, logout } = useAuth();
+  const { count: notiCount } = useNotificacoesCount();
 
   const isPublicPage = location === "/" || location === "/login" || location === "/admin/login";
   if (isPublicPage || status !== "authenticated" || !user) return null;
 
   const isAdmin = Boolean(user.isAdmin);
   const primeiroNome = (user.nome || "Usuário").split(" ")[0];
-  const { count: notiCount } = useNotificacoesCount();
 
   const links = [
     { href: "/dashboard",        label: "Início",      icon: Home       },
