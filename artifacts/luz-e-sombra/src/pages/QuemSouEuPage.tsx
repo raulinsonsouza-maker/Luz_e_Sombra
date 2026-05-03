@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import { profilePhotoViewResponseIsImageBody } from "@/lib/profilePhotoView";
 import {
   calcularNumerodeVida,
   calcularNumerodeExpressao,
@@ -559,9 +560,9 @@ export default function QuemSouEuPage() {
         const lista = await avaliacaoRes.json();
         if (lista.length > 0) setAvaliacao(lista[0] as Avaliacao);
       }
-      if (fotoRes.ok && fotoRes.headers.get("content-type")?.startsWith("image/")) {
+      if (profilePhotoViewResponseIsImageBody(fotoRes)) {
         const blob = await fotoRes.blob();
-        setFotoUrl(URL.createObjectURL(blob));
+        if (blob.size > 0) setFotoUrl(URL.createObjectURL(blob));
       }
     } catch { /* silent */ }
     setLoading(false);

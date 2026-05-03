@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import { profilePhotoViewResponseIsImageBody } from "@/lib/profilePhotoView";
 import {
   User, Calendar, Lock, CheckCircle, AlertCircle, Zap, Flame, Target,
   Star, Camera, Loader2, Sparkles, ArrowRight, Edit2, X, Save, KeyRound,
@@ -54,6 +55,13 @@ export default function MeuPerfilPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    return () => {
+      if (fotoUrl?.startsWith("blob:")) URL.revokeObjectURL(fotoUrl);
+      if (fotoPreview?.startsWith("blob:")) URL.revokeObjectURL(fotoPreview);
+    };
+  }, [fotoUrl, fotoPreview]);
+
+  useEffect(() => {
     buscarProgresso();
     buscarFoto();
   }, []);
@@ -76,17 +84,21 @@ export default function MeuPerfilPage() {
   async function buscarFoto() {
     try {
       const res = await apiFetch("/usuarios/me/foto-perfil/view");
-      if (res.ok && res.headers.get("content-type")?.startsWith("image/")) {
-        const blob = await res.blob();
-        setFotoUrl(URL.createObjectURL(blob));
-      }
+      if (!profilePhotoViewResponseIsImageBody(res)) return;
+      const blob = await res.blob();
+      if (blob.size === 0) return;
+      setFotoUrl((prev) => {
+        if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(blob);
+      });
     } catch {}
   }
 
   async function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setFotoPreview(URL.createObjectURL(file));
+    const previewBlobUrl = URL.createObjectURL(file);
+    setFotoPreview(previewBlobUrl);
     setUploadingFoto(true);
     setErrorMsg(null);
     try {
@@ -95,9 +107,18 @@ export default function MeuPerfilPage() {
       const { uploadURL, objectPath } = await urlRes.json();
       await fetch(uploadURL, { method: "PUT", body: file, headers: { "Content-Type": file.type || "image/jpeg" } });
       const saveRes = await apiFetch("/usuarios/me/foto-perfil", { method: "PUT", body: JSON.stringify({ objectPath }) });
-      if (saveRes.ok) { showSuccess("Foto de perfil atualizada!"); await buscarFoto(); setFotoPreview(null); }
-      else throw new Error();
-    } catch { setErrorMsg("Erro ao fazer upload da foto. Tente novamente."); setFotoPreview(null); }
+      if (saveRes.ok) {
+        updateUser({ fotoPerfil: objectPath });
+        showSuccess("Foto de perfil atualizada!");
+        await buscarFoto();
+        URL.revokeObjectURL(previewBlobUrl);
+        setFotoPreview(null);
+      } else throw new Error();
+    } catch {
+      setErrorMsg("Erro ao fazer upload da foto. Tente novamente.");
+      URL.revokeObjectURL(previewBlobUrl);
+      setFotoPreview(null);
+    }
     setUploadingFoto(false);
     if (fileRef.current) fileRef.current.value = "";
   }
