@@ -245,8 +245,11 @@ export default function TracodeCaraterPage() {
   const [novaNome, setNovaNome] = useState("");
   const [novaRelacao, setNovaRelacao] = useState("parceiro/a");
   const [addingPessoa, setAddingPessoa] = useState(false);
+  /** Evita redirecionar para o questionário antes de saber se já existe análise no servidor. */
+  const [tracoDadosCarregados, setTracoDadosCarregados] = useState(false);
 
   async function carregarDados(pessoaId: number | null) {
+    setTracoDadosCarregados(false);
     try {
       const q = pessoaId !== null ? `?pessoaId=${pessoaId}` : "";
       const [fotosRes, analiseRes] = await Promise.all([
@@ -280,6 +283,9 @@ export default function TracodeCaraterPage() {
         setAnalise(null);
       }
     } catch { /* silently ignore */ }
+    finally {
+      setTracoDadosCarregados(true);
+    }
   }
 
   useEffect(() => {
@@ -362,7 +368,8 @@ export default function TracodeCaraterPage() {
 
   const handleAnalisar = async () => {
     const q20Check = readQuestionario20Respostas();
-    if (!q20Check) {
+    const podeAnalisarSoFotos = !!(analise?.resultado?.estruturas && analise?.resultado?.estruturaPrincipal);
+    if (!q20Check && !podeAnalisarSoFotos) {
       setLocation("/diagnostico-eixos");
       return;
     }
@@ -414,13 +421,8 @@ export default function TracodeCaraterPage() {
       }
       const data: AnaliseTraco = await saveRes.json();
       setAnalise(data);
-      if (q20) {
-        try {
-          localStorage.removeItem(STORAGE_Q20);
-        } catch {
-          // ignore
-        }
-      }
+      // Não apagar o questionário aqui: a página exige Q20 no localStorage até haver outra fonte de verdade;
+      // apagar fazia o próximo render redirecionar de volta para /diagnostico-eixos. O utilizador limpa em "Refazer as 20 reflexões".
       setTimeout(() => {
         document.getElementById("resultado-traco")?.scrollIntoView({ behavior: "smooth" });
       }, 200);
@@ -465,7 +467,10 @@ export default function TracodeCaraterPage() {
 
   const fotosCount = Object.keys(fotos).length;
   const questionario20Pronto = readQuestionario20Respostas() !== undefined;
-  if (!questionario20Pronto) {
+  const jaTemAnaliseSalva = !!(analise?.resultado?.estruturas && analise?.resultado?.estruturaPrincipal);
+  const precisaIrAoQuestionario =
+    tracoDadosCarregados && !questionario20Pronto && !jaTemAnaliseSalva;
+  if (precisaIrAoQuestionario) {
     return <Redirect to="/diagnostico-eixos" />;
   }
 
