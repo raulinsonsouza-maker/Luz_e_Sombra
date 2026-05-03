@@ -2,6 +2,7 @@ import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
+import uploadsRouter from "./routes/uploads";
 import { logger } from "./lib/logger";
 
 const app: Express = express();
@@ -25,7 +26,13 @@ app.use(
     },
   }),
 );
-app.use(cors());
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean)
+  : [];
+app.use(cors({
+  origin: corsOrigins.length === 0 ? true : corsOrigins,
+}));
+app.use("/api/uploads", express.raw({ type: "*/*", limit: "20mb" }), uploadsRouter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
