@@ -1,3 +1,22 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+  <rect width="180" height="180" rx="38" fill="#130f09"/>
+  <rect x="1.5" y="1.5" width="177" height="177" rx="36.5" stroke="url(#border)" stroke-width="3"/>
+  <rect x="8" y="8" width="164" height="164" rx="30" fill="url(#innerBg)"/>
+  <text x="89" y="118" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="700" letter-spacing="-3" fill="url(#goldGrad)">SL</text>
+  <defs>
+    <linearGradient id="border" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#c8a56b" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#9c7742" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#c8a56b" stop-opacity="0.6"/>
+    </linearGradient>
+    <linearGradient id="innerBg" x1="0" y1="0" x2="164" y2="164" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e1812"/>
+      <stop offset="100%" stop-color="#2f251b"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="40" y1="55" x2="140" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#d4b87a"/>
+      <stop offset="60%" stop-color="#c8a56b"/>
+      <stop offset="100%" stop-color="#9c7742"/>
+    </linearGradient>
+  </defs>
 </svg>

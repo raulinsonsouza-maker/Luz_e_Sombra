@@ -3,12 +3,31 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import {
   Users, Plus, Edit2, Trash2, Check, X, Loader2, Search, CheckCircle, AlertCircle,
-  MessageSquare, GraduationCap, FileText, Youtube, ImageIcon, BookOpen, ChevronDown, ChevronUp, Eye, EyeOff
+  MessageSquare, GraduationCap, FileText, Youtube, ImageIcon, BookOpen,
+  ChevronDown, ChevronUp, Eye, EyeOff, LayoutDashboard, Shield, TrendingUp,
+  UserCheck, Layers, Heart, Flame, Sparkles, Star, Sun, type LucideIcon,
 } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// ── Design tokens ──────────────────────────────────────────────────────────────
+const BG = "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)";
+const CARD: React.CSSProperties = { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" };
+const CARD_S: React.CSSProperties = { background: "rgba(200,165,107,0.05)", border: "1.5px solid rgba(200,165,107,0.2)" };
+const INPUT_ST: React.CSSProperties = { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(200,165,107,0.25)", color: "#f7f2ec" };
+const SELECT_ST: React.CSSProperties = { background: "#1e1812", border: "1px solid rgba(200,165,107,0.25)", color: "#f7f2ec" };
+const C = { text: "#f7f2ec", muted: "rgba(247,242,236,0.45)", gold: "#c8a56b", bronze: "#9c7742", dim: "rgba(247,242,236,0.25)" };
+const OPT: React.CSSProperties = { background: "#1e1812" };
 
+// ── Reaction config ────────────────────────────────────────────────────────────
+const REACTIONS: { key: string; icon: LucideIcon; color: string; label: string }[] = [
+  { key: "❤️", icon: Heart,    color: "#e85555", label: "Amor" },
+  { key: "🔥", icon: Flame,    color: "#e86c2b", label: "Fogo" },
+  { key: "💫", icon: Sparkles, color: "#c8a56b", label: "Magia" },
+  { key: "🙏", icon: Sun,      color: "#f0c040", label: "Gratidão" },
+  { key: "✨", icon: Star,     color: "#c8a56b", label: "Inspiração" },
+];
+
+// ── Types ──────────────────────────────────────────────────────────────────────
 interface Usuario {
   id: number; username: string; nome: string; email: string | null;
   dataNascimento: string | null; primeiroAcesso: boolean; ativo: boolean;
@@ -21,7 +40,6 @@ interface Post {
   id: number; tipo: string; conteudo: string; mediaUrl: string | null; criadoEm: string;
   autorNome: string; reacoes: Record<string, number>;
 }
-
 interface Aula {
   id: number; titulo: string; descricao: string | null; videoUrl: string | null;
   conteudo: string | null; ordem: number; duracaoMin: number | null;
@@ -32,17 +50,17 @@ interface Curso {
   aulasCount: number; aulasConcluidasCount: number;
 }
 interface CursoDetalhe extends Curso { aulas: Aula[] }
-
-type Tab = "usuarios" | "comunidade" | "cursos";
-
-const EMOJIS_VALIDOS = ["❤️", "🔥", "💫", "🙏", "✨"];
+interface Stats {
+  usuarios: { total: number; ativos: number };
+  posts: number; reacoes: number; cursos: number; analiseTraco: number;
+}
+type Tab = "dashboard" | "usuarios" | "comunidade" | "cursos";
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-
 export default function AdminPage() {
   const [, navigate] = useLocation();
   const { user, status } = useAuth();
-  const [aba, setAba] = useState<Tab>("usuarios");
+  const [aba, setAba] = useState<Tab>("dashboard");
   const [mensagem, setMensagem] = useState<{ tipo: "sucesso" | "erro"; texto: string } | null>(null);
 
   useEffect(() => {
@@ -52,68 +70,183 @@ export default function AdminPage() {
 
   function showMsg(tipo: "sucesso" | "erro", texto: string) {
     setMensagem({ tipo, texto });
-    setTimeout(() => setMensagem(null), 4000);
+    setTimeout(() => setMensagem(null), 4500);
   }
 
   if (status === "loading") {
-    return <div className="luxury-shell flex items-center justify-center"><Loader2 className="w-10 h-10 text-brand-bronze animate-spin" /></div>;
+    return (
+      <div style={{ background: BG, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Loader2 className="w-10 h-10 animate-spin" style={{ color: C.gold }} />
+      </div>
+    );
   }
 
-  const tabBtn = (t: Tab, label: string, Icon: React.ElementType) => (
-    <button
-      onClick={() => setAba(t)}
-      className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
-      style={aba === t
-        ? { background: "rgba(200,165,107,0.15)", color: "#9c7742", border: "1.5px solid rgba(200,165,107,0.35)" }
-        : { background: "transparent", color: "#7a6040", border: "1.5px solid transparent" }
-      }
-    >
-      <Icon className="w-4 h-4" />
-      {label}
-    </button>
+  const TABS: { key: Tab; label: string; icon: LucideIcon }[] = [
+    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { key: "usuarios", label: "Usuários", icon: Users },
+    { key: "comunidade", label: "Comunidade", icon: MessageSquare },
+    { key: "cursos", label: "Cursos", icon: GraduationCap },
+  ];
+
+  return (
+    <div style={{ background: BG, minHeight: "100vh" }}>
+      {/* Sticky header + nav */}
+      <div className="sticky top-0 z-20 backdrop-blur-md" style={{ borderBottom: "1px solid rgba(200,165,107,0.12)", background: "rgba(19,15,9,0.9)" }}>
+        <div className="max-w-7xl mx-auto px-5 pt-3 flex items-center justify-between gap-4">
+          {/* Brand */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl font-tan-mon-cheri text-sm"
+              style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.15), rgba(156,119,66,0.05))", border: "1px solid rgba(200,165,107,0.3)", color: C.gold, letterSpacing: "0.04em" }}>
+              SL
+            </div>
+            <div className="hidden sm:block">
+              <p className="text-xs tracking-[0.2em] uppercase leading-none mb-0.5" style={{ color: "rgba(200,165,107,0.45)" }}>Painel</p>
+              <h1 className="font-tan-mon-cheri text-lg leading-none" style={{ color: C.gold }}>Administração</h1>
+            </div>
+          </div>
+
+          {/* Toast */}
+          {mensagem && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium flex-1 justify-center"
+              style={mensagem.tipo === "sucesso"
+                ? { background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)", color: "#4ade80" }
+                : { background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)", color: "#f87171" }}>
+              {mensagem.tipo === "sucesso" ? <CheckCircle className="w-3.5 h-3.5 shrink-0" /> : <AlertCircle className="w-3.5 h-3.5 shrink-0" />}
+              <span className="truncate">{mensagem.texto}</span>
+            </div>
+          )}
+
+          {/* User */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl shrink-0"
+            style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.15)" }}>
+            <Shield className="w-3.5 h-3.5" style={{ color: C.bronze }} />
+            <span className="text-xs" style={{ color: C.muted }}>{user?.nome?.split(" ")[0] || user?.username}</span>
+          </div>
+        </div>
+
+        {/* Tab bar */}
+        <div className="max-w-7xl mx-auto px-5 flex overflow-x-auto">
+          {TABS.map(({ key, label, icon: Icon }) => (
+            <button key={key} onClick={() => setAba(key)}
+              className="flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all shrink-0 relative"
+              style={{ color: aba === key ? C.gold : "rgba(247,242,236,0.3)" }}>
+              <Icon className="w-4 h-4" />
+              <span className="hidden sm:inline">{label}</span>
+              {aba === key && <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-t-full" style={{ background: C.gold }} />}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Page content */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {aba === "dashboard"  && <DashboardTab />}
+        {aba === "usuarios"   && <UsuariosTab showMsg={showMsg} />}
+        {aba === "comunidade" && <ComunidadeTab showMsg={showMsg} />}
+        {aba === "cursos"     && <CursosTab showMsg={showMsg} />}
+      </div>
+    </div>
+  );
+}
+
+// ── Dashboard Tab ──────────────────────────────────────────────────────────────
+function DashboardTab() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [recentUsers, setRecentUsers] = useState<Usuario[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [sr, ur] = await Promise.all([apiFetch("/usuarios/stats"), apiFetch("/usuarios")]);
+        if (sr.ok) setStats(await sr.json());
+        if (ur.ok) { const all: Usuario[] = await ur.json(); setRecentUsers(all.slice(0, 6)); }
+      } catch {}
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const statCards = stats ? [
+    { label: "Total de Usuários", value: stats.usuarios.total, sub: `${stats.usuarios.ativos} ativos`, Icon: Users, color: "#c8a56b" },
+    { label: "Usuários Ativos", value: stats.usuarios.ativos, sub: `${Math.round((stats.usuarios.ativos / Math.max(stats.usuarios.total, 1)) * 100)}% do total`, Icon: UserCheck, color: "#4ade80" },
+    { label: "Publicações", value: stats.posts, sub: "na comunidade", Icon: MessageSquare, color: "#60a5fa" },
+    { label: "Reações", value: stats.reacoes, sub: "em publicações", Icon: Heart, color: "#e85555" },
+    { label: "Cursos", value: stats.cursos, sub: "criados", Icon: GraduationCap, color: "#a78bfa" },
+    { label: "Análises Traço", value: stats.analiseTraco, sub: "concluídas", Icon: Layers, color: "#9c7742" },
+  ] : [];
+
+  if (loading) return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {[...Array(6)].map((_, i) => <div key={i} className="h-28 rounded-2xl animate-pulse" style={{ background: "rgba(200,165,107,0.05)" }} />)}
+      </div>
+    </div>
   );
 
   return (
-    <div className="luxury-shell py-8 px-4">
-      <div className="max-w-7xl mx-auto space-y-5">
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs tracking-[0.25em] uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>Visão Geral</p>
+        <h2 className="font-tan-mon-cheri text-3xl md:text-4xl" style={{ color: C.text }}>Dashboard</h2>
+      </div>
 
-        {mensagem && (
-          <div className="flex items-center gap-3 p-4 rounded-xl"
-            style={mensagem.tipo === "sucesso"
-              ? { background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.25)" }
-              : { background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)" }}>
-            {mensagem.tipo === "sucesso"
-              ? <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-              : <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />}
-            <p className={`text-sm font-medium ${mensagem.tipo === "sucesso" ? "text-green-700" : "text-red-700"}`}>
-              {mensagem.texto}
-            </p>
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {statCards.map(({ label, value, sub, Icon, color }) => (
+          <div key={label} className="p-5 rounded-2xl" style={CARD_S}>
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${color}18` }}>
+                <Icon className="w-5 h-5" style={{ color }} />
+              </div>
+              <TrendingUp className="w-3.5 h-3.5 mt-1.5" style={{ color: "rgba(200,165,107,0.25)" }} />
+            </div>
+            <p className="font-tan-mon-cheri text-3xl mb-0.5" style={{ color: C.text }}>{value.toLocaleString("pt-BR")}</p>
+            <p className="text-xs font-semibold mb-0.5" style={{ color: C.gold }}>{label}</p>
+            <p className="text-xs" style={{ color: C.muted }}>{sub}</p>
           </div>
-        )}
+        ))}
+      </div>
 
-        {/* Header */}
-        <div className="luxury-card-strong p-6 md:p-8">
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-1">Painel</p>
-          <h1 className="font-tan-mon-cheri text-4xl md:text-5xl text-brand-dark">Administração</h1>
+      {/* Recent users */}
+      <div className="rounded-2xl overflow-hidden" style={CARD_S}>
+        <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
+          <p className="text-xs tracking-[0.2em] uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>Usuários</p>
+          <h3 className="font-semibold" style={{ color: C.text }}>Cadastros Recentes</h3>
         </div>
-
-        {/* Tabs */}
-        <div className="luxury-card-strong p-3 flex gap-2 flex-wrap">
-          {tabBtn("usuarios", "Usuários", Users)}
-          {tabBtn("comunidade", "Comunidade", MessageSquare)}
-          {tabBtn("cursos", "Cursos", GraduationCap)}
-        </div>
-
-        {aba === "usuarios" && <UsuariosTab showMsg={showMsg} />}
-        {aba === "comunidade" && <ComunidadeTab showMsg={showMsg} />}
-        {aba === "cursos" && <CursosTab showMsg={showMsg} />}
+        {recentUsers.length === 0
+          ? <p className="text-center py-8 text-sm" style={{ color: C.muted }}>Nenhum usuário ainda.</p>
+          : recentUsers.map((u, i) => (
+            <div key={u.id} className="flex items-center justify-between gap-3 px-6 py-3.5"
+              style={{ borderTop: i > 0 ? "1px solid rgba(200,165,107,0.07)" : undefined }}>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                  style={{ background: "rgba(200,165,107,0.12)", color: C.gold, border: "1px solid rgba(200,165,107,0.2)" }}>
+                  {u.nome?.[0]?.toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-sm font-medium" style={{ color: C.text }}>{u.nome}</p>
+                  <p className="text-xs" style={{ color: C.muted }}>@{u.username}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-0.5 rounded-full"
+                  style={u.ativo
+                    ? { background: "rgba(74,222,128,0.09)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.2)" }
+                    : { background: "rgba(248,113,113,0.09)", color: "#f87171", border: "1px solid rgba(248,113,113,0.2)" }}>
+                  {u.ativo ? "Ativo" : "Inativo"}
+                </span>
+                <span className="text-xs hidden sm:inline" style={{ color: C.dim }}>{u._count.avaliacoes} avaliações</span>
+              </div>
+            </div>
+          ))
+        }
       </div>
     </div>
   );
 }
 
 // ── Usuários Tab ───────────────────────────────────────────────────────────────
-
 function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) => void }) {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -130,10 +263,7 @@ function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string
 
   async function buscarUsuarios() {
     setCarregando(true);
-    try {
-      const res = await apiFetch("/usuarios");
-      if (res.ok) setUsuarios(await res.json());
-    } catch {}
+    try { const res = await apiFetch("/usuarios"); if (res.ok) setUsuarios(await res.json()); } catch {}
     setCarregando(false);
   }
 
@@ -178,7 +308,7 @@ function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string
       const res = await apiFetch(`/usuarios/${id}`, { method: "DELETE" });
       if (res.ok) { showMsg("sucesso", "Usuário deletado!"); setUsuarioParaDeletar(null); buscarUsuarios(); }
       else { const data = await res.json(); showMsg("erro", data.error || "Erro ao deletar"); }
-    } catch { showMsg("erro", "Erro ao deletar usuário"); }
+    } catch { showMsg("erro", "Erro ao deletar"); }
   }
 
   const usuariosFiltrados = usuarios.filter(u =>
@@ -188,119 +318,191 @@ function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string
   const pagina = Math.min(paginaAtual, totalPaginas);
   const usuariosPaginados = usuariosFiltrados.slice((pagina - 1) * itensPorPagina, pagina * itensPorPagina);
 
-  const inputClass = "w-full px-4 py-2.5 rounded-xl text-sm text-brand-dark outline-none transition-all disabled:opacity-50";
-  const inputStyle = { border: "1.5px solid rgba(200,165,107,0.35)", background: "#fff" };
+  const ic = "w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all disabled:opacity-50";
 
-  if (carregando) return <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 text-brand-bronze animate-spin" /></div>;
+  if (carregando) return <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin" style={{ color: C.gold }} /></div>;
 
   return (
     <>
-      <div className="luxury-card-strong p-4 flex items-center justify-between gap-4 flex-wrap">
-        <div className="relative max-w-sm flex-1">
-          <Search className="w-4 h-4 text-brand-medium absolute left-3 top-1/2 -translate-y-1/2" />
-          <input value={busca} onChange={e => { setBusca(e.target.value); setPaginaAtual(1); }} className="luxury-input pl-9" placeholder="Buscar usuário, nome ou email" />
+      <div className="space-y-4">
+        {/* Search + new */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-48">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: C.muted }} />
+            <input value={busca} onChange={e => { setBusca(e.target.value); setPaginaAtual(1); }}
+              className={`${ic} pl-9`} style={INPUT_ST} placeholder="Buscar usuário, nome ou email" />
+          </div>
+          <button onClick={() => setMostrarModal(true)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+            style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
+            <Plus className="w-4 h-4" /> Novo Usuário
+          </button>
         </div>
-        <button onClick={() => setMostrarModal(true)} className="luxury-btn-primary"><Plus className="w-4 h-4" /> Novo Usuário</button>
-      </div>
 
-      <div className="luxury-card-strong overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr style={{ background: "rgba(200,165,107,0.06)", borderBottom: "1px solid rgba(200,165,107,0.15)" }}>
-                {["Usuário", "Nome", "Email", "Aval.", "Status", "Role", "Ações"].map(h => (
-                  <th key={h} className={`px-6 py-4 text-xs font-semibold tracking-widest uppercase text-brand-medium ${["Aval.", "Status", "Role", "Ações"].includes(h) ? "text-center" : "text-left"}`}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {usuariosPaginados.map((u, i) => (
-                <tr key={u.id} className="transition-colors" style={{ borderTop: i > 0 ? "1px solid rgba(200,165,107,0.1)" : undefined }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(200,165,107,0.03)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
-                  <td className="px-6 py-4"><div className="font-medium text-brand-dark text-sm">{u.username}</div></td>
-                  <td className="px-6 py-4 text-brand-darker text-sm">{u.nome}</td>
-                  <td className="px-6 py-4 text-brand-medium text-xs">{u.email || "—"}</td>
-                  <td className="px-6 py-4 text-center"><span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold" style={{ background: "rgba(200,165,107,0.12)", color: "#5f4a2f" }}>{u._count.avaliacoes}</span></td>
-                  <td className="px-6 py-4 text-center">
-                    <button onClick={() => toggleAtivo(u)} className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-colors"
-                      style={u.ativo ? { background: "rgba(34,197,94,0.08)", color: "#15803d", border: "1px solid rgba(34,197,94,0.2)" } : { background: "rgba(239,68,68,0.06)", color: "#dc2626", border: "1px solid rgba(239,68,68,0.2)" }}>
-                      {u.ativo ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
-                      {u.ativo ? "Ativo" : "Inativo"}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {u.isAdmin ? <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold" style={{ background: "rgba(200,165,107,0.15)", color: "#9c7742", border: "1px solid rgba(200,165,107,0.3)" }}>Admin</span>
-                      : <span className="text-brand-medium text-xs opacity-40">—</span>}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => abrirEdicao(u)} className="p-2 rounded-lg hover:bg-brand-gold/15 text-brand-bronze"><Edit2 className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => setUsuarioParaDeletar(u)} className="p-2 rounded-lg hover:bg-red-50 text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
-                    </div>
-                  </td>
+        {/* Table */}
+        <div className="rounded-2xl overflow-hidden" style={CARD_S}>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr style={{ background: "rgba(200,165,107,0.05)", borderBottom: "1px solid rgba(200,165,107,0.12)" }}>
+                  {["Usuário / Nome", "Email", "Aval.", "Status", "Role", "Ações"].map(h => (
+                    <th key={h} className={`px-5 py-4 text-xs font-semibold tracking-widest uppercase ${["Aval.", "Status", "Role", "Ações"].includes(h) ? "text-center" : "text-left"}`}
+                      style={{ color: "rgba(200,165,107,0.6)" }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {usuariosFiltrados.length === 0 && (
-            <div className="text-center py-12"><Users className="w-10 h-10 text-brand-medium mx-auto mb-3 opacity-20" /><p className="text-brand-medium text-sm">Nenhum usuário encontrado</p></div>
-          )}
-        </div>
-      </div>
-
-      {totalPaginas > 1 && (
-        <div className="flex items-center justify-between luxury-card p-3">
-          <p className="text-xs text-brand-medium">Página {pagina} de {totalPaginas}</p>
-          <div className="flex gap-2">
-            <button onClick={() => setPaginaAtual(p => Math.max(1, p - 1))} disabled={pagina === 1} className="luxury-btn-secondary px-3 py-1.5 text-sm disabled:opacity-40">Anterior</button>
-            <button onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas} className="luxury-btn-secondary px-3 py-1.5 text-sm disabled:opacity-40">Próxima</button>
+              </thead>
+              <tbody>
+                {usuariosPaginados.map((u, i) => (
+                  <tr key={u.id}
+                    style={{ borderTop: i > 0 ? "1px solid rgba(200,165,107,0.07)" : undefined }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(200,165,107,0.04)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                    <td className="px-5 py-4">
+                      <p className="text-sm font-medium" style={{ color: C.text }}>{u.nome}</p>
+                      <p className="text-xs" style={{ color: C.muted }}>@{u.username}</p>
+                    </td>
+                    <td className="px-5 py-4 text-xs" style={{ color: C.muted }}>{u.email || "—"}</td>
+                    <td className="px-5 py-4 text-center">
+                      <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                        style={{ background: "rgba(200,165,107,0.1)", color: C.gold }}>
+                        {u._count.avaliacoes}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-center">
+                      <button onClick={() => toggleAtivo(u)}
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-colors"
+                        style={u.ativo
+                          ? { background: "rgba(74,222,128,0.09)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.2)" }
+                          : { background: "rgba(248,113,113,0.09)", color: "#f87171", border: "1px solid rgba(248,113,113,0.2)" }}>
+                        {u.ativo ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                        {u.ativo ? "Ativo" : "Inativo"}
+                      </button>
+                    </td>
+                    <td className="px-5 py-4 text-center">
+                      {u.isAdmin
+                        ? <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold" style={{ background: "rgba(200,165,107,0.12)", color: C.gold, border: "1px solid rgba(200,165,107,0.25)" }}>Admin</span>
+                        : <span style={{ color: C.dim }} className="text-xs">—</span>}
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center justify-center gap-1">
+                        <button onClick={() => abrirEdicao(u)} className="p-2 rounded-lg transition-all"
+                          style={{ color: C.bronze }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "rgba(200,165,107,0.12)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => setUsuarioParaDeletar(u)} className="p-2 rounded-lg transition-all"
+                          style={{ color: "rgba(248,113,113,0.5)" }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(248,113,113,0.08)"; (e.currentTarget as HTMLElement).style.color = "#f87171"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "rgba(248,113,113,0.5)"; }}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {usuariosFiltrados.length === 0 && (
+              <div className="text-center py-12">
+                <Users className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: C.gold }} />
+                <p className="text-sm" style={{ color: C.muted }}>Nenhum usuário encontrado</p>
+              </div>
+            )}
           </div>
         </div>
-      )}
+
+        {/* Pagination */}
+        {totalPaginas > 1 && (
+          <div className="flex items-center justify-between rounded-xl px-4 py-3" style={CARD}>
+            <p className="text-xs" style={{ color: C.muted }}>Página {pagina} de {totalPaginas} · {usuariosFiltrados.length} usuários</p>
+            <div className="flex gap-2">
+              <button onClick={() => setPaginaAtual(p => Math.max(1, p - 1))} disabled={pagina === 1}
+                className="px-4 py-1.5 rounded-lg text-sm disabled:opacity-30 transition-all"
+                style={{ border: "1px solid rgba(200,165,107,0.2)", color: C.muted }}>Anterior</button>
+              <button onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}
+                className="px-4 py-1.5 rounded-lg text-sm disabled:opacity-30 transition-all"
+                style={{ border: "1px solid rgba(200,165,107,0.2)", color: C.muted }}>Próxima</button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Create/Edit modal */}
       {mostrarModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="luxury-card-strong p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="font-tan-mon-cheri text-2xl text-brand-dark mb-6">{usuarioEditando ? "Editar Usuário" : "Novo Usuário"}</h2>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="p-8 max-w-md w-full max-h-[90vh] overflow-y-auto rounded-2xl"
+            style={{ background: "linear-gradient(160deg, #1e1812, #2f251b)", border: "1px solid rgba(200,165,107,0.25)" }}>
+            <h2 className="font-tan-mon-cheri text-2xl mb-6" style={{ color: C.text }}>{usuarioEditando ? "Editar Usuário" : "Novo Usuário"}</h2>
             <form onSubmit={usuarioEditando ? salvarEdicao : criarUsuario} className="space-y-4">
-              <div><label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-1.5">Usuário *</label>
+              <div>
+                <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>Usuário *</label>
                 <input type="text" required={!usuarioEditando} disabled={!!usuarioEditando} value={novoUsuario.username}
-                  onChange={e => setNovoUsuario({ ...novoUsuario, username: e.target.value.trim().toLowerCase() })} className={inputClass} style={inputStyle} placeholder="username" /></div>
-              <div><label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-1.5">Senha {usuarioEditando ? "(em branco para não alterar)" : "*"}</label>
+                  onChange={e => setNovoUsuario({ ...novoUsuario, username: e.target.value.trim().toLowerCase() })}
+                  className={ic} style={INPUT_ST} placeholder="username" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>
+                  Senha {usuarioEditando ? "(em branco para não alterar)" : "*"}
+                </label>
                 <input type="password" required={!usuarioEditando} value={novoUsuario.senha}
-                  onChange={e => setNovoUsuario({ ...novoUsuario, senha: e.target.value })} className={inputClass} style={inputStyle} placeholder="••••••••" /></div>
-              <div><label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-1.5">Nome Completo *</label>
+                  onChange={e => setNovoUsuario({ ...novoUsuario, senha: e.target.value })}
+                  className={ic} style={INPUT_ST} placeholder="••••••••" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>Nome Completo *</label>
                 <input type="text" required value={novoUsuario.nome}
-                  onChange={e => setNovoUsuario({ ...novoUsuario, nome: e.target.value })} className={inputClass} style={inputStyle} placeholder="Nome Completo" /></div>
-              <div><label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-1.5">Email</label>
+                  onChange={e => setNovoUsuario({ ...novoUsuario, nome: e.target.value })}
+                  className={ic} style={INPUT_ST} placeholder="Nome Completo" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>Email</label>
                 <input type="email" value={novoUsuario.email}
-                  onChange={e => setNovoUsuario({ ...novoUsuario, email: e.target.value })} className={inputClass} style={inputStyle} placeholder="email@exemplo.com" /></div>
-              <div><label className="block text-xs font-semibold tracking-widest uppercase text-brand-medium mb-1.5">Data de Nascimento</label>
+                  onChange={e => setNovoUsuario({ ...novoUsuario, email: e.target.value })}
+                  className={ic} style={INPUT_ST} placeholder="email@exemplo.com" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>Data de Nascimento</label>
                 <input type="date" value={novoUsuario.dataNascimento}
-                  onChange={e => setNovoUsuario({ ...novoUsuario, dataNascimento: e.target.value })} className={inputClass} style={inputStyle} /></div>
+                  onChange={e => setNovoUsuario({ ...novoUsuario, dataNascimento: e.target.value })}
+                  className={ic} style={INPUT_ST} />
+              </div>
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={novoUsuario.isAdmin} onChange={e => setNovoUsuario({ ...novoUsuario, isAdmin: e.target.checked })} className="w-4 h-4 rounded accent-brand-bronze" />
-                <span className="text-sm text-brand-dark">Administrador</span>
+                <input type="checkbox" checked={novoUsuario.isAdmin} onChange={e => setNovoUsuario({ ...novoUsuario, isAdmin: e.target.checked })}
+                  className="w-4 h-4 rounded" style={{ accentColor: C.gold }} />
+                <span className="text-sm" style={{ color: C.text }}>Administrador</span>
               </label>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={fecharModal} className="flex-1 py-3 rounded-xl border font-medium text-sm text-brand-dark" style={{ borderColor: "rgba(200,165,107,0.3)" }}>Cancelar</button>
-                <button type="submit" disabled={salvando} className="flex-1 luxury-btn-primary disabled:opacity-50">{salvando ? (usuarioEditando ? "Salvando..." : "Criando...") : (usuarioEditando ? "Salvar" : "Criar")}</button>
+                <button type="button" onClick={fecharModal}
+                  className="flex-1 py-3 rounded-xl text-sm font-medium transition-all"
+                  style={{ border: "1px solid rgba(200,165,107,0.25)", color: C.muted }}>Cancelar</button>
+                <button type="submit" disabled={salvando}
+                  className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50 transition-all"
+                  style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
+                  {salvando ? (usuarioEditando ? "Salvando..." : "Criando...") : (usuarioEditando ? "Salvar" : "Criar")}
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
+      {/* Delete confirm */}
       {usuarioParaDeletar && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="luxury-card-strong p-8 max-w-sm w-full">
-            <h3 className="font-tan-mon-cheri text-xl text-brand-dark mb-2">Confirmar exclusão</h3>
-            <p className="text-sm text-brand-medium mb-6 leading-relaxed">Excluir <strong className="text-brand-dark">{usuarioParaDeletar.username}</strong>? Esta ação não pode ser desfeita.</p>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="p-8 max-w-sm w-full rounded-2xl"
+            style={{ background: "linear-gradient(160deg, #1e1812, #2f251b)", border: "1px solid rgba(200,165,107,0.2)" }}>
+            <h3 className="font-tan-mon-cheri text-xl mb-2" style={{ color: C.text }}>Confirmar exclusão</h3>
+            <p className="text-sm mb-6 leading-relaxed" style={{ color: C.muted }}>
+              Excluir <strong style={{ color: C.text }}>{usuarioParaDeletar.username}</strong>? Esta ação não pode ser desfeita.
+            </p>
             <div className="flex gap-3">
-              <button onClick={() => setUsuarioParaDeletar(null)} className="flex-1 py-2.5 rounded-xl border text-brand-dark font-medium text-sm" style={{ borderColor: "rgba(200,165,107,0.3)" }}>Cancelar</button>
-              <button onClick={() => deletarUsuario(usuarioParaDeletar.id)} className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl text-sm transition-colors">Excluir</button>
+              <button onClick={() => setUsuarioParaDeletar(null)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium"
+                style={{ border: "1px solid rgba(200,165,107,0.2)", color: C.muted }}>Cancelar</button>
+              <button onClick={() => deletarUsuario(usuarioParaDeletar.id)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
+                style={{ background: "rgba(220,38,38,0.8)" }}>Excluir</button>
             </div>
           </div>
         </div>
@@ -310,7 +512,6 @@ function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string
 }
 
 // ── Comunidade Tab ─────────────────────────────────────────────────────────────
-
 function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) => void }) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -360,102 +561,145 @@ function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: stri
     catch { showMsg("erro", "Erro ao deletar"); }
   }
 
-  const inputStyle = { border: "1.5px solid rgba(200,165,107,0.35)", background: "#fff" };
+  const ic = "w-full px-4 py-2.5 rounded-xl text-sm outline-none resize-none";
 
   return (
-    <div className="luxury-card-strong p-6 space-y-5">
-      <div className="flex items-center justify-between">
-        <h2 className="font-tan-mon-cheri text-2xl text-brand-dark">Publicações da Comunidade</h2>
-        <button onClick={() => setCriando(!criando)} className="luxury-btn-primary"><Plus className="w-4 h-4" /> Nova publicação</button>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <p className="text-xs tracking-[0.2em] uppercase mb-0.5" style={{ color: "rgba(200,165,107,0.45)" }}>Admin</p>
+          <h2 className="font-tan-mon-cheri text-2xl md:text-3xl" style={{ color: C.text }}>Comunidade</h2>
+        </div>
+        <button onClick={() => setCriando(!criando)}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
+          style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
+          <Plus className="w-4 h-4" /> Nova publicação
+        </button>
       </div>
 
+      {/* Create form */}
       {criando && (
-        <form onSubmit={handleCriar} className="rounded-xl p-5 space-y-4" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.2)" }}>
+        <form onSubmit={handleCriar} className="p-5 rounded-2xl space-y-4" style={CARD_S}>
+          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.6)" }}>Nova Publicação</p>
           <div className="flex gap-2 flex-wrap">
             {(["texto", "imagem", "video"] as const).map(t => (
               <button key={t} type="button" onClick={() => { setNovoTipo(t); setUploadFile(null); setNovoMediaUrl(""); }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-                style={novoTipo === t ? { background: "rgba(200,165,107,0.2)", color: "#9c7742", border: "1px solid rgba(200,165,107,0.4)" } : { background: "transparent", color: "#9c8060", border: "1px solid rgba(200,165,107,0.2)" }}>
-                {t === "texto" && <FileText className="w-3 h-3" />}{t === "imagem" && <ImageIcon className="w-3 h-3" />}{t === "video" && <Youtube className="w-3 h-3" />}
+                style={novoTipo === t
+                  ? { background: "rgba(200,165,107,0.2)", color: C.gold, border: "1px solid rgba(200,165,107,0.4)" }
+                  : { background: "transparent", color: C.muted, border: "1px solid rgba(200,165,107,0.15)" }}>
+                {t === "texto" && <FileText className="w-3 h-3" />}
+                {t === "imagem" && <ImageIcon className="w-3 h-3" />}
+                {t === "video" && <Youtube className="w-3 h-3" />}
                 {t.charAt(0).toUpperCase() + t.slice(1)}
               </button>
             ))}
           </div>
           <textarea value={novoConteudo} onChange={e => setNovoConteudo(e.target.value)} required rows={3}
-            className="w-full px-4 py-2.5 rounded-xl text-sm text-brand-dark outline-none resize-none" style={inputStyle} placeholder="Conteúdo da publicação..." />
+            className={ic} style={INPUT_ST} placeholder="Conteúdo da publicação..." />
           {novoTipo === "imagem" && (
             <div>
               <input ref={fileRef} type="file" accept="image/*" onChange={e => setUploadFile(e.target.files?.[0] || null)} className="hidden" id="adm-upload-img" />
               <label htmlFor="adm-upload-img" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm cursor-pointer"
-                style={{ border: "1px dashed rgba(200,165,107,0.4)", color: "#9c7742" }}>
+                style={{ border: "1px dashed rgba(200,165,107,0.35)", color: C.bronze }}>
                 <ImageIcon className="w-4 h-4" />{uploadFile ? uploadFile.name : "Selecionar imagem"}
               </label>
             </div>
           )}
           {novoTipo === "video" && (
             <input type="url" value={novoMediaUrl} onChange={e => setNovoMediaUrl(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl text-sm text-brand-dark outline-none" style={inputStyle} placeholder="URL do YouTube" />
+              className={ic} style={INPUT_ST} placeholder="URL do YouTube" />
           )}
           <div className="flex gap-3">
-            <button type="button" onClick={() => setCriando(false)} className="flex-1 py-2 rounded-xl border text-brand-dark text-sm" style={{ borderColor: "rgba(200,165,107,0.3)" }}>Cancelar</button>
-            <button type="submit" disabled={enviando} className="flex-1 luxury-btn-primary disabled:opacity-50">{enviando ? "Publicando..." : "Publicar"}</button>
+            <button type="button" onClick={() => setCriando(false)}
+              className="flex-1 py-2 rounded-xl text-sm" style={{ border: "1px solid rgba(200,165,107,0.2)", color: C.muted }}>Cancelar</button>
+            <button type="submit" disabled={enviando}
+              className="flex-1 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
+              {enviando ? "Publicando..." : "Publicar"}
+            </button>
           </div>
         </form>
       )}
 
-      {loading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-brand-bronze animate-spin" /></div>
-        : posts.length === 0 ? <p className="text-center text-brand-medium py-8 text-sm">Nenhuma publicação ainda.</p>
-        : (
-          <div className="space-y-3">
-            {posts.map(p => {
-              const totalReacoes = Object.values(p.reacoes ?? {}).reduce((a, b) => a + b, 0);
-              return (
-                <div key={p.id} className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.15)", background: "rgba(200,165,107,0.02)" }}>
-                  {/* Image preview */}
-                  {p.tipo === "imagem" && p.mediaUrl && (
-                    <div className="h-32 flex items-center justify-center" style={{ background: "rgba(200,165,107,0.05)", borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
-                      <ImageIcon className="w-8 h-8" style={{ color: "rgba(200,165,107,0.3)" }} />
-                      <span className="ml-2 text-xs" style={{ color: "rgba(156,119,66,0.5)" }}>Imagem anexada</span>
-                    </div>
-                  )}
-                  {p.tipo === "video" && p.mediaUrl && (
-                    <div className="h-20 flex items-center justify-center gap-2" style={{ background: "rgba(200,165,107,0.05)", borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
-                      <Youtube className="w-6 h-6" style={{ color: "rgba(200,165,107,0.5)" }} />
-                      <span className="text-xs truncate max-w-[200px]" style={{ color: "rgba(156,119,66,0.6)" }}>{p.mediaUrl}</span>
-                    </div>
-                  )}
-                  <div className="flex items-start justify-between gap-3 p-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(200,165,107,0.12)", color: "#9c7742" }}>{p.tipo}</span>
-                        <span className="text-xs text-brand-medium">{new Date(p.criadoEm).toLocaleDateString("pt-BR")}</span>
-                        {p.autorNome && <span className="text-xs" style={{ color: "rgba(156,119,66,0.6)" }}>por {p.autorNome}</span>}
+      {/* Posts list */}
+      {loading
+        ? <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin" style={{ color: C.gold }} /></div>
+        : posts.length === 0
+          ? <div className="text-center py-12 rounded-2xl" style={CARD}>
+              <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: C.gold }} />
+              <p className="text-sm" style={{ color: C.muted }}>Nenhuma publicação ainda.</p>
+            </div>
+          : (
+            <div className="space-y-3">
+              {posts.map(p => {
+                const totalReacoes = Object.values(p.reacoes ?? {}).reduce((a, b) => a + b, 0);
+                return (
+                  <div key={p.id} className="rounded-2xl overflow-hidden" style={CARD_S}>
+                    {/* Media header */}
+                    {p.tipo === "imagem" && p.mediaUrl && (
+                      <div className="h-24 flex items-center justify-center gap-2"
+                        style={{ background: "rgba(200,165,107,0.04)", borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
+                        <ImageIcon className="w-6 h-6" style={{ color: "rgba(200,165,107,0.3)" }} />
+                        <span className="text-xs" style={{ color: C.dim }}>Imagem anexada</span>
                       </div>
-                      <p className="text-sm text-brand-dark line-clamp-2 mb-2">{p.conteudo}</p>
-                      {totalReacoes > 0 && (
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {Object.entries(p.reacoes).sort(([,a],[,b]) => b - a).map(([emoji, count]) => (
-                            <span key={emoji} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.15)", color: "#9c7742" }}>
-                              {emoji} {count}
-                            </span>
-                          ))}
+                    )}
+                    {p.tipo === "video" && p.mediaUrl && (
+                      <div className="h-16 flex items-center justify-center gap-2 px-4"
+                        style={{ background: "rgba(200,165,107,0.04)", borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
+                        <Youtube className="w-5 h-5 shrink-0" style={{ color: "rgba(200,165,107,0.5)" }} />
+                        <span className="text-xs truncate" style={{ color: C.muted }}>{p.mediaUrl}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-start justify-between gap-3 p-4">
+                      <div className="flex-1 min-w-0">
+                        {/* Meta */}
+                        <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                          <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+                            style={{ background: "rgba(200,165,107,0.1)", color: C.bronze }}>{p.tipo}</span>
+                          <span className="text-xs" style={{ color: C.dim }}>{new Date(p.criadoEm).toLocaleDateString("pt-BR")}</span>
+                          {p.autorNome && <span className="text-xs" style={{ color: C.dim }}>· {p.autorNome}</span>}
                         </div>
-                      )}
+
+                        {/* Content */}
+                        <p className="text-sm leading-relaxed line-clamp-2 mb-2" style={{ color: "rgba(247,242,236,0.8)" }}>{p.conteudo}</p>
+
+                        {/* Reactions (SVG icons) */}
+                        {totalReacoes > 0 && (
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {REACTIONS.filter(r => (p.reacoes[r.key] ?? 0) > 0).map(({ key, icon: Icon, color, label }) => (
+                              <span key={key} title={label}
+                                className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                                style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.15)" }}>
+                                <Icon className="w-3 h-3" style={{ color }} />
+                                <span style={{ color: C.muted }}>{p.reacoes[key]}</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <button onClick={() => handleDeletar(p.id)}
+                        className="p-2 rounded-lg shrink-0 transition-all"
+                        style={{ color: "rgba(248,113,113,0.4)" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(248,113,113,0.08)"; (e.currentTarget as HTMLElement).style.color = "#f87171"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "rgba(248,113,113,0.4)"; }}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                    <button onClick={() => handleDeletar(p.id)} className="p-2 rounded-lg hover:bg-red-50 text-red-400 shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )
+                );
+              })}
+            </div>
+          )
       }
     </div>
   );
 }
 
 // ── Cursos Tab ─────────────────────────────────────────────────────────────────
-
 function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) => void }) {
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [loading, setLoading] = useState(true);
@@ -463,10 +707,8 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
   const [cursoAberto, setCursoAberto] = useState<number | null>(null);
   const [cursoDetalhe, setCursoDetalhe] = useState<CursoDetalhe | null>(null);
   const [loadingDetalhe, setLoadingDetalhe] = useState(false);
-
   const [novoCurso, setNovoCurso] = useState({ titulo: "", descricao: "", categoria: "", nivel: "todos", imagemUrl: "" });
   const [enviandoCurso, setEnviandoCurso] = useState(false);
-
   const [novaAula, setNovaAula] = useState({ titulo: "", descricao: "", videoUrl: "", conteudo: "", duracaoMin: "", ordem: "0" });
   const [criandoAula, setCriandoAula] = useState(false);
   const [enviandoAula, setEnviandoAula] = useState(false);
@@ -489,7 +731,7 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
   async function handleCriarCurso(e: React.FormEvent) {
     e.preventDefault(); setEnviandoCurso(true);
     try {
-      const res = await apiFetch("/cursos", { method: "POST", body: JSON.stringify({ ...novoCurso, duracaoMin: undefined }) });
+      const res = await apiFetch("/cursos", { method: "POST", body: JSON.stringify({ ...novoCurso }) });
       const data = await res.json();
       if (res.ok) { showMsg("sucesso", "Curso criado!"); setNovoCurso({ titulo: "", descricao: "", categoria: "", nivel: "todos", imagemUrl: "" }); setCriandoCurso(false); buscarCursos(); }
       else showMsg("erro", data.error || "Erro ao criar curso");
@@ -518,11 +760,8 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
         body: JSON.stringify({ ...novaAula, ordem: parseInt(novaAula.ordem) || 0, duracaoMin: parseInt(novaAula.duracaoMin) || null }),
       });
       const data = await res.json();
-      if (res.ok) {
-        showMsg("sucesso", "Aula criada!");
-        setNovaAula({ titulo: "", descricao: "", videoUrl: "", conteudo: "", duracaoMin: "", ordem: "0" });
-        setCriandoAula(false); abrirCurso(cursoId);
-      } else showMsg("erro", data.error || "Erro ao criar aula");
+      if (res.ok) { showMsg("sucesso", "Aula criada!"); setNovaAula({ titulo: "", descricao: "", videoUrl: "", conteudo: "", duracaoMin: "", ordem: "0" }); setCriandoAula(false); abrirCurso(cursoId); }
+      else showMsg("erro", data.error || "Erro ao criar aula");
     } catch { showMsg("erro", "Erro ao criar aula"); }
     setEnviandoAula(false);
   }
@@ -533,119 +772,192 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
     catch { showMsg("erro", "Erro ao deletar aula"); }
   }
 
-  const inputStyle = { border: "1.5px solid rgba(200,165,107,0.35)", background: "#fff" };
-  const ic = "w-full px-4 py-2.5 rounded-xl text-sm text-brand-dark outline-none";
+  const ic = "w-full px-4 py-2.5 rounded-xl text-sm outline-none";
 
   return (
-    <div className="luxury-card-strong p-6 space-y-5">
-      <div className="flex items-center justify-between">
-        <h2 className="font-tan-mon-cheri text-2xl text-brand-dark">Gerenciar Cursos</h2>
-        <button onClick={() => setCriandoCurso(!criandoCurso)} className="luxury-btn-primary"><Plus className="w-4 h-4" /> Novo Curso</button>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <p className="text-xs tracking-[0.2em] uppercase mb-0.5" style={{ color: "rgba(200,165,107,0.45)" }}>Admin</p>
+          <h2 className="font-tan-mon-cheri text-2xl md:text-3xl" style={{ color: C.text }}>Cursos</h2>
+        </div>
+        <button onClick={() => setCriandoCurso(!criandoCurso)}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
+          style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
+          <Plus className="w-4 h-4" /> Novo Curso
+        </button>
       </div>
 
       {/* Create course form */}
       {criandoCurso && (
-        <form onSubmit={handleCriarCurso} className="rounded-xl p-5 space-y-4" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.2)" }}>
-          <p className="text-xs font-bold tracking-widest uppercase text-brand-medium">Novo Curso</p>
-          <div><label className="block text-xs font-semibold text-brand-medium mb-1">Título *</label>
-            <input required value={novoCurso.titulo} onChange={e => setNovoCurso({ ...novoCurso, titulo: e.target.value })} className={ic} style={inputStyle} placeholder="Título do curso" /></div>
-          <div><label className="block text-xs font-semibold text-brand-medium mb-1">Descrição *</label>
-            <textarea required value={novoCurso.descricao} onChange={e => setNovoCurso({ ...novoCurso, descricao: e.target.value })} rows={2} className={`${ic} resize-none`} style={inputStyle} placeholder="Descrição breve" /></div>
+        <form onSubmit={handleCriarCurso} className="p-5 rounded-2xl space-y-4" style={CARD_S}>
+          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.6)" }}>Novo Curso</p>
+          <div>
+            <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Título *</label>
+            <input required value={novoCurso.titulo} onChange={e => setNovoCurso({ ...novoCurso, titulo: e.target.value })} className={ic} style={INPUT_ST} placeholder="Título do curso" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Descrição *</label>
+            <textarea required value={novoCurso.descricao} onChange={e => setNovoCurso({ ...novoCurso, descricao: e.target.value })} rows={2} className={`${ic} resize-none`} style={INPUT_ST} placeholder="Descrição breve" />
+          </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="block text-xs font-semibold text-brand-medium mb-1">Categoria</label>
-              <input value={novoCurso.categoria} onChange={e => setNovoCurso({ ...novoCurso, categoria: e.target.value })} className={ic} style={inputStyle} placeholder="Ex: Bioenergia" /></div>
-            <div><label className="block text-xs font-semibold text-brand-medium mb-1">Nível</label>
-              <select value={novoCurso.nivel} onChange={e => setNovoCurso({ ...novoCurso, nivel: e.target.value })} className={ic} style={inputStyle}>
-                <option value="todos">Todos</option><option value="iniciante">Iniciante</option><option value="intermediario">Intermediário</option><option value="avancado">Avançado</option>
-              </select></div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Categoria</label>
+              <input value={novoCurso.categoria} onChange={e => setNovoCurso({ ...novoCurso, categoria: e.target.value })} className={ic} style={INPUT_ST} placeholder="Ex: Bioenergia" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Nível</label>
+              <select value={novoCurso.nivel} onChange={e => setNovoCurso({ ...novoCurso, nivel: e.target.value })} className={ic} style={SELECT_ST}>
+                <option value="todos" style={OPT}>Todos</option>
+                <option value="iniciante" style={OPT}>Iniciante</option>
+                <option value="intermediario" style={OPT}>Intermediário</option>
+                <option value="avancado" style={OPT}>Avançado</option>
+              </select>
+            </div>
           </div>
           <div className="flex gap-3">
-            <button type="button" onClick={() => setCriandoCurso(false)} className="flex-1 py-2 rounded-xl border text-brand-dark text-sm" style={{ borderColor: "rgba(200,165,107,0.3)" }}>Cancelar</button>
-            <button type="submit" disabled={enviandoCurso} className="flex-1 luxury-btn-primary disabled:opacity-50">{enviandoCurso ? "Criando..." : "Criar Curso"}</button>
+            <button type="button" onClick={() => setCriandoCurso(false)} className="flex-1 py-2 rounded-xl text-sm"
+              style={{ border: "1px solid rgba(200,165,107,0.2)", color: C.muted }}>Cancelar</button>
+            <button type="submit" disabled={enviandoCurso} className="flex-1 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
+              {enviandoCurso ? "Criando..." : "Criar Curso"}
+            </button>
           </div>
         </form>
       )}
 
       {/* Course list */}
-      {loading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-brand-bronze animate-spin" /></div>
-        : cursos.length === 0 ? <p className="text-center text-brand-medium py-8 text-sm">Nenhum curso criado ainda.</p>
-        : (
-          <div className="space-y-3">
-            {cursos.map(curso => (
-              <div key={curso.id} className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.15)" }}>
-                {/* Course header */}
-                <div className="flex items-center gap-3 p-4 cursor-pointer" style={{ background: "rgba(200,165,107,0.02)" }}
-                  onClick={() => abrirCurso(curso.id)}>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                        style={curso.publicado ? { background: "rgba(34,197,94,0.08)", color: "#15803d", border: "1px solid rgba(34,197,94,0.2)" } : { background: "rgba(200,165,107,0.1)", color: "#9c7742" }}>
-                        {curso.publicado ? "Publicado" : "Rascunho"}
-                      </span>
-                      {curso.categoria && <span className="text-xs text-brand-medium">{curso.categoria}</span>}
+      {loading
+        ? <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin" style={{ color: C.gold }} /></div>
+        : cursos.length === 0
+          ? <div className="text-center py-12 rounded-2xl" style={CARD}>
+              <GraduationCap className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: C.gold }} />
+              <p className="text-sm" style={{ color: C.muted }}>Nenhum curso criado ainda.</p>
+            </div>
+          : (
+            <div className="space-y-3">
+              {cursos.map(curso => (
+                <div key={curso.id} className="rounded-2xl overflow-hidden" style={CARD_S}>
+                  {/* Course row */}
+                  <div className="flex items-center gap-3 p-4 cursor-pointer" onClick={() => abrirCurso(curso.id)}
+                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(200,165,107,0.03)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+                          style={curso.publicado
+                            ? { background: "rgba(74,222,128,0.09)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.2)" }
+                            : { background: "rgba(200,165,107,0.1)", color: C.bronze }}>
+                          {curso.publicado ? "Publicado" : "Rascunho"}
+                        </span>
+                        {curso.categoria && <span className="text-xs" style={{ color: C.muted }}>{curso.categoria}</span>}
+                      </div>
+                      <p className="font-semibold text-sm" style={{ color: C.text }}>{curso.titulo}</p>
+                      <p className="text-xs mt-0.5" style={{ color: C.muted }}>{curso.aulasCount} aula{curso.aulasCount !== 1 ? "s" : ""}</p>
                     </div>
-                    <p className="font-semibold text-brand-dark">{curso.titulo}</p>
-                    <p className="text-xs text-brand-medium mt-0.5">{curso.aulasCount} aula{curso.aulasCount !== 1 ? "s" : ""}</p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button onClick={e => { e.stopPropagation(); togglePublicado(curso); }}
-                      className="p-1.5 rounded-lg text-brand-medium hover:text-brand-dark transition-colors" title={curso.publicado ? "Despublicar" : "Publicar"}>
-                      {curso.publicado ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                    </button>
-                    <button onClick={e => { e.stopPropagation(); handleDeletarCurso(curso.id); }} className="p-1.5 rounded-lg text-red-400 hover:text-red-600 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
-                    {cursoAberto === curso.id ? <ChevronUp className="w-4 h-4 text-brand-medium" /> : <ChevronDown className="w-4 h-4 text-brand-medium" />}
-                  </div>
-                </div>
-
-                {/* Aulas */}
-                {cursoAberto === curso.id && (
-                  <div className="p-4 pt-0 space-y-3" style={{ borderTop: "1px solid rgba(200,165,107,0.1)" }}>
-                    {loadingDetalhe ? <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-brand-bronze animate-spin" /></div>
-                      : cursoDetalhe?.aulas.map((aula, i) => (
-                        <div key={aula.id} className="flex items-center gap-3 p-3 rounded-lg" style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.1)" }}>
-                          <BookOpen className="w-4 h-4 text-brand-medium shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-brand-medium">Aula {i + 1}</p>
-                            <p className="text-sm font-medium text-brand-dark truncate">{aula.titulo}</p>
-                          </div>
-                          <button onClick={() => handleDeletarAula(aula.id, curso.id)} className="p-1.5 rounded-lg text-red-400 hover:text-red-600 shrink-0"><Trash2 className="w-3 h-3" /></button>
-                        </div>
-                      ))
-                    }
-
-                    {!criandoAula ? (
-                      <button onClick={() => setCriandoAula(true)} className="flex items-center gap-2 text-sm text-brand-medium hover:text-brand-dark transition-colors pt-1">
-                        <Plus className="w-3.5 h-3.5" /> Adicionar aula
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button onClick={e => { e.stopPropagation(); togglePublicado(curso); }}
+                        className="p-1.5 rounded-lg transition-colors" style={{ color: C.muted }}
+                        title={curso.publicado ? "Despublicar" : "Publicar"}
+                        onMouseEnter={e => (e.currentTarget.style.color = C.gold)}
+                        onMouseLeave={e => (e.currentTarget.style.color = C.muted)}>
+                        {curso.publicado ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
-                    ) : (
-                      <form onSubmit={e => handleCriarAula(e, curso.id)} className="space-y-3 rounded-xl p-4" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
-                        <p className="text-xs font-bold tracking-widest uppercase text-brand-medium">Nova Aula</p>
-                        <div><label className="block text-xs font-semibold text-brand-medium mb-1">Título *</label>
-                          <input required value={novaAula.titulo} onChange={e => setNovaAula({ ...novaAula, titulo: e.target.value })} className={ic} style={inputStyle} placeholder="Título da aula" /></div>
-                        <div><label className="block text-xs font-semibold text-brand-medium mb-1">Descrição</label>
-                          <input value={novaAula.descricao} onChange={e => setNovaAula({ ...novaAula, descricao: e.target.value })} className={ic} style={inputStyle} placeholder="Descrição breve" /></div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div><label className="block text-xs font-semibold text-brand-medium mb-1">URL do Vídeo (YouTube)</label>
-                            <input type="url" value={novaAula.videoUrl} onChange={e => setNovaAula({ ...novaAula, videoUrl: e.target.value })} className={ic} style={inputStyle} placeholder="https://youtu.be/..." /></div>
-                          <div><label className="block text-xs font-semibold text-brand-medium mb-1">Duração (min)</label>
-                            <input type="number" min="0" value={novaAula.duracaoMin} onChange={e => setNovaAula({ ...novaAula, duracaoMin: e.target.value })} className={ic} style={inputStyle} placeholder="15" /></div>
-                        </div>
-                        <div><label className="block text-xs font-semibold text-brand-medium mb-1">Ordem</label>
-                          <input type="number" min="0" value={novaAula.ordem} onChange={e => setNovaAula({ ...novaAula, ordem: e.target.value })} className={ic} style={inputStyle} placeholder="0" /></div>
-                        <div><label className="block text-xs font-semibold text-brand-medium mb-1">Conteúdo / Texto</label>
-                          <textarea value={novaAula.conteudo} onChange={e => setNovaAula({ ...novaAula, conteudo: e.target.value })} rows={3} className={`${ic} resize-none`} style={inputStyle} placeholder="Texto da aula (opcional)..." /></div>
-                        <div className="flex gap-2">
-                          <button type="button" onClick={() => setCriandoAula(false)} className="flex-1 py-2 rounded-xl border text-brand-dark text-sm" style={{ borderColor: "rgba(200,165,107,0.3)" }}>Cancelar</button>
-                          <button type="submit" disabled={enviandoAula} className="flex-1 luxury-btn-primary disabled:opacity-50 text-sm">{enviandoAula ? "Salvando..." : "Salvar Aula"}</button>
-                        </div>
-                      </form>
-                    )}
+                      <button onClick={e => { e.stopPropagation(); handleDeletarCurso(curso.id); }}
+                        className="p-1.5 rounded-lg transition-colors" style={{ color: "rgba(248,113,113,0.4)" }}
+                        onMouseEnter={e => (e.currentTarget.style.color = "#f87171")}
+                        onMouseLeave={e => (e.currentTarget.style.color = "rgba(248,113,113,0.4)")}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      <span style={{ color: C.muted }}>
+                        {cursoAberto === curso.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </span>
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )
+
+                  {/* Aulas */}
+                  {cursoAberto === curso.id && (
+                    <div className="px-4 pb-4 pt-2 space-y-3" style={{ borderTop: "1px solid rgba(200,165,107,0.1)" }}>
+                      {loadingDetalhe
+                        ? <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin" style={{ color: C.gold }} /></div>
+                        : cursoDetalhe?.aulas.map((aula, i) => (
+                          <div key={aula.id} className="flex items-center gap-3 p-3 rounded-xl"
+                            style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.1)" }}>
+                            <BookOpen className="w-4 h-4 shrink-0" style={{ color: C.muted }} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs" style={{ color: C.dim }}>Aula {i + 1}</p>
+                              <p className="text-sm font-medium truncate" style={{ color: C.text }}>{aula.titulo}</p>
+                            </div>
+                            <button onClick={() => handleDeletarAula(aula.id, curso.id)}
+                              className="p-1.5 rounded-lg shrink-0 transition-colors" style={{ color: "rgba(248,113,113,0.4)" }}
+                              onMouseEnter={e => (e.currentTarget.style.color = "#f87171")}
+                              onMouseLeave={e => (e.currentTarget.style.color = "rgba(248,113,113,0.4)")}>
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))
+                      }
+
+                      {!criandoAula
+                        ? (
+                          <button onClick={() => setCriandoAula(true)}
+                            className="flex items-center gap-2 text-sm transition-colors"
+                            style={{ color: C.muted }}
+                            onMouseEnter={e => (e.currentTarget.style.color = C.gold)}
+                            onMouseLeave={e => (e.currentTarget.style.color = C.muted)}>
+                            <Plus className="w-3.5 h-3.5" /> Adicionar aula
+                          </button>
+                        ) : (
+                          <form onSubmit={e => handleCriarAula(e, curso.id)} className="space-y-3 p-4 rounded-xl"
+                            style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
+                            <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.6)" }}>Nova Aula</p>
+                            <div>
+                              <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Título *</label>
+                              <input required value={novaAula.titulo} onChange={e => setNovaAula({ ...novaAula, titulo: e.target.value })} className={ic} style={INPUT_ST} placeholder="Título da aula" />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Descrição</label>
+                              <input value={novaAula.descricao} onChange={e => setNovaAula({ ...novaAula, descricao: e.target.value })} className={ic} style={INPUT_ST} placeholder="Descrição breve" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>URL do Vídeo</label>
+                                <input type="url" value={novaAula.videoUrl} onChange={e => setNovaAula({ ...novaAula, videoUrl: e.target.value })} className={ic} style={INPUT_ST} placeholder="https://youtu.be/..." />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Duração (min)</label>
+                                <input type="number" min="0" value={novaAula.duracaoMin} onChange={e => setNovaAula({ ...novaAula, duracaoMin: e.target.value })} className={ic} style={INPUT_ST} placeholder="15" />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Ordem</label>
+                              <input type="number" min="0" value={novaAula.ordem} onChange={e => setNovaAula({ ...novaAula, ordem: e.target.value })} className={ic} style={INPUT_ST} placeholder="0" />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Conteúdo / Texto</label>
+                              <textarea value={novaAula.conteudo} onChange={e => setNovaAula({ ...novaAula, conteudo: e.target.value })} rows={3}
+                                className={`${ic} resize-none`} style={INPUT_ST} placeholder="Texto da aula (opcional)..." />
+                            </div>
+                            <div className="flex gap-2">
+                              <button type="button" onClick={() => setCriandoAula(false)}
+                                className="flex-1 py-2 rounded-xl text-sm"
+                                style={{ border: "1px solid rgba(200,165,107,0.2)", color: C.muted }}>Cancelar</button>
+                              <button type="submit" disabled={enviandoAula}
+                                className="flex-1 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+                                style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
+                                {enviandoAula ? "Salvando..." : "Salvar Aula"}
+                              </button>
+                            </div>
+                          </form>
+                        )
+                      }
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )
       }
     </div>
   );

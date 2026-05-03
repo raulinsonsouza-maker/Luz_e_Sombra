@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { CheckCircle2, Circle, Flame, Trophy, Star, Zap } from "lucide-react";
+import { CheckCircle2, Circle, Flame, Trophy, Star, Zap, Sunrise, Crown, Target, Gem, type LucideIcon } from "lucide-react";
 
 interface Missao {
   id: number;
@@ -33,13 +33,16 @@ const NIVEL_NOMES: Record<number, string> = {
   5: "Iluminado",
 };
 
-const CONQUISTAS = [
-  { icon: "🌅", titulo: "Primeiro Passo",  desc: "Complete sua primeira missão",  xp: 50,  desbloqueada: false },
-  { icon: "🔥", titulo: "7 Dias Seguidos", desc: "Mantenha sequência por 7 dias",  xp: 100, desbloqueada: false },
-  { icon: "⭐", titulo: "Autoconhecedor",   desc: "Complete 10 missões no total",  xp: 150, desbloqueada: false },
-  { icon: "🦁", titulo: "Traço Revelado",  desc: "Finalize o Traço de Caráter",   xp: 100, desbloqueada: false },
-  { icon: "🎯", titulo: "Roda Completa",   desc: "Complete sua Roda da Vida",      xp: 50,  desbloqueada: false },
-  { icon: "💎", titulo: "Observador",      desc: "Alcance o Nível 2",             xp: 200, desbloqueada: false },
+interface ConquistaItem {
+  icon: LucideIcon; titulo: string; desc: string; xp: number; desbloqueada: boolean;
+}
+const CONQUISTAS: ConquistaItem[] = [
+  { icon: Sunrise, titulo: "Primeiro Passo",  desc: "Complete sua primeira missão",  xp: 50,  desbloqueada: false },
+  { icon: Flame,   titulo: "7 Dias Seguidos", desc: "Mantenha sequência por 7 dias",  xp: 100, desbloqueada: false },
+  { icon: Star,    titulo: "Autoconhecedor",   desc: "Complete 10 missões no total",  xp: 150, desbloqueada: false },
+  { icon: Crown,   titulo: "Traço Revelado",  desc: "Finalize o Traço de Caráter",   xp: 100, desbloqueada: false },
+  { icon: Target,  titulo: "Roda Completa",   desc: "Complete sua Roda da Vida",      xp: 50,  desbloqueada: false },
+  { icon: Gem,     titulo: "Observador",      desc: "Alcance o Nível 2",             xp: 200, desbloqueada: false },
 ];
 
 export default function MissoesPage() {
@@ -114,7 +117,7 @@ export default function MissoesPage() {
               className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", boxShadow: "0 0 40px rgba(200,165,107,0.4)" }}
             >
-              <span className="text-3xl">💎</span>
+              <Gem className="w-10 h-10" style={{ color: "#1a1208" }} />
             </div>
             <p className="text-xs font-bold tracking-[0.3em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.6)" }}>
               Você evoluiu!
@@ -306,13 +309,13 @@ export default function MissoesPage() {
                 }}
               >
                 <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
                   style={{
                     background: c.desbloqueada ? "rgba(200,165,107,0.15)" : "rgba(255,255,255,0.03)",
-                    filter: c.desbloqueada ? "none" : "grayscale(1)",
+                    border: "1px solid rgba(200,165,107,0.15)",
                   }}
                 >
-                  {c.icon}
+                  <c.icon className="w-6 h-6" style={{ color: c.desbloqueada ? "#c8a56b" : "rgba(200,165,107,0.25)" }} />
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-sm" style={{ color: c.desbloqueada ? "#f7f2ec" : "rgba(247,242,236,0.4)" }}>

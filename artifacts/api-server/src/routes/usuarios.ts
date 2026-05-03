@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
 import bcrypt from "bcryptjs";
-import { db, usuariosTable, avaliacoesTable } from "@workspace/db";
-import { eq, count } from "drizzle-orm";
+import { db, usuariosTable, avaliacoesTable, comunidadeTable, reacoesTable, cursosTable, analiseTracoTable } from "@workspace/db";
+import { eq, count, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
 import { ObjectStorageService } from "../lib/objectStorage";
 
@@ -336,6 +336,32 @@ router.delete("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
   } catch (error) {
     req.log.error({ error }, "Erro ao deletar usuário");
     return res.status(500).json({ error: "Erro ao deletar usuário" });
+  }
+});
+
+// GET /api/usuarios/stats — dashboard stats (admin only)
+router.get("/stats", requireAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const [usersAgg, postsAgg, reactionsAgg, cursosAgg, analiseAgg] = await Promise.all([
+      db.select({
+        total: sql<number>`count(*)::int`,
+        ativos: sql<number>`sum(case when ativo then 1 else 0 end)::int`,
+      }).from(usuariosTable).where(eq(usuariosTable.isAdmin, false)),
+      db.select({ total: sql<number>`count(*)::int` }).from(comunidadeTable),
+      db.select({ total: sql<number>`count(*)::int` }).from(reacoesTable),
+      db.select({ total: sql<number>`count(*)::int` }).from(cursosTable),
+      db.select({ total: sql<number>`count(*)::int` }).from(analiseTracoTable),
+    ]);
+    return res.json({
+      usuarios: { total: usersAgg[0]?.total ?? 0, ativos: usersAgg[0]?.ativos ?? 0 },
+      posts: postsAgg[0]?.total ?? 0,
+      reacoes: reactionsAgg[0]?.total ?? 0,
+      cursos: cursosAgg[0]?.total ?? 0,
+      analiseTraco: analiseAgg[0]?.total ?? 0,
+    });
+  } catch (err) {
+    req.log.error({ err }, "Erro ao buscar stats");
+    return res.status(500).json({ error: "Erro ao buscar estatísticas" });
   }
 });
 

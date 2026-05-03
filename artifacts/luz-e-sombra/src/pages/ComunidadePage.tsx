@@ -1,9 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { Plus, Trash2, Loader2, Users, ImageIcon, Youtube, FileText, Heart } from "lucide-react";
+import { Plus, Trash2, Loader2, Users, ImageIcon, Youtube, FileText, Heart, Flame, Sparkles, Star, Sun, type LucideIcon } from "lucide-react";
 
-const EMOJIS = ["❤️", "🔥", "💫", "🙏", "✨"];
+const REACTIONS: { key: string; icon: LucideIcon; color: string; label: string }[] = [
+  { key: "❤️", icon: Heart,    color: "#e85555", label: "Amor" },
+  { key: "🔥", icon: Flame,    color: "#e86c2b", label: "Fogo" },
+  { key: "💫", icon: Sparkles, color: "#c8a56b", label: "Magia" },
+  { key: "🙏", icon: Sun,      color: "#f0c040", label: "Gratidão" },
+  { key: "✨", icon: Star,     color: "#c8a56b", label: "Inspiração" },
+];
 
 interface Post {
   id: number;
@@ -403,30 +409,30 @@ function PostCard({
 
       {/* Reactions */}
       <div className="flex items-center gap-1 px-5 pb-4 flex-wrap">
-        {EMOJIS.map(emoji => {
-          const count = post.reacoes[emoji] ?? 0;
-          const ativo = post.minhasReacoes.includes(emoji);
+        {REACTIONS.map(({ key, icon: Icon, color, label }) => {
+          const cnt = post.reacoes[key] ?? 0;
+          const ativo = post.minhasReacoes.includes(key);
           return (
             <button
-              key={emoji}
-              onClick={() => onReagir(post.id, emoji)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all"
+              key={key}
+              onClick={() => onReagir(post.id, key)}
+              title={label}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all"
               style={ativo
-                ? { background: "rgba(200,165,107,0.2)", border: "1px solid rgba(200,165,107,0.4)", color: "#c8a56b" }
-                : { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(247,242,236,0.5)" }
+                ? { background: "rgba(200,165,107,0.15)", border: `1px solid ${color}55`, color }
+                : { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(247,242,236,0.4)" }
               }
-              onMouseEnter={e => { if (!ativo) (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.2)"; }}
-              onMouseLeave={e => { if (!ativo) (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)"; }}
+              onMouseEnter={e => { if (!ativo) { (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.25)"; (e.currentTarget as HTMLElement).style.color = color; } }}
+              onMouseLeave={e => { if (!ativo) { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)"; (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.4)"; } }}
             >
-              <span>{emoji}</span>
-              {count > 0 && <span>{count}</span>}
+              <Icon className="w-3.5 h-3.5" />
+              {cnt > 0 && <span>{cnt}</span>}
             </button>
           );
         })}
         {totalReacoes > 0 && (
-          <span className="ml-1 text-xs flex items-center gap-1" style={{ color: "rgba(247,242,236,0.25)" }}>
-            <Heart className="w-3 h-3" />
-            {totalReacoes}
+          <span className="ml-1 text-xs flex items-center gap-1" style={{ color: "rgba(247,242,236,0.2)" }}>
+            · {totalReacoes} reações
           </span>
         )}
       </div>
