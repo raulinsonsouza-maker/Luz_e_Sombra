@@ -46,6 +46,16 @@ interface ResultadoAnalise {
   centroEnergetico: string;
   padraoEnergetico: string;
   mensagemTerapeutica: string;
+  // Enhanced fields
+  dominanteApelido?: string;
+  fraseIdentidade?: string;
+  pontosFortes?: string[];
+  pontosAtencao?: string[];
+  ferida?: string;
+  recurso?: string;
+  recomendacoesPraticas?: string[];
+  confiancaAnalise?: number;
+  perfilFisicoNarrado?: string;
 }
 
 interface AnaliseTraco {
@@ -597,7 +607,7 @@ export default function TracodeCaraterPage() {
 
         {/* ── Results ── */}
         {resultado && (
-          <div id="resultado-traco" className="space-y-6">
+          <div id="resultado-traco" className="space-y-5">
             {/* Separator */}
             <div className="flex items-center gap-4 mb-2">
               <div className="flex-1 h-px" style={{ background: "rgba(200,165,107,0.15)" }} />
@@ -607,22 +617,71 @@ export default function TracodeCaraterPage() {
               <div className="flex-1 h-px" style={{ background: "rgba(200,165,107,0.15)" }} />
             </div>
 
-            {/* Primary structure hero */}
+            {/* ── Primary structure hero ── */}
             {configPrincipal && estruturaPrincipal && (
               <div
                 className="rounded-2xl p-7"
                 style={{
-                  background: `linear-gradient(135deg, ${configPrincipal.corBg} 0%, rgba(30,24,18,0.4) 100%)`,
+                  background: `linear-gradient(135deg, ${configPrincipal.corBg} 0%, rgba(30,24,18,0.5) 100%)`,
                   border: `1px solid ${configPrincipal.corBorder}`,
                 }}
               >
-                <div className="flex items-start justify-between gap-4 mb-4">
+                {/* Apelido badge + confidence */}
+                <div className="flex items-center justify-between gap-3 mb-5">
+                  {resultado.dominanteApelido && (
+                    <span
+                      className="text-xs font-medium tracking-widest uppercase px-3 py-1.5 rounded-full"
+                      style={{
+                        background: configPrincipal.corBg,
+                        color: configPrincipal.cor,
+                        border: `1px solid ${configPrincipal.corBorder}`,
+                        letterSpacing: "0.15em",
+                      }}
+                    >
+                      O {resultado.dominanteApelido}
+                    </span>
+                  )}
+                  {resultado.confiancaAnalise !== undefined && (
+                    <div className="flex items-center gap-2 ml-auto">
+                      <span className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
+                        Confiança
+                      </span>
+                      <div
+                        className="relative h-1.5 rounded-full overflow-hidden"
+                        style={{ width: 60, background: "rgba(255,255,255,0.08)" }}
+                      >
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${resultado.confiancaAnalise}%`,
+                            background: resultado.confiancaAnalise >= 60
+                              ? "linear-gradient(to right, #6db96d, #4a9e4a)"
+                              : "linear-gradient(to right, #c8a56b, #9c7742)",
+                          }}
+                        />
+                      </div>
+                      <span
+                        className="text-xs font-medium"
+                        style={{
+                          color: resultado.confiancaAnalise >= 60
+                            ? "rgba(109,185,109,0.7)"
+                            : "rgba(200,165,107,0.6)",
+                        }}
+                      >
+                        {resultado.confiancaAnalise}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Name + % */}
+                <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
-                    <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
+                    <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>
                       Estrutura Principal
                     </p>
                     <h2
-                      className="font-tan-mon-cheri text-3xl"
+                      className="font-tan-mon-cheri text-3xl md:text-4xl"
                       style={{ color: configPrincipal.cor }}
                     >
                       {configPrincipal.nome}
@@ -630,24 +689,33 @@ export default function TracodeCaraterPage() {
                   </div>
                   <div
                     className="text-4xl font-bold font-tan-mon-cheri flex-shrink-0"
-                    style={{ color: configPrincipal.cor }}
+                    style={{ color: configPrincipal.cor, opacity: 0.9 }}
                   >
                     {resultado.estruturas[estruturaPrincipal]}%
                   </div>
                 </div>
-                <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.65)" }}>
-                  {configPrincipal.descricaoCurta}
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
+
+                {/* Frase identidade */}
+                {resultado.fraseIdentidade && (
+                  <p
+                    className="text-sm leading-relaxed mb-4 italic"
+                    style={{ color: "rgba(247,242,236,0.7)" }}
+                  >
+                    {resultado.fraseIdentidade}
+                  </p>
+                )}
+
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
                   {configPrincipal.descricaoLonga}
                 </p>
 
+                {/* Secondary structure */}
                 {resultado.estruturaSecundaria && (
                   <div
-                    className="mt-4 pt-4 flex items-center gap-3"
+                    className="mt-5 pt-4 flex flex-wrap items-center gap-3"
                     style={{ borderTop: `1px solid ${configPrincipal.corBorder}` }}
                   >
-                    <span className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
+                    <span className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
                       Estrutura secundária:
                     </span>
                     <span
@@ -659,26 +727,75 @@ export default function TracodeCaraterPage() {
                       }}
                     >
                       {ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].nome}
-                      {" "}
-                      ({resultado.estruturas[resultado.estruturaSecundaria]}%)
+                      {" "}({resultado.estruturas[resultado.estruturaSecundaria]}%)
                     </span>
                   </div>
                 )}
               </div>
             )}
 
-            {/* All 5 structure bars */}
+            {/* ── Pontos Fortes + Pontos de Atenção ── */}
+            {((resultado.pontosFortes?.length ?? 0) > 0 || (resultado.pontosAtencao?.length ?? 0) > 0) && (
+              <div className="grid md:grid-cols-2 gap-4">
+                {resultado.pontosFortes && resultado.pontosFortes.length > 0 && (
+                  <div
+                    className="rounded-2xl p-5"
+                    style={{ background: "rgba(109,185,109,0.05)", border: "1px solid rgba(109,185,109,0.18)" }}
+                  >
+                    <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(109,185,109,0.6)" }}>
+                      Pontos Fortes
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {resultado.pontosFortes.map((p, i) => (
+                        <span
+                          key={i}
+                          className="text-xs px-3 py-1.5 rounded-full"
+                          style={{
+                            background: "rgba(109,185,109,0.08)",
+                            border: "1px solid rgba(109,185,109,0.22)",
+                            color: "rgba(109,185,109,0.85)",
+                          }}
+                        >
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {resultado.pontosAtencao && resultado.pontosAtencao.length > 0 && (
+                  <div
+                    className="rounded-2xl p-5"
+                    style={{ background: "rgba(224,123,57,0.05)", border: "1px solid rgba(224,123,57,0.18)" }}
+                  >
+                    <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(224,123,57,0.6)" }}>
+                      Pontos de Atenção
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {resultado.pontosAtencao.map((p, i) => (
+                        <span
+                          key={i}
+                          className="text-xs px-3 py-1.5 rounded-full"
+                          style={{
+                            background: "rgba(224,123,57,0.08)",
+                            border: "1px solid rgba(224,123,57,0.22)",
+                            color: "rgba(224,123,57,0.85)",
+                          }}
+                        >
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Distribuição das Estruturas ── */}
             <div
               className="rounded-2xl p-6"
-              style={{
-                background: "rgba(30,24,18,0.5)",
-                border: "1px solid rgba(200,165,107,0.1)",
-              }}
+              style={{ background: "rgba(30,24,18,0.5)", border: "1px solid rgba(200,165,107,0.1)" }}
             >
-              <h3
-                className="font-tan-mon-cheri text-base mb-5"
-                style={{ color: "rgba(247,242,236,0.75)" }}
-              >
+              <h3 className="font-tan-mon-cheri text-base mb-5" style={{ color: "rgba(247,242,236,0.75)" }}>
                 Distribuição das Estruturas
               </h3>
               <div className="space-y-4">
@@ -687,13 +804,14 @@ export default function TracodeCaraterPage() {
                   .map(([key, pct]) => {
                     const cfg = ESTRUTURAS_CONFIG[key];
                     const isPrimary = key === resultado.estruturaPrincipal;
+                    const isSecondary = key === resultado.estruturaSecundaria;
                     return (
                       <div key={key}>
                         <div className="flex justify-between items-center mb-1.5">
                           <div className="flex items-center gap-2">
                             <span
                               className="text-sm font-medium"
-                              style={{ color: isPrimary ? cfg.cor : "rgba(247,242,236,0.65)" }}
+                              style={{ color: isPrimary ? cfg.cor : isSecondary ? "rgba(247,242,236,0.7)" : "rgba(247,242,236,0.45)" }}
                             >
                               {cfg.nome}
                             </span>
@@ -705,8 +823,16 @@ export default function TracodeCaraterPage() {
                                 principal
                               </span>
                             )}
+                            {isSecondary && !isPrimary && (
+                              <span
+                                className="text-xs px-2 py-0.5 rounded-full"
+                                style={{ background: "rgba(255,255,255,0.04)", color: "rgba(247,242,236,0.4)", border: "1px solid rgba(255,255,255,0.08)" }}
+                              >
+                                secundária
+                              </span>
+                            )}
                           </div>
-                          <span className="text-sm font-bold" style={{ color: cfg.cor }}>
+                          <span className="text-sm font-bold" style={{ color: isPrimary ? cfg.cor : "rgba(247,242,236,0.5)" }}>
                             {pct}%
                           </span>
                         </div>
@@ -718,7 +844,9 @@ export default function TracodeCaraterPage() {
                             className="h-full rounded-full transition-all duration-700"
                             style={{
                               width: `${pct}%`,
-                              background: `linear-gradient(to right, ${cfg.cor}99, ${cfg.cor})`,
+                              background: isPrimary
+                                ? `linear-gradient(to right, ${cfg.cor}88, ${cfg.cor})`
+                                : `linear-gradient(to right, ${cfg.cor}44, ${cfg.cor}66)`,
                             }}
                           />
                         </div>
@@ -728,27 +856,56 @@ export default function TracodeCaraterPage() {
               </div>
             </div>
 
-            {/* Interpretação */}
+            {/* ── Interpretação ── */}
             <div
               className="rounded-2xl p-6"
-              style={{
-                background: "rgba(200,165,107,0.03)",
-                border: "1px solid rgba(200,165,107,0.12)",
-              }}
+              style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}
             >
               <h3 className="font-tan-mon-cheri text-base mb-4" style={{ color: "#c8a56b" }}>
                 Interpretação
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {resultado.interpretacao.split(/\n+/).filter(Boolean).map((p, i) => (
-                  <p key={i} className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
+                  <p key={i} className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
                     {p}
                   </p>
                 ))}
               </div>
             </div>
 
-            {/* Postural pattern + energetic */}
+            {/* ── Ferida + Recurso (Essência) ── */}
+            {(resultado.ferida || resultado.recurso) && (
+              <div className="grid md:grid-cols-2 gap-4">
+                {resultado.ferida && (
+                  <div
+                    className="rounded-2xl p-5"
+                    style={{ background: "rgba(155,143,222,0.05)", border: "1px solid rgba(155,143,222,0.18)" }}
+                  >
+                    <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(155,143,222,0.6)" }}>
+                      Ferida Central
+                    </p>
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
+                      {resultado.ferida}
+                    </p>
+                  </div>
+                )}
+                {resultado.recurso && (
+                  <div
+                    className="rounded-2xl p-5"
+                    style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.18)" }}
+                  >
+                    <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.6)" }}>
+                      Recurso / Dom
+                    </p>
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
+                      {resultado.recurso}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Padrão Postural + Energético ── */}
             <div className="grid md:grid-cols-2 gap-4">
               <div
                 className="rounded-2xl p-5"
@@ -768,28 +925,52 @@ export default function TracodeCaraterPage() {
                 <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.5)" }}>
                   Padrão Energético
                 </p>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
+                <p className="text-sm leading-relaxed mb-2" style={{ color: "rgba(247,242,236,0.6)" }}>
                   <span style={{ color: "rgba(200,165,107,0.7)" }}>Centro: </span>
                   {resultado.centroEnergetico}
                 </p>
-                <p className="text-sm leading-relaxed mt-2" style={{ color: "rgba(247,242,236,0.55)" }}>
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
                   {resultado.padraoEnergetico}
                 </p>
               </div>
             </div>
 
-            {/* Physical characteristics — collapsible */}
-            {resultado.caracteristicasFisicasObservadas?.length > 0 && (
+            {/* ── Recomendações Práticas ── */}
+            {resultado.recomendacoesPraticas && resultado.recomendacoesPraticas.length > 0 && (
               <div
-                className="rounded-2xl overflow-hidden"
-                style={{ border: "1px solid rgba(200,165,107,0.1)" }}
+                className="rounded-2xl p-6"
+                style={{ background: "rgba(30,24,18,0.5)", border: "1px solid rgba(200,165,107,0.1)" }}
               >
+                <h3 className="font-tan-mon-cheri text-base mb-4" style={{ color: "rgba(247,242,236,0.75)" }}>
+                  Recomendações Práticas
+                </h3>
+                <div className="space-y-3">
+                  {resultado.recomendacoesPraticas.map((rec, i) => (
+                    <div key={i} className="flex gap-3 items-start">
+                      <div
+                        className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 text-xs font-bold"
+                        style={{ background: "rgba(200,165,107,0.12)", color: "#c8a56b" }}
+                      >
+                        {i + 1}
+                      </div>
+                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
+                        {rec}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Características Físicas — collapsible ── */}
+            {resultado.caracteristicasFisicasObservadas?.length > 0 && (
+              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.1)" }}>
                 <button
                   onClick={() => setExpandedCaract((v) => !v)}
                   className="w-full flex items-center justify-between px-6 py-4"
                   style={{ background: "rgba(30,24,18,0.5)", color: "rgba(247,242,236,0.65)" }}
                 >
-                  <span className="text-sm font-medium">Características Físicas Observadas</span>
+                  <span className="text-sm font-medium">Marcadores Físicos Identificados</span>
                   {expandedCaract ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {expandedCaract && (
@@ -797,6 +978,11 @@ export default function TracodeCaraterPage() {
                     className="px-6 py-5"
                     style={{ background: "rgba(30,24,18,0.3)", borderTop: "1px solid rgba(200,165,107,0.08)" }}
                   >
+                    {resultado.perfilFisicoNarrado && (
+                      <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.5)" }}>
+                        {resultado.perfilFisicoNarrado}
+                      </p>
+                    )}
                     <div className="flex flex-wrap gap-2">
                       {resultado.caracteristicasFisicasObservadas.map((c, i) => (
                         <span
@@ -805,7 +991,7 @@ export default function TracodeCaraterPage() {
                           style={{
                             background: "rgba(200,165,107,0.06)",
                             border: "1px solid rgba(200,165,107,0.15)",
-                            color: "rgba(247,242,236,0.55)",
+                            color: "rgba(247,242,236,0.5)",
                           }}
                         >
                           {c}
@@ -817,18 +1003,15 @@ export default function TracodeCaraterPage() {
               </div>
             )}
 
-            {/* Observations per photo — collapsible */}
-            {resultado.observacoesPorFoto && (
-              <div
-                className="rounded-2xl overflow-hidden"
-                style={{ border: "1px solid rgba(200,165,107,0.1)" }}
-              >
+            {/* ── Observações por Foto — collapsible ── */}
+            {resultado.observacoesPorFoto && Object.keys(resultado.observacoesPorFoto).length > 0 && (
+              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.1)" }}>
                 <button
                   onClick={() => setExpandedObs((v) => !v)}
                   className="w-full flex items-center justify-between px-6 py-4"
                   style={{ background: "rgba(30,24,18,0.5)", color: "rgba(247,242,236,0.65)" }}
                 >
-                  <span className="text-sm font-medium">Observações por Foto</span>
+                  <span className="text-sm font-medium">Leitura por Foto</span>
                   {expandedObs ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {expandedObs && (
@@ -851,29 +1034,29 @@ export default function TracodeCaraterPage() {
               </div>
             )}
 
-            {/* Therapeutic message */}
+            {/* ── Mensagem Terapêutica ── */}
             {resultado.mensagemTerapeutica && (
               <div
-                className="rounded-2xl p-6 text-center"
+                className="rounded-2xl p-7 text-center"
                 style={{
-                  background: "linear-gradient(135deg, rgba(200,165,107,0.06) 0%, rgba(156,119,66,0.04) 100%)",
-                  border: "1px solid rgba(200,165,107,0.18)",
+                  background: "linear-gradient(135deg, rgba(200,165,107,0.07) 0%, rgba(156,119,66,0.04) 100%)",
+                  border: "1px solid rgba(200,165,107,0.2)",
                 }}
               >
-                <div className="w-8 h-px mx-auto mb-4" style={{ background: "#c8a56b" }} />
+                <div className="w-10 h-px mx-auto mb-5" style={{ background: "linear-gradient(to right, transparent, #c8a56b, transparent)" }} />
                 <p
-                  className="text-sm leading-relaxed italic"
-                  style={{ color: "rgba(247,242,236,0.65)", maxWidth: 560, margin: "0 auto" }}
+                  className="text-base leading-relaxed italic font-tan-mon-cheri"
+                  style={{ color: "rgba(247,242,236,0.75)", maxWidth: 560, margin: "0 auto" }}
                 >
                   {resultado.mensagemTerapeutica}
                 </p>
-                <div className="w-8 h-px mx-auto mt-4" style={{ background: "#c8a56b" }} />
+                <div className="w-10 h-px mx-auto mt-5" style={{ background: "linear-gradient(to right, transparent, #c8a56b, transparent)" }} />
               </div>
             )}
 
-            {/* Date + re-analyze */}
-            <div className="flex items-center justify-between pt-2">
-              <p className="text-xs" style={{ color: "rgba(247,242,236,0.25)" }}>
+            {/* ── Date + re-analyze ── */}
+            <div className="flex items-center justify-between pt-2 pb-4">
+              <p className="text-xs" style={{ color: "rgba(247,242,236,0.22)" }}>
                 Análise realizada em{" "}
                 {new Date(analise!.criadoEm).toLocaleDateString("pt-BR", {
                   day: "2-digit",
@@ -885,10 +1068,7 @@ export default function TracodeCaraterPage() {
                 onClick={handleAnalisar}
                 disabled={analisando || fotosCount === 0}
                 className="flex items-center gap-2 text-xs px-4 py-2 rounded-lg transition-all"
-                style={{
-                  color: "rgba(200,165,107,0.6)",
-                  border: "1px solid rgba(200,165,107,0.2)",
-                }}
+                style={{ color: "rgba(200,165,107,0.6)", border: "1px solid rgba(200,165,107,0.2)" }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.color = "#c8a56b";
                   (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.4)";
