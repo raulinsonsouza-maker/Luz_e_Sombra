@@ -71,8 +71,9 @@ O cliente (`tracoAnalysis.ts`) envia **`metricasResumo`** no `resultado`: uma en
 
 ## 7. Frontend
 
-- Rota **`/diagnostico-eixos`**: fluxo 1 pergunta por ecrã; ao concluir, grava `localStorage` chave `luz_questionario_20_respostas`.
-- **`/traco-de-carater`**: ao gravar análise, envia `questionario20` se existir; após sucesso, remove a chave do `localStorage`.
+- **`/traco-de-carater`** redireciona para **`/diagnostico-eixos`** se ainda não existirem 20 respostas válidas em `localStorage` — o questionário é **obrigatório** e é o **passo 1** da análise de traço; as fotos são o **passo 2**.
+- Rota **`/diagnostico-eixos`**: uma pergunta por ecrã; ao responder a **última** pergunta, grava `luz_questionario_20_respostas` e navega automaticamente para `/traco-de-carater`.
+- Ao gravar a análise com sucesso, o cliente remove a chave do `localStorage` (próxima visita ao traço volta a exigir o questionário).
 
 ---
 

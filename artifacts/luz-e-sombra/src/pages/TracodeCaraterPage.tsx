@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, Redirect, useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { Upload, X, Camera, User, ArrowRight, Loader2, RefreshCw, ChevronDown, ChevronUp, AlertCircle, ImageIcon, Plus, Users, Trash2 } from "lucide-react";
 import { analyzeTracoDeCarater } from "@/lib/tracoAnalysis";
@@ -222,6 +222,7 @@ const FOTOS_CONFIG: Record<TipoFoto, { label: string; instrucoes: string[]; icon
 // ── Main Page ──────────────────────────────────────────────────────────────────
 export default function TracodeCaraterPage() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const primeiroNome = (user?.nome || "").split(" ")[0];
 
   const [fotos, setFotos] = useState<Partial<Record<TipoFoto, FotoTraco>>>({});
@@ -360,6 +361,12 @@ export default function TracodeCaraterPage() {
   }, [fotos]);
 
   const handleAnalisar = async () => {
+    const q20Check = readQuestionario20Respostas();
+    if (!q20Check) {
+      setLocation("/diagnostico-eixos");
+      return;
+    }
+
     const fotosDisponiveis = Object.keys(fotos) as TipoFoto[];
     if (fotosDisponiveis.length === 0) return;
 
@@ -458,6 +465,10 @@ export default function TracodeCaraterPage() {
 
   const fotosCount = Object.keys(fotos).length;
   const questionario20Pronto = readQuestionario20Respostas() !== undefined;
+  if (!questionario20Pronto) {
+    return <Redirect to="/diagnostico-eixos" />;
+  }
+
   const resultado = analise?.resultado;
   const estruturaPrincipal = resultado?.estruturaPrincipal;
   const configPrincipal = estruturaPrincipal ? ESTRUTURAS_CONFIG[estruturaPrincipal] : null;
@@ -487,6 +498,12 @@ export default function TracodeCaraterPage() {
               Auto-conhecimento corporal
             </span>
           </div>
+          <p
+            className="text-xs tracking-widest uppercase mb-3 inline-block px-3 py-1 rounded-full"
+            style={{ color: "rgba(109,185,109,0.85)", border: "1px solid rgba(109,185,109,0.35)", background: "rgba(109,185,109,0.08)" }}
+          >
+            Passo 2 de 2 · Fotos
+          </p>
           <h1
             className="font-tan-mon-cheri text-4xl md:text-5xl mb-4"
             style={{ color: "#f7f2ec", lineHeight: 1.2 }}
@@ -854,19 +871,26 @@ export default function TracodeCaraterPage() {
               ✓ As 3 fotos estão prontas — análise completa disponível
             </p>
           )}
-          {questionario20Pronto ? (
-            <p className="text-xs text-center max-w-md px-2" style={{ color: "rgba(109,185,109,0.8)" }}>
-              Questionário de eixos (20 respostas) será enviado com a gravação para o modelo multimodal.
-            </p>
-          ) : (
-            <p className="text-xs text-center max-w-md px-2" style={{ color: "rgba(200,165,107,0.45)" }}>
-              Quer mais consistência na leitura?{" "}
-              <Link href="/diagnostico-eixos" className="underline" style={{ color: "#c8a56b" }}>
-                Responder 20 perguntas
-              </Link>{" "}
-              antes de analisar.
-            </p>
-          )}
+          <p className="text-xs text-center max-w-md px-2" style={{ color: "rgba(109,185,109,0.75)" }}>
+            O questionário de eixos (passo 1) está concluído — as respostas serão enviadas com a gravação da análise.
+          </p>
+          <p className="text-xs text-center max-w-md px-2 mt-1" style={{ color: "rgba(200,165,107,0.45)" }}>
+            <Link
+              href="/diagnostico-eixos"
+              className="underline"
+              style={{ color: "#c8a56b" }}
+              onClick={() => {
+                try {
+                  localStorage.removeItem(STORAGE_Q20);
+                } catch {
+                  /* ignore */
+                }
+              }}
+            >
+              Refazer o questionário
+            </Link>
+            {" "}se quiser ajustar respostas antes de analisar.
+          </p>
         </div>
 
         {/* ── Results ── */}

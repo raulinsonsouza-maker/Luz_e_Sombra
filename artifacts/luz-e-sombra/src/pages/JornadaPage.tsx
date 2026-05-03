@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { CheckCircle2, Lock, ChevronRight, Layers, Target, Hash, Brain, Wallet, Sparkles, Heart, ClipboardList } from "lucide-react";
+import { CheckCircle2, Lock, ChevronRight, Layers, Target, Hash, Brain, Wallet, Sparkles, Heart } from "lucide-react";
 
 interface Progresso {
   jornada: {
@@ -27,20 +27,11 @@ interface Etapa {
 
 const ETAPAS: Etapa[] = [
   {
-    num: "00",
-    titulo: "Eixos emocionais",
-    subtitulo: "20 perguntas antes ou com o traço",
-    descricao: "Responde em poucos minutos; ao gravar a análise por fotos, o sistema combina imagem + questionário para maior consistência.",
-    icon: ClipboardList,
-    href: "/diagnostico-eixos",
-    xpRecompensa: 30,
-    key: null,
-  },
-  {
     num: "01",
     titulo: "Traço de Caráter",
-    subtitulo: "Conheça sua estrutura de personalidade",
-    descricao: "Baseada na bioenergética e psicologia corporal, essa análise revela com gentileza os padrões mais profundos que habitam em você — com compaixão e respeito pela sua história.",
+    subtitulo: "Questionário + fotos (2 passos)",
+    descricao:
+      "Primeiro respondes a 20 perguntas de eixos emocionais; em seguida envias as fotos. O sistema combina as duas fontes para uma leitura mais consistente.",
     icon: Layers,
     href: "/traco-de-carater",
     xpRecompensa: 100,

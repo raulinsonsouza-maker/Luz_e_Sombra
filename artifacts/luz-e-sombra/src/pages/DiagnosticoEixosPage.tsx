@@ -1,39 +1,63 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { PERGUNTAS_EIXOS_20 } from "@workspace/traco-eixos-multimodal";
 
 const STORAGE_KEY = "luz_questionario_20_respostas";
+
+function parseStored20(): number[] | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw?.trim()) return null;
+    const a = JSON.parse(raw) as unknown;
+    if (!Array.isArray(a) || a.length !== 20) return null;
+    const ok = a.every((x) => typeof x === "number" && Number.isInteger(x) && x >= 1 && x <= 5);
+    return ok ? (a as number[]) : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function DiagnosticoEixosPage() {
   const [, setLocation] = useLocation();
   const [index, setIndex] = useState(0);
   const [respostas, setRespostas] = useState<number[]>(() => Array(20).fill(0));
 
+  useEffect(() => {
+    const done = parseStored20();
+    if (done) setLocation("/traco-de-carater");
+  }, [setLocation]);
+
   const pergunta = PERGUNTAS_EIXOS_20[index];
   const answered = respostas.filter((r) => r >= 1 && r <= 5).length;
-  const isComplete = answered === 20;
 
-  const setValor = useCallback((valor: number) => {
-    setRespostas((prev) => {
-      const n = [...prev];
-      n[index] = valor;
-      return n;
-    });
-    if (index < 19) setIndex((i) => i + 1);
-  }, [index]);
+  const setValor = useCallback(
+    (valor: number) => {
+      setRespostas((prev) => {
+        const n = [...prev];
+        n[index] = valor;
+        if (index === 19) {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(n));
+          } catch {
+            // ignore
+          }
+          queueMicrotask(() => setLocation("/traco-de-carater"));
+          return n;
+        }
+        return n;
+      });
+      if (index < 19) setIndex((i) => i + 1);
+    },
+    [index, setLocation]
+  );
 
-  const handleConcluir = () => {
-    if (!isComplete) return;
+  const handleRecomeçar = () => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(respostas));
+      localStorage.removeItem(STORAGE_KEY);
     } catch {
       // ignore
     }
-    setLocation("/traco-de-carater");
-  };
-
-  const handleReiniciar = () => {
     setRespostas(Array(20).fill(0));
     setIndex(0);
   };
@@ -44,14 +68,18 @@ export default function DiagnosticoEixosPage() {
         className="px-4 pt-8 pb-6 max-w-lg mx-auto"
         style={{ borderBottom: "1px solid rgba(200,165,107,0.12)" }}
       >
-        <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.55)" }}>
-          Diagnóstico por eixos
+        <p
+          className="text-xs tracking-widest uppercase mb-2 inline-block px-2 py-0.5 rounded"
+          style={{ color: "rgba(200,165,107,0.75)", border: "1px solid rgba(200,165,107,0.25)" }}
+        >
+          Passo 1 de 2 · Traço de caráter
         </p>
         <h1 className="font-tan-mon-cheri text-2xl mb-2" style={{ color: "#f7f2ec" }}>
-          20 perguntas
+          Questionário de eixos
         </h1>
         <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
-          Escala 1 (discordo totalmente) a 5 (concordo totalmente). Uma pergunta por ecrã. Os dados combinam com a análise por fotos ao gravar o traço.
+          20 perguntas (escala 1 a 5). Ao terminar a última pergunta, segues automaticamente para o passo das{" "}
+          <strong style={{ color: "rgba(200,165,107,0.85)" }}>fotos</strong>.
         </p>
         <div className="mt-4 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
           <div
@@ -68,7 +96,7 @@ export default function DiagnosticoEixosPage() {
       </section>
 
       <div className="px-4 max-w-lg mx-auto pt-6">
-        {!isComplete && pergunta && (
+        {pergunta && (
           <div
             className="rounded-2xl p-6 mb-6"
             style={{ background: "rgba(30,24,18,0.55)", border: "1px solid rgba(200,165,107,0.12)" }}
@@ -99,36 +127,7 @@ export default function DiagnosticoEixosPage() {
           </div>
         )}
 
-        {isComplete && (
-          <div
-            className="rounded-2xl p-6 text-center mb-6"
-            style={{ background: "rgba(109,185,109,0.08)", border: "1px solid rgba(109,185,109,0.25)" }}
-          >
-            <CheckCircle2 className="w-12 h-12 mx-auto mb-3" style={{ color: "rgba(109,185,109,0.85)" }} />
-            <p className="text-sm mb-4" style={{ color: "rgba(247,242,236,0.75)" }}>
-              Questionário completo. Ao analisar o traço no próximo passo, estes dados serão enviados à API para o modelo multimodal.
-            </p>
-            <button
-              type="button"
-              onClick={handleConcluir}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold"
-              style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1510" }}
-            >
-              Ir para análise de traço
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={handleReiniciar}
-              className="block w-full mt-3 text-xs underline"
-              style={{ color: "rgba(200,165,107,0.5)" }}
-            >
-              Refazer questionário
-            </button>
-          </div>
-        )}
-
-        <div className="flex gap-2 justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
             disabled={index === 0}
@@ -140,12 +139,16 @@ export default function DiagnosticoEixosPage() {
           </button>
           <button
             type="button"
-            onClick={() => setLocation("/traco-de-carater")}
+            onClick={handleRecomeçar}
             className="text-xs px-3 py-2 rounded-lg"
-            style={{ color: "rgba(247,242,236,0.45)" }}
+            style={{ color: "rgba(224,123,57,0.65)", border: "1px solid rgba(224,123,57,0.2)" }}
           >
-            Saltar por agora
+            Recomeçar do início
           </button>
+          <span className="text-[10px] flex items-center gap-1" style={{ color: "rgba(200,165,107,0.4)" }}>
+            Depois: fotos
+            <ArrowRight className="w-3 h-3" />
+          </span>
         </div>
       </div>
     </div>
