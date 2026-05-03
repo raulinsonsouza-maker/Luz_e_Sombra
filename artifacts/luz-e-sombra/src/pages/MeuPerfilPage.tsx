@@ -219,18 +219,58 @@ export default function MeuPerfilPage() {
           )}
         </div>
 
-        {/* ── Quem Sou Eu shortcut ─────────────────────────────────────────── */}
+        {/* ── Quem Sou Eu — card destaque ──────────────────────────────────── */}
         <button
           onClick={() => navigate("/quem-sou-eu")}
-          className="w-full mb-6 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-98"
-          style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.15) 0%, rgba(156,119,66,0.08) 100%)", border: "1px solid rgba(200,165,107,0.3)" }}
+          className="w-full mb-6 rounded-3xl overflow-hidden relative transition-all active:scale-[0.98]"
+          style={{
+            background: "linear-gradient(135deg, rgba(200,165,107,0.2) 0%, rgba(156,119,66,0.1) 50%, rgba(30,24,18,0.9) 100%)",
+            border: "1px solid rgba(200,165,107,0.4)",
+            boxShadow: "0 8px 32px rgba(200,165,107,0.15), inset 0 1px 0 rgba(200,165,107,0.15)",
+          }}
         >
-          <Sparkles className="w-5 h-5" style={{ color: "#c8a56b" }} />
-          <div className="text-left">
-            <p className="font-tan-mon-cheri text-base" style={{ color: "#f7f2ec" }}>Quem Sou Eu</p>
-            <p className="text-xs" style={{ color: "rgba(200,165,107,0.6)" }}>Síntese integrada: numerologia, traço e roda da vida</p>
+          {/* Decorative glow blob */}
+          <div style={{ position: "absolute", top: -16, right: -16, width: 80, height: 80, borderRadius: "50%", background: "#c8a56b", opacity: 0.08, filter: "blur(24px)", pointerEvents: "none" }} />
+
+          <div className="p-5">
+            <div className="flex items-center gap-4">
+              {/* Icon */}
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
+                style={{
+                  background: "linear-gradient(135deg, rgba(200,165,107,0.35), rgba(156,119,66,0.18))",
+                  border: "1px solid rgba(200,165,107,0.4)",
+                  boxShadow: "0 4px 16px rgba(200,165,107,0.2)",
+                }}
+              >
+                <Sparkles className="w-6 h-6" style={{ color: "#c8a56b" }} />
+              </div>
+
+              {/* Text */}
+              <div className="flex-1 text-left min-w-0">
+                <p className="text-[10px] font-bold tracking-[0.25em] uppercase mb-1" style={{ color: "rgba(200,165,107,0.55)" }}>
+                  Análise Integrada
+                </p>
+                <p className="font-tan-mon-cheri text-xl mb-1" style={{ color: "#f7f2ec" }}>
+                  Dossiê de Vida
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
+                  Numerologia · Traço de Caráter · Ano Pessoal
+                </p>
+              </div>
+
+              {/* Arrow */}
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: "rgba(200,165,107,0.12)", border: "1px solid rgba(200,165,107,0.2)" }}
+              >
+                <ArrowRight className="w-4 h-4" style={{ color: "#c8a56b" }} />
+              </div>
+            </div>
           </div>
-          <ArrowRight className="w-4 h-4 ml-auto" style={{ color: "rgba(200,165,107,0.4)" }} />
+
+          {/* Bottom accent line */}
+          <div style={{ height: 2, background: "linear-gradient(90deg, transparent, rgba(200,165,107,0.4), transparent)" }} />
         </button>
 
         {/* ── Stats grid ───────────────────────────────────────────────────── */}

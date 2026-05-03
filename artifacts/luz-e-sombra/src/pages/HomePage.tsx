@@ -71,22 +71,41 @@ function saudacao() {
 }
 
 function ScoreGauge({ score, cor }: { score: number; cor: string }) {
-  const r = 54;
-  const cx = 72;
-  const cy = 72;
-  const circ = Math.PI * r;
-  const offset = circ * (1 - score / 10);
-  const path = `M ${cx - r},${cy} A ${r},${r} 0 0 1 ${cx + r},${cy}`;
+  const size = 96;
+  const r = 38;
+  const cx = size / 2;
+  const cy = size / 2;
+  const circ = 2 * Math.PI * r;
+  const pct = Math.min(1, score / 10);
+  const dashOffset = circ * (1 - pct);
 
   return (
-    <svg width="144" height="80" viewBox="0 0 144 80" className="overflow-visible">
-      <path d={path} fill="none" stroke="rgba(200,165,107,0.1)" strokeWidth={10} strokeLinecap="round" />
-      <path
-        d={path} fill="none" stroke={cor} strokeWidth={10} strokeLinecap="round"
-        strokeDasharray={`${circ}`} strokeDashoffset={offset}
-        style={{ transition: "stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)", filter: `drop-shadow(0 0 6px ${cor}55)` }}
-      />
-    </svg>
+    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(200,165,107,0.1)" strokeWidth={7} />
+        <circle
+          cx={cx} cy={cy} r={r} fill="none" stroke={cor} strokeWidth={7}
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          strokeDashoffset={dashOffset}
+          style={{ transition: "stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)", filter: `drop-shadow(0 0 8px ${cor}66)` }}
+        />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        {score > 0 ? (
+          <>
+            <span className="font-tan-mon-cheri" style={{ fontSize: 22, color: "#f7f2ec", lineHeight: 1 }}>
+              {score.toFixed(1)}
+            </span>
+            <span style={{ fontSize: 9, color: "rgba(247,242,236,0.35)", marginTop: 3, letterSpacing: "0.08em" }}>
+              média
+            </span>
+          </>
+        ) : (
+          <span style={{ fontSize: 16, color: "rgba(200,165,107,0.4)" }}>—</span>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -198,29 +217,7 @@ export default function HomePage() {
         >
           <div className="flex items-center gap-4">
             {/* Gauge */}
-            <div className="relative flex-shrink-0" style={{ width: 144, height: 80 }}>
-              <ScoreGauge score={media ?? 0} cor={mediaCor} />
-              {/* Score overlaid — top:24 keeps text inside the arc bowl (arc spans y=18→72) */}
-              <div style={{ position: "absolute", top: 22, left: 0, right: 0, textAlign: "center" }}>
-                {media !== null ? (
-                  <>
-                    <span
-                      className="font-tan-mon-cheri"
-                      style={{ fontSize: 28, color: "#f7f2ec", display: "block", lineHeight: 1 }}
-                    >
-                      {media.toFixed(1)}
-                    </span>
-                    <span
-                      style={{ fontSize: 10, color: "rgba(247,242,236,0.3)", display: "block", marginTop: 4 }}
-                    >
-                      média /10
-                    </span>
-                  </>
-                ) : (
-                  <span style={{ fontSize: 13, color: "rgba(200,165,107,0.4)", display: "block" }}>—</span>
-                )}
-              </div>
-            </div>
+            <ScoreGauge score={media ?? 0} cor={mediaCor} />
 
             {/* Level + XP */}
             <div className="flex-1 min-w-0">
