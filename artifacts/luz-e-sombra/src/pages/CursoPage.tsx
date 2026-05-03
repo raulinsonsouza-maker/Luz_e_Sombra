@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { apiFetch } from "@/lib/auth";
-import { useAuth } from "@/context/AuthContext";
 import {
   ChevronLeft, Loader2, CheckCircle2, Circle, Play,
   BookOpen, Clock, ChevronRight, ExternalLink,
@@ -31,10 +30,15 @@ interface Curso {
   aulas: Aula[];
 }
 
+/** Número da aula na ordem do curso (1…N), alinhado à lista — não usar só o campo `ordem` do banco. */
+function indiceAula(aulas: Aula[], aulaId: number): number {
+  const i = aulas.findIndex(a => a.id === aulaId);
+  return i < 0 ? 0 : i + 1;
+}
+
 export default function CursoPage() {
   const [, navigate] = useLocation();
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
   const [curso, setCurso] = useState<Curso | null>(null);
   const [loading, setLoading] = useState(true);
   const [aulaAtiva, setAulaAtiva] = useState<Aula | null>(null);
@@ -96,64 +100,84 @@ export default function CursoPage() {
 
   if (!curso) return null;
 
+  const totalAulas = curso.aulas.length;
   const totalConcluidas = curso.aulas.filter(a => a.concluida).length;
-  const pct = curso.aulas.length > 0 ? Math.round((totalConcluidas / curso.aulas.length) * 100) : 0;
+  const pct = totalAulas > 0 ? Math.round((totalConcluidas / totalAulas) * 100) : 0;
   const embedUrl = aulaAtiva?.videoUrl ? getVideoEmbedUrl(aulaAtiva.videoUrl) : null;
+  const nAtiva = aulaAtiva ? indiceAula(curso.aulas, aulaAtiva.id) : 0;
+  const temVideoEmbutido = Boolean(embedUrl);
 
   return (
-    <div className="min-h-screen pb-28"
+    <div className="min-h-screen pb-32"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}>
-      <div className="max-w-2xl mx-auto px-4 pt-4">
+      <div className="max-w-2xl mx-auto px-4 sm:px-5 pt-4 sm:pt-6">
 
-        {/* Back */}
         <button
+          type="button"
           onClick={() => navigate("/cursos")}
-          className="flex items-center gap-2 mb-5 text-sm transition-all"
-          style={{ color: "rgba(200,165,107,0.5)" }}
+          className="flex items-center gap-2 mb-4 sm:mb-6 text-sm transition-all"
+          style={{ color: "rgba(200,165,107,0.55)" }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#c8a56b"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "rgba(200,165,107,0.5)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "rgba(200,165,107,0.55)"; }}
         >
           <ChevronLeft className="w-4 h-4" />
-          Todos os cursos
+          Voltar aos cursos
         </button>
 
-        {/* Cabeçalho com capa */}
-        <div className="rounded-2xl overflow-hidden mb-5"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
-          <CursoCapa cursoId={curso.id} imagemUrl={curso.imagemUrl} titulo={curso.titulo} heightClass="h-44 sm:h-52" />
-          <div className="p-5">
+        {/* Hero do curso */}
+        <div className="rounded-2xl overflow-hidden mb-6 shadow-xl shadow-black/30"
+          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.14)" }}>
+          <CursoCapa cursoId={curso.id} imagemUrl={curso.imagemUrl} titulo={curso.titulo} heightClass="h-48 sm:h-56" />
+          <div className="p-5 sm:p-6">
             {curso.categoria && (
-              <p className="text-xs mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>{curso.categoria}</p>
-            )}
-            <h1 className="font-tan-mon-cheri text-2xl mb-2" style={{ color: "#f7f2ec" }}>{curso.titulo}</h1>
-            <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.5)" }}>{curso.descricao}</p>
-            <div className="flex items-center gap-4">
-              <span className="text-xs flex items-center gap-1" style={{ color: "rgba(247,242,236,0.3)" }}>
-                <BookOpen className="w-3.5 h-3.5" />
-                {curso.aulas.length} aula{curso.aulas.length !== 1 ? "s" : ""}
+              <span className="inline-block text-[10px] font-bold tracking-widest uppercase mb-2 px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(200,165,107,0.12)", color: "rgba(200,165,107,0.75)" }}>
+                {curso.categoria}
               </span>
-              <span className="text-xs font-medium" style={{ color: pct === 100 ? "#5db97a" : "#c8a56b" }}>
-                {pct}% concluído
+            )}
+            <h1 className="font-tan-mon-cheri text-2xl sm:text-3xl mb-3 leading-tight" style={{ color: "#f7f2ec" }}>
+              {curso.titulo}
+            </h1>
+            <p className="text-sm sm:text-[15px] leading-relaxed mb-6" style={{ color: "rgba(247,242,236,0.52)" }}>
+              {curso.descricao}
+            </p>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <span className="text-xs font-medium" style={{ color: "rgba(247,242,236,0.45)" }}>
+                Progresso do curso
+              </span>
+              <span className="text-xs font-semibold tabular-nums" style={{ color: pct === 100 ? "#6ecf8f" : "#c8a56b" }}>
+                {totalConcluidas}/{totalAulas} aulas · {pct}%
               </span>
             </div>
-            <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(200,165,107,0.08)" }}>
+            <div
+              className="h-3 sm:h-3.5 rounded-full overflow-hidden"
+              style={{
+                background: "rgba(0,0,0,0.35)",
+                boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4)",
+                border: "1px solid rgba(200,165,107,0.12)",
+              }}
+            >
               <div
-                className="h-full rounded-full transition-all"
+                className="h-full rounded-full transition-all duration-500 ease-out"
                 style={{
                   width: `${pct}%`,
-                  background: pct === 100 ? "linear-gradient(90deg, #5db97a, #3da65a)" : "linear-gradient(90deg, #9c7742, #c8a56b)",
+                  minWidth: pct > 0 ? "6px" : undefined,
+                  background: pct === 100
+                    ? "linear-gradient(90deg, #4ade80, #22c55e)"
+                    : "linear-gradient(90deg, #8a6a3e, #d4b87a, #c8a56b)",
+                  boxShadow: pct > 0 ? "0 0 12px rgba(200,165,107,0.35)" : undefined,
                 }}
               />
             </div>
           </div>
         </div>
 
-        {/* Active lesson viewer */}
+        {/* Aula em foco */}
         {aulaAtiva && (
-          <div className="rounded-2xl overflow-hidden mb-5"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
+          <div className="rounded-2xl overflow-hidden mb-6"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.14)" }}>
 
-            {/* Video embed */}
             {embedUrl ? (
               <div className="aspect-video w-full bg-black">
                 <iframe
@@ -165,69 +189,92 @@ export default function CursoPage() {
                 />
               </div>
             ) : aulaAtiva.videoUrl?.trim() ? (
-              <div className="aspect-video w-full flex flex-col items-center justify-center gap-3 px-6 text-center"
+              <div className="aspect-video w-full flex flex-col items-center justify-center gap-4 px-6 text-center py-8"
                 style={{ background: "rgba(200,165,107,0.06)", borderBottom: "1px solid rgba(200,165,107,0.08)" }}>
                 <Play className="w-10 h-10" style={{ color: "rgba(200,165,107,0.45)" }} />
-                <p className="text-xs" style={{ color: "rgba(247,242,236,0.45)" }}>
-                  Este link não pôde ser incorporado. Abra no navegador para assistir.
+                <p className="text-sm max-w-sm" style={{ color: "rgba(247,242,236,0.5)" }}>
+                  Este link não pode ser reproduzido aqui. Abra no YouTube ou no navegador.
                 </p>
                 <a
                   href={aulaAtiva.videoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
                   style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
                 >
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  <ExternalLink className="w-4 h-4" />
                   Abrir vídeo
                 </a>
               </div>
             ) : (
-              <div className="aspect-video w-full flex items-center justify-center"
-                style={{ background: "rgba(200,165,107,0.04)" }}>
-                <div className="text-center">
-                  <Play className="w-10 h-10 mx-auto mb-2" style={{ color: "rgba(200,165,107,0.3)" }} />
-                  <p className="text-xs" style={{ color: "rgba(247,242,236,0.25)" }}>Sem vídeo para esta aula</p>
+              <div className="aspect-video max-h-48 w-full flex items-center justify-center"
+                style={{ background: "rgba(200,165,107,0.05)" }}>
+                <div className="text-center px-4">
+                  <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-35" style={{ color: "#c8a56b" }} />
+                  <p className="text-sm" style={{ color: "rgba(247,242,236,0.35)" }}>Esta aula ainda não tem vídeo</p>
                 </div>
               </div>
             )}
 
-            <div className="p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                  <p className="text-xs mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
-                    Aula {(aulaAtiva.ordem + 1).toString().padStart(2, "0")}
-                  </p>
-                  <h2 className="font-semibold text-lg mb-2" style={{ color: "#f7f2ec" }}>{aulaAtiva.titulo}</h2>
-                  {aulaAtiva.descricao && (
-                    <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.5)" }}>
-                      {aulaAtiva.descricao}
-                    </p>
-                  )}
-                  {aulaAtiva.conteudo && (
-                    <div
-                      className="text-sm leading-relaxed rounded-xl p-4"
-                      style={{
-                        background: "rgba(200,165,107,0.04)",
-                        border: "1px solid rgba(200,165,107,0.1)",
-                        color: "rgba(247,242,236,0.7)",
-                        whiteSpace: "pre-wrap",
-                      }}
-                    >
-                      {aulaAtiva.conteudo}
-                    </div>
-                  )}
-                </div>
+            <div className="p-5 sm:p-6">
+              <h2 className="sr-only">{aulaAtiva.titulo}</h2>
+
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <span
+                  className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                  style={{ background: "rgba(200,165,107,0.15)", color: "#c8a56b", border: "1px solid rgba(200,165,107,0.25)" }}
+                >
+                  Aula {nAtiva} de {totalAulas}
+                </span>
+                {aulaAtiva.duracaoMin != null && aulaAtiva.duracaoMin > 0 && (
+                  <span className="flex items-center gap-1 text-[11px]" style={{ color: "rgba(247,242,236,0.38)" }}>
+                    <Clock className="w-3.5 h-3.5" />
+                    {aulaAtiva.duracaoMin} min
+                  </span>
+                )}
+                {aulaAtiva.concluida && (
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(74,222,128,0.12)", color: "#6ecf8f" }}>
+                    Concluída
+                  </span>
+                )}
               </div>
 
-              <div className="flex items-center gap-3 mt-4">
+              {/* Título visível só quando não há player (evita repetir o mesmo título 3x) */}
+              {!temVideoEmbutido && (
+                <p className="text-lg sm:text-xl font-semibold leading-snug mb-3" style={{ color: "#f7f2ec" }}>
+                  {aulaAtiva.titulo}
+                </p>
+              )}
+
+              {aulaAtiva.descricao?.trim() && (
+                <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.55)" }}>
+                  {aulaAtiva.descricao}
+                </p>
+              )}
+
+              {aulaAtiva.conteudo?.trim() && (
+                <div
+                  className="text-sm leading-relaxed rounded-xl p-4 mb-5"
+                  style={{
+                    background: "rgba(200,165,107,0.05)",
+                    border: "1px solid rgba(200,165,107,0.1)",
+                    color: "rgba(247,242,236,0.72)",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {aulaAtiva.conteudo}
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-3">
                 <button
+                  type="button"
                   onClick={() => toggleConcluida(aulaAtiva)}
                   disabled={toggling === aulaAtiva.id}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50"
                   style={aulaAtiva.concluida
-                    ? { background: "rgba(93,185,122,0.15)", color: "#5db97a", border: "1px solid rgba(93,185,122,0.3)" }
-                    : { background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }
+                    ? { background: "rgba(93,185,122,0.18)", color: "#6ecf8f", border: "1px solid rgba(93,185,122,0.35)" }
+                    : { background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208", border: "none" }
                   }
                 >
                   {toggling === aulaAtiva.id
@@ -236,78 +283,103 @@ export default function CursoPage() {
                       ? <CheckCircle2 className="w-4 h-4" />
                       : <Circle className="w-4 h-4" />
                   }
-                  {aulaAtiva.concluida ? "Concluída" : "Marcar como concluída"}
+                  {aulaAtiva.concluida ? "Aula concluída" : "Marcar aula como concluída"}
                 </button>
 
-                {/* Next lesson */}
                 {(() => {
                   const idx = curso.aulas.findIndex(a => a.id === aulaAtiva.id);
+                  const prev = curso.aulas[idx - 1];
                   const next = curso.aulas[idx + 1];
-                  return next ? (
-                    <button
-                      onClick={() => setAulaAtiva(next)}
-                      className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm transition-all"
-                      style={{ border: "1px solid rgba(200,165,107,0.2)", color: "rgba(200,165,107,0.6)" }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#c8a56b"; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "rgba(200,165,107,0.6)"; }}
-                    >
-                      Próxima
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  ) : null;
+                  return (
+                    <>
+                      {prev && (
+                        <button
+                          type="button"
+                          onClick={() => setAulaAtiva(prev)}
+                          className="flex items-center gap-1 min-h-[44px] px-4 rounded-xl text-sm font-medium transition-all"
+                          style={{ border: "1px solid rgba(200,165,107,0.22)", color: "rgba(200,165,107,0.75)" }}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          Anterior
+                        </button>
+                      )}
+                      {next && (
+                        <button
+                          type="button"
+                          onClick={() => setAulaAtiva(next)}
+                          className="flex items-center gap-1 min-h-[44px] px-4 rounded-xl text-sm font-medium transition-all"
+                          style={{ border: "1px solid rgba(200,165,107,0.22)", color: "rgba(200,165,107,0.75)" }}
+                        >
+                          Próxima
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      )}
+                    </>
+                  );
                 })()}
               </div>
             </div>
           </div>
         )}
 
-        {/* Lesson list */}
+        {/* Lista de aulas */}
         {curso.aulas.length > 0 && (
           <div className="rounded-2xl overflow-hidden"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.1)" }}>
-            <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(200,165,107,0.08)" }}>
-              <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
-                Aulas do Curso
+            style={{ background: "rgba(255,255,255,0.035)", border: "1px solid rgba(200,165,107,0.12)" }}>
+            <div className="px-5 sm:px-6 py-4 sm:py-5" style={{ borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
+              <p className="text-xs font-bold tracking-[0.2em] uppercase mb-0.5" style={{ color: "rgba(200,165,107,0.55)" }}>
+                Conteúdo do curso
+              </p>
+              <p className="text-[11px]" style={{ color: "rgba(247,242,236,0.28)" }}>
+                Toque em uma aula para assistir ou ler
               </p>
             </div>
             {curso.aulas.map((aula, i) => {
               const ativa = aulaAtiva?.id === aula.id;
+              const n = i + 1;
               return (
                 <button
                   key={aula.id}
+                  type="button"
                   onClick={() => setAulaAtiva(aula)}
-                  className="w-full flex items-center gap-3 px-5 py-3.5 text-left transition-all"
+                  className="w-full flex items-start gap-4 px-5 sm:px-6 py-4 sm:py-5 text-left transition-all min-h-[72px]"
                   style={{
-                    borderTop: i > 0 ? "1px solid rgba(200,165,107,0.06)" : undefined,
-                    background: ativa ? "rgba(200,165,107,0.06)" : "transparent",
+                    borderTop: i > 0 ? "1px solid rgba(200,165,107,0.07)" : undefined,
+                    background: ativa ? "rgba(200,165,107,0.08)" : "transparent",
+                    boxShadow: ativa ? "inset 3px 0 0 #c8a56b" : undefined,
                   }}
-                  onMouseEnter={e => { if (!ativa) (e.currentTarget as HTMLElement).style.background = "rgba(200,165,107,0.03)"; }}
-                  onMouseLeave={e => { if (!ativa) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                  onMouseEnter={e => {
+                    if (!ativa) (e.currentTarget as HTMLElement).style.background = "rgba(200,165,107,0.04)";
+                  }}
+                  onMouseLeave={e => {
+                    if (!ativa) (e.currentTarget as HTMLElement).style.background = "transparent";
+                  }}
                 >
-                  <div className="shrink-0">
+                  <div className="shrink-0 pt-0.5">
                     {aula.concluida
-                      ? <CheckCircle2 className="w-4 h-4" style={{ color: "#5db97a" }} />
-                      : <Circle className="w-4 h-4" style={{ color: ativa ? "#c8a56b" : "rgba(247,242,236,0.2)" }} />
+                      ? <CheckCircle2 className="w-5 h-5" style={{ color: "#5db97a" }} />
+                      : <Circle className="w-5 h-5" style={{ color: ativa ? "#c8a56b" : "rgba(247,242,236,0.22)" }} />
                     }
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs mb-0.5" style={{ color: "rgba(200,165,107,0.4)" }}>
-                      Aula {(i + 1).toString().padStart(2, "0")}
+                  <div className="flex-1 min-w-0 py-0.5">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: ativa ? "rgba(200,165,107,0.85)" : "rgba(200,165,107,0.45)" }}>
+                      Aula {String(n).padStart(2, "0")}
                     </p>
-                    <p className="text-sm font-medium truncate" style={{ color: ativa ? "#f7f2ec" : "rgba(247,242,236,0.6)" }}>
+                    <p className={`text-[15px] leading-snug ${ativa ? "font-semibold" : "font-medium"}`}
+                      style={{ color: ativa ? "#f7f2ec" : "rgba(247,242,236,0.72)" }}>
                       {aula.titulo}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {aula.duracaoMin && (
-                      <span className="flex items-center gap-1 text-xs" style={{ color: "rgba(247,242,236,0.25)" }}>
-                        <Clock className="w-3 h-3" />
-                        {aula.duracaoMin}min
+                  <div className="flex flex-col items-end gap-1 shrink-0 pt-0.5">
+                    {aula.duracaoMin != null && aula.duracaoMin > 0 && (
+                      <span className="flex items-center gap-1 text-[11px] tabular-nums" style={{ color: "rgba(247,242,236,0.32)" }}>
+                        <Clock className="w-3.5 h-3.5" />
+                        {aula.duracaoMin} min
                       </span>
                     )}
                     {aula.videoUrl
-                      ? <Play className="w-3.5 h-3.5" style={{ color: ativa ? "#c8a56b" : "rgba(247,242,236,0.15)" }} />
-                      : <BookOpen className="w-3.5 h-3.5" style={{ color: "rgba(247,242,236,0.15)" }} />
+                      ? <Play className="w-4 h-4" style={{ color: ativa ? "#c8a56b" : "rgba(247,242,236,0.2)" }} />
+                      : <BookOpen className="w-4 h-4" style={{ color: "rgba(247,242,236,0.2)" }} />
                     }
                   </div>
                 </button>
@@ -317,10 +389,10 @@ export default function CursoPage() {
         )}
 
         {curso.aulas.length === 0 && (
-          <div className="text-center py-12">
-            <BookOpen className="w-8 h-8 mx-auto mb-3" style={{ color: "rgba(200,165,107,0.3)" }} />
-            <p className="text-sm" style={{ color: "rgba(247,242,236,0.3)" }}>
-              As aulas serão adicionadas em breve.
+          <div className="text-center py-14 rounded-2xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.1)" }}>
+            <BookOpen className="w-9 h-9 mx-auto mb-3 opacity-40" style={{ color: "#c8a56b" }} />
+            <p className="text-sm" style={{ color: "rgba(247,242,236,0.35)" }}>
+              As aulas deste curso serão publicadas em breve.
             </p>
           </div>
         )}
