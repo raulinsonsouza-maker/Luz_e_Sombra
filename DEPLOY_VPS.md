@@ -112,7 +112,7 @@ sudo -u postgres psql
 ### 7.2 Executar os comandos SQL (copie e cole)
 
 ```sql
-CREATE USER luzesombra_user WITH PASSWORD 'SENHA_FORTE_AQUI';
+CREATE USER luzesombra_user WITH PASSWORD 'Sucesso@2025';
 CREATE DATABASE luzesombra_db OWNER luzesombra_user;
 GRANT ALL PRIVILEGES ON DATABASE luzesombra_db TO luzesombra_user;
 \q
@@ -139,7 +139,7 @@ Vamos usar a pasta `/opt/luzesombra`.
 ```bash
 mkdir -p /opt
 cd /opt
-git clone URL_DO_SEU_REPOSITORIO luzesombra
+git clone https://github.com/raulinsonsouza-maker/Luz_e_Sombra luzesombra
 cd luzesombra
 ```
 
@@ -172,10 +172,10 @@ Use este exemplo (ajuste os valores):
 NODE_ENV=production
 
 PORT=8080
-DATABASE_URL=postgresql://luzesombra_user:SENHA_FORTE_AQUI@127.0.0.1:5432/luzesombra_db
+DATABASE_URL=postgresql://luzesombra_user:Sucesso@2025@127.0.0.1:5432/luzesombra_db
 JWT_SECRET=COLOQUE_UM_SEGREDO_BEM_GRANDE_AQUI
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=SENHA_ADMIN_FORTE
+ADMIN_PASSWORD=SUcesso@2025
 ADMIN_NOME=Administrador
 LOG_LEVEL=info
 CORS_ORIGIN=https://app.seudominio.com
@@ -386,6 +386,30 @@ systemctl reload nginx
 ---
 
 ## 20) Comandos uteis de suporte
+
+### Healthcheck do deploy falha (`curl` a `/api/healthz`)
+
+O `scripts/deploy-vps.sh` volta a tentar o healthcheck durante alguns segundos (arranque lento ou `RestartSec`).
+
+Se continuar a falhar, na VPS:
+
+```bash
+systemctl status luzesombra-api --no-pager -l
+journalctl -u luzesombra-api -n 80 --no-pager
+```
+
+Causas frequentes:
+
+- **`PORT` em falta** no ficheiro referenciado por `EnvironmentFile=` (ex.: `PORT=8080` no `/opt/luzesombra/.env`).
+- **`DATABASE_URL` em falta** para o processo do systemd (o deploy faz `source .env` só para o `drizzle-kit`; o Node da API lê o mesmo ficheiro via systemd).
+- **Permissões do `.env`**: com `User=www-data`, o utilizador tem de conseguir ler o ficheiro (ex.: `chgrp www-data /opt/luzesombra/.env` e `chmod 640 /opt/luzesombra/.env`).
+- **Caminho do `ExecStart`**: tem de apontar para `artifacts/api-server/dist/index.mjs` dentro do clone atualizado.
+
+Teste manual na VPS:
+
+```bash
+curl -sv http://127.0.0.1:8080/api/healthz
+```
 
 Ver logs da API:
 
