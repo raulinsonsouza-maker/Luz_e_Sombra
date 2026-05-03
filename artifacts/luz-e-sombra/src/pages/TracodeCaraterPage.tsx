@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Upload, X, Camera, User, ArrowRight, Loader2, RefreshCw, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
+import { Upload, X, Camera, User, ArrowRight, Loader2, RefreshCw, ChevronDown, ChevronUp, AlertCircle, ImageIcon } from "lucide-react";
+import { analyzeTracoDeCarater } from "@/lib/tracoAnalysis";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -141,15 +142,18 @@ export default function TracodeCaraterPage() {
   const primeiroNome = (user?.nome || "").split(" ")[0];
 
   const [fotos, setFotos] = useState<Partial<Record<TipoFoto, FotoTraco>>>({});
+  const [fotoFiles, setFotoFiles] = useState<Partial<Record<TipoFoto, File>>>({}); // local File objects for analysis
   const [previews, setPreviews] = useState<Partial<Record<TipoFoto, string>>>({});
   const [uploading, setUploading] = useState<Partial<Record<TipoFoto, boolean>>>({});
   const [analise, setAnalise] = useState<AnaliseTraco | null>(null);
   const [analisando, setAnalisando] = useState(false);
+  const [analisandoEtapa, setAnalisandoEtapa] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [expandedObs, setExpandedObs] = useState(false);
   const [expandedCaract, setExpandedCaract] = useState(false);
 
   const fileInputs = useRef<Partial<Record<TipoFoto, HTMLInputElement | null>>>({});
+  const cameraInputs = useRef<Partial<Record<TipoFoto, HTMLInputElement | null>>>({});
 
   // Load existing photos and analysis on mount
   useEffect(() => {
@@ -188,6 +192,9 @@ export default function TracodeCaraterPage() {
       setUploading((u) => ({ ...u, [tipo]: true }));
       setErro(null);
 
+      // Store file locally for analysis (no API credits needed)
+      setFotoFiles((ff) => ({ ...ff, [tipo]: file }));
+
       try {
         // 1. Get presigned URL
         const urlRes = await apiFetch("/traco/fotos/upload-url", {
@@ -214,12 +221,13 @@ export default function TracodeCaraterPage() {
         const savedFoto: FotoTraco = await saveRes.json();
 
         setFotos((f) => ({ ...f, [tipo]: savedFoto }));
-        // Switch to server preview URL
-        setPreviews((p) => ({ ...p, [tipo]: `${API_BASE}/api/traco/fotos/${savedFoto.id}/view` }));
+        // Keep local preview (avoids auth-gated reload)
+        setPreviews((p) => ({ ...p, [tipo]: localURL }));
       } catch (e: unknown) {
         setErro(e instanceof Error ? e.message : "Erro ao fazer upload da foto");
         setPreviews((p) => ({ ...p, [tipo]: undefined }));
         setFotos((f) => { const n = { ...f }; delete n[tipo]; return n; });
+        setFotoFiles((ff) => { const n = { ...ff }; delete n[tipo]; return n; });
       } finally {
         setUploading((u) => ({ ...u, [tipo]: false }));
       }
@@ -237,25 +245,49 @@ export default function TracodeCaraterPage() {
     }
     setFotos((f) => { const n = { ...f }; delete n[tipo]; return n; });
     setPreviews((p) => { const n = { ...p }; delete n[tipo]; return n; });
+    setFotoFiles((ff) => { const n = { ...ff }; delete n[tipo]; return n; });
   }, [fotos]);
 
   const handleAnalisar = async () => {
+    const fotosDisponiveis = Object.keys(fotos) as TipoFoto[];
+    if (fotosDisponiveis.length === 0) return;
+
     setAnalisando(true);
+    setAnalisandoEtapa("Carregando fotos...");
     setErro(null);
+
     try {
-      const token = localStorage.getItem("luz_e_sombra_token");
-      const res = await fetch(`${API_BASE}/api/traco/analisar`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Erro na análise");
+      const token = localStorage.getItem("luz_e_sombra_token") ?? "";
+
+      // Build photo sources: prefer local File, fall back to server URL
+      setAnalisandoEtapa("Lendo marcadores corporais...");
+      const photoSources: Array<{ tipo: TipoFoto; source: File | string }> = [];
+      for (const tipo of fotosDisponiveis) {
+        const localFile = fotoFiles[tipo];
+        if (localFile) {
+          photoSources.push({ tipo, source: localFile });
+        } else if (fotos[tipo]) {
+          const fotoId = fotos[tipo]!.id;
+          const serverUrl = `${API_BASE}/api/traco/fotos/${fotoId}/view`;
+          photoSources.push({ tipo, source: serverUrl });
+        }
       }
-      const data: AnaliseTraco = await res.json();
+
+      setAnalisandoEtapa("Calculando estruturas biomecânicas...");
+      const resultado = await analyzeTracoDeCarater(photoSources, token);
+
+      setAnalisandoEtapa("Gerando análise completa...");
+
+      // Save computed result to backend
+      const saveRes = await apiFetch("/traco/analisar", {
+        method: "POST",
+        body: JSON.stringify({ resultado }),
+      });
+      if (!saveRes.ok) {
+        const errData = await saveRes.json().catch(() => ({}));
+        throw new Error((errData as { error?: string }).error ?? "Erro ao salvar análise");
+      }
+      const data: AnaliseTraco = await saveRes.json();
       setAnalise(data);
       setTimeout(() => {
         document.getElementById("resultado-traco")?.scrollIntoView({ behavior: "smooth" });
@@ -264,6 +296,7 @@ export default function TracodeCaraterPage() {
       setErro(e instanceof Error ? e.message : "Erro ao analisar. Tente novamente.");
     } finally {
       setAnalisando(false);
+      setAnalisandoEtapa("");
     }
   };
 
@@ -396,53 +429,87 @@ export default function TracodeCaraterPage() {
                       </span>
                     </div>
                   ) : preview ? (
-                    <div className="relative w-full h-44 rounded-xl overflow-hidden group">
-                      <img
-                        src={preview}
-                        alt={config.label}
-                        className="w-full h-full object-cover"
-                        style={{ filter: "brightness(0.85)" }}
-                      />
-                      <div
-                        className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                        style={{ background: "rgba(0,0,0,0.5)" }}
-                        onClick={() => fileInputs.current[tipo]?.click()}
-                      >
-                        <div className="flex flex-col items-center gap-2">
-                          <RefreshCw className="w-5 h-5" style={{ color: "#c8a56b" }} />
-                          <span className="text-xs" style={{ color: "#c8a56b" }}>
-                            Trocar foto
-                          </span>
+                    /* ── Photo preview with swap options ── */
+                    <div className="w-full space-y-2">
+                      <div className="relative w-full h-36 rounded-xl overflow-hidden group">
+                        <img
+                          src={preview}
+                          alt={config.label}
+                          className="w-full h-full object-cover"
+                          style={{ filter: "brightness(0.85)" }}
+                        />
+                        <div
+                          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          style={{ background: "rgba(0,0,0,0.55)" }}
+                        >
+                          <span className="text-xs" style={{ color: "#c8a56b" }}>Trocar foto</span>
                         </div>
+                      </div>
+                      {/* Swap buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => cameraInputs.current[tipo]?.click()}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs transition-all"
+                          style={{ color: "rgba(200,165,107,0.6)", border: "1px solid rgba(200,165,107,0.18)" }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#c8a56b"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.4)"; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(200,165,107,0.6)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.18)"; }}
+                        >
+                          <Camera className="w-3.5 h-3.5" /> Câmera
+                        </button>
+                        <button
+                          onClick={() => fileInputs.current[tipo]?.click()}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs transition-all"
+                          style={{ color: "rgba(200,165,107,0.6)", border: "1px solid rgba(200,165,107,0.18)" }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#c8a56b"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.4)"; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(200,165,107,0.6)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.18)"; }}
+                        >
+                          <ImageIcon className="w-3.5 h-3.5" /> Galeria
+                        </button>
                       </div>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => fileInputs.current[tipo]?.click()}
-                      className="flex flex-col items-center gap-3 w-full h-44 rounded-xl border-2 border-dashed transition-all"
-                      style={{
-                        borderColor: "rgba(200,165,107,0.2)",
-                        color: "rgba(247,242,236,0.3)",
-                      }}
-                      onMouseEnter={(e) => {
-                        const el = e.currentTarget as HTMLElement;
-                        el.style.borderColor = "rgba(200,165,107,0.5)";
-                        el.style.color = "rgba(247,242,236,0.6)";
-                        el.style.background = "rgba(200,165,107,0.04)";
-                      }}
-                      onMouseLeave={(e) => {
-                        const el = e.currentTarget as HTMLElement;
-                        el.style.borderColor = "rgba(200,165,107,0.2)";
-                        el.style.color = "rgba(247,242,236,0.3)";
-                        el.style.background = "transparent";
-                      }}
-                    >
-                      <Upload className="w-7 h-7" />
-                      <span className="text-xs text-center px-4">
-                        Clique para selecionar a foto
-                      </span>
-                    </button>
+                    /* ── Empty state: camera + gallery buttons ── */
+                    <div className="w-full space-y-2">
+                      {/* Camera button — opens camera directly on mobile */}
+                      <button
+                        onClick={() => cameraInputs.current[tipo]?.click()}
+                        className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl border-2 transition-all"
+                        style={{ borderColor: "rgba(200,165,107,0.3)", color: "rgba(247,242,236,0.55)", background: "rgba(200,165,107,0.04)" }}
+                        onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(200,165,107,0.6)"; el.style.color = "rgba(247,242,236,0.85)"; el.style.background = "rgba(200,165,107,0.08)"; }}
+                        onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(200,165,107,0.3)"; el.style.color = "rgba(247,242,236,0.55)"; el.style.background = "rgba(200,165,107,0.04)"; }}
+                      >
+                        <Camera className="w-5 h-5" />
+                        <span className="text-sm font-medium">Tirar foto agora</span>
+                      </button>
+                      {/* Gallery / file button */}
+                      <button
+                        onClick={() => fileInputs.current[tipo]?.click()}
+                        className="flex items-center justify-center gap-2.5 w-full py-3 rounded-xl border border-dashed transition-all"
+                        style={{ borderColor: "rgba(200,165,107,0.18)", color: "rgba(247,242,236,0.3)" }}
+                        onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(200,165,107,0.4)"; el.style.color = "rgba(247,242,236,0.55)"; }}
+                        onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(200,165,107,0.18)"; el.style.color = "rgba(247,242,236,0.3)"; }}
+                      >
+                        <ImageIcon className="w-4 h-4" />
+                        <span className="text-xs">Escolher da galeria</span>
+                      </button>
+                    </div>
                   )}
+
+                  {/* Hidden inputs */}
+                  {/* Camera input — capture attribute opens camera directly */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture={tipo === "rosto" ? "user" : "environment"}
+                    ref={(el) => { cameraInputs.current[tipo] = el; }}
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileSelect(tipo, file);
+                      e.target.value = "";
+                    }}
+                  />
+                  {/* Gallery input — no capture, opens file picker */}
                   <input
                     type="file"
                     accept="image/*"
@@ -504,7 +571,7 @@ export default function TracodeCaraterPage() {
             {analisando ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Analisando seu traço de caráter...
+                <span>{analisandoEtapa || "Analisando..."}</span>
               </>
             ) : (
               <>
