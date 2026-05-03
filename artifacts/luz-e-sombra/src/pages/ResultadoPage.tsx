@@ -4,13 +4,37 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import RadarChart from "@/components/RadarChart";
 import LineChart from "@/components/LineChart";
-import AreaIcon from "@/components/AreaIcon";
 import { AREAS_DA_VIDA } from "@/lib/types";
 import {
   ArrowRight, Sparkles, TrendingUp, ArrowUp, ArrowDown, Minus,
   ChevronRight, AlertTriangle, CheckCircle, Target, Zap,
+  Smile, Activity, Brain, Scale, Home, Heart, Users,
+  Coins, Hand, Palette, LucideIcon,
 } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
+
+// ─── Area icon ─────────────────────────────────────────────────────────────
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Smile, Sparkles, Activity, Brain, Scale,
+  Home, Heart, Users, Target, Coins, Hand, Palette,
+};
+
+function AreaIconDark({ iconName, size = 24 }: { iconName: string; size?: number }) {
+  const Icon = ICON_MAP[iconName] || Smile;
+  return (
+    <div
+      className="inline-flex items-center justify-center rounded-xl flex-shrink-0"
+      style={{
+        width: size + 20, height: size + 20,
+        background: "linear-gradient(135deg, rgba(200,165,107,0.12) 0%, rgba(156,119,66,0.06) 100%)",
+        border: "1px solid rgba(200,165,107,0.25)",
+      }}
+    >
+      <Icon size={size} strokeWidth={1.4} style={{ color: "#c8a56b" }} />
+    </div>
+  );
+}
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -272,10 +296,10 @@ function getNivelInfo(areaId: string, valor: number): NivelInfo {
     valor <= 7 ? "desenvolvimento" : "excelencia";
 
   const configs = {
-    urgente: { label: "Atenção urgente", cor: "#ef4444", bgLight: "rgba(239,68,68,0.05)", borderColor: "rgba(239,68,68,0.25)" },
-    atencao: { label: "Atenção necessária", cor: "#f97316", bgLight: "rgba(249,115,22,0.05)", borderColor: "rgba(249,115,22,0.25)" },
-    desenvolvimento: { label: "Em desenvolvimento", cor: "#eab308", bgLight: "rgba(234,179,8,0.05)", borderColor: "rgba(234,179,8,0.25)" },
-    excelencia: { label: "Ponto forte", cor: "#c8a56b", bgLight: "rgba(200,165,107,0.05)", borderColor: "rgba(200,165,107,0.25)" },
+    urgente: { label: "Atenção urgente", cor: "#ef4444", bgLight: "rgba(239,68,68,0.06)", borderColor: "rgba(239,68,68,0.2)" },
+    atencao: { label: "Atenção necessária", cor: "#f97316", bgLight: "rgba(249,115,22,0.06)", borderColor: "rgba(249,115,22,0.2)" },
+    desenvolvimento: { label: "Em desenvolvimento", cor: "#eab308", bgLight: "rgba(234,179,8,0.06)", borderColor: "rgba(234,179,8,0.2)" },
+    excelencia: { label: "Ponto forte", cor: "#c8a56b", bgLight: "rgba(200,165,107,0.06)", borderColor: "rgba(200,165,107,0.2)" },
   };
 
   const textos = INTERPRETACOES[areaId]?.[nivel] ?? {
@@ -312,6 +336,23 @@ function calcularMedia(aval: Avaliacao): number {
   return v.reduce((a, b) => a + b, 0) / v.length;
 }
 
+// ─── Shared dark card wrapper ───────────────────────────────────────────────
+
+function DarkCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`rounded-3xl ${className}`}
+      style={{
+        background: "rgba(30,24,18,0.6)",
+        border: "1px solid rgba(200,165,107,0.12)",
+        backdropFilter: "blur(20px)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 // ─── Page ──────────────────────────────────────────────────────────────────
 
 export default function ResultadoPage() {
@@ -338,16 +379,31 @@ export default function ResultadoPage() {
   }, [params.id]);
 
   if (loading) return (
-    <div className="luxury-shell flex items-center justify-center">
-      <div className="animate-spin rounded-full h-10 w-10 border-2 border-brand-gold border-t-transparent" />
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
+    >
+      <div
+        className="animate-spin rounded-full h-10 w-10 border-2"
+        style={{ borderColor: "rgba(200,165,107,0.3)", borderTopColor: "transparent" }}
+      />
     </div>
   );
 
   if (!avaliacao) return (
-    <div className="luxury-shell flex items-center justify-center">
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
+    >
       <div className="text-center">
-        <p className="text-xl text-brand-medium mb-4">Avaliação não encontrada</p>
-        <button onClick={() => navigate("/dashboard")} className="luxury-btn-primary">Voltar</button>
+        <p className="text-lg mb-4" style={{ color: "rgba(247,242,236,0.6)" }}>Avaliação não encontrada</p>
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="px-6 py-3 rounded-2xl text-sm font-semibold"
+          style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1e1812" }}
+        >
+          Voltar ao início
+        </button>
       </div>
     </div>
   );
@@ -364,16 +420,13 @@ export default function ResultadoPage() {
   const { label: mediaLabel, sublabel: mediaSublabel } = getMediaLabel(media);
   const mediaColor = getMediaColor(media);
 
-  // Sorted areas by score (lowest first → most urgent first)
   const areasComValores = AREAS_DA_VIDA.map((area, i) => ({ area, valor: valores[i] }));
   const areasOrdenadas = [...areasComValores].sort((a, b) => a.valor - b.valor);
 
-  // Panorama buckets
   const fortes = areasComValores.filter(a => a.valor >= 7);
   const desenvolvendo = areasComValores.filter(a => a.valor >= 4 && a.valor < 7);
   const urgentes = areasComValores.filter(a => a.valor < 4);
 
-  // Evolution
   const evolucaoData = todasAvaliacoes.length > 1 ? {
     labels: [...todasAvaliacoes].reverse().map(a => format(new Date(a.dataAvaliacao), "dd/MM", { locale: ptBR })),
     datasets: [{
@@ -391,8 +444,11 @@ export default function ResultadoPage() {
   const progresso = mediaInicial !== null ? media - mediaInicial : null;
 
   return (
-    <div className="luxury-shell py-8 px-4 md:py-12">
-      <div className="max-w-4xl mx-auto space-y-5 animate-fadeIn">
+    <div
+      className="min-h-screen pb-28"
+      style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
+    >
+      <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-4 animate-fadeIn">
 
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <div className="rounded-3xl overflow-hidden"
@@ -424,21 +480,18 @@ export default function ResultadoPage() {
                 </p>
               </div>
 
-              <div className="flex items-end gap-4">
-                <div className="text-right">
-                  <div className="flex items-end gap-2 justify-end">
-                    <span className="font-tan-mon-cheri text-6xl md:text-7xl leading-none" style={{ color: mediaColor }}>
-                      {media.toFixed(1)}
-                    </span>
-                    <span className="text-xl mb-2" style={{ color: "rgba(200,165,107,0.4)" }}>/10</span>
-                  </div>
-                  <p className="text-sm font-semibold" style={{ color: mediaColor }}>{mediaLabel}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(200,165,107,0.45)" }}>{mediaSublabel}</p>
+              <div className="text-right">
+                <div className="flex items-end gap-2 justify-end">
+                  <span className="font-tan-mon-cheri text-6xl md:text-7xl leading-none" style={{ color: mediaColor }}>
+                    {media.toFixed(1)}
+                  </span>
+                  <span className="text-xl mb-2" style={{ color: "rgba(200,165,107,0.4)" }}>/10</span>
                 </div>
+                <p className="text-sm font-semibold" style={{ color: mediaColor }}>{mediaLabel}</p>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(200,165,107,0.45)" }}>{mediaSublabel}</p>
               </div>
             </div>
 
-            {/* Quick stats row */}
             <div className="grid grid-cols-3 gap-3 mt-6 pt-5"
               style={{ borderTop: "1px solid rgba(200,165,107,0.12)" }}>
               <div>
@@ -467,9 +520,7 @@ export default function ResultadoPage() {
                 <p className="text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: "rgba(200,165,107,0.45)" }}>
                   Desequilíbrio
                 </p>
-                <p className="font-tan-mon-cheri text-sm" style={{ color: "rgba(200,165,107,0.6)" }}>
-                  Amplitude
-                </p>
+                <p className="font-tan-mon-cheri text-sm" style={{ color: "rgba(200,165,107,0.6)" }}>Amplitude</p>
                 <p className="font-tan-mon-cheri text-2xl" style={{ color: "rgba(200,165,107,0.8)" }}>
                   {areasOrdenadas[areasOrdenadas.length - 1].valor - areasOrdenadas[0].valor} pts
                 </p>
@@ -481,8 +532,8 @@ export default function ResultadoPage() {
         </div>
 
         {/* ── Panorama diagnóstico ────────────────────────────────────────── */}
-        <div className="luxury-card-strong p-6 md:p-8">
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-5">
+        <DarkCard className="p-6 md:p-8">
+          <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-5" style={{ color: "rgba(200,165,107,0.5)" }}>
             Panorama Diagnóstico
           </p>
           <div className="grid md:grid-cols-3 gap-4">
@@ -492,14 +543,12 @@ export default function ResultadoPage() {
                 style={{ background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.2)" }}>
                 <div className="flex items-center gap-2 mb-3">
                   <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                  <p className="text-xs font-semibold tracking-wider uppercase text-red-500">
-                    Atenção imediata
-                  </p>
+                  <p className="text-xs font-semibold tracking-wider uppercase text-red-500">Atenção imediata</p>
                 </div>
                 <div className="space-y-2">
                   {urgentes.map(({ area, valor }) => (
                     <div key={area.id} className="flex items-center justify-between">
-                      <span className="text-sm text-brand-dark">{area.titulo}</span>
+                      <span className="text-sm" style={{ color: "rgba(247,242,236,0.7)" }}>{area.titulo}</span>
                       <span className="font-tan-mon-cheri text-lg text-red-500">{valor}</span>
                     </div>
                   ))}
@@ -512,14 +561,12 @@ export default function ResultadoPage() {
                 style={{ background: "rgba(234,179,8,0.04)", border: "1px solid rgba(234,179,8,0.2)" }}>
                 <div className="flex items-center gap-2 mb-3">
                   <Target className="w-4 h-4 flex-shrink-0" style={{ color: "#ca8a04" }} />
-                  <p className="text-xs font-semibold tracking-wider uppercase" style={{ color: "#ca8a04" }}>
-                    Em desenvolvimento
-                  </p>
+                  <p className="text-xs font-semibold tracking-wider uppercase" style={{ color: "#ca8a04" }}>Em desenvolvimento</p>
                 </div>
                 <div className="space-y-2">
                   {desenvolvendo.map(({ area, valor }) => (
                     <div key={area.id} className="flex items-center justify-between">
-                      <span className="text-sm text-brand-dark">{area.titulo}</span>
+                      <span className="text-sm" style={{ color: "rgba(247,242,236,0.7)" }}>{area.titulo}</span>
                       <span className="font-tan-mon-cheri text-lg" style={{ color: "#ca8a04" }}>{valor}</span>
                     </div>
                   ))}
@@ -531,16 +578,14 @@ export default function ResultadoPage() {
               <div className="rounded-2xl p-4"
                 style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.25)" }}>
                 <div className="flex items-center gap-2 mb-3">
-                  <CheckCircle className="w-4 h-4 text-brand-bronze flex-shrink-0" />
-                  <p className="text-xs font-semibold tracking-wider uppercase text-brand-bronze">
-                    Pontos fortes
-                  </p>
+                  <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: "#c8a56b" }} />
+                  <p className="text-xs font-semibold tracking-wider uppercase" style={{ color: "#c8a56b" }}>Pontos fortes</p>
                 </div>
                 <div className="space-y-2">
                   {fortes.sort((a, b) => b.valor - a.valor).map(({ area, valor }) => (
                     <div key={area.id} className="flex items-center justify-between">
-                      <span className="text-sm text-brand-dark">{area.titulo}</span>
-                      <span className="font-tan-mon-cheri text-lg text-brand-bronze">{valor}</span>
+                      <span className="text-sm" style={{ color: "rgba(247,242,236,0.7)" }}>{area.titulo}</span>
+                      <span className="font-tan-mon-cheri text-lg" style={{ color: "#c8a56b" }}>{valor}</span>
                     </div>
                   ))}
                 </div>
@@ -548,31 +593,27 @@ export default function ResultadoPage() {
             )}
 
           </div>
-        </div>
+        </DarkCard>
 
         {/* ── Radar ───────────────────────────────────────────────────────── */}
-        <div className="luxury-card-strong p-6 md:p-8">
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-2">
+        <DarkCard className="p-6 md:p-8">
+          <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
             Mapa Visual das Áreas
           </p>
-          <p className="text-sm text-brand-medium mb-5">
+          <p className="text-sm mb-5" style={{ color: "rgba(247,242,236,0.4)" }}>
             O gráfico revela o padrão de equilíbrio e desequilíbrio entre todas as dimensões da sua vida.
           </p>
           <RadarChart data={chartData} />
-        </div>
+        </DarkCard>
 
         {/* ── Deep area analysis ──────────────────────────────────────────── */}
-        <div className="luxury-card-strong p-6 md:p-8">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-1">
-                Análise Profunda
-              </p>
-              <p className="text-sm text-brand-medium">
-                Áreas ordenadas por prioridade — as que mais pedem atenção aparecem primeiro.
-              </p>
-            </div>
-          </div>
+        <DarkCard className="p-6 md:p-8">
+          <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
+            Análise Profunda
+          </p>
+          <p className="text-sm mb-6" style={{ color: "rgba(247,242,236,0.4)" }}>
+            Áreas ordenadas por prioridade — as que mais pedem atenção aparecem primeiro.
+          </p>
 
           <div className="space-y-4">
             {areasOrdenadas.map(({ area, valor }) => {
@@ -580,47 +621,39 @@ export default function ResultadoPage() {
               const pct = (valor / 10) * 100;
               return (
                 <div key={area.id}
-                  className="rounded-2xl p-5 md:p-6 transition-all"
+                  className="rounded-2xl p-5 md:p-6"
                   style={{ background: nivelInfo.bgLight, border: `1px solid ${nivelInfo.borderColor}` }}>
 
-                  {/* Header row */}
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                      <AreaIcon iconName={area.icon} size={36} className="flex-shrink-0" />
+                      <AreaIconDark iconName={area.icon} size={22} />
                       <div className="min-w-0">
-                        <h3 className="font-tan-mon-cheri text-lg text-brand-dark leading-tight">{area.titulo}</h3>
-                        <p className="text-xs text-brand-medium">{area.subtitulo}</p>
+                        <h3 className="font-tan-mon-cheri text-lg leading-tight" style={{ color: "#f7f2ec" }}>{area.titulo}</h3>
+                        <p className="text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>{area.subtitulo}</p>
                       </div>
                     </div>
                     <div className="flex-shrink-0 text-right">
-                      <p className="font-tan-mon-cheri text-4xl leading-none" style={{ color: nivelInfo.cor }}>
-                        {valor}
-                      </p>
-                      <p className="text-xs font-semibold tracking-wider mt-0.5" style={{ color: nivelInfo.cor }}>
-                        {nivelInfo.label}
-                      </p>
+                      <p className="font-tan-mon-cheri text-4xl leading-none" style={{ color: nivelInfo.cor }}>{valor}</p>
+                      <p className="text-xs font-semibold tracking-wider mt-0.5" style={{ color: nivelInfo.cor }}>{nivelInfo.label}</p>
                     </div>
                   </div>
 
-                  {/* Progress bar */}
-                  <div className="w-full rounded-full h-1.5 mb-4" style={{ background: "rgba(200,165,107,0.12)" }}>
+                  <div className="w-full rounded-full h-1.5 mb-4" style={{ background: "rgba(255,255,255,0.06)" }}>
                     <div
-                      className="h-1.5 rounded-full transition-all"
+                      className="h-1.5 rounded-full"
                       style={{ width: `${pct}%`, background: nivelInfo.cor }}
                     />
                   </div>
 
-                  {/* Interpretation */}
-                  <p className="text-sm text-brand-darker leading-relaxed mb-3">
+                  <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.65)" }}>
                     {nivelInfo.interpretacao}
                   </p>
 
-                  {/* Action */}
                   <div className="flex items-start gap-2.5 pt-3"
                     style={{ borderTop: `1px solid ${nivelInfo.borderColor}` }}>
                     <Zap className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: nivelInfo.cor }} />
-                    <p className="text-xs text-brand-medium leading-relaxed">
-                      <span className="font-semibold text-brand-dark">Próximo passo: </span>
+                    <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
+                      <span className="font-semibold" style={{ color: "rgba(247,242,236,0.75)" }}>Próximo passo: </span>
                       {nivelInfo.acao}
                     </p>
                   </div>
@@ -628,61 +661,90 @@ export default function ResultadoPage() {
               );
             })}
           </div>
-        </div>
+        </DarkCard>
 
         {/* ── Evolution ───────────────────────────────────────────────────── */}
         {evolucaoData && (
-          <div className="luxury-card-strong p-6 md:p-8">
+          <DarkCard className="p-6 md:p-8">
             <div className="flex items-center gap-3 mb-1">
-              <TrendingUp className="w-5 h-5 text-brand-bronze" />
-              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium">
+              <TrendingUp className="w-4 h-4" style={{ color: "#c8a56b" }} />
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
                 Sua Jornada ao Longo do Tempo
               </p>
             </div>
-            <p className="text-sm text-brand-medium mb-6">
+            <p className="text-sm mb-6" style={{ color: "rgba(247,242,236,0.4)" }}>
               Você tem {todasAvaliacoes.length} avaliações registradas. Cada ponto é um retrato honesto de um momento da sua vida.
             </p>
             <LineChart data={evolucaoData} />
 
             {progresso !== null && (
               <div className="grid grid-cols-3 gap-4 mt-6 pt-5"
-                style={{ borderTop: "1px solid rgba(200,165,107,0.15)" }}>
+                style={{ borderTop: "1px solid rgba(200,165,107,0.12)" }}>
                 <div>
-                  <p className="text-xs tracking-widest uppercase text-brand-medium mb-1">Início</p>
-                  <p className="font-tan-mon-cheri text-3xl text-brand-dark">{mediaInicial?.toFixed(1)}</p>
+                  <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>Início</p>
+                  <p className="font-tan-mon-cheri text-3xl" style={{ color: "#f7f2ec" }}>{mediaInicial?.toFixed(1)}</p>
                 </div>
                 <div>
-                  <p className="text-xs tracking-widest uppercase text-brand-medium mb-1">Atual</p>
-                  <p className="font-tan-mon-cheri text-3xl text-brand-dark">{media.toFixed(1)}</p>
+                  <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>Atual</p>
+                  <p className="font-tan-mon-cheri text-3xl" style={{ color: "#f7f2ec" }}>{media.toFixed(1)}</p>
                 </div>
                 <div>
-                  <p className="text-xs tracking-widest uppercase text-brand-medium mb-1">Evolução</p>
+                  <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>Evolução</p>
                   <div className="flex items-center gap-1">
-                    {progresso > 0 ? <ArrowUp className="w-4 h-4 text-green-600" />
-                      : progresso < 0 ? <ArrowDown className="w-4 h-4 text-red-500" />
-                      : <Minus className="w-4 h-4 text-brand-medium" />}
-                    <p className={`font-tan-mon-cheri text-3xl ${progresso > 0 ? "text-green-600" : progresso < 0 ? "text-red-500" : "text-brand-medium"}`}>
+                    {progresso > 0 ? <ArrowUp className="w-4 h-4 text-green-400" />
+                      : progresso < 0 ? <ArrowDown className="w-4 h-4 text-red-400" />
+                      : <Minus className="w-4 h-4" style={{ color: "rgba(247,242,236,0.35)" }} />}
+                    <p className={`font-tan-mon-cheri text-3xl ${progresso > 0 ? "text-green-400" : progresso < 0 ? "text-red-400" : ""}`}
+                      style={progresso === 0 ? { color: "rgba(247,242,236,0.35)" } : undefined}>
                       {progresso > 0 ? "+" : ""}{progresso.toFixed(1)}
                     </p>
                   </div>
                 </div>
               </div>
             )}
-          </div>
+          </DarkCard>
         )}
 
         {/* ── Actions ─────────────────────────────────────────────────────── */}
-        <div className="flex flex-wrap gap-3 justify-center pb-8 no-print">
-          <button onClick={() => navigate("/dashboard")} className="luxury-btn-primary">
+        <div className="flex flex-wrap gap-3 justify-center pt-2">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold transition-all"
+            style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1e1812" }}
+          >
             {primeiroAcesso ? <Sparkles className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
             {primeiroAcesso ? "Acessar Área de Membro" : "Início"}
           </button>
           {!primeiroAcesso && (
-            <button onClick={() => navigate("/avaliacao?novo=true")} className="luxury-btn-secondary">
+            <button
+              onClick={() => navigate("/avaliacao?novo=true")}
+              className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-medium transition-all"
+              style={{ border: "1px solid rgba(200,165,107,0.3)", color: "rgba(247,242,236,0.7)" }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.55)";
+                (e.currentTarget as HTMLElement).style.color = "#c8a56b";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.3)";
+                (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.7)";
+              }}
+            >
               Nova Avaliação
             </button>
           )}
-          <button onClick={() => navigate("/numerologia")} className="luxury-btn-secondary flex items-center gap-2">
+          <button
+            onClick={() => navigate("/numerologia")}
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-medium transition-all"
+            style={{ border: "1px solid rgba(200,165,107,0.3)", color: "rgba(247,242,236,0.7)" }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.55)";
+              (e.currentTarget as HTMLElement).style.color = "#c8a56b";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.3)";
+              (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.7)";
+            }}
+          >
             <ChevronRight className="w-4 h-4" />
             Explorar Numerologia
           </button>
