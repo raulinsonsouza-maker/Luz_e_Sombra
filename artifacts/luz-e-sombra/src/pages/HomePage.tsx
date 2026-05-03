@@ -198,20 +198,28 @@ export default function HomePage() {
         >
           <div className="flex items-center gap-4">
             {/* Gauge */}
-            <div className="relative flex-shrink-0" style={{ width: 144 }}>
+            <div className="relative flex-shrink-0" style={{ width: 144, height: 80 }}>
               <ScoreGauge score={media ?? 0} cor={mediaCor} />
-              <div className="absolute inset-0 flex flex-col items-center justify-end" style={{ paddingBottom: 2 }}>
+              {/* Score overlaid — top:24 keeps text inside the arc bowl (arc spans y=18→72) */}
+              <div style={{ position: "absolute", top: 22, left: 0, right: 0, textAlign: "center" }}>
                 {media !== null ? (
-                  <span className="font-tan-mon-cheri leading-none" style={{ fontSize: 30, color: "#f7f2ec" }}>
-                    {media.toFixed(1)}
-                  </span>
+                  <>
+                    <span
+                      className="font-tan-mon-cheri"
+                      style={{ fontSize: 28, color: "#f7f2ec", display: "block", lineHeight: 1 }}
+                    >
+                      {media.toFixed(1)}
+                    </span>
+                    <span
+                      style={{ fontSize: 10, color: "rgba(247,242,236,0.3)", display: "block", marginTop: 4 }}
+                    >
+                      média /10
+                    </span>
+                  </>
                 ) : (
-                  <span className="text-base font-medium" style={{ color: "rgba(200,165,107,0.4)" }}>—</span>
+                  <span style={{ fontSize: 13, color: "rgba(200,165,107,0.4)", display: "block" }}>—</span>
                 )}
               </div>
-              <p className="text-center text-[10px] mt-0.5" style={{ color: "rgba(247,242,236,0.3)" }}>
-                {media !== null ? "média /10" : "sem avaliação"}
-              </p>
             </div>
 
             {/* Level + XP */}
