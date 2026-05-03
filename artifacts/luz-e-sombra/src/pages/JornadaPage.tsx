@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { CheckCircle2, Lock, ChevronRight, Layers, Target, Hash, Brain, Wallet, Sparkles, Heart } from "lucide-react";
+import { CheckCircle2, Lock, ChevronRight, Layers, Target, Hash, Brain, Wallet, Sparkles, Heart, ClipboardList } from "lucide-react";
 
 interface Progresso {
   jornada: {
@@ -26,6 +26,16 @@ interface Etapa {
 }
 
 const ETAPAS: Etapa[] = [
+  {
+    num: "00",
+    titulo: "Eixos emocionais",
+    subtitulo: "20 perguntas antes ou com o traço",
+    descricao: "Responde em poucos minutos; ao gravar a análise por fotos, o sistema combina imagem + questionário para maior consistência.",
+    icon: ClipboardList,
+    href: "/diagnostico-eixos",
+    xpRecompensa: 30,
+    key: null,
+  },
   {
     num: "01",
     titulo: "Traço de Caráter",

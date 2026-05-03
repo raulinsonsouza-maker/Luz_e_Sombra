@@ -10,6 +10,11 @@ import {
   ESTRUTURAS_TRACO,
   type EstruturaTraco,
 } from "@workspace/traco-diagnostico-fusion";
+import {
+  executarModeloMultimodal,
+  metricasResumoSchema,
+  questionario20RespostasSchema,
+} from "@workspace/traco-eixos-multimodal";
 
 const router = Router();
 const objectStorage = new ObjectStorageService();
@@ -276,10 +281,12 @@ router.get("/fotos/:id/view", requireAuth, async (req: AuthRequest, res: Respons
 // ── POST /traco/analisar ───────────────────────────────────────────────────────
 router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const { resultado, pessoaId: pessoaIdRaw, diagnosticoEmocional } = req.body as {
+    const { resultado, pessoaId: pessoaIdRaw, diagnosticoEmocional, questionario20 } = req.body as {
       resultado?: Record<string, unknown>;
       pessoaId?: unknown;
       diagnosticoEmocional?: unknown;
+      /** 20 inteiros 1–5 ou `{ respostas: number[] }` */
+      questionario20?: unknown;
     };
 
     if (!resultado || typeof resultado !== "object") {
@@ -306,7 +313,54 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
     let resultadoFusao = { ...r, metadata } as Record<string, unknown>;
     resultadoFusao.estruturasSomenteFotos = { ...estruturasSomenteFotos };
 
-    if (diagnosticoEmocional !== undefined && diagnosticoEmocional !== null) {
+    const rawQ20 =
+      questionario20 === undefined || questionario20 === null
+        ? undefined
+        : Array.isArray(questionario20)
+          ? questionario20
+          : typeof questionario20 === "object" &&
+              questionario20 !== null &&
+              Array.isArray((questionario20 as { respostas?: unknown }).respostas)
+            ? (questionario20 as { respostas: number[] }).respostas
+            : undefined;
+
+    const q20Parsed =
+      rawQ20 === undefined ? null : questionario20RespostasSchema.safeParse(rawQ20);
+
+    if (rawQ20 !== undefined && (!q20Parsed || !q20Parsed.success)) {
+      const msg = q20Parsed?.error?.issues.map((issue) => issue.message).join(" ") ?? "Formato inválido.";
+      return res.status(400).json({
+        error: "questionario20 inválido: envie 20 valores inteiros de 1 a 5 (índice 0 = pergunta 1).",
+        detalhes: msg,
+      });
+    }
+
+    if (q20Parsed?.success) {
+      const mrParsed = metricasResumoSchema.safeParse(r.metricasResumo);
+      if (!mrParsed.success) {
+        return res.status(400).json({
+          error: "resultado.metricasResumo é obrigatório quando questionario20 é enviado (cliente deve atualizar o app).",
+          detalhes: mrParsed.error.flatten(),
+        });
+      }
+      try {
+        const mm = executarModeloMultimodal({
+          metricasResumo: mrParsed.data,
+          respostas20: q20Parsed.data,
+        });
+        resultadoFusao = { ...resultadoFusao, modeloMultimodal: mm };
+      } catch (me: unknown) {
+        const msg = me instanceof Error ? me.message : "Erro no modelo multimodal.";
+        return res.status(400).json({ error: msg });
+      }
+    }
+
+    // Fusão legada (5 padrões internos): só quando não há questionário de 20 — evita dupla alteração de estruturas.
+    if (
+      diagnosticoEmocional !== undefined &&
+      diagnosticoEmocional !== null &&
+      !q20Parsed?.success
+    ) {
       const diagParsed = diagnosticoEmocionalFusaoSchema.safeParse(diagnosticoEmocional);
       if (!diagParsed.success) {
         const msg = diagParsed.error.issues.map((issue) => issue.message).join(" ");

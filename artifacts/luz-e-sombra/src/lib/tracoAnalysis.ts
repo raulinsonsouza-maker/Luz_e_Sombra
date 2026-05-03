@@ -9,6 +9,8 @@
  * visible in photos to identify dominant character structures.
  */
 
+import type { MetricasFotoResumo, MetricasResumo } from "@workspace/traco-eixos-multimodal";
+
 export type TipoFoto = "rosto" | "corpo-frente" | "corpo-lado";
 
 export interface EstruturasPct {
@@ -77,6 +79,8 @@ export interface ResultadoAnalise {
       varianciaEntreFotos: number;
     };
   };
+  /** Agregação estável das métricas por foto (para modelo multimodal / API). */
+  metricasResumo?: MetricasResumo;
 }
 
 // ── Image loading ──────────────────────────────────────────────────────────────
@@ -234,6 +238,48 @@ function variance(values: number[]): number {
   if (values.length <= 1) return 0;
   const m = mean(values);
   return mean(values.map((v) => (v - m) ** 2));
+}
+
+/** Serializa `Metrics` para o pacote multimodal (sem pixels). */
+export function buildMetricasResumoFromMetrics(metricsList: Metrics[]): MetricasResumo {
+  const fotos: MetricasFotoResumo[] = metricsList.map((m) => ({
+    tipo: m.tipo,
+    shoulderW: m.shoulderW,
+    chestW: m.chestW,
+    waistW: m.waistW,
+    hipW: m.hipW,
+    thighW: m.thighW,
+    legW: m.legW,
+    shr: m.shr,
+    whr: m.whr,
+    wsr: m.wsr,
+    ulr: m.ulr,
+    symm: m.symm,
+    bodyPct: m.bodyPct,
+    edgeDensityBody: m.edgeDensityBody,
+    forwardLean: m.forwardLean,
+    chestProjection: m.chestProjection,
+    confidence: m.confidence,
+  }));
+
+  const safeHip = (hip: number) => Math.max(hip, 0.01);
+  const chestOverHip = metricsList.map((m) => m.chestW / safeHip(m.hipW));
+  const pernasVals = metricsList.map((m) => (m.thighW + m.legW) / 2);
+
+  const agregado = {
+    shrMedio: mean(metricsList.map((m) => m.shr)),
+    whrMedio: mean(metricsList.map((m) => m.whr)),
+    symmMedio: mean(metricsList.map((m) => m.symm)),
+    forwardLeanMedio: mean(metricsList.map((m) => m.forwardLean)),
+    chestProjectionMedio: mean(metricsList.map((m) => m.chestProjection)),
+    edgeDensityMedio: mean(metricsList.map((m) => m.edgeDensityBody)),
+    bodyPctMedio: mean(metricsList.map((m) => m.bodyPct)),
+    ulrMedio: mean(metricsList.map((m) => m.ulr)),
+    chestExpansionProxy: mean(chestOverHip.length ? chestOverHip : [0.9]),
+    pernasMedio: mean(pernasVals.length ? pernasVals : [0.1]),
+  };
+
+  return { versao: "metricas_resumo_v1", fotos, agregado };
 }
 
 function bandScore(value: number, min: number, max: number): number {
@@ -1282,5 +1328,6 @@ export async function analyzeTracoDeCarater(
       confidenceBreakdown,
       featureSummary,
     },
+    metricasResumo: buildMetricasResumoFromMetrics(metricsList),
   };
 }

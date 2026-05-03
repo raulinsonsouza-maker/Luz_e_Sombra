@@ -1,9 +1,25 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { Upload, X, Camera, User, ArrowRight, Loader2, RefreshCw, ChevronDown, ChevronUp, AlertCircle, ImageIcon, Plus, Users, Trash2 } from "lucide-react";
 import { analyzeTracoDeCarater } from "@/lib/tracoAnalysis";
+import type { ModeloMultimodalOutput } from "@workspace/traco-eixos-multimodal";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const STORAGE_Q20 = "luz_questionario_20_respostas";
+
+function readQuestionario20Respostas(): number[] | undefined {
+  try {
+    const raw = localStorage.getItem(STORAGE_Q20);
+    if (!raw?.trim()) return undefined;
+    const a = JSON.parse(raw) as unknown;
+    if (!Array.isArray(a) || a.length !== 20) return undefined;
+    const ok = a.every((x) => typeof x === "number" && Number.isInteger(x) && x >= 1 && x <= 5);
+    return ok ? (a as number[]) : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /** Payload opcional para fusão na API; preenchido pelo módulo de diagnóstico quando existir (ou testes via localStorage). */
 function readOptionalDiagnosticoFusao(): Record<string, unknown> | undefined {
@@ -101,6 +117,7 @@ interface ResultadoAnalise {
   estruturasSomenteFotos?: EstruturasPct;
   sinteseIntegradaFotosQuestionario?: string;
   fusaoDiagnosticoEmocional?: FusaoDiagnosticoEmocionalResposta;
+  modeloMultimodal?: ModeloMultimodalOutput;
   perfilFisicoNarrado?: string;
   estiloComunicacao?: EstiloComunicacao;
   perfilUnico?: string;
@@ -373,13 +390,15 @@ export default function TracodeCaraterPage() {
       setAnalisandoEtapa("Gerando análise completa...");
 
       // Save computed result to backend
+      const q20 = readQuestionario20Respostas();
       const optionalDiag = readOptionalDiagnosticoFusao();
       const saveRes = await apiFetch("/traco/analisar", {
         method: "POST",
         body: JSON.stringify({
           resultado,
           pessoaId: selectedPessoaId,
-          ...(optionalDiag ? { diagnosticoEmocional: optionalDiag } : {}),
+          ...(optionalDiag && !q20 ? { diagnosticoEmocional: optionalDiag } : {}),
+          ...(q20 ? { questionario20: q20 } : {}),
         }),
       });
       if (!saveRes.ok) {
@@ -388,6 +407,13 @@ export default function TracodeCaraterPage() {
       }
       const data: AnaliseTraco = await saveRes.json();
       setAnalise(data);
+      if (q20) {
+        try {
+          localStorage.removeItem(STORAGE_Q20);
+        } catch {
+          // ignore
+        }
+      }
       setTimeout(() => {
         document.getElementById("resultado-traco")?.scrollIntoView({ behavior: "smooth" });
       }, 200);
@@ -431,6 +457,7 @@ export default function TracodeCaraterPage() {
   }
 
   const fotosCount = Object.keys(fotos).length;
+  const questionario20Pronto = readQuestionario20Respostas() !== undefined;
   const resultado = analise?.resultado;
   const estruturaPrincipal = resultado?.estruturaPrincipal;
   const configPrincipal = estruturaPrincipal ? ESTRUTURAS_CONFIG[estruturaPrincipal] : null;
@@ -827,6 +854,19 @@ export default function TracodeCaraterPage() {
               ✓ As 3 fotos estão prontas — análise completa disponível
             </p>
           )}
+          {questionario20Pronto ? (
+            <p className="text-xs text-center max-w-md px-2" style={{ color: "rgba(109,185,109,0.8)" }}>
+              Questionário de eixos (20 respostas) será enviado com a gravação para o modelo multimodal.
+            </p>
+          ) : (
+            <p className="text-xs text-center max-w-md px-2" style={{ color: "rgba(200,165,107,0.45)" }}>
+              Quer mais consistência na leitura?{" "}
+              <Link href="/diagnostico-eixos" className="underline" style={{ color: "#c8a56b" }}>
+                Responder 20 perguntas
+              </Link>{" "}
+              antes de analisar.
+            </p>
+          )}
         </div>
 
         {/* ── Results ── */}
@@ -1071,6 +1111,90 @@ export default function TracodeCaraterPage() {
                     As barras abaixo refletem a leitura já integrada; o perfil só-fotos fica guardado nos dados para transparência.
                   </p>
                 )}
+              </div>
+            )}
+
+            {/* ── Modelo multimodal (20 perguntas + métricas de imagem) ── */}
+            {resultado.modeloMultimodal && (
+              <div
+                className="rounded-2xl p-6"
+                style={{
+                  background: "rgba(120,140,200,0.06)",
+                  border: "1px solid rgba(160,170,220,0.25)",
+                }}
+              >
+                <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(160,170,220,0.65)" }}>
+                  Modelo multimodal
+                </p>
+                <h3 className="font-tan-mon-cheri text-base mb-1" style={{ color: "rgba(247,242,236,0.9)" }}>
+                  Cinco eixos (imagem + questionário)
+                </h3>
+                <p className="text-xs mb-4" style={{ color: "rgba(247,242,236,0.4)" }}>
+                  {resultado.modeloMultimodal.versaoModelo} · pesos imagem/questionário:{" "}
+                  {Math.round(resultado.modeloMultimodal.pesoImagem * 100)}% /{" "}
+                  {Math.round(resultado.modeloMultimodal.pesoQuestionario * 100)}%
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4 text-xs">
+                  <span className="px-2 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "#c8d4f0" }}>
+                    Dominante: <strong>{resultado.modeloMultimodal.dominante}</strong>
+                  </span>
+                  <span className="px-2 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "#c8d4f0" }}>
+                    Secundário: <strong>{resultado.modeloMultimodal.secundario}</strong>
+                  </span>
+                  <span className="px-2 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "#c8d4f0" }}>
+                    Confiança: <strong>{resultado.modeloMultimodal.confianca}</strong>
+                  </span>
+                  <span className="px-2 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "#c8d4f0" }}>
+                    Consistência: <strong>{resultado.modeloMultimodal.consistencia}</strong>
+                  </span>
+                </div>
+                <div className="space-y-3 mb-5">
+                  {(
+                    [
+                      ["controle", "Controle"],
+                      ["retracao", "Retração"],
+                      ["dependencia", "Dependência"],
+                      ["expansao", "Expansão"],
+                      ["rigidez", "Rigidez"],
+                    ] as const
+                  ).map(([key, label]) => {
+                    const v = resultado.modeloMultimodal!.scores[key];
+                    return (
+                      <div key={key}>
+                        <div className="flex justify-between text-xs mb-1" style={{ color: "rgba(247,242,236,0.55)" }}>
+                          <span>{label}</span>
+                          <span>{v}%</span>
+                        </div>
+                        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                          <div className="h-full rounded-full" style={{ width: `${v}%`, background: "linear-gradient(90deg, #8a9ec4, #c8a56b)" }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="space-y-3 text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
+                  <p>
+                    <span className="text-xs uppercase tracking-wider" style={{ color: "rgba(200,165,107,0.5)" }}>
+                      Emocional
+                    </span>
+                    <br />
+                    {resultado.modeloMultimodal.analise.emocional}
+                  </p>
+                  <p>
+                    <span className="text-xs uppercase tracking-wider" style={{ color: "rgba(200,165,107,0.5)" }}>
+                      Comportamental
+                    </span>
+                    <br />
+                    {resultado.modeloMultimodal.analise.comportamental}
+                  </p>
+                  <p>
+                    <span className="text-xs uppercase tracking-wider" style={{ color: "rgba(200,165,107,0.5)" }}>
+                      Relacional
+                    </span>
+                    <br />
+                    {resultado.modeloMultimodal.analise.relacional}
+                  </p>
+                </div>
               </div>
             )}
 

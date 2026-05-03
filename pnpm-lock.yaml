@@ -178,6 +178,9 @@ importers:
       '@workspace/traco-diagnostico-fusion':
         specifier: workspace:*
         version: link:../../lib/traco-diagnostico-fusion
+      '@workspace/traco-eixos-multimodal':
+        specifier: workspace:*
+        version: link:../../lib/traco-eixos-multimodal
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -251,6 +254,9 @@ importers:
 
   artifacts/luz-e-sombra:
     dependencies:
+      '@workspace/traco-eixos-multimodal':
+        specifier: workspace:*
+        version: link:../../lib/traco-eixos-multimodal
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
@@ -687,6 +693,19 @@ importers:
         version: 7.1.1
 
   lib/traco-diagnostico-fusion:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: ~5.9.2
+        version: 5.9.3
+
+  lib/traco-eixos-multimodal:
     dependencies:
       zod:
         specifier: 'catalog:'

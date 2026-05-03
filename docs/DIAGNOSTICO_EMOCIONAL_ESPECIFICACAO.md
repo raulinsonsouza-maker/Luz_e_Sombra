@@ -1,6 +1,8 @@
 # Diagnóstico Emocional — Especificação técnica e funcional
 
-Documento para alinhar produto, backend e frontend. O app **hoje** expõe apenas um **resumo derivado** no dossiê “Quem sou eu” (Fase 1: idade + traço + Roda da Vida). **Não** existe ainda o fluxo completo de 30 perguntas + persistência descrito abaixo.
+Documento para alinhar produto, backend e frontend. O app **hoje** expõe um **resumo derivado** no dossiê “Quem sou eu” (Fase 1: idade + traço + Roda da Vida). O fluxo **completo de 30 perguntas** (passado/presente) descrito nas secções 2–6 **ainda não** foi implementado como UI dedicada.
+
+**Modelo implementado em paralelo:** o **multimodal por 5 eixos e 20 perguntas** está descrito e versionado em [`MODELO_MULTIMODAL_EIXOS.md`](./MODELO_MULTIMODAL_EIXOS.md) (rota `/diagnostico-eixos`, pacote `@workspace/traco-eixos-multimodal`, campo `resultado.modeloMultimodal` na API). Os dois desenhos (30 vs 20) convivem até decisão de produto de unificação.
 
 **Prioridade de produto:** este módulo **não é isolado** — deve ser planejado e implementado **em conjunto com a análise de traços** (`tracoAnalysis.ts` e fluxo de fotos), para **aumentar a assertividade** da leitura de traços. O questionário captura **histórico subjetivo, vínculo, controle e consciência**; a análise visual captura **marcadores posturais e de expressão**. Juntos reduzem ambiguidade quando uma fonte sozinha seria frágil (poucas fotos, iluminação ruim, ou respostas “do momento”).
 
@@ -13,7 +15,7 @@ Documento para alinhar produto, backend e frontend. O app **hoje** expõe apenas
 | **Módulo** | Diagnóstico Emocional |
 | **Objetivo** | Perfil emocional personalizado: padrões (passado + presente), consciência, evolução, linguagem interpretativa (não só números). |
 | **Integração com traços** | **Obrigatória no desenho final:** alimentar e calibrar a **análise de traços** com sinais declarativos estáveis, melhorando ranking de estruturas, textos de interpretação e confiança da análise. |
-| **Fonte de verdade do algoritmo (15+)** | Especificado neste documento (secções 4–5); implementação do questionário + `padroesPct` ainda pendente no app. |
+| **Fonte de verdade (15+ / 30 itens)** | Especificado nas secções 4–5; **UI de 30 itens** ainda pendente. Para traço + questionário **já operacional**, ver `MODELO_MULTIMODAL_EIXOS.md` (20 itens). |
 
 ### 1.1 Integração técnica com análise de traços (assertividade)
 

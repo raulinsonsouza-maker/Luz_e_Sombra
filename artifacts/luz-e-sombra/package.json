@@ -75,6 +75,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@workspace/traco-eixos-multimodal": "workspace:*",
     "chart.js": "^4.5.1",
     "react-chartjs-2": "^5.3.1"
   }
