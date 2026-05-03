@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../routes/auth";
-import { db, usuariosTable } from "@workspace/db";
+import { db } from "@workspace/db";
+import { usuariosTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 
 export interface AuthRequest extends Request {
@@ -43,17 +44,17 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
       isAdmin: usuario.isAdmin,
       dataNascimento: usuario.dataNascimento,
     };
-    next();
+    return next();
   } catch (error) {
     return res.status(401).json({ error: "Token inválido" });
   }
 }
 
 export async function requireAdmin(req: AuthRequest, res: Response, next: NextFunction) {
-  await requireAuth(req, res, () => {
+  return requireAuth(req, res, () => {
     if (!req.user?.isAdmin) {
       return res.status(403).json({ error: "Acesso negado. Apenas administradores." });
     }
-    next();
+    return next();
   });
 }

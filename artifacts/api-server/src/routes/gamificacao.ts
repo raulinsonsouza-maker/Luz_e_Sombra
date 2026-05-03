@@ -6,7 +6,7 @@ import {
   avaliacoesTable,
   analiseTracoTable,
   usuariosTable,
-} from "@workspace/db";
+} from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
 
@@ -140,7 +140,7 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
       xpParaProximo,
       streakDias: gam.streakDias,
       melhorStreak: gam.melhorStreak,
-      missoes: missoes.map(m => ({
+      missoes: missoes.map((m) => ({
         id: m.id,
         titulo: m.titulo,
         xpRecompensa: m.xpRecompensa,
@@ -177,7 +177,7 @@ router.post("/adicionar-xp", requireAuth, async (req: AuthRequest, res: Response
       .where(eq(gamificacaoTable.usuarioId, userId))
       .returning();
 
-    res.json({
+    return res.json({
       xp: updated.xp,
       nivel: updated.nivel,
       nomeNivel: nivelInfo.nome,
@@ -187,14 +187,14 @@ router.post("/adicionar-xp", requireAuth, async (req: AuthRequest, res: Response
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Erro ao adicionar XP" });
+    return res.status(500).json({ error: "Erro ao adicionar XP" });
   }
 });
 
 router.post("/missoes/:id/concluir", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user!.id;
-    const missaoId = parseInt(req.params.id);
+    const missaoId = parseInt(String(req.params.id), 10);
 
     const [missao] = await db
       .select()
@@ -219,7 +219,7 @@ router.post("/missoes/:id/concluir", requireAuth, async (req: AuthRequest, res: 
       .set({ xp: newXp, nivel: nivelInfo.nivel, atualizadoEm: new Date() })
       .where(eq(gamificacaoTable.usuarioId, userId));
 
-    res.json({
+    return res.json({
       success: true,
       xpGanho: missao.xpRecompensa,
       totalXp: newXp,
@@ -229,7 +229,7 @@ router.post("/missoes/:id/concluir", requireAuth, async (req: AuthRequest, res: 
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Erro ao concluir missão" });
+    return res.status(500).json({ error: "Erro ao concluir missão" });
   }
 });
 

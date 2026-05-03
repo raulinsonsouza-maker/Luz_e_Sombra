@@ -1,7 +1,8 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { db, usuariosTable } from "@workspace/db";
+import { db } from "@workspace/db";
+import { usuariosTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 
 const router = Router();
@@ -10,6 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required but was not set.");
 }
+const jwtSecret: string = JWT_SECRET;
 const JWT_EXPIRES_IN = "30d";
 
 interface JwtPayload {
@@ -25,11 +27,11 @@ interface JwtPayload {
 }
 
 export function signToken(payload: Omit<JwtPayload, "iat" | "exp">): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, jwtSecret, { expiresIn: JWT_EXPIRES_IN });
 }
 
 export function verifyToken(token: string): JwtPayload {
-  return jwt.verify(token, JWT_SECRET) as JwtPayload;
+  return jwt.verify(token, jwtSecret) as unknown as JwtPayload;
 }
 
 // POST /api/auth/login

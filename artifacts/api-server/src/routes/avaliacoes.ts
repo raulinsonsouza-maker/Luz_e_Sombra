@@ -1,5 +1,6 @@
 import { Router, Response } from "express";
-import { db, avaliacoesTable, usuariosTable } from "@workspace/db";
+import { db } from "@workspace/db";
+import { avaliacoesTable, usuariosTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
 
@@ -77,7 +78,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
 router.get("/:id", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const user = req.user!;
-    const avaliacaoId = parseInt(req.params.id);
+    const avaliacaoId = parseInt(String(req.params.id), 10);
     if (isNaN(avaliacaoId)) {
       return res.status(400).json({ error: "ID inválido" });
     }

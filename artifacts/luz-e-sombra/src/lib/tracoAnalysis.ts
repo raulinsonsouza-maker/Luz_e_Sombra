@@ -61,6 +61,22 @@ export interface ResultadoAnalise {
   estiloComunicacao: EstiloComunicacao;
   perfilUnico: string;
   dinamicaFuncional: DinamicaFuncional;
+  metadata?: {
+    analysisVersion: string;
+    confidenceBreakdown: {
+      imageQuality: number;
+      bodyDetection: number;
+      photoCoverage: number;
+      featureVariance: number;
+    };
+    featureSummary: {
+      mediaSimetria: number;
+      mediaDensidadeCorporal: number;
+      mediaRazaoOmbroQuadril: number;
+      mediaMassaSuperiorInferior: number;
+      varianciaEntreFotos: number;
+    };
+  };
 }
 
 // ── Image loading ──────────────────────────────────────────────────────────────
@@ -204,6 +220,25 @@ interface Metrics {
   // Side-view specific
   forwardLean: number;  // for corpo-lado: how much does the peak shift forward (0=neutral)
   chestProjection: number; // chest prominence vs hip in side view
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function mean(values: number[]): number {
+  return values.length === 0 ? 0 : values.reduce((s, v) => s + v, 0) / values.length;
+}
+
+function variance(values: number[]): number {
+  if (values.length <= 1) return 0;
+  const m = mean(values);
+  return mean(values.map((v) => (v - m) ** 2));
+}
+
+function bandScore(value: number, min: number, max: number): number {
+  if (max <= min) return 0;
+  return clamp((value - min) / (max - min), 0, 1);
 }
 
 function measurePhoto(d: PixelData, tipo: TipoFoto): Metrics {
@@ -515,18 +550,20 @@ function collectEvidence(metrics: Metrics[]): EvidencePiece[] {
 }
 
 function scoreFromEvidence(evidence: EvidencePiece[]): EstruturasPct {
-  // Weighted accumulation
   const raw: Record<keyof EstruturasPct, number> = {
-    esquizoide: 4, oral: 4, psicopata: 4, masoquista: 4, rigido: 4
+    esquizoide: 0,
+    oral: 0,
+    psicopata: 0,
+    masoquista: 0,
+    rigido: 0,
   };
 
   for (const e of evidence) {
-    raw[e.structure] += e.score * Math.max(0.05, Math.min(1, e.confidence));
+    raw[e.structure] += e.score * clamp(e.confidence, 0.05, 1);
   }
 
-  // Clamp to non-negative
   for (const k of Object.keys(raw) as (keyof EstruturasPct)[]) {
-    raw[k] = Math.max(0.5, raw[k]);
+    raw[k] = Math.max(0.1, raw[k] + 8);
   }
 
   const total = Object.values(raw).reduce((s, v) => s + v, 0);
@@ -549,6 +586,98 @@ function scoreFromEvidence(evidence: EvidencePiece[]): EstruturasPct {
   return pct;
 }
 
+function scoreFromContinuousFeatures(metrics: Metrics[]): Record<keyof EstruturasPct, number> {
+  const front = metrics.find((m) => m.tipo === "corpo-frente");
+  const side = metrics.find((m) => m.tipo === "corpo-lado");
+  const face = metrics.find((m) => m.tipo === "rosto");
+  const scores: Record<keyof EstruturasPct, number> = {
+    esquizoide: 0.15,
+    oral: 0.15,
+    psicopata: 0.15,
+    masoquista: 0.15,
+    rigido: 0.15,
+  };
+
+  if (front) {
+    const shrPsicopata = bandScore(front.shr, 1.14, 1.52);
+    const shrMasoquista = bandScore(1.08 - front.shr, 0.02, 0.28);
+    const assimetria = bandScore(0.9 - front.symm, 0.04, 0.2) * clamp(front.symmQ, 0.3, 1);
+    const oralCollapse = bandScore(0.96 - front.ulr, 0.02, 0.34);
+    const densidade = bandScore(front.bodyPct, 0.2, 0.56);
+    const definicao = bandScore(front.edgeDensityBody, 0.18, 0.42);
+    const simetria = bandScore(front.symm, 0.82, 0.97) * clamp(front.symmQ, 0.3, 1);
+
+    scores.psicopata += shrPsicopata * 0.42 + bandScore(front.ulr, 1.02, 1.45) * 0.2 + definicao * 0.12;
+    scores.masoquista += shrMasoquista * 0.32 + densidade * 0.3 + bandScore(front.wsr, 0.76, 0.94) * 0.18;
+    scores.esquizoide += assimetria * 0.34 + bandScore(0.3 - front.shoulderW, 0.02, 0.15) * 0.22 + bandScore(0.2 - front.bodyPct, 0.01, 0.15) * 0.2;
+    scores.oral += oralCollapse * 0.34 + bandScore(0.28 - front.chestW, 0.02, 0.12) * 0.15 + bandScore(0.22 - front.bodyPct, 0.02, 0.18) * 0.14;
+    scores.rigido += simetria * 0.4 + bandScore(front.shr, 1.04, 1.32) * 0.16 + definicao * 0.16 + bandScore(0.42 - Math.abs(front.bodyPct - 0.32), 0.08, 0.38) * 0.1;
+  }
+
+  if (side) {
+    scores.psicopata += bandScore(side.forwardLean, 0.02, 0.16) * 0.16 + bandScore(side.chestProjection, 0.01, 0.09) * 0.12;
+    scores.oral += bandScore(-side.forwardLean, 0.02, 0.14) * 0.14 + bandScore(0.92 - side.ulr, 0.01, 0.24) * 0.1;
+    scores.masoquista += bandScore(side.bodyPct, 0.24, 0.58) * 0.08;
+    scores.esquizoide += bandScore(0.88 - side.symm, 0.05, 0.22) * 0.1;
+    scores.rigido += bandScore(side.symm, 0.82, 0.97) * 0.08;
+  }
+
+  if (face) {
+    const faceSym = bandScore(face.symm, 0.84, 0.97) * clamp(face.symmQ, 0.35, 1);
+    scores.rigido += faceSym * 0.12;
+    scores.psicopata += faceSym * 0.08;
+    scores.esquizoide += bandScore(0.86 - face.symm, 0.03, 0.2) * 0.11;
+    scores.oral += bandScore(0.32 - face.shoulderW, 0.03, 0.15) * 0.06;
+  }
+
+  for (const key of Object.keys(scores) as (keyof EstruturasPct)[]) {
+    scores[key] = Math.max(0.05, scores[key]);
+  }
+
+  return scores;
+}
+
+function mergeScores(
+  evidencePct: EstruturasPct,
+  continuousRaw: Record<keyof EstruturasPct, number>,
+  metrics: Metrics[],
+): EstruturasPct {
+  const totalContinuous = Object.values(continuousRaw).reduce((s, v) => s + v, 0);
+  const continuousPct: Record<keyof EstruturasPct, number> = {
+    esquizoide: (continuousRaw.esquizoide / totalContinuous) * 100,
+    oral: (continuousRaw.oral / totalContinuous) * 100,
+    psicopata: (continuousRaw.psicopata / totalContinuous) * 100,
+    masoquista: (continuousRaw.masoquista / totalContinuous) * 100,
+    rigido: (continuousRaw.rigido / totalContinuous) * 100,
+  };
+
+  const coverageWeight = clamp(metrics.length / 3, 0.45, 1);
+  const continuousWeight = 0.58 * coverageWeight;
+  const evidenceWeight = 1 - continuousWeight;
+  const merged = {
+    esquizoide: evidencePct.esquizoide * evidenceWeight + continuousPct.esquizoide * continuousWeight,
+    oral: evidencePct.oral * evidenceWeight + continuousPct.oral * continuousWeight,
+    psicopata: evidencePct.psicopata * evidenceWeight + continuousPct.psicopata * continuousWeight,
+    masoquista: evidencePct.masoquista * evidenceWeight + continuousPct.masoquista * continuousWeight,
+    rigido: evidencePct.rigido * evidenceWeight + continuousPct.rigido * continuousWeight,
+  };
+
+  const total = Object.values(merged).reduce((s, v) => s + v, 0);
+  const pct = {
+    esquizoide: Math.round((merged.esquizoide / total) * 100),
+    oral: Math.round((merged.oral / total) * 100),
+    psicopata: Math.round((merged.psicopata / total) * 100),
+    masoquista: Math.round((merged.masoquista / total) * 100),
+    rigido: Math.round((merged.rigido / total) * 100),
+  };
+  const diff = 100 - (pct.esquizoide + pct.oral + pct.psicopata + pct.masoquista + pct.rigido);
+  if (diff !== 0) {
+    const top = (Object.keys(merged) as (keyof EstruturasPct)[]).reduce((a, b) => merged[a] > merged[b] ? a : b);
+    pct[top] += diff;
+  }
+  return pct;
+}
+
 // ── Confidence calculation ─────────────────────────────────────────────────────
 
 function computeOverallConfidence(metrics: Metrics[]): number {
@@ -557,6 +686,27 @@ function computeOverallConfidence(metrics: Metrics[]): number {
   const bonus = metrics.length === 3 ? 0.15 : metrics.length === 2 ? 0.07 : 0;
   const detected = metrics.filter(m => m.bodyDetected).length / metrics.length;
   return Math.round(Math.min(100, (avg * detected + bonus) * 100));
+}
+
+function buildConfidenceBreakdown(metrics: Metrics[]) {
+  if (metrics.length === 0) {
+    return {
+      imageQuality: 0,
+      bodyDetection: 0,
+      photoCoverage: 0,
+      featureVariance: 0,
+    };
+  }
+  const imageQuality = clamp(mean(metrics.map((m) => m.contrastScore)), 0, 1);
+  const bodyDetection = mean(metrics.map((m) => (m.bodyDetected ? 1 : 0)));
+  const photoCoverage = clamp(metrics.length / 3, 0, 1);
+  const featureVariance = clamp(1 - Math.sqrt(variance(metrics.map((m) => m.shr))), 0.45, 1);
+  return {
+    imageQuality: Math.round(imageQuality * 100) / 100,
+    bodyDetection: Math.round(bodyDetection * 100) / 100,
+    photoCoverage: Math.round(photoCoverage * 100) / 100,
+    featureVariance: Math.round(featureVariance * 100) / 100,
+  };
 }
 
 // ── Dynamic physical profile text ──────────────────────────────────────────────
@@ -1015,9 +1165,11 @@ export async function analyzeTracoDeCarater(
     throw new Error("Não foi possível processar as fotos. Verifique formato e qualidade das imagens.");
   }
 
-  // Score using evidence accumulation
+  // Score using hybrid accumulation (evidence + continuous feature scoring)
   const evidence = collectEvidence(metricsList);
-  const estruturas = scoreFromEvidence(evidence);
+  const evidencePct = scoreFromEvidence(evidence);
+  const continuousRaw = scoreFromContinuousFeatures(metricsList);
+  const estruturas = mergeScores(evidencePct, continuousRaw, metricsList);
 
   // Rank structures
   const sorted = (Object.entries(estruturas) as [keyof EstruturasPct, number][])
@@ -1025,8 +1177,9 @@ export async function analyzeTracoDeCarater(
   const principal = sorted[0][0];
   const secundaria = sorted[1][0];
 
-  // Overall confidence
+  // Overall confidence + explainability
   const confiancaAnalise = computeOverallConfidence(metricsList);
+  const confidenceBreakdown = buildConfidenceBreakdown(metricsList);
 
   // Per-photo observations
   for (const m of metricsList) {
@@ -1048,7 +1201,9 @@ export async function analyzeTracoDeCarater(
     estruturas[secundaria] >= 18 ? is_[0] : ip[2],
     ip[3],
     `A combinação de ${NOMES[principal]} (${estruturas[principal]}%) com ${NOMES[secundaria]} (${estruturas[secundaria]}%) revela ${combo}`,
-    ip[4],
+    estruturas[principal] - estruturas[secundaria] < 8
+      ? "Os dois padrões centrais aparecem com intensidade próxima, indicando um funcionamento mais híbrido e sensível ao contexto. Isso tende a gerar respostas emocionais diferentes conforme ambiente, vínculo e fase de vida."
+      : ip[4],
   ].filter(Boolean).join("\n\n");
 
   // Physical profile narrated from actual measurements
@@ -1091,6 +1246,13 @@ export async function analyzeTracoDeCarater(
 
   // Functional dynamic from principal structure
   const dinamicaFuncional = DINAMICAS_FUNCIONAIS[principal];
+  const featureSummary = {
+    mediaSimetria: Math.round(mean(metricsList.map((m) => m.symm)) * 100) / 100,
+    mediaDensidadeCorporal: Math.round(mean(metricsList.map((m) => m.bodyPct)) * 100) / 100,
+    mediaRazaoOmbroQuadril: Math.round(mean(metricsList.map((m) => m.shr)) * 100) / 100,
+    mediaMassaSuperiorInferior: Math.round(mean(metricsList.map((m) => m.ulr)) * 100) / 100,
+    varianciaEntreFotos: Math.round(Math.sqrt(variance(metricsList.map((m) => m.shr))) * 100) / 100,
+  };
 
   return {
     estruturas,
@@ -1115,5 +1277,10 @@ export async function analyzeTracoDeCarater(
     estiloComunicacao,
     perfilUnico,
     dinamicaFuncional,
+    metadata: {
+      analysisVersion: "traco-hybrid-v3",
+      confidenceBreakdown,
+      featureSummary,
+    },
   };
 }

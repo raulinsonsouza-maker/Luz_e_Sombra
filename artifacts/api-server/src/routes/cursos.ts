@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
-import { db, cursosTable, aulasTable, progressoCursosTable } from "@workspace/db";
+import { db } from "@workspace/db";
+import { cursosTable, aulasTable, progressoCursosTable } from "@workspace/db/schema";
 import { eq, and, asc, sql, count } from "drizzle-orm";
 
 const router = Router();
@@ -64,7 +65,7 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
 // GET /api/cursos/:id — course detail with aulas + user progress
 router.get("/:id", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const cursoId = parseInt(req.params.id, 10);
+    const cursoId = parseInt(String(req.params.id), 10);
     if (isNaN(cursoId)) return res.status(400).json({ error: "ID inválido" });
 
     const [curso] = await db
@@ -135,7 +136,7 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
 // PUT /api/cursos/:id — admin update course
 router.put("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const cursoId = parseInt(req.params.id, 10);
+    const cursoId = parseInt(String(req.params.id), 10);
     if (isNaN(cursoId)) return res.status(400).json({ error: "ID inválido" });
 
     const { titulo, descricao, imagemUrl, categoria, nivel, publicado } = req.body as {
@@ -168,7 +169,7 @@ router.put("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
 // DELETE /api/cursos/:id — admin delete
 router.delete("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const cursoId = parseInt(req.params.id, 10);
+    const cursoId = parseInt(String(req.params.id), 10);
     if (isNaN(cursoId)) return res.status(400).json({ error: "ID inválido" });
     await db.delete(cursosTable).where(eq(cursosTable.id, cursoId));
     return res.json({ ok: true });
@@ -181,7 +182,7 @@ router.delete("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
 // POST /api/cursos/:id/aulas — admin add lesson
 router.post("/:id/aulas", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const cursoId = parseInt(req.params.id, 10);
+    const cursoId = parseInt(String(req.params.id), 10);
     if (isNaN(cursoId)) return res.status(400).json({ error: "ID inválido" });
 
     const [curso] = await db.select({ id: cursosTable.id }).from(cursosTable).where(eq(cursosTable.id, cursoId)).limit(1);
@@ -217,7 +218,7 @@ router.post("/:id/aulas", requireAdmin, async (req: AuthRequest, res: Response) 
 // PUT /api/cursos/aulas/:aulaId — admin update lesson
 router.put("/aulas/:aulaId", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const aulaId = parseInt(req.params.aulaId, 10);
+    const aulaId = parseInt(String(req.params.aulaId), 10);
     if (isNaN(aulaId)) return res.status(400).json({ error: "ID inválido" });
 
     const { titulo, descricao, videoUrl, conteudo, ordem, duracaoMin } = req.body as {
@@ -250,7 +251,7 @@ router.put("/aulas/:aulaId", requireAdmin, async (req: AuthRequest, res: Respons
 // DELETE /api/cursos/aulas/:aulaId — admin delete lesson
 router.delete("/aulas/:aulaId", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const aulaId = parseInt(req.params.aulaId, 10);
+    const aulaId = parseInt(String(req.params.aulaId), 10);
     if (isNaN(aulaId)) return res.status(400).json({ error: "ID inválido" });
     await db.delete(aulasTable).where(eq(aulasTable.id, aulaId));
     return res.json({ ok: true });
@@ -263,7 +264,7 @@ router.delete("/aulas/:aulaId", requireAdmin, async (req: AuthRequest, res: Resp
 // POST /api/cursos/aulas/:aulaId/concluir — mark lesson complete
 router.post("/aulas/:aulaId/concluir", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const aulaId = parseInt(req.params.aulaId, 10);
+    const aulaId = parseInt(String(req.params.aulaId), 10);
     if (isNaN(aulaId)) return res.status(400).json({ error: "ID inválido" });
 
     const [aula] = await db.select({ id: aulasTable.id }).from(aulasTable).where(eq(aulasTable.id, aulaId)).limit(1);
@@ -284,7 +285,7 @@ router.post("/aulas/:aulaId/concluir", requireAuth, async (req: AuthRequest, res
 // DELETE /api/cursos/aulas/:aulaId/concluir — unmark lesson
 router.delete("/aulas/:aulaId/concluir", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const aulaId = parseInt(req.params.aulaId, 10);
+    const aulaId = parseInt(String(req.params.aulaId), 10);
     if (isNaN(aulaId)) return res.status(400).json({ error: "ID inválido" });
     await db.delete(progressoCursosTable).where(
       and(eq(progressoCursosTable.usuarioId, req.user!.id), eq(progressoCursosTable.aulaId, aulaId))

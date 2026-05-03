@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import bcrypt from "bcryptjs";
-import { db, usuariosTable, avaliacoesTable, comunidadeTable, reacoesTable, cursosTable, analiseTracoTable } from "@workspace/db";
+import { db } from "@workspace/db";
+import { usuariosTable, avaliacoesTable, comunidadeTable, reacoesTable, cursosTable, analiseTracoTable } from "@workspace/db/schema";
 import { eq, count, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
 import { ObjectStorageService } from "../lib/objectStorage";
@@ -261,7 +262,7 @@ type UsuarioUpdates = {
 // PUT /api/usuarios/:id - Admin only
 router.put("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const usuarioId = parseInt(req.params.id);
+    const usuarioId = parseInt(String(req.params.id), 10);
     if (isNaN(usuarioId)) return res.status(400).json({ error: "ID inválido" });
 
     const { nome, email, dataNascimento, ativo, isAdmin, senha, novaSenha, primeiroAcesso } = req.body as {
@@ -327,7 +328,7 @@ router.put("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
 // DELETE /api/usuarios/:id - Admin only
 router.delete("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const usuarioId = parseInt(req.params.id);
+    const usuarioId = parseInt(String(req.params.id), 10);
     if (isNaN(usuarioId)) return res.status(400).json({ error: "ID inválido" });
     if (req.user!.id === usuarioId) return res.status(400).json({ error: "Você não pode deletar seu próprio usuário" });
 

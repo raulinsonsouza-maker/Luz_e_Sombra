@@ -62,7 +62,7 @@ const ETAPAS: Etapa[] = [
     subtitulo: "Inteligência emocional profunda",
     descricao: "Trabalhe seus padrões emocionais, gatilhos e desenvolva regulação interna.",
     icon: Heart,
-    href: undefined,
+    href: "/quem-sou-eu",
     xpRecompensa: 80,
     key: null,
   },
@@ -178,7 +178,7 @@ export default function JornadaPage() {
               return (
                 <div key={etapa.num} className="relative flex gap-4">
                   {/* Circle */}
-                  <div className="relative z-10 flex-shrink-0">
+                  <div className="relative z-10 shrink-0">
                     <div
                       className="w-16 h-16 rounded-full flex items-center justify-center transition-all"
                       style={{
@@ -281,7 +281,7 @@ export default function JornadaPage() {
                         {s !== "locked" && etapa.href && (
                           <button
                             onClick={() => navigate(etapa.href!)}
-                            className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+                            className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
                             style={{
                               background: s === "done" ? "rgba(200,165,107,0.1)" : "linear-gradient(135deg, #c8a56b, #9c7742)",
                               color: s === "done" ? "#c8a56b" : "#1a1208",

@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
-import { db, notificacoesTable, usuariosTable } from "@workspace/db";
+import { db } from "@workspace/db";
+import { notificacoesTable, usuariosTable } from "@workspace/db/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 
 const router = Router();

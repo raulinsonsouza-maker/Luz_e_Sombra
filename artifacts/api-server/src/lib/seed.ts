@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
-import { db, usuariosTable } from "@workspace/db";
+import { db } from "@workspace/db";
+import { usuariosTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { logger } from "./logger";
 

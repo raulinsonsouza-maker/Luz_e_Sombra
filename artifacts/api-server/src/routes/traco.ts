@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
-import { db, fotosTracoTable, analiseTracoTable, pessoasAnaliseTable } from "@workspace/db";
+import { db } from "@workspace/db";
+import { fotosTracoTable, analiseTracoTable, pessoasAnaliseTable } from "@workspace/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
 
@@ -10,10 +11,61 @@ const objectStorage = new ObjectStorageService();
 const TIPOS_FOTO = ["rosto", "corpo-frente", "corpo-lado"] as const;
 type TipoFoto = (typeof TIPOS_FOTO)[number];
 
+type AnalysisMetadata = {
+  analysisVersion: string;
+  confidenceBreakdown: {
+    imageQuality: number;
+    bodyDetection: number;
+    photoCoverage: number;
+    featureVariance: number;
+  };
+  featureSummary: {
+    mediaSimetria: number;
+    mediaDensidadeCorporal: number;
+    mediaRazaoOmbroQuadril: number;
+    mediaMassaSuperiorInferior: number;
+    varianciaEntreFotos: number;
+  };
+};
+
 function parsePessoaId(raw: unknown): number | null {
   if (raw === undefined || raw === null || raw === "" || raw === "null") return null;
   const n = parseInt(String(raw), 10);
   return isNaN(n) ? null : n;
+}
+
+function toSafeNumber(value: unknown, fallback = 0): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function normalizeMetadata(raw: unknown, fallbackConfidence: number): AnalysisMetadata {
+  const data = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const conf = (data.confidenceBreakdown && typeof data.confidenceBreakdown === "object"
+    ? data.confidenceBreakdown
+    : {}) as Record<string, unknown>;
+  const summary = (data.featureSummary && typeof data.featureSummary === "object"
+    ? data.featureSummary
+    : {}) as Record<string, unknown>;
+
+  return {
+    analysisVersion: typeof data.analysisVersion === "string" && data.analysisVersion.trim()
+      ? data.analysisVersion.trim().slice(0, 64)
+      : "traco-legacy",
+    confidenceBreakdown: {
+      imageQuality: toSafeNumber(conf.imageQuality, fallbackConfidence / 100),
+      bodyDetection: toSafeNumber(conf.bodyDetection, fallbackConfidence / 100),
+      photoCoverage: toSafeNumber(conf.photoCoverage, 0),
+      featureVariance: toSafeNumber(conf.featureVariance, 0.5),
+    },
+    featureSummary: {
+      mediaSimetria: toSafeNumber(summary.mediaSimetria, 0),
+      mediaDensidadeCorporal: toSafeNumber(summary.mediaDensidadeCorporal, 0),
+      mediaRazaoOmbroQuadril: toSafeNumber(summary.mediaRazaoOmbroQuadril, 0),
+      mediaMassaSuperiorInferior: toSafeNumber(summary.mediaMassaSuperiorInferior, 0),
+      varianciaEntreFotos: toSafeNumber(summary.varianciaEntreFotos, 0),
+    },
+  };
 }
 
 // ── GET /traco/pessoas ─────────────────────────────────────────────────────────
@@ -59,7 +111,7 @@ router.post("/pessoas", requireAuth, async (req: AuthRequest, res: Response) => 
 // ── PUT /traco/pessoas/:id ─────────────────────────────────────────────────────
 router.put("/pessoas/:id", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const { nome, relacao } = req.body as { nome?: string; relacao?: string };
     const [existing] = await db.select().from(pessoasAnaliseTable)
       .where(and(eq(pessoasAnaliseTable.id, id), eq(pessoasAnaliseTable.usuarioId, req.user!.id)));
@@ -80,7 +132,7 @@ router.put("/pessoas/:id", requireAuth, async (req: AuthRequest, res: Response) 
 // ── DELETE /traco/pessoas/:id ──────────────────────────────────────────────────
 router.delete("/pessoas/:id", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const [existing] = await db.select().from(pessoasAnaliseTable)
       .where(and(eq(pessoasAnaliseTable.id, id), eq(pessoasAnaliseTable.usuarioId, req.user!.id)));
     if (!existing) return res.status(404).json({ error: "Pessoa não encontrada" });
@@ -166,7 +218,7 @@ router.post("/fotos", requireAuth, async (req: AuthRequest, res: Response) => {
 // ── DELETE /traco/fotos/:id ────────────────────────────────────────────────────
 router.delete("/fotos/:id", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const [foto] = await db
       .select()
       .from(fotosTracoTable)
@@ -183,7 +235,7 @@ router.delete("/fotos/:id", requireAuth, async (req: AuthRequest, res: Response)
 // ── GET /traco/fotos/:id/view ──────────────────────────────────────────────────
 router.get("/fotos/:id/view", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const [foto] = await db
       .select()
       .from(fotosTracoTable)
@@ -221,6 +273,11 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
     if (Math.abs(sum - 100) > 2) {
       return res.status(400).json({ error: "Percentagens inválidas: devem somar 100." });
     }
+    const metadata = normalizeMetadata(r.metadata, toSafeNumber(r.confiancaAnalise, 50));
+    const resultadoComMetadata = {
+      ...r,
+      metadata,
+    };
 
     const pessoaId = parsePessoaId(pessoaIdRaw);
 
@@ -242,13 +299,13 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
     if (existing.length > 0) {
       [analise] = await db
         .update(analiseTracoTable)
-        .set({ resultado, criadoEm: new Date() })
+        .set({ resultado: resultadoComMetadata, criadoEm: new Date() })
         .where(eq(analiseTracoTable.id, existing[0].id))
         .returning();
     } else {
       [analise] = await db
         .insert(analiseTracoTable)
-        .values({ usuarioId: req.user!.id, pessoaId, resultado })
+        .values({ usuarioId: req.user!.id, pessoaId, resultado: resultadoComMetadata })
         .returning();
     }
 

@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
-import { db, comunidadeTable, reacoesTable, usuariosTable, notificacoesTable } from "@workspace/db";
+import { db } from "@workspace/db";
+import { comunidadeTable, reacoesTable, usuariosTable, notificacoesTable } from "@workspace/db/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
 
@@ -115,7 +116,7 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
 // DELETE /api/comunidade/:id — admin delete
 router.delete("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
     await db.delete(comunidadeTable).where(eq(comunidadeTable.id, id));
     return res.json({ ok: true });
@@ -128,7 +129,7 @@ router.delete("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
 // POST /api/comunidade/:id/reagir — toggle reaction
 router.post("/:id/reagir", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const publicacaoId = parseInt(req.params.id, 10);
+    const publicacaoId = parseInt(String(req.params.id), 10);
     if (isNaN(publicacaoId)) return res.status(400).json({ error: "ID inválido" });
 
     const { emoji } = req.body as { emoji?: string };
@@ -187,7 +188,7 @@ router.post("/upload-url", requireAdmin, async (req: AuthRequest, res: Response)
 // GET /api/comunidade/:id/imagem — stream image
 router.get("/:id/imagem", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
 
     const [post] = await db

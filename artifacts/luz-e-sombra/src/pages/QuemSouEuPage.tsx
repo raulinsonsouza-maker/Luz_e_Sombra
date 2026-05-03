@@ -45,6 +45,19 @@ interface Avaliacao {
   criatividadeHobbyDiversao: number;
 }
 
+interface DiagnosticoEmocionalFase1 {
+  faixaEtaria: "4-7" | "8-11" | "12-14" | "15+";
+  modoColeta: string;
+  passado: number;
+  presente: number;
+  consciencia: number;
+  nivelAtual: "baixo" | "medio" | "alto";
+  evolucao: "baixo" | "medio" | "alto";
+  tag: "inconsciente" | "em_processo" | "integrado" | "em_desenvolvimento";
+  resumo: string;
+  proximosPassos: string[];
+}
+
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const AREAS_LABELS: Record<keyof Avaliacao, string> = {
@@ -404,6 +417,64 @@ function gerarOrientacaoPrecisa(params: {
   return orientacoes.slice(0, 3);
 }
 
+function calcularDiagnosticoEmocionalFase1(params: {
+  idade: number | null;
+  traco: TracoResultado | null;
+  avaliacao: Avaliacao | null;
+}): DiagnosticoEmocionalFase1 | null {
+  const { idade, traco, avaliacao } = params;
+  if (!idade || !traco || !avaliacao) return null;
+
+  const faixaEtaria: DiagnosticoEmocionalFase1["faixaEtaria"] =
+    idade <= 7 ? "4-7" :
+    idade <= 11 ? "8-11" :
+    idade <= 14 ? "12-14" : "15+";
+
+  const modoColeta =
+    faixaEtaria === "4-7" ? "observacao_dos_pais" :
+    faixaEtaria === "8-11" ? "hibrido_crianca_responsavel" :
+    "autoavaliacao";
+
+  const dominante = Math.max(...Object.values(traco.estruturas || { a: 0 }));
+  const passado = Math.round(Math.min(100, dominante * 1.15));
+  const estresseAtual = (10 - avaliacao.equilibrioEmocional) * 10;
+  const relacionalAtual = (10 - avaliacao.desenvolvimentoAmoroso) * 7;
+  const presente = Math.round(Math.min(100, Math.max(0, estresseAtual * 0.65 + relacionalAtual * 0.35)));
+  const conscienciaBase = (avaliacao.equilibrioEmocional + avaliacao.desenvolvimentoIntelectual + avaliacao.espiritualidade) / 30;
+  const consciencia = Math.round(Math.min(100, conscienciaBase * 100));
+
+  const nivelAtual: DiagnosticoEmocionalFase1["nivelAtual"] =
+    presente < 34 ? "baixo" : presente < 67 ? "medio" : "alto";
+  const evolucao: DiagnosticoEmocionalFase1["evolucao"] =
+    consciencia < 40 ? "baixo" : consciencia < 70 ? "medio" : "alto";
+
+  const tag: DiagnosticoEmocionalFase1["tag"] =
+    faixaEtaria === "4-7" ? "em_desenvolvimento" :
+    consciencia >= 70 && presente < 45 ? "integrado" :
+    consciencia < 40 ? "inconsciente" : "em_processo";
+
+  const resumo =
+    `Seu eixo passado-presente indica ativação ${nivelAtual} neste momento, com consciência ${evolucao}. ` +
+    `A leitura aponta maior sensibilidade em situações relacionais e de controle emocional, com potencial real de evolução quando há prática consistente.`;
+
+  return {
+    faixaEtaria,
+    modoColeta,
+    passado,
+    presente,
+    consciencia,
+    nivelAtual,
+    evolucao,
+    tag,
+    resumo,
+    proximosPassos: [
+      "Registrar gatilhos emocionais por 7 dias e observar repetição de padrão",
+      "Praticar expressão emocional segura em 1 conversa importante por semana",
+      "Reavaliar após 30 dias para medir deslocamento de presente e consciência",
+    ],
+  };
+}
+
 // ── Section Component ─────────────────────────────────────────────────────────
 
 function SecaoCard({ titulo, subtitulo, icone: Icone, children }: {
@@ -501,6 +572,7 @@ export default function QuemSouEuPage() {
   const primeiroNome = user.nome.split(" ")[0];
   const dataNasc = user.dataNascimento;
   const anoAtual = new Date().getFullYear();
+  const idade = dataNasc ? Math.max(0, anoAtual - Number(dataNasc.slice(0, 4))) : null;
 
   // ── Compute all numerology ──────────────────────────────────────────────────
   let vidaNum: number | null = null;
@@ -560,6 +632,11 @@ export default function QuemSouEuPage() {
     estrutura: traco?.estruturaPrincipal ?? null,
     bottomAreas: bottomAreas as { key: keyof Avaliacao; val: number }[],
     topAreas: topAreas as { key: keyof Avaliacao; val: number }[],
+  });
+  const diagnosticoEmocional = calcularDiagnosticoEmocionalFase1({
+    idade,
+    traco,
+    avaliacao,
   });
 
   const INSIGHT_ICONS: Record<string, React.ElementType> = {
@@ -1087,10 +1164,58 @@ export default function QuemSouEuPage() {
               </SecaoCard>
             )}
 
+            {/* ── DIAGNÓSTICO EMOCIONAL (FASE 1) ── */}
+            {diagnosticoEmocional && (
+              <SecaoCard titulo="Diagnóstico Emocional (Fase 1)" subtitulo="Leitura de passado, presente e consciência" icone={Heart}>
+                <DossieLabel num="V" label="Estado Emocional Estrutural" />
+                <div
+                  className="rounded-xl p-4 mb-4"
+                  style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.12)" }}
+                >
+                  <p className="text-xs mb-2" style={{ color: "rgba(200,165,107,0.65)" }}>
+                    Faixa etária: {diagnosticoEmocional.faixaEtaria} · Coleta: {diagnosticoEmocional.modoColeta.replaceAll("_", " ")}
+                  </p>
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)" }}>
+                    {diagnosticoEmocional.resumo}
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {[
+                    { k: "Passado", v: diagnosticoEmocional.passado },
+                    { k: "Presente", v: diagnosticoEmocional.presente },
+                    { k: "Consciência", v: diagnosticoEmocional.consciencia },
+                  ].map((item) => (
+                    <div key={item.k} className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(200,165,107,0.08)" }}>
+                      <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>{item.k}</p>
+                      <p className="font-tan-mon-cheri text-2xl" style={{ color: "#c8a56b" }}>{item.v}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="text-xs px-2.5 py-1 rounded-full" style={{ background: "rgba(91,155,213,0.12)", color: "#5b9bd5" }}>
+                    Nível atual: {diagnosticoEmocional.nivelAtual}
+                  </span>
+                  <span className="text-xs px-2.5 py-1 rounded-full" style={{ background: "rgba(109,185,109,0.12)", color: "#6db96d" }}>
+                    Evolução: {diagnosticoEmocional.evolucao}
+                  </span>
+                  <span className="text-xs px-2.5 py-1 rounded-full" style={{ background: "rgba(224,123,57,0.12)", color: "#e07b39" }}>
+                    Tag: {diagnosticoEmocional.tag.replace("_", " ")}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {diagnosticoEmocional.proximosPassos.map((p, i) => (
+                    <p key={i} className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
+                      {i + 1}. {p}
+                    </p>
+                  ))}
+                </div>
+              </SecaoCard>
+            )}
+
             {/* ── ORIENTACAO PRECISA ── */}
             {orientacoes.length > 0 && (
               <SecaoCard titulo="Sua Bússola para Este Momento" subtitulo="Orientação precisa baseada em todos os seus dados" icone={Target}>
-                <DossieLabel num="V" label="Ação com Propósito" />
+                <DossieLabel num="VI" label="Ação com Propósito" />
                 <div className="space-y-3">
                   {orientacoes.map((o, i) => (
                     <div
