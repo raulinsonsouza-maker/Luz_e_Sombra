@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { User, Calendar, Lock, CheckCircle, AlertCircle, Zap, Flame, Target, Star, Camera, Loader2 } from "lucide-react";
+import { User, Calendar, Lock, CheckCircle, AlertCircle, Zap, Flame, Target, Star, Camera, Loader2, Sparkles, ArrowRight } from "lucide-react";
 
 interface Progresso {
   xp: number;
@@ -15,6 +16,7 @@ interface Progresso {
 }
 
 export default function MeuPerfilPage() {
+  const [, navigate] = useLocation();
   const { user, updateUser } = useAuth();
 
   const [nome, setNome] = useState(user?.nome ?? "");
@@ -225,6 +227,23 @@ export default function MeuPerfilPage() {
             Toque na câmera para alterar sua foto
           </p>
         </div>
+
+        {/* Quem Sou Eu button */}
+        <button
+          onClick={() => navigate("/quem-sou-eu")}
+          className="w-full mb-6 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-98"
+          style={{
+            background: "linear-gradient(135deg, rgba(200,165,107,0.15) 0%, rgba(156,119,66,0.08) 100%)",
+            border: "1px solid rgba(200,165,107,0.3)",
+          }}
+        >
+          <Sparkles className="w-5 h-5" style={{ color: "#c8a56b" }} />
+          <div className="text-left">
+            <p className="font-tan-mon-cheri text-base" style={{ color: "#f7f2ec" }}>Quem Sou Eu</p>
+            <p className="text-xs" style={{ color: "rgba(200,165,107,0.6)" }}>Síntese integrada: numerologia, traço e roda da vida</p>
+          </div>
+          <ArrowRight className="w-4 h-4 ml-auto" style={{ color: "rgba(200,165,107,0.4)" }} />
+        </button>
 
         {/* Stats cards */}
         {progresso && (

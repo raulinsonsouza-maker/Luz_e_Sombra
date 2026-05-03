@@ -39,9 +39,22 @@ export const avaliacoesTable = pgTable("avaliacoes", {
   dataAvaliacaoIdx: index("idx_avaliacoes_data").on(table.dataAvaliacao),
 }));
 
+// ── Pessoas para análise (spouse, children, etc.) ──────────────────────────────
+export const pessoasAnaliseTable = pgTable("pessoas_analise", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  nome: text("nome").notNull(),
+  relacao: text("relacao"),
+  ordem: integer("ordem").notNull().default(0),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  usuarioIdx: index("idx_pessoas_analise_usuario_id").on(table.usuarioId),
+}));
+
 export const fotosTracoTable = pgTable("fotos_traco", {
   id: serial("id").primaryKey(),
   usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  pessoaId: integer("pessoa_id").references(() => pessoasAnaliseTable.id, { onDelete: "cascade" }),
   tipo: text("tipo").notNull(),
   objectPath: text("object_path").notNull(),
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
@@ -52,6 +65,7 @@ export const fotosTracoTable = pgTable("fotos_traco", {
 export const analiseTracoTable = pgTable("analise_traco", {
   id: serial("id").primaryKey(),
   usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  pessoaId: integer("pessoa_id").references(() => pessoasAnaliseTable.id, { onDelete: "cascade" }),
   resultado: jsonb("resultado").notNull(),
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
 }, (table) => ({
@@ -86,7 +100,7 @@ export const missoesDiariasTable = pgTable("missoes_diarias", {
 export const comunidadeTable = pgTable("comunidade", {
   id: serial("id").primaryKey(),
   autorId: integer("autor_id").notNull().references(() => usuariosTable.id),
-  tipo: text("tipo").notNull().default("texto"), // texto | imagem | video
+  tipo: text("tipo").notNull().default("texto"),
   conteudo: text("conteudo").notNull(),
   mediaUrl: text("media_url"),
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
@@ -154,6 +168,7 @@ export type InsertUsuario = z.infer<typeof insertUsuarioSchema>;
 export type Usuario = typeof usuariosTable.$inferSelect;
 export type InsertAvaliacao = z.infer<typeof insertAvaliacaoSchema>;
 export type Avaliacao = typeof avaliacoesTable.$inferSelect;
+export type PessoaAnalise = typeof pessoasAnaliseTable.$inferSelect;
 export type FotoTraco = typeof fotosTracoTable.$inferSelect;
 export type AnaliseTraco = typeof analiseTracoTable.$inferSelect;
 export type Gamificacao = typeof gamificacaoTable.$inferSelect;

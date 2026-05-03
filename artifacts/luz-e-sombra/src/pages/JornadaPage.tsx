@@ -29,8 +29,8 @@ const ETAPAS: Etapa[] = [
   {
     num: "01",
     titulo: "Traço de Caráter",
-    subtitulo: "Descubra sua estrutura de personalidade",
-    descricao: "Análise baseada em bioenergia e psicologia corporal. Entenda seus padrões mais profundos.",
+    subtitulo: "Conheça sua estrutura de personalidade",
+    descricao: "Baseada na bioenergética e psicologia corporal, essa análise revela com gentileza os padrões mais profundos que habitam em você — com compaixão e respeito pela sua história.",
     icon: Layers,
     href: "/traco-de-carater",
     xpRecompensa: 100,
@@ -39,8 +39,8 @@ const ETAPAS: Etapa[] = [
   {
     num: "02",
     titulo: "Roda da Vida",
-    subtitulo: "Mapeie o equilíbrio das suas áreas de vida",
-    descricao: "Avalie 12 dimensões da sua vida e descubra onde focar sua energia de transformação.",
+    subtitulo: "Mapeie as áreas da sua vida com honestidade",
+    descricao: "Um olhar amoroso sobre 12 dimensões da sua vida. Sem julgamento — apenas clareza de onde você está e para onde quer ir.",
     icon: Target,
     href: "/avaliacao",
     xpRecompensa: 50,
@@ -49,8 +49,8 @@ const ETAPAS: Etapa[] = [
   {
     num: "03",
     titulo: "Numerologia",
-    subtitulo: "Seu caminho de vida pelos números",
-    descricao: "Descubra seu número de missão, expressão e o que os ciclos revelam sobre sua jornada.",
+    subtitulo: "Os números que contam a sua história",
+    descricao: "Descubra o que seu número de vida, expressão e alma revelam sobre sua missão e seus ciclos de crescimento.",
     icon: Hash,
     href: "/numerologia",
     xpRecompensa: 40,

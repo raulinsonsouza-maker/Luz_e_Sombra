@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Upload, X, Camera, User, ArrowRight, Loader2, RefreshCw, ChevronDown, ChevronUp, AlertCircle, ImageIcon } from "lucide-react";
+import { Upload, X, Camera, User, ArrowRight, Loader2, RefreshCw, ChevronDown, ChevronUp, AlertCircle, ImageIcon, Plus, Users, Trash2 } from "lucide-react";
 import { analyzeTracoDeCarater } from "@/lib/tracoAnalysis";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -82,6 +82,13 @@ interface AnaliseTraco {
   id: number;
   resultado: ResultadoAnalise;
   criadoEm: string;
+}
+
+interface Pessoa {
+  id: number;
+  nome: string;
+  relacao: string | null;
+  ordem: number;
 }
 
 // ── Estrutura config ───────────────────────────────────────────────────────────
@@ -185,34 +192,62 @@ export default function TracodeCaraterPage() {
   const fileInputs = useRef<Partial<Record<TipoFoto, HTMLInputElement | null>>>({});
   const cameraInputs = useRef<Partial<Record<TipoFoto, HTMLInputElement | null>>>({});
 
-  // Load existing photos and analysis on mount
-  useEffect(() => {
-    (async () => {
-      try {
-        const [fotosRes, analiseRes] = await Promise.all([
-          apiFetch("/traco/fotos"),
-          apiFetch("/traco/analise"),
-        ]);
-        if (fotosRes.ok) {
-          const lista: FotoTraco[] = await fotosRes.json();
-          const map: Partial<Record<TipoFoto, FotoTraco>> = {};
-          const prevMap: Partial<Record<TipoFoto, string>> = {};
-          for (const f of lista) {
-            map[f.tipo as TipoFoto] = f;
-            prevMap[f.tipo as TipoFoto] = `${API_BASE}/api/traco/fotos/${f.id}/view`;
-          }
-          setFotos(map);
-          setPreviews(prevMap);
-        }
-        if (analiseRes.ok) {
-          const data = await analiseRes.json();
-          setAnalise(data);
-        }
-      } catch {
-        // silently ignore
+  const [pessoas, setPessoas] = useState<Pessoa[]>([]);
+  const [selectedPessoaId, setSelectedPessoaId] = useState<number | null>(null);
+  const [showAddPessoa, setShowAddPessoa] = useState(false);
+  const [novaNome, setNovaNome] = useState("");
+  const [novaRelacao, setNovaRelacao] = useState("parceiro/a");
+  const [addingPessoa, setAddingPessoa] = useState(false);
+
+  async function carregarDados(pessoaId: number | null) {
+    try {
+      const q = pessoaId !== null ? `?pessoaId=${pessoaId}` : "";
+      const [fotosRes, analiseRes] = await Promise.all([
+        apiFetch(`/traco/fotos${q}`),
+        apiFetch(`/traco/analise${q}`),
+      ]);
+      if (fotosRes.ok) {
+        const lista: FotoTraco[] = await fotosRes.json();
+        const map: Partial<Record<TipoFoto, FotoTraco>> = {};
+        const prevMap: Partial<Record<TipoFoto, string>> = {};
+        const token = localStorage.getItem("luz_e_sombra_token") ?? "";
+        await Promise.all(lista.map(async (f) => {
+          map[f.tipo as TipoFoto] = f;
+          try {
+            const imgRes = await fetch(`${API_BASE}/api/traco/fotos/${f.id}/view`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (imgRes.ok) {
+              const blob = await imgRes.blob();
+              prevMap[f.tipo as TipoFoto] = URL.createObjectURL(blob);
+            }
+          } catch { /* keep no preview */ }
+        }));
+        setFotos(map);
+        setPreviews(prevMap);
       }
-    })();
+      if (analiseRes.ok) {
+        const data = await analiseRes.json();
+        setAnalise(data);
+      } else {
+        setAnalise(null);
+      }
+    } catch { /* silently ignore */ }
+  }
+
+  useEffect(() => {
+    carregarDados(null);
+    apiFetch("/traco/pessoas").then(r => r.ok ? r.json() : []).then(setPessoas).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    setFotos({});
+    setPreviews({});
+    setFotoFiles({});
+    setAnalise(null);
+    carregarDados(selectedPessoaId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPessoaId]);
 
   const handleFileSelect = useCallback(
     async (tipo: TipoFoto, file: File) => {
@@ -245,7 +280,7 @@ export default function TracodeCaraterPage() {
         // 3. Save metadata
         const saveRes = await apiFetch("/traco/fotos", {
           method: "POST",
-          body: JSON.stringify({ tipo, objectPath }),
+          body: JSON.stringify({ tipo, objectPath, pessoaId: selectedPessoaId }),
         });
         if (!saveRes.ok) throw new Error("Erro ao salvar foto");
         const savedFoto: FotoTraco = await saveRes.json();
@@ -262,7 +297,7 @@ export default function TracodeCaraterPage() {
         setUploading((u) => ({ ...u, [tipo]: false }));
       }
     },
-    []
+    [selectedPessoaId]
   );
 
   const handleDelete = useCallback(async (tipo: TipoFoto) => {
@@ -311,7 +346,7 @@ export default function TracodeCaraterPage() {
       // Save computed result to backend
       const saveRes = await apiFetch("/traco/analisar", {
         method: "POST",
-        body: JSON.stringify({ resultado }),
+        body: JSON.stringify({ resultado, pessoaId: selectedPessoaId }),
       });
       if (!saveRes.ok) {
         const errData = await saveRes.json().catch(() => ({}));
@@ -330,10 +365,42 @@ export default function TracodeCaraterPage() {
     }
   };
 
+  async function handleAdicionarPessoa(e: React.FormEvent) {
+    e.preventDefault();
+    if (!novaNome.trim()) return;
+    setAddingPessoa(true);
+    try {
+      const res = await apiFetch("/traco/pessoas", {
+        method: "POST",
+        body: JSON.stringify({ nome: novaNome.trim(), relacao: novaRelacao }),
+      });
+      if (res.ok) {
+        const pessoa: Pessoa = await res.json();
+        setPessoas(prev => [...prev, pessoa]);
+        setShowAddPessoa(false);
+        setNovaNome("");
+        setSelectedPessoaId(pessoa.id);
+      }
+    } catch { /* silent */ }
+    setAddingPessoa(false);
+  }
+
+  async function handleRemoverPessoa(id: number) {
+    if (!confirm("Remover esta pessoa e todos os dados de análise dela?")) return;
+    try {
+      const res = await apiFetch(`/traco/pessoas/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setPessoas(prev => prev.filter(p => p.id !== id));
+        setSelectedPessoaId(null);
+      }
+    } catch { /* silent */ }
+  }
+
   const fotosCount = Object.keys(fotos).length;
   const resultado = analise?.resultado;
   const estruturaPrincipal = resultado?.estruturaPrincipal;
   const configPrincipal = estruturaPrincipal ? ESTRUTURAS_CONFIG[estruturaPrincipal] : null;
+  const pessoaSelecionada = selectedPessoaId !== null ? pessoas.find(p => p.id === selectedPessoaId) : null;
 
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #1e1812 0%, #2a1f14 50%, #2f251b 100%)" }}>
@@ -369,14 +436,117 @@ export default function TracodeCaraterPage() {
             Olá, <span style={{ color: "#c8a56b" }}>{primeiroNome}</span>.
           </p>
           <p className="text-base leading-relaxed" style={{ color: "rgba(247,242,236,0.55)", maxWidth: 600 }}>
-            Baseada na Bioenergética de Alexander Lowen e na Análise do Caráter de Wilhelm Reich, esta análise
-            identifica nos marcadores físicos do seu corpo as cinco estruturas de caráter e como elas se expressam
-            em você — com precisão, profundidade e compaixão.
+            Inspirada na Bioenergética de Alexander Lowen e na Análise do Caráter de Wilhelm Reich, esta jornada
+            revela, com gentileza e profundidade, os padrões que seu corpo carrega — e que contam a história de
+            quem você é, de onde você veio, e do quanto você já cresceu.
           </p>
         </div>
       </section>
 
       <div className="max-w-4xl mx-auto px-6 py-10">
+
+        {/* ── Seletor de pessoas ── */}
+        <div className="mb-8">
+          <p className="text-xs tracking-[0.2em] uppercase mb-3 flex items-center gap-2" style={{ color: "rgba(200,165,107,0.5)" }}>
+            <Users className="w-3.5 h-3.5" /> Analisando
+          </p>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {/* Me */}
+            <button
+              onClick={() => setSelectedPessoaId(null)}
+              className="flex-shrink-0 px-4 py-3 rounded-2xl flex flex-col items-center gap-1 min-w-[78px] transition-all"
+              style={selectedPessoaId === null
+                ? { background: "rgba(200,165,107,0.15)", border: "1.5px solid rgba(200,165,107,0.5)", color: "#c8a56b" }
+                : { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)", color: "rgba(247,242,236,0.4)" }}
+            >
+              <User className="w-5 h-5" />
+              <span className="text-xs font-medium">Eu</span>
+            </button>
+
+            {/* Other people */}
+            {pessoas.map(p => (
+              <button
+                key={p.id}
+                onClick={() => setSelectedPessoaId(p.id)}
+                className="flex-shrink-0 px-4 py-3 rounded-2xl flex flex-col items-center gap-1 min-w-[78px] transition-all"
+                style={selectedPessoaId === p.id
+                  ? { background: "rgba(200,165,107,0.15)", border: "1.5px solid rgba(200,165,107,0.5)", color: "#c8a56b" }
+                  : { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)", color: "rgba(247,242,236,0.4)" }}
+              >
+                <Users className="w-5 h-5" />
+                <span className="text-xs font-medium truncate max-w-[66px]">{p.nome.split(" ")[0]}</span>
+                <span className="text-[10px] opacity-60 truncate max-w-[66px]">{p.relacao || "outro"}</span>
+              </button>
+            ))}
+
+            {/* Add button */}
+            {pessoas.length < 2 && (
+              <button
+                onClick={() => setShowAddPessoa(s => !s)}
+                className="flex-shrink-0 px-4 py-3 rounded-2xl flex flex-col items-center gap-1 min-w-[78px] transition-all"
+                style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(200,165,107,0.25)", color: "rgba(200,165,107,0.4)" }}
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-xs">Adicionar</span>
+              </button>
+            )}
+          </div>
+
+          {/* Add form */}
+          {showAddPessoa && (
+            <form
+              onSubmit={handleAdicionarPessoa}
+              className="mt-3 p-4 rounded-2xl space-y-3"
+              style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}
+            >
+              <p className="text-xs font-semibold" style={{ color: "rgba(200,165,107,0.7)" }}>Adicionar pessoa para analisar</p>
+              <input
+                type="text" value={novaNome} onChange={e => setNovaNome(e.target.value)}
+                placeholder="Nome da pessoa" required
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.2)", color: "#f7f2ec" }}
+              />
+              <select
+                value={novaRelacao} onChange={e => setNovaRelacao(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                style={{ background: "rgba(30,24,18,0.9)", border: "1px solid rgba(200,165,107,0.2)", color: "#f7f2ec" }}
+              >
+                {["parceiro/a", "cônjuge", "filho/a", "pai", "mãe", "irmão/irmã", "familiar", "amigo/a", "outro"].map(r => (
+                  <option key={r} value={r} style={{ background: "#2f251b" }}>{r}</option>
+                ))}
+              </select>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => { setShowAddPessoa(false); setNovaNome(""); }}
+                  className="flex-1 py-2 rounded-xl text-sm" style={{ border: "1px solid rgba(200,165,107,0.2)", color: "rgba(247,242,236,0.5)" }}>
+                  Cancelar
+                </button>
+                <button type="submit" disabled={addingPessoa}
+                  className="flex-1 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
+                  {addingPessoa ? "Adicionando..." : "Adicionar"}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Context: who we're analysing + remove option */}
+          {pessoaSelecionada && (
+            <div className="mt-3 flex items-center justify-between px-1">
+              <p className="text-xs" style={{ color: "rgba(200,165,107,0.6)" }}>
+                Analisando <strong style={{ color: "#c8a56b" }}>{pessoaSelecionada.nome}</strong>
+                {pessoaSelecionada.relacao && ` · ${pessoaSelecionada.relacao}`}
+              </p>
+              <button
+                onClick={() => handleRemoverPessoa(pessoaSelecionada.id)}
+                className="flex items-center gap-1 text-xs transition-opacity hover:opacity-80"
+                style={{ color: "rgba(220,38,38,0.5)" }}
+              >
+                <Trash2 className="w-3 h-3" /> Remover
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* ── Photo guide ── */}
         <div
           className="rounded-2xl p-6 mb-8"

@@ -18,6 +18,7 @@ import MissoesPage from "@/pages/MissoesPage";
 import ComunidadePage from "@/pages/ComunidadePage";
 import CursosPage from "@/pages/CursosPage";
 import CursoPage from "@/pages/CursoPage";
+import QuemSouEuPage from "@/pages/QuemSouEuPage";
 
 function ProtectedRoute({ component: Component, adminOnly = false }: { component: React.ComponentType; adminOnly?: boolean }) {
   const { user, status } = useAuth();
@@ -67,6 +68,9 @@ function Router() {
         </Route>
         <Route path="/perfil">
           <ProtectedRoute component={MeuPerfilPage} />
+        </Route>
+        <Route path="/quem-sou-eu">
+          <ProtectedRoute component={QuemSouEuPage} />
         </Route>
         <Route path="/traco-de-carater">
           <ProtectedRoute component={TracodeCaraterPage} />

@@ -39,11 +39,11 @@ function formatarDataExibicao(iso: string): string {
 }
 
 function scoreLabel(v: number): string {
-  if (v <= 2) return "Muito baixo";
-  if (v <= 4) return "Baixo";
-  if (v <= 6) return "Médio";
-  if (v <= 8) return "Bom";
-  return "Excelente";
+  if (v <= 2) return "Precisa de atenção";
+  if (v <= 4) return "Em desenvolvimento";
+  if (v <= 6) return "Em equilíbrio";
+  if (v <= 8) return "Florescendo";
+  return "Pleno";
 }
 
 function scoreColor(v: number): string {

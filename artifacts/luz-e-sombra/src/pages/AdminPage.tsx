@@ -18,7 +18,8 @@ type FormValues = { username: string; senha: string; nome: string; email: string
 const emptyForm: FormValues = { username: "", senha: "", nome: "", email: "", dataNascimento: "", isAdmin: false };
 
 interface Post {
-  id: number; tipo: string; conteudo: string; mediaUrl: string | null; criadoEm: string; autorNome: string;
+  id: number; tipo: string; conteudo: string; mediaUrl: string | null; criadoEm: string;
+  autorNome: string; reacoes: Record<string, number>;
 }
 
 interface Aula {
@@ -406,18 +407,46 @@ function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: stri
         : posts.length === 0 ? <p className="text-center text-brand-medium py-8 text-sm">Nenhuma publicação ainda.</p>
         : (
           <div className="space-y-3">
-            {posts.map(p => (
-              <div key={p.id} className="flex items-start justify-between gap-3 p-4 rounded-xl" style={{ border: "1px solid rgba(200,165,107,0.15)", background: "rgba(200,165,107,0.02)" }}>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(200,165,107,0.12)", color: "#9c7742" }}>{p.tipo}</span>
-                    <span className="text-xs text-brand-medium">{new Date(p.criadoEm).toLocaleDateString("pt-BR")}</span>
+            {posts.map(p => {
+              const totalReacoes = Object.values(p.reacoes ?? {}).reduce((a, b) => a + b, 0);
+              return (
+                <div key={p.id} className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.15)", background: "rgba(200,165,107,0.02)" }}>
+                  {/* Image preview */}
+                  {p.tipo === "imagem" && p.mediaUrl && (
+                    <div className="h-32 flex items-center justify-center" style={{ background: "rgba(200,165,107,0.05)", borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
+                      <ImageIcon className="w-8 h-8" style={{ color: "rgba(200,165,107,0.3)" }} />
+                      <span className="ml-2 text-xs" style={{ color: "rgba(156,119,66,0.5)" }}>Imagem anexada</span>
+                    </div>
+                  )}
+                  {p.tipo === "video" && p.mediaUrl && (
+                    <div className="h-20 flex items-center justify-center gap-2" style={{ background: "rgba(200,165,107,0.05)", borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
+                      <Youtube className="w-6 h-6" style={{ color: "rgba(200,165,107,0.5)" }} />
+                      <span className="text-xs truncate max-w-[200px]" style={{ color: "rgba(156,119,66,0.6)" }}>{p.mediaUrl}</span>
+                    </div>
+                  )}
+                  <div className="flex items-start justify-between gap-3 p-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(200,165,107,0.12)", color: "#9c7742" }}>{p.tipo}</span>
+                        <span className="text-xs text-brand-medium">{new Date(p.criadoEm).toLocaleDateString("pt-BR")}</span>
+                        {p.autorNome && <span className="text-xs" style={{ color: "rgba(156,119,66,0.6)" }}>por {p.autorNome}</span>}
+                      </div>
+                      <p className="text-sm text-brand-dark line-clamp-2 mb-2">{p.conteudo}</p>
+                      {totalReacoes > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {Object.entries(p.reacoes).sort(([,a],[,b]) => b - a).map(([emoji, count]) => (
+                            <span key={emoji} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.15)", color: "#9c7742" }}>
+                              {emoji} {count}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <button onClick={() => handleDeletar(p.id)} className="p-2 rounded-lg hover:bg-red-50 text-red-400 shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
-                  <p className="text-sm text-brand-dark line-clamp-2">{p.conteudo}</p>
                 </div>
-                <button onClick={() => handleDeletar(p.id)} className="p-2 rounded-lg hover:bg-red-50 text-red-400 shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )
       }

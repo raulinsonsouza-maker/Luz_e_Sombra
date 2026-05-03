@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
-import { db, fotosTracoTable, analiseTracoTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { db, fotosTracoTable, analiseTracoTable, pessoasAnaliseTable } from "@workspace/db";
+import { eq, and, isNull } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
 
 const router = Router();
@@ -10,13 +10,99 @@ const objectStorage = new ObjectStorageService();
 const TIPOS_FOTO = ["rosto", "corpo-frente", "corpo-lado"] as const;
 type TipoFoto = (typeof TIPOS_FOTO)[number];
 
-// ── GET /traco/fotos — list photos ────────────────────────────────────────────
+function parsePessoaId(raw: unknown): number | null {
+  if (raw === undefined || raw === null || raw === "" || raw === "null") return null;
+  const n = parseInt(String(raw), 10);
+  return isNaN(n) ? null : n;
+}
+
+// ── GET /traco/pessoas ─────────────────────────────────────────────────────────
+router.get("/pessoas", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const pessoas = await db
+      .select()
+      .from(pessoasAnaliseTable)
+      .where(eq(pessoasAnaliseTable.usuarioId, req.user!.id))
+      .orderBy(pessoasAnaliseTable.ordem);
+    return res.json(pessoas);
+  } catch (err) {
+    req.log?.error(err);
+    return res.status(500).json({ error: "Erro ao buscar pessoas" });
+  }
+});
+
+// ── POST /traco/pessoas ────────────────────────────────────────────────────────
+router.post("/pessoas", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const { nome, relacao, ordem } = req.body as { nome?: string; relacao?: string; ordem?: number };
+    if (!nome?.trim()) return res.status(400).json({ error: "Nome é obrigatório" });
+
+    const existentes = await db
+      .select({ id: pessoasAnaliseTable.id })
+      .from(pessoasAnaliseTable)
+      .where(eq(pessoasAnaliseTable.usuarioId, req.user!.id));
+    if (existentes.length >= 2) {
+      return res.status(400).json({ error: "Limite de 2 pessoas adicionais atingido" });
+    }
+
+    const [pessoa] = await db
+      .insert(pessoasAnaliseTable)
+      .values({ usuarioId: req.user!.id, nome: nome.trim(), relacao: relacao?.trim() || null, ordem: ordem ?? existentes.length })
+      .returning();
+    return res.status(201).json(pessoa);
+  } catch (err) {
+    req.log?.error(err);
+    return res.status(500).json({ error: "Erro ao criar pessoa" });
+  }
+});
+
+// ── PUT /traco/pessoas/:id ─────────────────────────────────────────────────────
+router.put("/pessoas/:id", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { nome, relacao } = req.body as { nome?: string; relacao?: string };
+    const [existing] = await db.select().from(pessoasAnaliseTable)
+      .where(and(eq(pessoasAnaliseTable.id, id), eq(pessoasAnaliseTable.usuarioId, req.user!.id)));
+    if (!existing) return res.status(404).json({ error: "Pessoa não encontrada" });
+
+    const updates: Partial<typeof pessoasAnaliseTable.$inferInsert> = {};
+    if (nome?.trim()) updates.nome = nome.trim();
+    if (relacao !== undefined) updates.relacao = relacao?.trim() || null;
+
+    const [pessoa] = await db.update(pessoasAnaliseTable).set(updates).where(eq(pessoasAnaliseTable.id, id)).returning();
+    return res.json(pessoa);
+  } catch (err) {
+    req.log?.error(err);
+    return res.status(500).json({ error: "Erro ao atualizar pessoa" });
+  }
+});
+
+// ── DELETE /traco/pessoas/:id ──────────────────────────────────────────────────
+router.delete("/pessoas/:id", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const [existing] = await db.select().from(pessoasAnaliseTable)
+      .where(and(eq(pessoasAnaliseTable.id, id), eq(pessoasAnaliseTable.usuarioId, req.user!.id)));
+    if (!existing) return res.status(404).json({ error: "Pessoa não encontrada" });
+    await db.delete(pessoasAnaliseTable).where(eq(pessoasAnaliseTable.id, id));
+    return res.json({ ok: true });
+  } catch (err) {
+    req.log?.error(err);
+    return res.status(500).json({ error: "Erro ao remover pessoa" });
+  }
+});
+
+// ── GET /traco/fotos ───────────────────────────────────────────────────────────
 router.get("/fotos", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
+    const pessoaId = parsePessoaId(req.query.pessoaId);
     const fotos = await db
       .select()
       .from(fotosTracoTable)
-      .where(eq(fotosTracoTable.usuarioId, req.user!.id));
+      .where(and(
+        eq(fotosTracoTable.usuarioId, req.user!.id),
+        pessoaId === null ? isNull(fotosTracoTable.pessoaId) : eq(fotosTracoTable.pessoaId, pessoaId),
+      ));
     return res.json(fotos);
   } catch (err) {
     req.log?.error(err);
@@ -24,7 +110,7 @@ router.get("/fotos", requireAuth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// ── POST /traco/fotos/upload-url — request presigned URL ─────────────────────
+// ── POST /traco/fotos/upload-url ───────────────────────────────────────────────
 router.post("/fotos/upload-url", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const { tipo } = req.body as { tipo: TipoFoto };
@@ -40,27 +126,36 @@ router.post("/fotos/upload-url", requireAuth, async (req: AuthRequest, res: Resp
   }
 });
 
-// ── POST /traco/fotos — save photo metadata ───────────────────────────────────
+// ── POST /traco/fotos ──────────────────────────────────────────────────────────
 router.post("/fotos", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const { tipo, objectPath } = req.body as { tipo: TipoFoto; objectPath: string };
+    const { tipo, objectPath, pessoaId: pessoaIdRaw } = req.body as { tipo: TipoFoto; objectPath: string; pessoaId?: unknown };
     if (!TIPOS_FOTO.includes(tipo)) {
       return res.status(400).json({ error: "Tipo de foto inválido" });
     }
     if (!objectPath?.startsWith("/objects/")) {
       return res.status(400).json({ error: "objectPath inválido" });
     }
+    const pessoaId = parsePessoaId(pessoaIdRaw);
 
-    // Delete existing photo of this type for this user
-    await db
-      .delete(fotosTracoTable)
-      .where(and(eq(fotosTracoTable.usuarioId, req.user!.id), eq(fotosTracoTable.tipo, tipo)));
+    // Validate pessoaId belongs to user if provided
+    if (pessoaId !== null) {
+      const [pessoa] = await db.select({ id: pessoasAnaliseTable.id }).from(pessoasAnaliseTable)
+        .where(and(eq(pessoasAnaliseTable.id, pessoaId), eq(pessoasAnaliseTable.usuarioId, req.user!.id)));
+      if (!pessoa) return res.status(404).json({ error: "Pessoa não encontrada" });
+    }
+
+    // Delete existing photo of this type for this user+pessoa
+    await db.delete(fotosTracoTable).where(and(
+      eq(fotosTracoTable.usuarioId, req.user!.id),
+      eq(fotosTracoTable.tipo, tipo),
+      pessoaId === null ? isNull(fotosTracoTable.pessoaId) : eq(fotosTracoTable.pessoaId, pessoaId),
+    ));
 
     const [foto] = await db
       .insert(fotosTracoTable)
-      .values({ usuarioId: req.user!.id, tipo, objectPath })
+      .values({ usuarioId: req.user!.id, pessoaId, tipo, objectPath })
       .returning();
-
     return res.json(foto);
   } catch (err) {
     req.log?.error(err);
@@ -68,7 +163,7 @@ router.post("/fotos", requireAuth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// ── DELETE /traco/fotos/:id — delete a photo ──────────────────────────────────
+// ── DELETE /traco/fotos/:id ────────────────────────────────────────────────────
 router.delete("/fotos/:id", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -77,7 +172,6 @@ router.delete("/fotos/:id", requireAuth, async (req: AuthRequest, res: Response)
       .from(fotosTracoTable)
       .where(and(eq(fotosTracoTable.id, id), eq(fotosTracoTable.usuarioId, req.user!.id)));
     if (!foto) return res.status(404).json({ error: "Foto não encontrada" });
-
     await db.delete(fotosTracoTable).where(eq(fotosTracoTable.id, id));
     return res.json({ ok: true });
   } catch (err) {
@@ -86,7 +180,7 @@ router.delete("/fotos/:id", requireAuth, async (req: AuthRequest, res: Response)
   }
 });
 
-// ── GET /traco/fotos/:id/view — proxy photo from GCS ─────────────────────────
+// ── GET /traco/fotos/:id/view ──────────────────────────────────────────────────
 router.get("/fotos/:id/view", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -108,37 +202,41 @@ router.get("/fotos/:id/view", requireAuth, async (req: AuthRequest, res: Respons
   }
 });
 
-// ── POST /traco/analisar — save pre-computed analysis (no AI credits) ─────────
-// The analysis is computed client-side using our local biomechanical engine.
-// This endpoint simply receives the computed resultado and persists it to the DB.
+// ── POST /traco/analisar ───────────────────────────────────────────────────────
 router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const { resultado } = req.body as { resultado?: Record<string, unknown> };
+    const { resultado, pessoaId: pessoaIdRaw } = req.body as { resultado?: Record<string, unknown>; pessoaId?: unknown };
 
     if (!resultado || typeof resultado !== "object") {
-      return res.status(400).json({
-        error: "Resultado da análise não fornecido. A análise deve ser enviada pelo cliente.",
-      });
+      return res.status(400).json({ error: "Resultado da análise não fornecido." });
     }
 
-    // Basic structure validation
     const r = resultado as Record<string, unknown>;
     if (!r.estruturas || !r.estruturaPrincipal || !r.estruturaSecundaria) {
       return res.status(400).json({ error: "Resultado da análise incompleto ou inválido." });
     }
 
-    // Validate percentages sum to 100
     const est = r.estruturas as Record<string, number>;
     const sum = Object.values(est).reduce((a: number, b) => a + Number(b), 0);
     if (Math.abs(sum - 100) > 2) {
       return res.status(400).json({ error: "Percentagens inválidas: devem somar 100." });
     }
 
-    // Upsert: one analysis per user
+    const pessoaId = parsePessoaId(pessoaIdRaw);
+
+    if (pessoaId !== null) {
+      const [pessoa] = await db.select({ id: pessoasAnaliseTable.id }).from(pessoasAnaliseTable)
+        .where(and(eq(pessoasAnaliseTable.id, pessoaId), eq(pessoasAnaliseTable.usuarioId, req.user!.id)));
+      if (!pessoa) return res.status(404).json({ error: "Pessoa não encontrada" });
+    }
+
     const existing = await db
       .select()
       .from(analiseTracoTable)
-      .where(eq(analiseTracoTable.usuarioId, req.user!.id));
+      .where(and(
+        eq(analiseTracoTable.usuarioId, req.user!.id),
+        pessoaId === null ? isNull(analiseTracoTable.pessoaId) : eq(analiseTracoTable.pessoaId, pessoaId),
+      ));
 
     let analise;
     if (existing.length > 0) {
@@ -150,7 +248,7 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
     } else {
       [analise] = await db
         .insert(analiseTracoTable)
-        .values({ usuarioId: req.user!.id, resultado })
+        .values({ usuarioId: req.user!.id, pessoaId, resultado })
         .returning();
     }
 
@@ -161,13 +259,17 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
   }
 });
 
-// ── GET /traco/analise — get latest analysis ──────────────────────────────────
+// ── GET /traco/analise ─────────────────────────────────────────────────────────
 router.get("/analise", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
+    const pessoaId = parsePessoaId(req.query.pessoaId);
     const [analise] = await db
       .select()
       .from(analiseTracoTable)
-      .where(eq(analiseTracoTable.usuarioId, req.user!.id));
+      .where(and(
+        eq(analiseTracoTable.usuarioId, req.user!.id),
+        pessoaId === null ? isNull(analiseTracoTable.pessoaId) : eq(analiseTracoTable.pessoaId, pessoaId),
+      ));
     return res.json(analise ?? null);
   } catch (err) {
     req.log?.error(err);
