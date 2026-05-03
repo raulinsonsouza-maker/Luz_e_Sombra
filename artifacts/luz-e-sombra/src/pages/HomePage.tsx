@@ -110,9 +110,9 @@ function ScoreGauge({ score, cor }: { score: number; cor: string }) {
 }
 
 const QUICK_ACTIONS = [
+  { label: "Traço",         sub: "Comece por aqui", icon: Layers, href: "/traco-de-carater",  gold: true  },
   { label: "Jornada",       sub: "Ver progresso",   icon: Map,    href: "/jornada",          gold: false },
-  { label: "Roda da Vida",  sub: "Nova avaliação",  icon: Target, href: "/avaliacao",         gold: true  },
-  { label: "Traço",         sub: "Meu caráter",     icon: Layers, href: "/traco-de-carater",  gold: false },
+  { label: "Roda da Vida",  sub: "Nova avaliação",  icon: Target, href: "/avaliacao",         gold: false },
   { label: "Numerologia",   sub: "Meus números",    icon: Hash,   href: "/numerologia",       gold: false },
 ];
 
@@ -126,7 +126,6 @@ export default function HomePage() {
   useEffect(() => {
     if (status === "unauthenticated") { navigate("/login"); return; }
     if (status === "loading") return;
-    if (user?.primeiroAcesso) { navigate("/avaliacao?primeiro=true"); return; }
     buscarDados();
   }, [status, user]);
 
