@@ -73,38 +73,39 @@ export default function BottomNav() {
           ))}
         </div>
 
-        <div className="flex flex-col items-center justify-end shrink-0 px-1 -mt-7 pb-0.5">
+        <div className="flex flex-col items-center justify-end shrink-0 px-1 -mt-6 pb-0.5">
           <button
             type="button"
             onClick={() => navigate("/jornada")}
-            className="flex flex-col items-center gap-1 transition-transform active:scale-95"
+            className="rounded-full flex flex-col items-center justify-center gap-0.5 transition-transform active:scale-95 leading-none"
             aria-current={jornadaActive ? "page" : undefined}
+            style={{
+              width: 64,
+              height: 64,
+              paddingTop: 8,
+              paddingBottom: 6,
+              background: jornadaActive
+                ? "linear-gradient(145deg, #d4b87a 0%, #c8a56b 45%, #8a6a3a 100%)"
+                : "linear-gradient(145deg, #2a2218 0%, #1e1812 55%, #161008 100%)",
+              border: jornadaActive ? "2px solid rgba(255,230,180,0.45)" : "2px solid rgba(200,165,107,0.55)",
+              boxShadow: jornadaActive
+                ? "0 0 0 1px rgba(200,165,107,0.35), 0 8px 28px rgba(200,165,107,0.35)"
+                : "0 6px 22px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
+            }}
           >
-            <div
-              className="rounded-full flex items-center justify-center"
+            <Map
+              className="w-[22px] h-[22px] shrink-0"
               style={{
-                width: 56,
-                height: 56,
-                background: jornadaActive
-                  ? "linear-gradient(145deg, #d4b87a 0%, #c8a56b 45%, #8a6a3a 100%)"
-                  : "linear-gradient(145deg, #2a2218 0%, #1e1812 55%, #161008 100%)",
-                border: jornadaActive ? "2px solid rgba(255,230,180,0.45)" : "2px solid rgba(200,165,107,0.55)",
-                boxShadow: jornadaActive
-                  ? "0 0 0 1px rgba(200,165,107,0.35), 0 8px 28px rgba(200,165,107,0.35)"
-                  : "0 6px 22px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
+                color: jornadaActive ? "#1a1208" : "#c8a56b",
+                strokeWidth: jornadaActive ? 2.4 : 2,
               }}
-            >
-              <Map
-                className="w-6 h-6"
-                style={{
-                  color: jornadaActive ? "#1a1208" : "#c8a56b",
-                  strokeWidth: jornadaActive ? 2.4 : 2,
-                }}
-              />
-            </div>
+            />
             <span
-              className="text-[9px] font-semibold tracking-wide"
-              style={{ color: jornadaActive ? "#c8a56b" : "rgba(247,242,236,0.45)" }}
+              className="text-[8px] font-bold tracking-wide"
+              style={{
+                color: jornadaActive ? "#1a1208" : "rgba(200,165,107,0.92)",
+                letterSpacing: "0.04em",
+              }}
             >
               Jornada
             </span>
