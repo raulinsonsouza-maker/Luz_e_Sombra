@@ -72,14 +72,17 @@ export default function DiagnosticoEixosPage() {
           className="text-xs tracking-widest uppercase mb-2 inline-block px-2 py-0.5 rounded"
           style={{ color: "rgba(200,165,107,0.75)", border: "1px solid rgba(200,165,107,0.25)" }}
         >
-          Passo 1 de 2 · Traço de caráter
+          Traço de Caráter · Passo 1 de 2
         </p>
-        <h1 className="font-tan-mon-cheri text-2xl mb-2" style={{ color: "#f7f2ec" }}>
-          Questionário de eixos
+        <h1 className="font-tan-mon-cheri text-2xl mb-2 leading-tight" style={{ color: "#f7f2ec" }}>
+          Vinte reflexões sobre o teu jeito de ser
         </h1>
         <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
-          20 perguntas (escala 1 a 5). Ao terminar a última pergunta, segues automaticamente para o passo das{" "}
-          <strong style={{ color: "rgba(200,165,107,0.85)" }}>fotos</strong>.
+          Cada afirmação pede uma nota de <strong style={{ color: "rgba(247,242,236,0.65)" }}>1</strong> (quase
+          nunca) a <strong style={{ color: "rgba(247,242,236,0.65)" }}>5</strong> (quase sempre), à medida que te
+          reconheces hoje. Ao concluíres a última, passas na hora para o passo das{" "}
+          <strong style={{ color: "rgba(200,165,107,0.85)" }}>fotos</strong>
+          {" — "}junto, o questionário e as imagens sustentam a leitura do teu Traço de Caráter.
         </p>
         <div className="mt-4 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
           <div
@@ -91,7 +94,8 @@ export default function DiagnosticoEixosPage() {
           />
         </div>
         <p className="text-xs mt-2" style={{ color: "rgba(200,165,107,0.45)" }}>
-          {index + 1} / 20 · {answered} respondidas
+          Pergunta {index + 1} de 20 · {answered}{" "}
+          {answered === 1 ? "resposta registada" : "respostas registadas"}
         </p>
       </section>
 
@@ -122,7 +126,7 @@ export default function DiagnosticoEixosPage() {
               ))}
             </div>
             <p className="text-[10px] mt-3 text-center" style={{ color: "rgba(247,242,236,0.35)" }}>
-              1 = mínimo · 5 = máximo
+              1 = quase nunca · 5 = quase sempre
             </p>
           </div>
         )}
@@ -146,7 +150,7 @@ export default function DiagnosticoEixosPage() {
             Recomeçar do início
           </button>
           <span className="text-[10px] flex items-center gap-1" style={{ color: "rgba(200,165,107,0.4)" }}>
-            Depois: fotos
+            A seguir: fotos
             <ArrowRight className="w-3 h-3" />
           </span>
         </div>

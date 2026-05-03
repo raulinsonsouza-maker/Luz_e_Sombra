@@ -872,7 +872,7 @@ export default function TracodeCaraterPage() {
             </p>
           )}
           <p className="text-xs text-center max-w-md px-2" style={{ color: "rgba(109,185,109,0.75)" }}>
-            O questionário de eixos (passo 1) está concluído — as respostas serão enviadas com a gravação da análise.
+            A parte das 20 reflexões (passo 1) está concluída — as respostas entram na análise juntamente com as fotos.
           </p>
           <p className="text-xs text-center max-w-md px-2 mt-1" style={{ color: "rgba(200,165,107,0.45)" }}>
             <Link
@@ -887,7 +887,7 @@ export default function TracodeCaraterPage() {
                 }
               }}
             >
-              Refazer o questionário
+              Refazer as 20 reflexões
             </Link>
             {" "}se quiser ajustar respostas antes de analisar.
           </p>
@@ -1151,10 +1151,10 @@ export default function TracodeCaraterPage() {
                   Modelo multimodal
                 </p>
                 <h3 className="font-tan-mon-cheri text-base mb-1" style={{ color: "rgba(247,242,236,0.9)" }}>
-                  Cinco eixos (imagem + questionário)
+                  Perfil em cinco dimensões (fotos + reflexões)
                 </h3>
                 <p className="text-xs mb-4" style={{ color: "rgba(247,242,236,0.4)" }}>
-                  {resultado.modeloMultimodal.versaoModelo} · pesos imagem/questionário:{" "}
+                  {resultado.modeloMultimodal.versaoModelo} · peso fotos / reflexões:{" "}
                   {Math.round(resultado.modeloMultimodal.pesoImagem * 100)}% /{" "}
                   {Math.round(resultado.modeloMultimodal.pesoQuestionario * 100)}%
                 </p>

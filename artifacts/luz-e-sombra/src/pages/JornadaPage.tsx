@@ -29,9 +29,9 @@ const ETAPAS: Etapa[] = [
   {
     num: "01",
     titulo: "Traço de Caráter",
-    subtitulo: "Questionário + fotos (2 passos)",
+    subtitulo: "20 reflexões + fotos (2 passos)",
     descricao:
-      "Primeiro respondes a 20 perguntas de eixos emocionais; em seguida envias as fotos. O sistema combina as duas fontes para uma leitura mais consistente.",
+      "Primeiro respondes a 20 reflexões sobre o teu jeito de sentir e agir; depois envias as fotos. O sistema cruza as duas partes para uma leitura mais firme do teu Traço de Caráter.",
     icon: Layers,
     href: "/traco-de-carater",
     xpRecompensa: 100,
