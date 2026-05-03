@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { Home, Target, Hash, History, Shield, LogOut, Menu, X, UserCircle } from "lucide-react";
+import { Home, Target, Hash, History, Shield, LogOut, Menu, X, UserCircle, Layers } from "lucide-react";
 
 export default function SiteHeader() {
   const [location, navigate] = useLocation();
@@ -18,6 +18,7 @@ export default function SiteHeader() {
     { href: "/dashboard", label: "Início", icon: Home },
     { href: "/avaliacao", label: "Avaliação", icon: Target },
     { href: "/numerologia", label: "Numerologia", icon: Hash },
+    { href: "/traco-de-carater", label: "Traço", icon: Layers },
     { href: "/historico", label: "Histórico", icon: History },
   ];
 

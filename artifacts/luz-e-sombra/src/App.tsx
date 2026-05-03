@@ -11,6 +11,7 @@ import HistoricoPage from "@/pages/HistoricoPage";
 import NumerologiaPage from "@/pages/NumerologiaPage";
 import AdminPage from "@/pages/AdminPage";
 import MeuPerfilPage from "@/pages/MeuPerfilPage";
+import TracodeCaraterPage from "@/pages/TracodeCaraterPage";
 
 function ProtectedRoute({ component: Component, adminOnly = false }: { component: React.ComponentType; adminOnly?: boolean }) {
   const { user, status } = useAuth();
@@ -54,6 +55,9 @@ function Router() {
         </Route>
         <Route path="/perfil">
           <ProtectedRoute component={MeuPerfilPage} />
+        </Route>
+        <Route path="/traco-de-carater">
+          <ProtectedRoute component={TracodeCaraterPage} />
         </Route>
         <Route path="/admin">
           <ProtectedRoute component={AdminPage} adminOnly />

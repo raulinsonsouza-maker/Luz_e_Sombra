@@ -1,4 +1,4 @@
-import { pgTable, text, serial, boolean, timestamp, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, integer, index, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -38,6 +38,25 @@ export const avaliacoesTable = pgTable("avaliacoes", {
   dataAvaliacaoIdx: index("idx_avaliacoes_data").on(table.dataAvaliacao),
 }));
 
+export const fotosTracoTable = pgTable("fotos_traco", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  tipo: text("tipo").notNull(),
+  objectPath: text("object_path").notNull(),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  usuarioIdIdx: index("idx_fotos_traco_usuario_id").on(table.usuarioId),
+}));
+
+export const analiseTracoTable = pgTable("analise_traco", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  resultado: jsonb("resultado").notNull(),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  usuarioIdIdx: index("idx_analise_traco_usuario_id").on(table.usuarioId),
+}));
+
 export const insertUsuarioSchema = createInsertSchema(usuariosTable).omit({ id: true, criadoEm: true, atualizadoEm: true });
 export const insertAvaliacaoSchema = createInsertSchema(avaliacoesTable).omit({ id: true, criadaEm: true });
 
@@ -45,3 +64,5 @@ export type InsertUsuario = z.infer<typeof insertUsuarioSchema>;
 export type Usuario = typeof usuariosTable.$inferSelect;
 export type InsertAvaliacao = z.infer<typeof insertAvaliacaoSchema>;
 export type Avaliacao = typeof avaliacoesTable.$inferSelect;
+export type FotoTraco = typeof fotosTracoTable.$inferSelect;
+export type AnaliseTraco = typeof analiseTracoTable.$inferSelect;
