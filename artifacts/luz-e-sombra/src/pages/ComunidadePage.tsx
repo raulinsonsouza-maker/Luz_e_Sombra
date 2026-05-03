@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { Plus, Trash2, Loader2, Users, ImageIcon, Youtube, FileText, Heart, Flame, Sparkles, Star, Sun, type LucideIcon } from "lucide-react";
+import { AuthenticatedImage } from "@/components/AuthenticatedImage";
+import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
+import { Plus, Trash2, Loader2, Users, ImageIcon, Youtube, FileText, Heart, Flame, Sparkles, Star, Sun, ExternalLink, type LucideIcon } from "lucide-react";
 
 const REACTIONS: { key: string; icon: LucideIcon; color: string; label: string }[] = [
   { key: "❤️", icon: Heart,    color: "#e85555", label: "Amor" },
@@ -21,21 +23,6 @@ interface Post {
   criadoEm: string;
   reacoes: Record<string, number>;
   minhasReacoes: string[];
-}
-
-function getYouTubeEmbedUrl(url: string): string | null {
-  try {
-    const u = new URL(url);
-    let videoId: string | null = null;
-    if (u.hostname.includes("youtu.be")) {
-      videoId = u.pathname.slice(1);
-    } else if (u.hostname.includes("youtube.com")) {
-      videoId = u.searchParams.get("v");
-    }
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
-  } catch {
-    return null;
-  }
 }
 
 function timeAgo(dateStr: string): string {
@@ -63,9 +50,20 @@ export default function ComunidadePage() {
   const [enviando, setEnviando] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(false);
+  const [formErro, setFormErro] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const isAdmin = Boolean(user?.isAdmin);
+
+  const definirArquivo = useCallback((f: File | null) => {
+    if (f && !f.type.startsWith("image/")) {
+      setFormErro("Use apenas arquivos de imagem (JPG, PNG, WebP…).");
+      return;
+    }
+    setFormErro(null);
+    setUploadFile(f);
+  }, []);
 
   useEffect(() => {
     buscarPosts();
@@ -107,7 +105,19 @@ export default function ComunidadePage() {
 
   async function handleCriarPost(e: React.FormEvent) {
     e.preventDefault();
-    if (!novoConteudo.trim()) return;
+    setFormErro(null);
+    if (novoTipo === "texto" && !novoConteudo.trim()) {
+      setFormErro("Escreva o texto da publicação.");
+      return;
+    }
+    if (novoTipo === "imagem" && !uploadFile) {
+      setFormErro("Selecione ou arraste uma imagem.");
+      return;
+    }
+    if (novoTipo === "video" && !novoMediaUrl.trim()) {
+      setFormErro("Cole o link do YouTube ou Vimeo.");
+      return;
+    }
     setEnviando(true);
 
     try {
@@ -119,20 +129,23 @@ export default function ComunidadePage() {
         if (!urlRes.ok) throw new Error("Erro ao gerar URL de upload");
         const { uploadURL, objectPath } = await urlRes.json();
 
-        await fetch(uploadURL, {
+        const up = await fetch(uploadURL, {
           method: "PUT",
           body: uploadFile,
           headers: { "Content-Type": uploadFile.type || "image/jpeg" },
         });
+        if (!up.ok) throw new Error("Falha no envio da imagem");
         mediaUrl = objectPath;
         setUploadProgress(false);
       } else if (novoTipo === "video") {
         mediaUrl = novoMediaUrl.trim() || undefined;
       }
 
+      const textoPublicacao = novoConteudo.trim() || (novoTipo === "imagem" ? " " : novoTipo === "video" ? " " : "");
+
       const res = await apiFetch("/comunidade", {
         method: "POST",
-        body: JSON.stringify({ tipo: novoTipo, conteudo: novoConteudo.trim(), mediaUrl }),
+        body: JSON.stringify({ tipo: novoTipo, conteudo: textoPublicacao, mediaUrl }),
       });
 
       if (res.ok) {
@@ -141,10 +154,15 @@ export default function ComunidadePage() {
         setUploadFile(null);
         if (fileRef.current) fileRef.current.value = "";
         setCriando(false);
+        setFormErro(null);
         await buscarPosts();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setFormErro((data as { error?: string }).error || "Não foi possível publicar.");
       }
     } catch (err) {
       console.error(err);
+      setFormErro("Erro de rede ao publicar.");
     }
     setUploadProgress(false);
     setEnviando(false);
@@ -170,7 +188,7 @@ export default function ComunidadePage() {
       className="min-h-screen pb-28"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
-      <div className="max-w-lg mx-auto px-4 pt-6">
+      <div className="max-w-xl mx-auto px-4 pt-6">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -200,8 +218,16 @@ export default function ComunidadePage() {
             style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.2)" }}
           >
             <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.6)" }}>
-              Nova Publicação
+              Nova publicação
             </p>
+            <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.35)" }}>
+              Texto livre, imagem (upload) ou vídeo (link YouTube / Vimeo, inclusive Shorts).
+            </p>
+            {formErro && (
+              <p className="text-xs rounded-lg px-3 py-2" style={{ background: "rgba(248,113,113,0.12)", color: "#f87171", border: "1px solid rgba(248,113,113,0.25)" }}>
+                {formErro}
+              </p>
+            )}
 
             {/* Tipo */}
             <div className="flex gap-2">
@@ -209,7 +235,7 @@ export default function ComunidadePage() {
                 <button
                   key={t}
                   type="button"
-                  onClick={() => { setNovoTipo(t); setUploadFile(null); setNovoMediaUrl(""); }}
+                  onClick={() => { setNovoTipo(t); setUploadFile(null); setNovoMediaUrl(""); setFormErro(null); }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
                   style={novoTipo === t
                     ? { background: "rgba(200,165,107,0.2)", color: "#c8a56b", border: "1px solid rgba(200,165,107,0.4)" }
@@ -227,11 +253,17 @@ export default function ComunidadePage() {
             <textarea
               value={novoConteudo}
               onChange={e => setNovoConteudo(e.target.value)}
-              required
+              required={novoTipo === "texto"}
               rows={3}
               className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none"
               style={inputStyle}
-              placeholder="Compartilhe algo com a comunidade..."
+              placeholder={
+                novoTipo === "texto"
+                  ? "Compartilhe algo com a comunidade…"
+                  : novoTipo === "imagem"
+                    ? "Legenda opcional para a imagem…"
+                    : "Comentário opcional sobre o vídeo…"
+              }
             />
 
             {novoTipo === "imagem" && (
@@ -240,30 +272,49 @@ export default function ComunidadePage() {
                   ref={fileRef}
                   type="file"
                   accept="image/*"
-                  onChange={e => setUploadFile(e.target.files?.[0] || null)}
+                  onChange={e => definirArquivo(e.target.files?.[0] || null)}
                   className="hidden"
                   id="upload-img"
                 />
                 <label
                   htmlFor="upload-img"
-                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm cursor-pointer transition-all"
-                  style={{ border: "1px dashed rgba(200,165,107,0.3)", color: "rgba(200,165,107,0.6)" }}
+                  onDragEnter={e => { e.preventDefault(); setDragActive(true); }}
+                  onDragLeave={e => { e.preventDefault(); setDragActive(false); }}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={e => {
+                    e.preventDefault();
+                    setDragActive(false);
+                    const f = e.dataTransfer.files?.[0];
+                    if (f) definirArquivo(f);
+                  }}
+                  className="flex flex-col items-center justify-center gap-2 w-full py-8 rounded-xl text-sm cursor-pointer transition-all"
+                  style={{
+                    border: `2px dashed ${dragActive ? "rgba(200,165,107,0.55)" : "rgba(200,165,107,0.3)"}`,
+                    background: dragActive ? "rgba(200,165,107,0.06)" : "transparent",
+                    color: "rgba(200,165,107,0.65)",
+                  }}
                 >
-                  <ImageIcon className="w-4 h-4" />
-                  {uploadFile ? uploadFile.name : "Selecionar imagem"}
+                  <ImageIcon className="w-8 h-8 opacity-70" />
+                  <span className="font-medium">{uploadFile ? uploadFile.name : "Toque ou arraste a imagem aqui"}</span>
+                  <span className="text-[11px] opacity-60">JPG, PNG ou WebP · até o limite configurado no servidor</span>
                 </label>
               </div>
             )}
 
             {novoTipo === "video" && (
-              <input
-                type="url"
-                value={novoMediaUrl}
-                onChange={e => setNovoMediaUrl(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                style={inputStyle}
-                placeholder="URL do YouTube (ex: https://youtu.be/...)"
-              />
+              <div className="space-y-1">
+                <input
+                  type="url"
+                  value={novoMediaUrl}
+                  onChange={e => setNovoMediaUrl(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl text-sm outline-none"
+                  style={inputStyle}
+                  placeholder="https://www.youtube.com/watch?v=… ou https://vimeo.com/…"
+                />
+                <p className="text-[11px] px-1" style={{ color: "rgba(247,242,236,0.28)" }}>
+                  Suporta YouTube (vídeos, Shorts, youtu.be) e Vimeo.
+                </p>
+              </div>
             )}
 
             <div className="flex gap-3">
@@ -335,17 +386,16 @@ function PostCard({
   onDeletar: (id: number) => void;
   deletando: boolean;
 }) {
-  const embedUrl = post.tipo === "video" && post.mediaUrl ? getYouTubeEmbedUrl(post.mediaUrl) : null;
-  const imageSrc = post.tipo === "imagem" && post.mediaUrl
-    ? `/api/comunidade/${post.id}/imagem`
-    : null;
+  const embedUrl = post.tipo === "video" && post.mediaUrl ? getVideoEmbedUrl(post.mediaUrl) : null;
+  const showImagem = post.tipo === "imagem" && Boolean(post.mediaUrl);
 
   const totalReacoes = Object.values(post.reacoes).reduce((a, b) => a + b, 0);
+  const textoPost = post.conteudo?.trim();
 
   return (
     <div
-      className="rounded-2xl overflow-hidden"
-      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.1)" }}
+      className="rounded-2xl overflow-hidden shadow-lg shadow-black/20"
+      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}
     >
       {/* Author bar */}
       <div className="flex items-center justify-between px-5 pt-4 pb-3">
@@ -376,34 +426,58 @@ function PostCard({
         )}
       </div>
 
-      {/* Content */}
-      <div className="px-5 pb-3">
-        <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.8)", whiteSpace: "pre-wrap" }}>
-          {post.conteudo}
-        </p>
-      </div>
-
-      {/* Media */}
-      {imageSrc && (
-        <div className="mx-5 mb-3 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.1)" }}>
-          <img
-            src={imageSrc}
-            alt="Imagem da publicação"
-            className="w-full max-h-72 object-cover"
-            onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-          />
+      {/* Mídia em destaque (imagem / vídeo) */}
+      {showImagem && (
+        <div className="px-0 sm:px-1 mb-1">
+          <div className="rounded-none sm:rounded-xl overflow-hidden max-h-[min(70vh,420px)]" style={{ border: "1px solid rgba(200,165,107,0.12)" }}>
+            <AuthenticatedImage
+              apiPath={`/comunidade/${post.id}/imagem`}
+              alt="Publicação na comunidade"
+              className="w-full max-h-[min(70vh,420px)]"
+              imgClassName="w-full h-full max-h-[min(70vh,420px)] object-cover object-center"
+            />
+          </div>
         </div>
       )}
 
-      {embedUrl && (
-        <div className="mx-5 mb-3 rounded-xl overflow-hidden aspect-video">
+      {post.tipo === "video" && post.mediaUrl && embedUrl && (
+        <div className="mx-5 mb-3 rounded-xl overflow-hidden aspect-video bg-black" style={{ border: "1px solid rgba(200,165,107,0.12)" }}>
           <iframe
             src={embedUrl}
             className="w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            title="Vídeo"
+            title="Vídeo da comunidade"
           />
+        </div>
+      )}
+
+      {post.tipo === "video" && post.mediaUrl && !embedUrl && (
+        <div className="mx-5 mb-3 rounded-xl p-4 flex items-center gap-3" style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.15)" }}>
+          <Youtube className="w-8 h-8 shrink-0" style={{ color: "#c8a56b" }} />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium mb-1" style={{ color: "#f7f2ec" }}>Link de vídeo</p>
+            <p className="text-[11px] truncate mb-2" style={{ color: "rgba(247,242,236,0.4)" }}>{post.mediaUrl}</p>
+            <a
+              href={post.mediaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold"
+              style={{ color: "#c8a56b" }}
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Abrir em nova aba
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* Texto */}
+      {textoPost && (
+        <div className="px-5 pb-3 pt-2">
+          <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.82)", whiteSpace: "pre-wrap" }}>
+            {post.conteudo.trim()}
+          </p>
         </div>
       )}
 

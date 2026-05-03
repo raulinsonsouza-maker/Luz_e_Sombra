@@ -45,3 +45,8 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
   };
   return fetch(`/api${path}`, { ...options, headers });
 }
+
+/** GET com Bearer (sem forçar Content-Type — uso em imagens/binários autenticados). */
+export function apiFetchGet(path: string): Promise<Response> {
+  return fetch(`/api${path}`, { headers: { ...authHeaders() } as HeadersInit });
+}

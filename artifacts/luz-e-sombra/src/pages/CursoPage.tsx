@@ -4,8 +4,10 @@ import { apiFetch } from "@/lib/auth";
 import { useAuth } from "@/context/AuthContext";
 import {
   ChevronLeft, Loader2, CheckCircle2, Circle, Play,
-  BookOpen, Clock, ChevronRight, GraduationCap
+  BookOpen, Clock, ChevronRight, ExternalLink,
 } from "lucide-react";
+import { CursoCapa } from "@/components/CursoCapa";
+import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 
 interface Aula {
   id: number;
@@ -27,18 +29,6 @@ interface Curso {
   nivel: string | null;
   publicado: boolean;
   aulas: Aula[];
-}
-
-function getYouTubeEmbedUrl(url: string): string | null {
-  try {
-    const u = new URL(url);
-    let videoId: string | null = null;
-    if (u.hostname.includes("youtu.be")) videoId = u.pathname.slice(1);
-    else if (u.hostname.includes("youtube.com")) videoId = u.searchParams.get("v");
-    return videoId ? `https://www.youtube.com/embed/${videoId}?rel=0` : null;
-  } catch {
-    return null;
-  }
 }
 
 export default function CursoPage() {
@@ -108,7 +98,7 @@ export default function CursoPage() {
 
   const totalConcluidas = curso.aulas.filter(a => a.concluida).length;
   const pct = curso.aulas.length > 0 ? Math.round((totalConcluidas / curso.aulas.length) * 100) : 0;
-  const embedUrl = aulaAtiva?.videoUrl ? getYouTubeEmbedUrl(aulaAtiva.videoUrl) : null;
+  const embedUrl = aulaAtiva?.videoUrl ? getVideoEmbedUrl(aulaAtiva.videoUrl) : null;
 
   return (
     <div className="min-h-screen pb-28"
@@ -127,37 +117,33 @@ export default function CursoPage() {
           Todos os cursos
         </button>
 
-        {/* Course header */}
-        <div className="rounded-2xl p-5 mb-5"
+        {/* Cabeçalho com capa */}
+        <div className="rounded-2xl overflow-hidden mb-5"
           style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.15), rgba(156,119,66,0.08))", border: "1px solid rgba(200,165,107,0.15)" }}>
-              <GraduationCap className="w-5 h-5" style={{ color: "#c8a56b" }} />
+          <CursoCapa cursoId={curso.id} imagemUrl={curso.imagemUrl} titulo={curso.titulo} heightClass="h-44 sm:h-52" />
+          <div className="p-5">
+            {curso.categoria && (
+              <p className="text-xs mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>{curso.categoria}</p>
+            )}
+            <h1 className="font-tan-mon-cheri text-2xl mb-2" style={{ color: "#f7f2ec" }}>{curso.titulo}</h1>
+            <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.5)" }}>{curso.descricao}</p>
+            <div className="flex items-center gap-4">
+              <span className="text-xs flex items-center gap-1" style={{ color: "rgba(247,242,236,0.3)" }}>
+                <BookOpen className="w-3.5 h-3.5" />
+                {curso.aulas.length} aula{curso.aulas.length !== 1 ? "s" : ""}
+              </span>
+              <span className="text-xs font-medium" style={{ color: pct === 100 ? "#5db97a" : "#c8a56b" }}>
+                {pct}% concluído
+              </span>
             </div>
-            <div className="flex-1">
-              {curso.categoria && (
-                <p className="text-xs mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>{curso.categoria}</p>
-              )}
-              <h1 className="font-tan-mon-cheri text-xl mb-2" style={{ color: "#f7f2ec" }}>{curso.titulo}</h1>
-              <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.5)" }}>{curso.descricao}</p>
-              <div className="flex items-center gap-4">
-                <span className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
-                  {curso.aulas.length} aula{curso.aulas.length !== 1 ? "s" : ""}
-                </span>
-                <span className="text-xs font-medium" style={{ color: pct === 100 ? "#5db97a" : "#c8a56b" }}>
-                  {pct}% concluído
-                </span>
-              </div>
-              <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: "rgba(200,165,107,0.08)" }}>
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${pct}%`,
-                    background: pct === 100 ? "linear-gradient(90deg, #5db97a, #3da65a)" : "linear-gradient(90deg, #9c7742, #c8a56b)",
-                  }}
-                />
-              </div>
+            <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(200,165,107,0.08)" }}>
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${pct}%`,
+                  background: pct === 100 ? "linear-gradient(90deg, #5db97a, #3da65a)" : "linear-gradient(90deg, #9c7742, #c8a56b)",
+                }}
+              />
             </div>
           </div>
         </div>
@@ -177,6 +163,24 @@ export default function CursoPage() {
                   allowFullScreen
                   title={aulaAtiva.titulo}
                 />
+              </div>
+            ) : aulaAtiva.videoUrl?.trim() ? (
+              <div className="aspect-video w-full flex flex-col items-center justify-center gap-3 px-6 text-center"
+                style={{ background: "rgba(200,165,107,0.06)", borderBottom: "1px solid rgba(200,165,107,0.08)" }}>
+                <Play className="w-10 h-10" style={{ color: "rgba(200,165,107,0.45)" }} />
+                <p className="text-xs" style={{ color: "rgba(247,242,236,0.45)" }}>
+                  Este link não pôde ser incorporado. Abra no navegador para assistir.
+                </p>
+                <a
+                  href={aulaAtiva.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
+                  style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Abrir vídeo
+                </a>
               </div>
             ) : (
               <div className="aspect-video w-full flex items-center justify-center"

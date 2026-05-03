@@ -3,8 +3,10 @@ import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
 import { db } from "@workspace/db";
 import { cursosTable, aulasTable, progressoCursosTable } from "@workspace/db/schema";
 import { eq, and, asc, sql, count } from "drizzle-orm";
+import { ObjectStorageService } from "../lib/objectStorage";
 
 const router = Router();
+const objectStorage = new ObjectStorageService();
 
 // GET /api/cursos — list courses (published for users, all for admin)
 router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
@@ -59,6 +61,52 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
   } catch (err) {
     req.log.error({ err }, "Erro ao buscar cursos");
     return res.status(500).json({ error: "Erro ao buscar cursos" });
+  }
+});
+
+// POST /api/cursos/upload-url — capa do curso (armazenamento local / assinado)
+router.post("/upload-url", requireAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const uploadURL = await objectStorage.getObjectEntityUploadURL();
+    const objectPath = objectStorage.normalizeObjectEntityPath(uploadURL);
+    return res.json({ uploadURL, objectPath });
+  } catch (err) {
+    req.log.error({ err }, "Erro ao gerar URL de upload (curso)");
+    return res.status(500).json({ error: "Erro ao gerar URL de upload" });
+  }
+});
+
+// GET /api/cursos/:id/capa — imagem da capa (JWT; paths internos ou redireciona URL absoluta)
+router.get("/:id/capa", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const cursoId = parseInt(String(req.params.id), 10);
+    if (isNaN(cursoId)) return res.status(400).json({ error: "ID inválido" });
+
+    const [curso] = await db
+      .select({ imagemUrl: cursosTable.imagemUrl, publicado: cursosTable.publicado })
+      .from(cursosTable)
+      .where(eq(cursosTable.id, cursoId))
+      .limit(1);
+
+    if (!curso?.imagemUrl) return res.status(404).json({ error: "Capa não encontrada" });
+    if (!curso.publicado && !req.user!.isAdmin) {
+      return res.status(404).json({ error: "Curso não encontrado" });
+    }
+
+    const src = curso.imagemUrl.trim();
+    if (/^https?:\/\//i.test(src)) {
+      return res.redirect(302, src);
+    }
+
+    const file = await objectStorage.getObjectEntityFile(src);
+    const response = await objectStorage.downloadObject(file, 3600);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    res.set("Content-Type", response.headers.get("content-type") || "image/jpeg");
+    res.set("Cache-Control", "private, max-age=3600");
+    return res.send(buffer);
+  } catch (err) {
+    req.log.error({ err }, "Erro ao carregar capa do curso");
+    return res.status(500).json({ error: "Erro ao carregar capa" });
   }
 });
 

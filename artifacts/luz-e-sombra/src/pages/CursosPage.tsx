@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { GraduationCap, Loader2, BookOpen, CheckCircle2, ChevronRight, Lock } from "lucide-react";
+import { CursoCapa } from "@/components/CursoCapa";
+import { GraduationCap, Loader2, BookOpen, CheckCircle2, ChevronRight, Lock, Sparkles } from "lucide-react";
 
 interface Curso {
   id: number;
@@ -121,78 +122,89 @@ function CursoCard({ curso, rascunho, onClick }: { curso: Curso; rascunho?: bool
 
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="w-full text-left rounded-2xl overflow-hidden transition-all"
+      className="w-full text-left rounded-2xl overflow-hidden transition-all group"
       style={{
         background: "rgba(255,255,255,0.03)",
-        border: `1px solid ${rascunho ? "rgba(200,165,107,0.08)" : "rgba(200,165,107,0.12)"}`,
+        border: `1px solid ${rascunho ? "rgba(200,165,107,0.08)" : "rgba(200,165,107,0.14)"}`,
         opacity: rascunho ? 0.65 : 1,
       }}
-      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.25)"; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = rascunho ? "rgba(200,165,107,0.08)" : "rgba(200,165,107,0.12)"; }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.35)"; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = rascunho ? "rgba(200,165,107,0.08)" : "rgba(200,165,107,0.14)"; }}
     >
-      <div className="p-5 flex gap-4">
-        {/* Icon / thumb */}
-        <div
-          className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.15), rgba(156,119,66,0.08))", border: "1px solid rgba(200,165,107,0.15)" }}
-        >
-          {concluido
-            ? <CheckCircle2 className="w-6 h-6" style={{ color: "#5db97a" }} />
-            : <BookOpen className="w-6 h-6" style={{ color: "#c8a56b" }} />
-          }
-        </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                {rascunho && (
-                  <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(200,165,107,0.1)", color: "rgba(200,165,107,0.6)" }}>
-                    <Lock className="w-2.5 h-2.5" />
-                    Rascunho
-                  </span>
-                )}
-                {curso.categoria && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(200,165,107,0.08)", color: "rgba(200,165,107,0.5)" }}>
-                    {curso.categoria}
-                  </span>
-                )}
-              </div>
-              <h3 className="font-semibold text-sm leading-tight mb-1 truncate" style={{ color: "#f7f2ec" }}>
-                {curso.titulo}
-              </h3>
-              <p className="text-xs line-clamp-2" style={{ color: "rgba(247,242,236,0.45)" }}>
-                {curso.descricao}
-              </p>
-            </div>
-            <ChevronRight className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "rgba(200,165,107,0.4)" }} />
+      <div className="relative">
+        <CursoCapa cursoId={curso.id} imagemUrl={curso.imagemUrl} titulo={curso.titulo} />
+        {!rascunho && !concluido && (
+          <div className="absolute bottom-3 left-3 pointer-events-none z-10">
+            <span
+              className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full inline-flex items-center gap-1"
+              style={{
+                background: "linear-gradient(135deg, rgba(200,165,107,0.95), #9c7742)",
+                color: "#1a1208",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
+              }}
+            >
+              <Sparkles className="w-3 h-3" />
+              {pct > 0 ? "Continuar curso" : "Começar agora"}
+            </span>
           </div>
+        )}
+      </div>
 
-          {/* Progress */}
-          <div className="mt-3">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px]" style={{ color: "rgba(247,242,236,0.3)" }}>
-                {curso.aulasConcluidasCount}/{curso.aulasCount} aulas
-              </span>
-              {pct > 0 && (
-                <span className="text-[10px] font-medium" style={{ color: concluido ? "#5db97a" : "#c8a56b" }}>
-                  {pct}%
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              {rascunho && (
+                <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(200,165,107,0.1)", color: "rgba(200,165,107,0.6)" }}>
+                  <Lock className="w-2.5 h-2.5" />
+                  Rascunho
+                </span>
+              )}
+              {curso.categoria && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(200,165,107,0.1)", color: "rgba(200,165,107,0.55)" }}>
+                  {curso.categoria}
+                </span>
+              )}
+              {concluido && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(74,222,128,0.12)", color: "#5db97a" }}>
+                  Concluído
                 </span>
               )}
             </div>
-            <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(200,165,107,0.08)" }}>
-              <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${pct}%`,
-                  background: concluido
-                    ? "linear-gradient(90deg, #5db97a, #3da65a)"
-                    : "linear-gradient(90deg, #9c7742, #c8a56b)",
-                }}
-              />
-            </div>
+            <h3 className="font-tan-mon-cheri text-lg leading-tight mb-1.5" style={{ color: "#f7f2ec" }}>
+              {curso.titulo}
+            </h3>
+            <p className="text-xs line-clamp-2 leading-relaxed" style={{ color: "rgba(247,242,236,0.48)" }}>
+              {curso.descricao}
+            </p>
+          </div>
+          <ChevronRight className="w-5 h-5 shrink-0 mt-1 opacity-50 group-hover:opacity-100 transition-opacity" style={{ color: "#c8a56b" }} />
+        </div>
+
+        <div className="mt-4">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] flex items-center gap-1" style={{ color: "rgba(247,242,236,0.35)" }}>
+              <BookOpen className="w-3 h-3" />
+              {curso.aulasConcluidasCount}/{curso.aulasCount} aulas
+            </span>
+            {pct > 0 && (
+              <span className="text-[10px] font-medium" style={{ color: concluido ? "#5db97a" : "#c8a56b" }}>
+                {pct}%
+              </span>
+            )}
+          </div>
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(200,165,107,0.08)" }}>
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${pct}%`,
+                background: concluido
+                  ? "linear-gradient(90deg, #5db97a, #3da65a)"
+                  : "linear-gradient(90deg, #9c7742, #c8a56b)",
+              }}
+            />
           </div>
         </div>
       </div>

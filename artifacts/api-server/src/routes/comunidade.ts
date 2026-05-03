@@ -68,8 +68,10 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
       tipo?: string; conteudo?: string; mediaUrl?: string; notificar?: boolean;
     };
 
-    if (!conteudo?.trim()) {
-      return res.status(400).json({ error: "Conteúdo é obrigatório" });
+    const texto = (conteudo ?? "").trim();
+    const midia = (mediaUrl ?? "").trim();
+    if (!texto && !midia) {
+      return res.status(400).json({ error: "Inclua um texto ou uma mídia (imagem / link de vídeo)" });
     }
     const tiposValidos = ["texto", "imagem", "video"];
     if (tipo && !tiposValidos.includes(tipo)) {
@@ -81,8 +83,8 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
       .values({
         autorId: req.user!.id,
         tipo: tipo || "texto",
-        conteudo: conteudo.trim(),
-        mediaUrl: mediaUrl?.trim() || null,
+        conteudo: texto || " ",
+        mediaUrl: midia || null,
       })
       .returning();
 
@@ -93,7 +95,8 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
         .where(and(eq(usuariosTable.isAdmin, false), eq(usuariosTable.ativo, true)));
 
       if (usuarios.length > 0) {
-        const preview = conteudo.trim().slice(0, 100) + (conteudo.trim().length > 100 ? "..." : "");
+        const previewBase = texto || (midia ? "Nova publicação com mídia" : "Comunidade");
+        const preview = previewBase.slice(0, 100) + (previewBase.length > 100 ? "..." : "");
         await db.insert(notificacoesTable).values(
           usuarios.map(u => ({
             usuarioId: u.id,

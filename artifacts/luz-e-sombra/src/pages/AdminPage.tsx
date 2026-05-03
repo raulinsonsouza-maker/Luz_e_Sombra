@@ -8,6 +8,8 @@ import {
   UserCheck, Layers, Heart, Flame, Sparkles, Star, Sun, Bell, type LucideIcon,
 } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
+import { AuthenticatedImage } from "@/components/AuthenticatedImage";
+import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const BG = "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)";
@@ -618,19 +620,25 @@ function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: stri
   }
 
   async function handleCriar(e: React.FormEvent) {
-    e.preventDefault(); if (!novoConteudo.trim()) return; setEnviando(true);
+    e.preventDefault();
+    if (novoTipo === "texto" && !novoConteudo.trim()) { showMsg("erro", "Escreva o conteúdo."); return; }
+    if (novoTipo === "imagem" && !uploadFile) { showMsg("erro", "Selecione uma imagem."); return; }
+    if (novoTipo === "video" && !novoMediaUrl.trim()) { showMsg("erro", "Cole o link do YouTube ou Vimeo."); return; }
+    setEnviando(true);
     try {
       let mediaUrl: string | undefined;
       if (novoTipo === "imagem" && uploadFile) {
         const urlRes = await apiFetch("/comunidade/upload-url", { method: "POST" });
         if (!urlRes.ok) throw new Error("Erro ao gerar URL");
         const { uploadURL, objectPath } = await urlRes.json();
-        await fetch(uploadURL, { method: "PUT", body: uploadFile, headers: { "Content-Type": uploadFile.type || "image/jpeg" } });
+        const up = await fetch(uploadURL, { method: "PUT", body: uploadFile, headers: { "Content-Type": uploadFile.type || "image/jpeg" } });
+        if (!up.ok) throw new Error("Falha no upload");
         mediaUrl = objectPath;
       } else if (novoTipo === "video") {
         mediaUrl = novoMediaUrl.trim() || undefined;
       }
-      const res = await apiFetch("/comunidade", { method: "POST", body: JSON.stringify({ tipo: novoTipo, conteudo: novoConteudo.trim(), mediaUrl, notificar }) });
+      const texto = novoConteudo.trim() || " ";
+      const res = await apiFetch("/comunidade", { method: "POST", body: JSON.stringify({ tipo: novoTipo, conteudo: texto, mediaUrl, notificar }) });
       if (res.ok) {
         showMsg("sucesso", "Publicação criada!");
         setNovoConteudo(""); setNovoMediaUrl(""); setUploadFile(null);
@@ -682,20 +690,26 @@ function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: stri
               </button>
             ))}
           </div>
-          <textarea value={novoConteudo} onChange={e => setNovoConteudo(e.target.value)} required rows={3}
-            className={ic} style={INPUT_ST} placeholder="Conteúdo da publicação..." />
+          <textarea value={novoConteudo} onChange={e => setNovoConteudo(e.target.value)} required={novoTipo === "texto"} rows={3}
+            className={ic} style={INPUT_ST}
+            placeholder={novoTipo === "texto" ? "Conteúdo da publicação…" : novoTipo === "imagem" ? "Legenda opcional…" : "Comentário opcional sobre o vídeo…"} />
           {novoTipo === "imagem" && (
             <div>
               <input ref={fileRef} type="file" accept="image/*" onChange={e => setUploadFile(e.target.files?.[0] || null)} className="hidden" id="adm-upload-img" />
-              <label htmlFor="adm-upload-img" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm cursor-pointer"
-                style={{ border: "1px dashed rgba(200,165,107,0.35)", color: C.bronze }}>
-                <ImageIcon className="w-4 h-4" />{uploadFile ? uploadFile.name : "Selecionar imagem"}
+              <label htmlFor="adm-upload-img" className="flex flex-col items-center justify-center gap-1 w-full py-6 rounded-xl text-sm cursor-pointer"
+                style={{ border: "2px dashed rgba(200,165,107,0.35)", color: C.bronze }}>
+                <ImageIcon className="w-6 h-6 opacity-70" />
+                <span>{uploadFile ? uploadFile.name : "Toque ou selecione uma imagem"}</span>
+                <span className="text-[10px] opacity-60">JPG, PNG, WebP</span>
               </label>
             </div>
           )}
           {novoTipo === "video" && (
-            <input type="url" value={novoMediaUrl} onChange={e => setNovoMediaUrl(e.target.value)}
-              className={ic} style={INPUT_ST} placeholder="URL do YouTube" />
+            <div className="space-y-1">
+              <input type="url" value={novoMediaUrl} onChange={e => setNovoMediaUrl(e.target.value)}
+                className={ic} style={INPUT_ST} placeholder="https://youtube.com/…, youtu.be/… ou vimeo.com/…" />
+              <p className="text-[10px]" style={{ color: C.dim }}>YouTube (incl. Shorts) e Vimeo são incorporados automaticamente.</p>
+            </div>
           )}
           {/* Notificar usuários */}
           <label
@@ -744,17 +758,25 @@ function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: stri
                   <div key={p.id} className="rounded-2xl overflow-hidden" style={CARD_S}>
                     {/* Media header */}
                     {p.tipo === "imagem" && p.mediaUrl && (
-                      <div className="h-24 flex items-center justify-center gap-2"
-                        style={{ background: "rgba(200,165,107,0.04)", borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
-                        <ImageIcon className="w-6 h-6" style={{ color: "rgba(200,165,107,0.3)" }} />
-                        <span className="text-xs" style={{ color: C.dim }}>Imagem anexada</span>
+                      <div className="max-h-52 overflow-hidden" style={{ borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
+                        <AuthenticatedImage
+                          apiPath={`/comunidade/${p.id}/imagem`}
+                          alt=""
+                          className="w-full h-48"
+                          imgClassName="w-full h-48 object-cover"
+                        />
                       </div>
                     )}
-                    {p.tipo === "video" && p.mediaUrl && (
-                      <div className="h-16 flex items-center justify-center gap-2 px-4"
+                    {p.tipo === "video" && p.mediaUrl && getVideoEmbedUrl(p.mediaUrl) && (
+                      <div className="aspect-video max-h-56 bg-black" style={{ borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
+                        <iframe src={getVideoEmbedUrl(p.mediaUrl)!} className="w-full h-full" title="preview" allowFullScreen />
+                      </div>
+                    )}
+                    {p.tipo === "video" && p.mediaUrl && !getVideoEmbedUrl(p.mediaUrl) && (
+                      <div className="px-4 py-3 flex items-center gap-2"
                         style={{ background: "rgba(200,165,107,0.04)", borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
                         <Youtube className="w-5 h-5 shrink-0" style={{ color: "rgba(200,165,107,0.5)" }} />
-                        <span className="text-xs truncate" style={{ color: C.muted }}>{p.mediaUrl}</span>
+                        <a href={p.mediaUrl} target="_blank" rel="noopener noreferrer" className="text-xs truncate underline" style={{ color: C.gold }}>{p.mediaUrl}</a>
                       </div>
                     )}
 
@@ -813,12 +835,26 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
   const [cursoDetalhe, setCursoDetalhe] = useState<CursoDetalhe | null>(null);
   const [loadingDetalhe, setLoadingDetalhe] = useState(false);
   const [novoCurso, setNovoCurso] = useState({ titulo: "", descricao: "", categoria: "", nivel: "todos", imagemUrl: "" });
+  const [capaArquivoNovo, setCapaArquivoNovo] = useState<File | null>(null);
+  const [capaUrlEdicao, setCapaUrlEdicao] = useState("");
+  const [capaArquivoEdicao, setCapaArquivoEdicao] = useState<File | null>(null);
+  const [salvandoCapa, setSalvandoCapa] = useState(false);
   const [enviandoCurso, setEnviandoCurso] = useState(false);
   const [novaAula, setNovaAula] = useState({ titulo: "", descricao: "", videoUrl: "", conteudo: "", duracaoMin: "", ordem: "0" });
   const [criandoAula, setCriandoAula] = useState(false);
   const [enviandoAula, setEnviandoAula] = useState(false);
+  const capaNovoRef = useRef<HTMLInputElement>(null);
+  const capaEdicaoRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { buscarCursos(); }, []);
+
+  useEffect(() => {
+    if (cursoDetalhe) {
+      setCapaUrlEdicao(cursoDetalhe.imagemUrl || "");
+      setCapaArquivoEdicao(null);
+      if (capaEdicaoRef.current) capaEdicaoRef.current.value = "";
+    }
+  }, [cursoDetalhe?.id]);
 
   async function buscarCursos() {
     setLoading(true);
@@ -833,15 +869,78 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
     setLoadingDetalhe(false);
   }
 
+  async function enviarCapaUpload(file: File): Promise<string | null> {
+    const urlRes = await apiFetch("/cursos/upload-url", { method: "POST" });
+    if (!urlRes.ok) return null;
+    const { uploadURL, objectPath } = await urlRes.json();
+    const up = await fetch(uploadURL, {
+      method: "PUT",
+      body: file,
+      headers: { "Content-Type": file.type || "image/jpeg" },
+    });
+    return up.ok ? objectPath : null;
+  }
+
   async function handleCriarCurso(e: React.FormEvent) {
     e.preventDefault(); setEnviandoCurso(true);
     try {
-      const res = await apiFetch("/cursos", { method: "POST", body: JSON.stringify({ ...novoCurso }) });
+      let imagemUrl = novoCurso.imagemUrl.trim() || null;
+      if (capaArquivoNovo) {
+        const path = await enviarCapaUpload(capaArquivoNovo);
+        if (!path) { showMsg("erro", "Falha no upload da capa."); setEnviandoCurso(false); return; }
+        imagemUrl = path;
+      }
+      const res = await apiFetch("/cursos", {
+        method: "POST",
+        body: JSON.stringify({
+          titulo: novoCurso.titulo,
+          descricao: novoCurso.descricao,
+          categoria: novoCurso.categoria,
+          nivel: novoCurso.nivel,
+          imagemUrl: imagemUrl || "",
+        }),
+      });
       const data = await res.json();
-      if (res.ok) { showMsg("sucesso", "Curso criado!"); setNovoCurso({ titulo: "", descricao: "", categoria: "", nivel: "todos", imagemUrl: "" }); setCriandoCurso(false); buscarCursos(); }
+      if (res.ok) {
+        showMsg("sucesso", "Curso criado!");
+        setNovoCurso({ titulo: "", descricao: "", categoria: "", nivel: "todos", imagemUrl: "" });
+        setCapaArquivoNovo(null);
+        if (capaNovoRef.current) capaNovoRef.current.value = "";
+        setCriandoCurso(false);
+        buscarCursos();
+      }
       else showMsg("erro", data.error || "Erro ao criar curso");
     } catch { showMsg("erro", "Erro ao criar curso"); }
     setEnviandoCurso(false);
+  }
+
+  async function handleSalvarCapa(cursoId: number) {
+    setSalvandoCapa(true);
+    try {
+      let imagemUrl = capaUrlEdicao.trim() || null;
+      if (capaArquivoEdicao) {
+        const path = await enviarCapaUpload(capaArquivoEdicao);
+        if (!path) { showMsg("erro", "Falha no upload da capa."); setSalvandoCapa(false); return; }
+        imagemUrl = path;
+      }
+      const res = await apiFetch(`/cursos/${cursoId}`, { method: "PUT", body: JSON.stringify({ imagemUrl }) });
+      if (res.ok) {
+        showMsg("sucesso", "Capa atualizada!");
+        setCapaArquivoEdicao(null);
+        if (capaEdicaoRef.current) capaEdicaoRef.current.value = "";
+        buscarCursos();
+        const det = await apiFetch(`/cursos/${cursoId}`);
+        if (det.ok) {
+          const d = await det.json() as CursoDetalhe;
+          setCursoDetalhe(d);
+          setCapaUrlEdicao(d.imagemUrl || "");
+        }
+      } else {
+        const d = await res.json().catch(() => ({}));
+        showMsg("erro", (d as { error?: string }).error || "Erro ao salvar capa");
+      }
+    } catch { showMsg("erro", "Erro ao salvar capa"); }
+    setSalvandoCapa(false);
   }
 
   async function togglePublicado(curso: Curso) {
@@ -921,6 +1020,21 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
               </select>
             </div>
           </div>
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold" style={{ color: C.muted }}>Capa do curso (opcional)</label>
+            <p className="text-[10px] leading-relaxed" style={{ color: C.dim }}>
+              Envie uma imagem chamativa ou cole uma URL pública (HTTPS). Se enviar arquivo, ele substitui a URL.
+            </p>
+            <input ref={capaNovoRef} type="file" accept="image/*" className="hidden" id="capa-novo-curso"
+              onChange={e => setCapaArquivoNovo(e.target.files?.[0] || null)} />
+            <label htmlFor="capa-novo-curso" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs cursor-pointer"
+              style={{ border: "1px dashed rgba(200,165,107,0.35)", color: C.bronze }}>
+              <ImageIcon className="w-4 h-4" />
+              {capaArquivoNovo ? capaArquivoNovo.name : "Upload de imagem da capa"}
+            </label>
+            <input value={novoCurso.imagemUrl} onChange={e => setNovoCurso({ ...novoCurso, imagemUrl: e.target.value })}
+              className={ic} style={INPUT_ST} placeholder="Ou URL da imagem (https://…)" type="url" />
+          </div>
           <div className="flex gap-3">
             <button type="button" onClick={() => setCriandoCurso(false)} className="flex-1 py-2 rounded-xl text-sm"
               style={{ border: "1px solid rgba(200,165,107,0.2)", color: C.muted }}>Cancelar</button>
@@ -984,6 +1098,36 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
                   {/* Aulas */}
                   {cursoAberto === curso.id && (
                     <div className="px-4 pb-4 pt-2 space-y-3" style={{ borderTop: "1px solid rgba(200,165,107,0.1)" }}>
+                      <div className="p-4 rounded-xl space-y-3" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.12)" }}>
+                        <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.55)" }}>Capa na vitrine</p>
+                        <div className="h-28 rounded-lg overflow-hidden relative bg-black/30">
+                          {cursoDetalhe?.imagemUrl?.trim() && /^https?:\/\//i.test(cursoDetalhe.imagemUrl) ? (
+                            <img src={cursoDetalhe.imagemUrl} alt="" className="w-full h-full object-cover" />
+                          ) : cursoDetalhe?.imagemUrl ? (
+                            <AuthenticatedImage
+                              apiPath={`/cursos/${curso.id}/capa`}
+                              alt=""
+                              className="w-full h-full"
+                              imgClassName="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[10px]" style={{ color: C.dim }}>Sem capa</div>
+                          )}
+                        </div>
+                        <input ref={capaEdicaoRef} type="file" accept="image/*" className="hidden" id={`capa-edt-${curso.id}`}
+                          onChange={e => setCapaArquivoEdicao(e.target.files?.[0] || null)} />
+                        <label htmlFor={`capa-edt-${curso.id}`} className="block text-center py-2 rounded-lg text-xs cursor-pointer"
+                          style={{ border: "1px dashed rgba(200,165,107,0.35)", color: C.bronze }}>
+                          {capaArquivoEdicao ? capaArquivoEdicao.name : "Nova imagem (upload)"}
+                        </label>
+                        <input type="url" value={capaUrlEdicao} onChange={e => setCapaUrlEdicao(e.target.value)}
+                          className={ic} style={INPUT_ST} placeholder="Ou URL https://…" />
+                        <button type="button" disabled={salvandoCapa} onClick={() => handleSalvarCapa(curso.id)}
+                          className="w-full py-2 rounded-xl text-xs font-semibold disabled:opacity-50"
+                          style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
+                          {salvandoCapa ? "Salvando capa…" : "Salvar capa"}
+                        </button>
+                      </div>
                       {loadingDetalhe
                         ? <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin" style={{ color: C.gold }} /></div>
                         : cursoDetalhe?.aulas.map((aula, i) => (
