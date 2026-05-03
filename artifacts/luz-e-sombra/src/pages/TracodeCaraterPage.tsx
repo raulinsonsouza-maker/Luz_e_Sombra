@@ -35,6 +35,24 @@ interface EstruturasPct {
   rigido: number;
 }
 
+interface EstiloComunicacao {
+  tipo: string;
+  descricao: string;
+  emGrupos: string;
+  emRelacoes: string;
+  emConflito: string;
+  emTensao: string;
+}
+
+interface DinamicaFuncional {
+  trabalho: string;
+  relacoes: string;
+  estresse: string;
+  decisoes: string;
+  energia: string;
+  sombra: string;
+}
+
 interface ResultadoAnalise {
   estruturas: EstruturasPct;
   estruturaPrincipal: keyof EstruturasPct;
@@ -46,7 +64,6 @@ interface ResultadoAnalise {
   centroEnergetico: string;
   padraoEnergetico: string;
   mensagemTerapeutica: string;
-  // Enhanced fields
   dominanteApelido?: string;
   fraseIdentidade?: string;
   pontosFortes?: string[];
@@ -56,6 +73,9 @@ interface ResultadoAnalise {
   recomendacoesPraticas?: string[];
   confiancaAnalise?: number;
   perfilFisicoNarrado?: string;
+  estiloComunicacao?: EstiloComunicacao;
+  perfilUnico?: string;
+  dinamicaFuncional?: DinamicaFuncional;
 }
 
 interface AnaliseTraco {
@@ -872,6 +892,198 @@ export default function TracodeCaraterPage() {
                 ))}
               </div>
             </div>
+
+            {/* ── Perfil Único (Combinação) ── */}
+            {resultado.perfilUnico && (
+              <div
+                className="rounded-2xl p-6"
+                style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-6 h-px" style={{ background: "linear-gradient(to right, transparent, #c8a56b)" }} />
+                  <h3 className="font-tan-mon-cheri text-base" style={{ color: "#c8a56b" }}>
+                    O Que Te Torna Único
+                  </h3>
+                </div>
+                {resultado.estruturaPrincipal && resultado.estruturaSecundaria && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span
+                      className="text-xs px-3 py-1 rounded-full"
+                      style={{
+                        background: configPrincipal?.corBg,
+                        color: configPrincipal?.cor,
+                        border: `1px solid ${configPrincipal?.corBorder}`,
+                      }}
+                    >
+                      {ESTRUTURAS_CONFIG[resultado.estruturaPrincipal].nome} {resultado.estruturas[resultado.estruturaPrincipal]}%
+                    </span>
+                    <span className="text-xs self-center" style={{ color: "rgba(200,165,107,0.4)" }}>+</span>
+                    <span
+                      className="text-xs px-3 py-1 rounded-full"
+                      style={{
+                        background: ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].corBg,
+                        color: ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].cor,
+                        border: `1px solid ${ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].corBorder}`,
+                      }}
+                    >
+                      {ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].nome} {resultado.estruturas[resultado.estruturaSecundaria]}%
+                    </span>
+                  </div>
+                )}
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)", lineHeight: 1.8 }}>
+                  {resultado.perfilUnico}
+                </p>
+              </div>
+            )}
+
+            {/* ── Estilo de Comunicação ── */}
+            {resultado.estiloComunicacao && (
+              <div
+                className="rounded-2xl overflow-hidden"
+                style={{ border: "1px solid rgba(200,165,107,0.12)" }}
+              >
+                {/* Header */}
+                <div
+                  className="px-6 py-4 flex items-center justify-between"
+                  style={{ background: "rgba(200,165,107,0.06)", borderBottom: "1px solid rgba(200,165,107,0.1)" }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-px" style={{ background: "linear-gradient(to right, transparent, #c8a56b)" }} />
+                    <h3 className="font-tan-mon-cheri text-base" style={{ color: "#c8a56b" }}>
+                      Como Você Se Comunica
+                    </h3>
+                  </div>
+                  <span
+                    className="text-xs px-3 py-1.5 rounded-full font-medium"
+                    style={{
+                      background: "rgba(200,165,107,0.1)",
+                      color: "#c8a56b",
+                      border: "1px solid rgba(200,165,107,0.25)",
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    {resultado.estiloComunicacao.tipo}
+                  </span>
+                </div>
+
+                <div className="p-6 space-y-5" style={{ background: "rgba(30,24,18,0.4)" }}>
+                  {/* Descrição geral */}
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.8 }}>
+                    {resultado.estiloComunicacao.descricao}
+                  </p>
+
+                  {/* Grid contextual */}
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {[
+                      { label: "Em grupos", texto: resultado.estiloComunicacao.emGrupos },
+                      { label: "Nas relações", texto: resultado.estiloComunicacao.emRelacoes },
+                      { label: "No conflito", texto: resultado.estiloComunicacao.emConflito },
+                      { label: "Sob tensão", texto: resultado.estiloComunicacao.emTensao },
+                    ].map(({ label, texto }) => (
+                      <div
+                        key={label}
+                        className="rounded-xl p-4"
+                        style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.08)" }}
+                      >
+                        <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
+                          {label}
+                        </p>
+                        <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.55)", lineHeight: 1.75 }}>
+                          {texto}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Dinâmica Funcional (Como você funciona) ── */}
+            {resultado.dinamicaFuncional && (
+              <div
+                className="rounded-2xl overflow-hidden"
+                style={{ border: "1px solid rgba(200,165,107,0.12)" }}
+              >
+                {/* Header */}
+                <div
+                  className="px-6 py-5"
+                  style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.08) 0%, rgba(30,24,18,0.6) 100%)", borderBottom: "1px solid rgba(200,165,107,0.1)" }}
+                >
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="w-6 h-px" style={{ background: "linear-gradient(to right, transparent, #c8a56b)" }} />
+                    <h3 className="font-tan-mon-cheri text-base" style={{ color: "#c8a56b" }}>
+                      Como Você Funciona
+                    </h3>
+                  </div>
+                  <p className="text-xs ml-9" style={{ color: "rgba(247,242,236,0.35)" }}>
+                    Uma leitura cruzada de como suas estruturas operam no dia a dia
+                  </p>
+                </div>
+
+                <div className="divide-y" style={{ borderColor: "rgba(200,165,107,0.07)" }}>
+                  {[
+                    {
+                      area: "Trabalho & Desempenho",
+                      cor: "#c8a56b",
+                      corBg: "rgba(200,165,107,0.08)",
+                      texto: resultado.dinamicaFuncional.trabalho,
+                    },
+                    {
+                      area: "Relacionamentos",
+                      cor: "#5b9bd5",
+                      corBg: "rgba(91,155,213,0.06)",
+                      texto: resultado.dinamicaFuncional.relacoes,
+                    },
+                    {
+                      area: "Gestão do Estresse",
+                      cor: "#e07b39",
+                      corBg: "rgba(224,123,57,0.06)",
+                      texto: resultado.dinamicaFuncional.estresse,
+                    },
+                    {
+                      area: "Tomada de Decisão",
+                      cor: "#9b8fde",
+                      corBg: "rgba(155,143,222,0.06)",
+                      texto: resultado.dinamicaFuncional.decisoes,
+                    },
+                    {
+                      area: "Padrão de Energia",
+                      cor: "#6db96d",
+                      corBg: "rgba(109,185,109,0.06)",
+                      texto: resultado.dinamicaFuncional.energia,
+                    },
+                    {
+                      area: "Zona de Sombra",
+                      cor: "rgba(247,242,236,0.4)",
+                      corBg: "rgba(255,255,255,0.02)",
+                      texto: resultado.dinamicaFuncional.sombra,
+                    },
+                  ].map(({ area, cor, corBg, texto }) => (
+                    <div
+                      key={area}
+                      className="px-6 py-5"
+                      style={{ background: "rgba(30,24,18,0.35)" }}
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: cor }} />
+                        <p
+                          className="text-xs font-medium tracking-widest uppercase"
+                          style={{ color: cor }}
+                        >
+                          {area}
+                        </p>
+                      </div>
+                      <p
+                        className="text-sm leading-relaxed"
+                        style={{ color: "rgba(247,242,236,0.6)", lineHeight: 1.8 }}
+                      >
+                        {texto}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* ── Ferida + Recurso (Essência) ── */}
             {(resultado.ferida || resultado.recurso) && (
