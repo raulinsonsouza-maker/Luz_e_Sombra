@@ -273,7 +273,7 @@ export default function TracodeCaraterPage() {
   const configPrincipal = estruturaPrincipal ? ESTRUTURAS_CONFIG[estruturaPrincipal] : null;
 
   return (
-    <div className="luxury-shell min-h-screen">
+    <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #1e1812 0%, #2a1f14 50%, #2f251b 100%)" }}>
       {/* ── Hero ── */}
       <section
         className="relative overflow-hidden"
