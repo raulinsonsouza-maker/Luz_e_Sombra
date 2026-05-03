@@ -1,18 +1,24 @@
-import { useState, useCallback, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { useLocation, useSearch } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { PERGUNTAS_EIXOS_20 } from "@workspace/traco-eixos-multimodal";
+import {
+  LEGACY_STORAGE_Q20,
+  parsePessoaIdFromSearch,
+  readQuestionario20Respostas,
+  storageKeyQuestionario20,
+  tracoQueryPessoa,
+} from "@/lib/tracoFormStorage";
 
-const STORAGE_KEY = "luz_questionario_20_respostas";
-
-function parseStored20(): number[] | null {
+function parseStored20Incomplete(key: string): number[] | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     if (!raw?.trim()) return null;
     const a = JSON.parse(raw) as unknown;
     if (!Array.isArray(a) || a.length !== 20) return null;
-    const ok = a.every((x) => typeof x === "number" && Number.isInteger(x) && x >= 1 && x <= 5);
-    return ok ? (a as number[]) : null;
+    return a.every((x) => typeof x === "number" && Number.isInteger(x) && x >= 0 && x <= 5)
+      ? (a as number[])
+      : null;
   } catch {
     return null;
   }
@@ -20,13 +26,29 @@ function parseStored20(): number[] | null {
 
 export default function DiagnosticoEixosPage() {
   const [, setLocation] = useLocation();
+  const search = useSearch();
+  const pessoaId = useMemo(() => parsePessoaIdFromSearch(search), [search]);
+  const storageKey = useMemo(() => storageKeyQuestionario20(pessoaId), [pessoaId]);
+
   const [index, setIndex] = useState(0);
   const [respostas, setRespostas] = useState<number[]>(() => Array(20).fill(0));
 
   useEffect(() => {
-    const done = parseStored20();
-    if (done) setLocation("/traco-de-carater");
-  }, [setLocation]);
+    const done = readQuestionario20Respostas(pessoaId);
+    if (done) {
+      setLocation(`/traco-de-carater${tracoQueryPessoa(pessoaId)}`);
+      return;
+    }
+    const partial = parseStored20Incomplete(storageKey);
+    if (partial) {
+      setRespostas(partial);
+      const last = partial.findIndex((x) => x < 1 || x > 5);
+      setIndex(last === -1 ? 0 : Math.min(last, 19));
+    } else {
+      setRespostas(Array(20).fill(0));
+      setIndex(0);
+    }
+  }, [setLocation, storageKey, pessoaId]);
 
   const pergunta = PERGUNTAS_EIXOS_20[index];
   const answered = respostas.filter((r) => r >= 1 && r <= 5).length;
@@ -38,23 +60,30 @@ export default function DiagnosticoEixosPage() {
         n[index] = valor;
         if (index === 19) {
           try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(n));
+            localStorage.setItem(storageKey, JSON.stringify(n));
+            if (pessoaId === null) localStorage.removeItem(LEGACY_STORAGE_Q20);
           } catch {
             // ignore
           }
-          queueMicrotask(() => setLocation("/traco-de-carater"));
+          queueMicrotask(() => setLocation(`/traco-de-carater${tracoQueryPessoa(pessoaId)}`));
           return n;
+        }
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(n));
+        } catch {
+          // ignore
         }
         return n;
       });
       if (index < 19) setIndex((i) => i + 1);
     },
-    [index, setLocation]
+    [index, setLocation, storageKey, pessoaId]
   );
 
   const handleRecomeçar = () => {
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(storageKey);
+      if (pessoaId === null) localStorage.removeItem(LEGACY_STORAGE_Q20);
     } catch {
       // ignore
     }
@@ -77,6 +106,19 @@ export default function DiagnosticoEixosPage() {
         <h1 className="font-tan-mon-cheri text-2xl mb-2 leading-tight" style={{ color: "#f7f2ec" }}>
           Vinte reflexões sobre o teu jeito de ser
         </h1>
+        {pessoaId !== null && (
+          <p
+            className="text-xs mb-3 rounded-lg px-3 py-2"
+            style={{
+              color: "rgba(200,165,107,0.9)",
+              background: "rgba(200,165,107,0.08)",
+              border: "1px solid rgba(200,165,107,0.2)",
+            }}
+          >
+            Questionário <strong>separado por pessoa</strong>: estás a preencher para a análise deste perfil no Traço.
+            O &quot;Eu&quot; e cada pessoa adicionada têm as suas próprias 20 respostas.
+          </p>
+        )}
         <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
           Cada afirmação pede uma nota de <strong style={{ color: "rgba(247,242,236,0.65)" }}>1</strong> (quase
           nunca) a <strong style={{ color: "rgba(247,242,236,0.65)" }}>5</strong> (quase sempre), à medida que te

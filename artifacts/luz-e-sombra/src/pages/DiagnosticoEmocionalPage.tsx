@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useLocation, useSearch } from "wouter";
 import { ArrowRight, CheckCircle2, Heart, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -11,8 +11,13 @@ import {
   ESCALA_PRESENTE_LABELS,
   ESCALA_CONSCIENCIA_LABELS,
 } from "@workspace/traco-diagnostico-emocional";
-
-const STORAGE_KEY = "luz_diagnostico_emocional_30_v1";
+import {
+  isDiagnostico30RespostasCompletas,
+  parsePessoaIdFromSearch,
+  readDiagnostico30RespostasEntrada,
+  storageKeyDiagnostico30,
+  tracoQueryPessoa,
+} from "@/lib/tracoFormStorage";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -40,6 +45,9 @@ type Fase = "intro" | "perguntas" | "resultado";
 
 export default function DiagnosticoEmocionalPage() {
   const [, navigate] = useLocation();
+  const search = useSearch();
+  const pessoaId = useMemo(() => parsePessoaIdFromSearch(search), [search]);
+  const storageKey = useMemo(() => storageKeyDiagnostico30(pessoaId), [pessoaId]);
   const { status } = useAuth();
   const [fase, setFase] = useState<Fase>("intro");
   const [idx, setIdx] = useState(0);
@@ -54,36 +62,42 @@ export default function DiagnosticoEmocionalPage() {
 
   const carregarPersistido = useCallback(async () => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const o = JSON.parse(raw) as { respostas?: unknown; resultado?: unknown };
-        const r = entradaDiagnostico30Schema.safeParse(o.respostas);
-        if (r.success) {
-          setPassado([...r.data.passado]);
-          setPresente([...r.data.presente]);
-          setConsciencia([...r.data.consciencia]);
+      const localEnt = readDiagnostico30RespostasEntrada(pessoaId);
+      if (localEnt) {
+        setPassado([...localEnt.passado]);
+        setPresente([...localEnt.presente]);
+        setConsciencia([...localEnt.consciencia]);
+        if (isDiagnostico30RespostasCompletas(localEnt)) {
+          setComputado(computarDiagnostico30(localEnt));
+          setFase("resultado");
         }
+        return;
       }
+      if (pessoaId !== null) return;
       const res = await apiFetch("/diagnostico-emocional/ultimo");
-      if (res.ok) {
-        const row = (await res.json()) as { respostas?: unknown } | null;
-        if (row?.respostas) {
-          const r = entradaDiagnostico30Schema.safeParse(row.respostas);
-          if (r.success) {
-            setPassado([...r.data.passado]);
-            setPresente([...r.data.presente]);
-            setConsciencia([...r.data.consciencia]);
-          }
-        }
+      if (!res.ok) return;
+      const row = (await res.json()) as { respostas?: unknown } | null;
+      if (!row?.respostas) return;
+      const r = entradaDiagnostico30Schema.safeParse(row.respostas);
+      if (!r.success) return;
+      setPassado([...r.data.passado]);
+      setPresente([...r.data.presente]);
+      setConsciencia([...r.data.consciencia]);
+      if (isDiagnostico30RespostasCompletas(r.data)) {
+        setComputado(computarDiagnostico30(r.data));
+        setFase("resultado");
       }
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [pessoaId]);
 
   useEffect(() => {
+    setFase("intro");
+    setIdx(0);
+    setComputado(null);
     void carregarPersistido();
-  }, [carregarPersistido]);
+  }, [storageKey, carregarPersistido]);
 
   const totalPerguntas = 30;
   const progresso =
@@ -107,7 +121,7 @@ export default function DiagnosticoEmocionalPage() {
     setComputado(comp);
     const payload = { respostas: parsed.data, resultado: comp.diagnosticoEmocional };
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      localStorage.setItem(storageKey, JSON.stringify(payload));
     } catch {
       /* ignore */
     }
@@ -140,6 +154,18 @@ export default function DiagnosticoEmocionalPage() {
             <h1 className="font-tan-mon-cheri text-2xl mb-4" style={{ color: "#f7f2ec" }}>
               Antes de olhar o corpo, o contexto emocional
             </h1>
+            {pessoaId !== null && (
+              <p
+                className="text-xs mb-4 rounded-lg px-3 py-2"
+                style={{
+                  color: "rgba(200,165,107,0.95)",
+                  background: "rgba(200,165,107,0.08)",
+                  border: "1px solid rgba(200,165,107,0.22)",
+                }}
+              >
+                Estas <strong>30 respostas</strong> ficam guardadas só para esta pessoa no Traço de Caráter (não se misturam com o teu &quot;Eu&quot; nem com outras análises).
+              </p>
+            )}
             <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(247,242,236,0.55)" }}>
               Este diagnóstico vai te ajudar a entender seus padrões emocionais e seu momento atual.
               Leva menos de 3 minutos para responder.
@@ -366,7 +392,7 @@ export default function DiagnosticoEmocionalPage() {
 
             <button
               type="button"
-              onClick={() => navigate("/traco-de-carater")}
+              onClick={() => navigate(`/traco-de-carater${tracoQueryPessoa(pessoaId)}`)}
               className="w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
               style={{
                 background: "linear-gradient(135deg, #c8a56b, #8a6a3a)",
@@ -386,7 +412,7 @@ export default function DiagnosticoEmocionalPage() {
                 setIdx(0);
                 setFase("intro");
                 try {
-                  localStorage.removeItem(STORAGE_KEY);
+                  localStorage.removeItem(storageKey);
                 } catch {
                   /* ignore */
                 }

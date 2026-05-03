@@ -1,62 +1,21 @@
-import { useState, useRef, useCallback, useEffect } from "react";
-import { Link, Redirect, useLocation } from "wouter";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { Link, Redirect, useLocation, useSearch } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { Upload, X, Camera, User, ArrowRight, Loader2, RefreshCw, ChevronDown, ChevronUp, AlertCircle, ImageIcon, Plus, Users, Trash2 } from "lucide-react";
 import { analyzeTracoDeCarater } from "@/lib/tracoAnalysis";
 import type { ModeloMultimodalOutput } from "@workspace/traco-eixos-multimodal";
 import {
-  computarDiagnostico30,
-  entradaDiagnostico30Schema,
-} from "@workspace/traco-diagnostico-emocional";
-import { diagnosticoEmocionalFusaoSchema } from "@workspace/traco-diagnostico-fusion";
+  readQuestionario20Respostas,
+  readDiagnosticoEmocional30Fusao,
+  readOptionalDiagnosticoFusao,
+  storageKeyQuestionario20,
+  storageKeyDiagnostico30,
+  storageKeyDiagnosticoFusao,
+  tracoQueryPessoa,
+  parsePessoaIdFromSearch,
+} from "@/lib/tracoFormStorage";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-const STORAGE_Q20 = "luz_questionario_20_respostas";
-const STORAGE_DIAGNOSTICO_30 = "luz_diagnostico_emocional_30_v1";
-
-function readQuestionario20Respostas(): number[] | undefined {
-  try {
-    const raw = localStorage.getItem(STORAGE_Q20);
-    if (!raw?.trim()) return undefined;
-    const a = JSON.parse(raw) as unknown;
-    if (!Array.isArray(a) || a.length !== 20) return undefined;
-    const ok = a.every((x) => typeof x === "number" && Number.isInteger(x) && x >= 1 && x <= 5);
-    return ok ? (a as number[]) : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-/** Payload opcional para fusão na API; preenchido pelo módulo de diagnóstico quando existir (ou testes via localStorage). */
-/** Diagnóstico emocional 30 (local ou recompute a partir das respostas). */
-function readDiagnosticoEmocional30Fusao(): Record<string, unknown> | undefined {
-  try {
-    const raw = localStorage.getItem(STORAGE_DIAGNOSTICO_30);
-    if (!raw?.trim()) return undefined;
-    const o = JSON.parse(raw) as { resultado?: unknown; respostas?: unknown };
-    if (o?.resultado) {
-      const v = diagnosticoEmocionalFusaoSchema.safeParse(o.resultado);
-      if (v.success) return v.data as unknown as Record<string, unknown>;
-    }
-    const ent = entradaDiagnostico30Schema.safeParse(o.respostas ?? o);
-    if (!ent.success) return undefined;
-    return computarDiagnostico30(ent.data).diagnosticoEmocional as unknown as Record<string, unknown>;
-  } catch {
-    return undefined;
-  }
-}
-
-function readOptionalDiagnosticoFusao(): Record<string, unknown> | undefined {
-  try {
-    const raw = localStorage.getItem("luz_diagnostico_emocional_fusao");
-    if (!raw?.trim()) return undefined;
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== "object") return undefined;
-    return parsed as Record<string, unknown>;
-  } catch {
-    return undefined;
-  }
-}
 
 function apiFetch(path: string, options?: RequestInit) {
   const token = localStorage.getItem("luz_e_sombra_token");
@@ -247,6 +206,16 @@ const FOTOS_CONFIG: Record<TipoFoto, { label: string; instrucoes: string[]; icon
 export default function TracodeCaraterPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const search = useSearch();
+  const selectedPessoaId = useMemo(() => parsePessoaIdFromSearch(search), [search]);
+
+  const irParaTracoPessoa = useCallback(
+    (pessoaId: number | null) => {
+      const path = pessoaId === null ? "/traco-de-carater" : `/traco-de-carater?pessoaId=${pessoaId}`;
+      setLocation(path, { replace: true } as { replace?: boolean });
+    },
+    [setLocation]
+  );
   const primeiroNome = (user?.nome || "").split(" ")[0];
 
   const [fotos, setFotos] = useState<Partial<Record<TipoFoto, FotoTraco>>>({});
@@ -264,7 +233,6 @@ export default function TracodeCaraterPage() {
   const cameraInputs = useRef<Partial<Record<TipoFoto, HTMLInputElement | null>>>({});
 
   const [pessoas, setPessoas] = useState<Pessoa[]>([]);
-  const [selectedPessoaId, setSelectedPessoaId] = useState<number | null>(null);
   const [showAddPessoa, setShowAddPessoa] = useState(false);
   const [novaNome, setNovaNome] = useState("");
   const [novaRelacao, setNovaRelacao] = useState("parceiro/a");
@@ -313,7 +281,6 @@ export default function TracodeCaraterPage() {
   }
 
   useEffect(() => {
-    carregarDados(null);
     apiFetch("/traco/pessoas").then(r => r.ok ? r.json() : []).then(setPessoas).catch(() => {});
   }, []);
 
@@ -391,10 +358,10 @@ export default function TracodeCaraterPage() {
   }, [fotos]);
 
   const handleAnalisar = async () => {
-    const q20Check = readQuestionario20Respostas();
+    const q20Check = readQuestionario20Respostas(selectedPessoaId);
     const podeAnalisarSoFotos = !!(analise?.resultado?.estruturas && analise?.resultado?.estruturaPrincipal);
     if (!q20Check && !podeAnalisarSoFotos) {
-      setLocation("/diagnostico-eixos");
+      setLocation(`/diagnostico-eixos${tracoQueryPessoa(selectedPessoaId)}`);
       return;
     }
 
@@ -428,9 +395,9 @@ export default function TracodeCaraterPage() {
       setAnalisandoEtapa("Gerando análise completa...");
 
       // Save computed result to backend
-      const q20 = readQuestionario20Respostas();
-      const optionalDiagLegado = readOptionalDiagnosticoFusao();
-      const diagnostico30 = readDiagnosticoEmocional30Fusao();
+      const q20 = readQuestionario20Respostas(selectedPessoaId);
+      const optionalDiagLegado = readOptionalDiagnosticoFusao(selectedPessoaId);
+      const diagnostico30 = readDiagnosticoEmocional30Fusao(selectedPessoaId);
       const diagnosticoEmocionalPayload =
         diagnostico30 ?? (optionalDiagLegado && !q20 ? optionalDiagLegado : undefined);
       const saveRes = await apiFetch("/traco/analisar", {
@@ -475,7 +442,7 @@ export default function TracodeCaraterPage() {
         setPessoas(prev => [...prev, pessoa]);
         setShowAddPessoa(false);
         setNovaNome("");
-        setSelectedPessoaId(pessoa.id);
+        irParaTracoPessoa(pessoa.id);
       }
     } catch { /* silent */ }
     setAddingPessoa(false);
@@ -487,18 +454,25 @@ export default function TracodeCaraterPage() {
       const res = await apiFetch(`/traco/pessoas/${id}`, { method: "DELETE" });
       if (res.ok) {
         setPessoas(prev => prev.filter(p => p.id !== id));
-        setSelectedPessoaId(null);
+        try {
+          localStorage.removeItem(storageKeyQuestionario20(id));
+          localStorage.removeItem(storageKeyDiagnostico30(id));
+          localStorage.removeItem(storageKeyDiagnosticoFusao(id));
+        } catch {
+          /* ignore */
+        }
+        if (selectedPessoaId === id) irParaTracoPessoa(null);
       }
     } catch { /* silent */ }
   }
 
   const fotosCount = Object.keys(fotos).length;
-  const questionario20Pronto = readQuestionario20Respostas() !== undefined;
+  const questionario20Pronto = readQuestionario20Respostas(selectedPessoaId) !== undefined;
   const jaTemAnaliseSalva = !!(analise?.resultado?.estruturas && analise?.resultado?.estruturaPrincipal);
   const precisaIrAoQuestionario =
     tracoDadosCarregados && !questionario20Pronto && !jaTemAnaliseSalva;
   if (precisaIrAoQuestionario) {
-    return <Redirect to="/diagnostico-eixos" />;
+    return <Redirect to={`/diagnostico-eixos${tracoQueryPessoa(selectedPessoaId)}`} />;
   }
 
   const resultado = analise?.resultado;
@@ -563,7 +537,7 @@ export default function TracodeCaraterPage() {
           <div className="flex gap-2 overflow-x-auto pb-1">
             {/* Me */}
             <button
-              onClick={() => setSelectedPessoaId(null)}
+              onClick={() => irParaTracoPessoa(null)}
               className="flex-shrink-0 px-4 py-3 rounded-2xl flex flex-col items-center gap-1 min-w-[78px] transition-all"
               style={selectedPessoaId === null
                 ? { background: "rgba(200,165,107,0.15)", border: "1.5px solid rgba(200,165,107,0.5)", color: "#c8a56b" }
@@ -577,7 +551,7 @@ export default function TracodeCaraterPage() {
             {pessoas.map(p => (
               <button
                 key={p.id}
-                onClick={() => setSelectedPessoaId(p.id)}
+                onClick={() => irParaTracoPessoa(p.id)}
                 className="flex-shrink-0 px-4 py-3 rounded-2xl flex flex-col items-center gap-1 min-w-[78px] transition-all"
                 style={selectedPessoaId === p.id
                   ? { background: "rgba(200,165,107,0.15)", border: "1.5px solid rgba(200,165,107,0.5)", color: "#c8a56b" }
@@ -655,6 +629,19 @@ export default function TracodeCaraterPage() {
               </button>
             </div>
           )}
+        </div>
+
+        <div
+          className="mb-8 rounded-xl px-4 py-3 text-xs leading-relaxed"
+          style={{ background: "rgba(109,185,109,0.06)", border: "1px solid rgba(109,185,109,0.2)" }}
+        >
+          <span style={{ color: "rgba(247,242,236,0.55)" }}>
+            Diagnóstico emocional (30 perguntas, passado/presente + consciência) entra na fusão com as fotos —{" "}
+          </span>
+          <Link href={`/diagnostico-emocional${tracoQueryPessoa(selectedPessoaId)}`} style={{ color: "#c8a56b" }} className="underline font-medium">
+            preencher para {pessoaSelecionada ? pessoaSelecionada.nome.split(" ")[0] : "mim"}
+          </Link>
+          <span style={{ color: "rgba(247,242,236,0.35)" }}> (guardado por pessoa).</span>
         </div>
 
         {/* ── Photo guide ── */}
@@ -908,12 +895,12 @@ export default function TracodeCaraterPage() {
           </p>
           <p className="text-xs text-center max-w-md px-2 mt-1" style={{ color: "rgba(200,165,107,0.45)" }}>
             <Link
-              href="/diagnostico-eixos"
+              href={`/diagnostico-eixos${tracoQueryPessoa(selectedPessoaId)}`}
               className="underline"
               style={{ color: "#c8a56b" }}
               onClick={() => {
                 try {
-                  localStorage.removeItem(STORAGE_Q20);
+                  localStorage.removeItem(storageKeyQuestionario20(selectedPessoaId));
                 } catch {
                   /* ignore */
                 }
