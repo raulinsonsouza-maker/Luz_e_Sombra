@@ -181,9 +181,6 @@ importers:
       '@workspace/traco-diagnostico-fusion':
         specifier: workspace:*
         version: link:../../lib/traco-diagnostico-fusion
-      '@workspace/traco-eixos-multimodal':
-        specifier: workspace:*
-        version: link:../../lib/traco-eixos-multimodal
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3

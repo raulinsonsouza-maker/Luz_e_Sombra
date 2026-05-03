@@ -13,7 +13,6 @@ import NumerologiaPage from "@/pages/NumerologiaPage";
 import AdminPage from "@/pages/AdminPage";
 import MeuPerfilPage from "@/pages/MeuPerfilPage";
 import TracodeCaraterPage from "@/pages/TracodeCaraterPage";
-import DiagnosticoEixosPage from "@/pages/DiagnosticoEixosPage";
 import DiagnosticoEmocionalPage from "@/pages/DiagnosticoEmocionalPage";
 import JornadaPage from "@/pages/JornadaPage";
 import MissoesPage from "@/pages/MissoesPage";
@@ -74,9 +73,6 @@ function Router() {
         </Route>
         <Route path="/quem-sou-eu">
           <ProtectedRoute component={QuemSouEuPage} />
-        </Route>
-        <Route path="/diagnostico-eixos">
-          <ProtectedRoute component={DiagnosticoEixosPage} />
         </Route>
         <Route path="/diagnostico-emocional">
           <ProtectedRoute component={DiagnosticoEmocionalPage} />

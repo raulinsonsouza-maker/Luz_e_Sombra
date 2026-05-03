@@ -5,7 +5,7 @@ Documento único para produto, design e desenvolvimento: **sem ruído**, fluxo f
 **Relação com o restante do produto**
 
 - O app **hoje** pode enviar um resumo opcional `diagnosticoEmocional` em `POST /traco/analisar` (fusão com traços) — ver secção [11](#11-implementação-técnica--checklist).
-- Em **paralelo** existe o modelo **multimodal 20 perguntas + fotos** (`MODELO_MULTIMODAL_EIXOS.md`, `/diagnostico-eixos`). Os dois fluxos **convivem** até decisão de unificação; este documento define o módulo **Diagnóstico Emocional (30 itens, passado + presente + consciência)**.
+- O fluxo de **20 reflexões (eixos)** foi **removido da aplicação**; o Traço de Caráter usa **fotos** e, em opcional, o **Diagnóstico Emocional (30 itens)** descrito neste documento. O pacote `traco-eixos-multimodal` mantém utilitários usados na análise por imagem no cliente.
 
 **Prioridade de produto:** o diagnóstico **não substitui** a análise por fotos; **refina** leituras ambíguas e enriquece linguagem quando integrado ao traço.
 

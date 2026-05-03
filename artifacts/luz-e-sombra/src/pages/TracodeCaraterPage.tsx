@@ -1,14 +1,13 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { Link, Redirect, useLocation, useSearch } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { Upload, X, Camera, User, ArrowRight, Loader2, RefreshCw, ChevronDown, ChevronUp, AlertCircle, ImageIcon, Plus, Users, Trash2 } from "lucide-react";
 import { analyzeTracoDeCarater } from "@/lib/tracoAnalysis";
 import type { ModeloMultimodalOutput } from "@workspace/traco-eixos-multimodal";
 import {
-  readQuestionario20Respostas,
+  purgeQuestionario20Storage,
   readDiagnosticoEmocional30Fusao,
   readOptionalDiagnosticoFusao,
-  storageKeyQuestionario20,
   storageKeyDiagnostico30,
   storageKeyDiagnosticoFusao,
   tracoQueryPessoa,
@@ -237,11 +236,8 @@ export default function TracodeCaraterPage() {
   const [novaNome, setNovaNome] = useState("");
   const [novaRelacao, setNovaRelacao] = useState("parceiro/a");
   const [addingPessoa, setAddingPessoa] = useState(false);
-  /** Evita redirecionar para o questionário antes de saber se já existe análise no servidor. */
-  const [tracoDadosCarregados, setTracoDadosCarregados] = useState(false);
 
   async function carregarDados(pessoaId: number | null) {
-    setTracoDadosCarregados(false);
     try {
       const q = pessoaId !== null ? `?pessoaId=${pessoaId}` : "";
       const [fotosRes, analiseRes] = await Promise.all([
@@ -275,12 +271,10 @@ export default function TracodeCaraterPage() {
         setAnalise(null);
       }
     } catch { /* silently ignore */ }
-    finally {
-      setTracoDadosCarregados(true);
-    }
   }
 
   useEffect(() => {
+    purgeQuestionario20Storage();
     apiFetch("/traco/pessoas").then(r => r.ok ? r.json() : []).then(setPessoas).catch(() => {});
   }, []);
 
@@ -358,13 +352,6 @@ export default function TracodeCaraterPage() {
   }, [fotos]);
 
   const handleAnalisar = async () => {
-    const q20Check = readQuestionario20Respostas(selectedPessoaId);
-    const podeAnalisarSoFotos = !!(analise?.resultado?.estruturas && analise?.resultado?.estruturaPrincipal);
-    if (!q20Check && !podeAnalisarSoFotos) {
-      setLocation(`/diagnostico-eixos${tracoQueryPessoa(selectedPessoaId)}`);
-      return;
-    }
-
     const fotosDisponiveis = Object.keys(fotos) as TipoFoto[];
     if (fotosDisponiveis.length === 0) return;
 
@@ -395,18 +382,15 @@ export default function TracodeCaraterPage() {
       setAnalisandoEtapa("Gerando análise completa...");
 
       // Save computed result to backend
-      const q20 = readQuestionario20Respostas(selectedPessoaId);
       const optionalDiagLegado = readOptionalDiagnosticoFusao(selectedPessoaId);
       const diagnostico30 = readDiagnosticoEmocional30Fusao(selectedPessoaId);
-      const diagnosticoEmocionalPayload =
-        diagnostico30 ?? (optionalDiagLegado && !q20 ? optionalDiagLegado : undefined);
+      const diagnosticoEmocionalPayload = diagnostico30 ?? optionalDiagLegado;
       const saveRes = await apiFetch("/traco/analisar", {
         method: "POST",
         body: JSON.stringify({
           resultado,
           pessoaId: selectedPessoaId,
           ...(diagnosticoEmocionalPayload ? { diagnosticoEmocional: diagnosticoEmocionalPayload } : {}),
-          ...(q20 ? { questionario20: q20 } : {}),
         }),
       });
       if (!saveRes.ok) {
@@ -415,8 +399,6 @@ export default function TracodeCaraterPage() {
       }
       const data: AnaliseTraco = await saveRes.json();
       setAnalise(data);
-      // Não apagar o questionário aqui: a página exige Q20 no localStorage até haver outra fonte de verdade;
-      // apagar fazia o próximo render redirecionar de volta para /diagnostico-eixos. O utilizador limpa em "Refazer as 20 reflexões".
       setTimeout(() => {
         document.getElementById("resultado-traco")?.scrollIntoView({ behavior: "smooth" });
       }, 200);
@@ -455,7 +437,6 @@ export default function TracodeCaraterPage() {
       if (res.ok) {
         setPessoas(prev => prev.filter(p => p.id !== id));
         try {
-          localStorage.removeItem(storageKeyQuestionario20(id));
           localStorage.removeItem(storageKeyDiagnostico30(id));
           localStorage.removeItem(storageKeyDiagnosticoFusao(id));
         } catch {
@@ -467,13 +448,6 @@ export default function TracodeCaraterPage() {
   }
 
   const fotosCount = Object.keys(fotos).length;
-  const questionario20Pronto = readQuestionario20Respostas(selectedPessoaId) !== undefined;
-  const jaTemAnaliseSalva = !!(analise?.resultado?.estruturas && analise?.resultado?.estruturaPrincipal);
-  const precisaIrAoQuestionario =
-    tracoDadosCarregados && !questionario20Pronto && !jaTemAnaliseSalva;
-  if (precisaIrAoQuestionario) {
-    return <Redirect to={`/diagnostico-eixos${tracoQueryPessoa(selectedPessoaId)}`} />;
-  }
 
   const resultado = analise?.resultado;
   const estruturaPrincipal = resultado?.estruturaPrincipal;
@@ -508,7 +482,7 @@ export default function TracodeCaraterPage() {
             className="text-xs tracking-widest uppercase mb-3 inline-block px-3 py-1 rounded-full"
             style={{ color: "rgba(109,185,109,0.85)", border: "1px solid rgba(109,185,109,0.35)", background: "rgba(109,185,109,0.08)" }}
           >
-            Passo 2 de 2 · Fotos
+            Fotos + contexto emocional (opcional)
           </p>
           <h1
             className="font-tan-mon-cheri text-4xl md:text-5xl mb-4"
@@ -891,24 +865,13 @@ export default function TracodeCaraterPage() {
             </p>
           )}
           <p className="text-xs text-center max-w-md px-2" style={{ color: "rgba(109,185,109,0.75)" }}>
-            A parte das 20 reflexões (passo 1) está concluída — as respostas entram na análise juntamente com as fotos.
+            O diagnóstico emocional (30 perguntas) é opcional e reforça a leitura quando preenchido para esta pessoa.
           </p>
           <p className="text-xs text-center max-w-md px-2 mt-1" style={{ color: "rgba(200,165,107,0.45)" }}>
-            <Link
-              href={`/diagnostico-eixos${tracoQueryPessoa(selectedPessoaId)}`}
-              className="underline"
-              style={{ color: "#c8a56b" }}
-              onClick={() => {
-                try {
-                  localStorage.removeItem(storageKeyQuestionario20(selectedPessoaId));
-                } catch {
-                  /* ignore */
-                }
-              }}
-            >
-              Refazer as 20 reflexões
+            <Link href={`/diagnostico-emocional${tracoQueryPessoa(selectedPessoaId)}`} className="underline" style={{ color: "#c8a56b" }}>
+              Abrir diagnóstico emocional (30)
             </Link>
-            {" "}se quiser ajustar respostas antes de analisar.
+            {" "}— ou analise só com as fotos.
           </p>
         </div>
 

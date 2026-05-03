@@ -71,8 +71,7 @@ O cliente (`tracoAnalysis.ts`) envia **`metricasResumo`** no `resultado`: uma en
 
 ## 7. Frontend
 
-- **`/traco-de-carater`** redireciona para **`/diagnostico-eixos`** se ainda não existirem 20 respostas válidas em `localStorage` — o questionário é **obrigatório** e é o **passo 1** da análise de traço; as fotos são o **passo 2**.
-- Rota **`/diagnostico-eixos`**: uma pergunta por ecrã; ao responder a **última** pergunta, grava `luz_questionario_20_respostas` e navega automaticamente para `/traco-de-carater`.
+- **Atualização:** a rota **`/diagnostico-eixos`** e o questionário obrigatório de **20 itens** foram **retirados do produto**. O Traço de Caráter passa a combinar **fotos** com o **Diagnóstico Emocional (30)** (`/diagnostico-emocional`) quando o utilizador o preenche; a API deixou de aceitar `questionario20` em `POST /traco/analisar`.
 - Ao gravar a análise com sucesso, o cliente remove a chave do `localStorage` (próxima visita ao traço volta a exigir o questionário).
 
 ---

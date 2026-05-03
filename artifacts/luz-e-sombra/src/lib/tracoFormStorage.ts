@@ -5,17 +5,23 @@ import {
 } from "@workspace/traco-diagnostico-emocional";
 import { diagnosticoEmocionalFusaoSchema } from "@workspace/traco-diagnostico-fusion";
 
-/** Chaves antigas (uma só por browser) — migradas para `eu` na primeira leitura. */
-export const LEGACY_STORAGE_Q20 = "luz_questionario_20_respostas";
 export const LEGACY_STORAGE_DIAGNOSTICO_30 = "luz_diagnostico_emocional_30_v1";
 export const LEGACY_STORAGE_DIAGNOSTICO_FUSAO = "luz_diagnostico_emocional_fusao";
 
-export function storageSuffixForPessoa(pessoaId: number | null): "eu" | `p${number}` {
-  return pessoaId === null ? "eu" : `p${pessoaId}`;
+/** Remove resíduos do antigo questionário de 20 (evita confusão com o diagnóstico de 30). */
+export function purgeQuestionario20Storage(): void {
+  try {
+    const legacy = "luz_questionario_20_respostas";
+    for (const k of Object.keys(localStorage)) {
+      if (k === legacy || k.startsWith(`${legacy}_`)) localStorage.removeItem(k);
+    }
+  } catch {
+    /* ignore */
+  }
 }
 
-export function storageKeyQuestionario20(pessoaId: number | null): string {
-  return `luz_questionario_20_respostas_${storageSuffixForPessoa(pessoaId)}`;
+export function storageSuffixForPessoa(pessoaId: number | null): "eu" | `p${number}` {
+  return pessoaId === null ? "eu" : `p${pessoaId}`;
 }
 
 export function storageKeyDiagnostico30(pessoaId: number | null): string {
@@ -42,42 +48,6 @@ export function parsePessoaIdFromSearch(search: string): number | null {
   const n = Number(p);
   if (!Number.isInteger(n) || n <= 0) return null;
   return n;
-}
-
-function parseQ20Array(raw: string): number[] | undefined {
-  const a = JSON.parse(raw) as unknown;
-  if (!Array.isArray(a) || a.length !== 20) return undefined;
-  const ok = a.every((x) => typeof x === "number" && Number.isInteger(x) && x >= 1 && x <= 5);
-  return ok ? (a as number[]) : undefined;
-}
-
-export function readQuestionario20Respostas(pessoaId: number | null): number[] | undefined {
-  try {
-    const key = storageKeyQuestionario20(pessoaId);
-    const raw = localStorage.getItem(key);
-    if (raw?.trim()) {
-      const v = parseQ20Array(raw);
-      if (v) return v;
-    }
-    if (pessoaId === null) {
-      const leg = localStorage.getItem(LEGACY_STORAGE_Q20);
-      if (leg?.trim()) {
-        const v = parseQ20Array(leg);
-        if (v) {
-          try {
-            localStorage.setItem(key, JSON.stringify(v));
-            localStorage.removeItem(LEGACY_STORAGE_Q20);
-          } catch {
-            /* ignore */
-          }
-          return v;
-        }
-      }
-    }
-  } catch {
-    /* ignore */
-  }
-  return undefined;
 }
 
 /** Respostas brutas guardadas no localStorage (por pessoa). */
