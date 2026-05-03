@@ -1,6 +1,6 @@
 import { Router, Response } from "express";
 import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
-import { db, comunidadeTable, reacoesTable, usuariosTable } from "@workspace/db";
+import { db, comunidadeTable, reacoesTable, usuariosTable, notificacoesTable } from "@workspace/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
 
@@ -63,8 +63,8 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
 // POST /api/comunidade — admin create post
 router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const { tipo, conteudo, mediaUrl } = req.body as {
-      tipo?: string; conteudo?: string; mediaUrl?: string;
+    const { tipo, conteudo, mediaUrl, notificar } = req.body as {
+      tipo?: string; conteudo?: string; mediaUrl?: string; notificar?: boolean;
     };
 
     if (!conteudo?.trim()) {
@@ -84,6 +84,26 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
         mediaUrl: mediaUrl?.trim() || null,
       })
       .returning();
+
+    if (notificar) {
+      const usuarios = await db
+        .select({ id: usuariosTable.id })
+        .from(usuariosTable)
+        .where(and(eq(usuariosTable.isAdmin, false), eq(usuariosTable.ativo, true)));
+
+      if (usuarios.length > 0) {
+        const preview = conteudo.trim().slice(0, 100) + (conteudo.trim().length > 100 ? "..." : "");
+        await db.insert(notificacoesTable).values(
+          usuarios.map(u => ({
+            usuarioId: u.id,
+            titulo: "Nova publicação na Comunidade",
+            mensagem: preview,
+            tipo: "comunidade",
+            link: "/comunidade",
+          }))
+        );
+      }
+    }
 
     return res.status(201).json(post);
   } catch (err) {

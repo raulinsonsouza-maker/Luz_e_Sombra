@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { Home, Target, Hash, History, Shield, LogOut, UserCircle, Layers, Map, Flame, Users2, GraduationCap } from "lucide-react";
+import { Home, Target, Hash, History, Shield, LogOut, UserCircle, Layers, Map, Flame, Users2, GraduationCap, Bell } from "lucide-react";
+import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
 
 export default function SiteHeader() {
   const [location, navigate] = useLocation();
@@ -11,6 +12,7 @@ export default function SiteHeader() {
 
   const isAdmin = Boolean(user.isAdmin);
   const primeiroNome = (user.nome || "Usuário").split(" ")[0];
+  const { count: notiCount } = useNotificacoesCount();
 
   const links = [
     { href: "/dashboard",        label: "Início",      icon: Home       },
@@ -117,6 +119,26 @@ export default function SiteHeader() {
 
           {/* Right side */}
           <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => navigate("/notificacoes")}
+              className="relative flex items-center justify-center w-8 h-8 rounded-lg transition-all"
+              title="Notificações"
+              style={{ color: location === "/notificacoes" ? "#c8a56b" : "rgba(247,242,236,0.45)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#c8a56b"; }}
+              onMouseLeave={e => {
+                if (location !== "/notificacoes") (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.45)";
+              }}
+            >
+              <Bell className="w-4 h-4" />
+              {notiCount > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-0.5"
+                  style={{ background: "#c8a56b", color: "#130f09" }}
+                >
+                  {notiCount > 99 ? "99+" : notiCount}
+                </span>
+              )}
+            </button>
             <button
               onClick={() => navigate("/perfil")}
               className="flex items-center gap-2 rounded-lg px-2 py-1 transition-all"

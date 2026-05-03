@@ -120,6 +120,22 @@ export const reacoesTable = pgTable("reacoes_comunidade", {
   publicacaoIdx: index("idx_reacoes_publicacao_id").on(table.publicacaoId),
 }));
 
+// ── Notificações ───────────────────────────────────────────────────────────────
+
+export const notificacoesTable = pgTable("notificacoes", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  titulo: text("titulo").notNull(),
+  mensagem: text("mensagem").notNull(),
+  tipo: text("tipo").notNull().default("geral"),
+  lida: boolean("lida").notNull().default(false),
+  link: text("link"),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  usuarioIdx: index("idx_notificacoes_usuario").on(table.usuarioId),
+  naoLidasIdx: index("idx_notificacoes_nao_lidas").on(table.usuarioId, table.lida),
+}));
+
 // ── Cursos ─────────────────────────────────────────────────────────────────────
 
 export const cursosTable = pgTable("cursos", {
@@ -178,3 +194,4 @@ export type Reacao = typeof reacoesTable.$inferSelect;
 export type Curso = typeof cursosTable.$inferSelect;
 export type Aula = typeof aulasTable.$inferSelect;
 export type ProgressoCurso = typeof progressoCursosTable.$inferSelect;
+export type Notificacao = typeof notificacoesTable.$inferSelect;

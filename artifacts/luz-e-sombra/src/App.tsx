@@ -19,6 +19,7 @@ import ComunidadePage from "@/pages/ComunidadePage";
 import CursosPage from "@/pages/CursosPage";
 import CursoPage from "@/pages/CursoPage";
 import QuemSouEuPage from "@/pages/QuemSouEuPage";
+import NotificacoesPage from "@/pages/NotificacoesPage";
 
 function ProtectedRoute({ component: Component, adminOnly = false }: { component: React.ComponentType; adminOnly?: boolean }) {
   const { user, status } = useAuth();
@@ -83,6 +84,9 @@ function Router() {
         </Route>
         <Route path="/cursos">
           <ProtectedRoute component={CursosPage} />
+        </Route>
+        <Route path="/notificacoes">
+          <ProtectedRoute component={NotificacoesPage} />
         </Route>
         <Route path="/admin">
           <ProtectedRoute component={AdminPage} adminOnly />

@@ -1,18 +1,21 @@
 import { useLocation } from "wouter";
-import { Home, Map, Users2, GraduationCap, User } from "lucide-react";
+import { Home, Map, Users2, GraduationCap, User, Bell } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
 
 const ITEMS = [
-  { href: "/dashboard",   label: "Início",     icon: Home },
-  { href: "/comunidade",  label: "Comunidade", icon: Users2 },
-  { href: "/cursos",      label: "Cursos",     icon: GraduationCap },
-  { href: "/jornada",     label: "Jornada",    icon: Map },
-  { href: "/perfil",      label: "Perfil",     icon: User },
+  { href: "/dashboard",      label: "Início",     icon: Home },
+  { href: "/comunidade",     label: "Comunidade", icon: Users2 },
+  { href: "/cursos",         label: "Cursos",     icon: GraduationCap },
+  { href: "/jornada",        label: "Jornada",    icon: Map },
+  { href: "/notificacoes",   label: "Alertas",    icon: Bell },
+  { href: "/perfil",         label: "Perfil",     icon: User },
 ];
 
 export default function BottomNav() {
   const [location, navigate] = useLocation();
   const { user, status } = useAuth();
+  const { count: notiCount } = useNotificacoesCount();
 
   const isPublicPage =
     location === "/" || location === "/login" || location === "/admin/login";
@@ -32,12 +35,13 @@ export default function BottomNav() {
         {ITEMS.map(({ href, label, icon: Icon }) => {
           const active =
             href === "/dashboard" ? location === href : location.startsWith(href);
+          const isBell = href === "/notificacoes";
           return (
             <button
               key={href}
               onClick={() => navigate(href)}
-              className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-all relative"
-              style={{ minWidth: 48 }}
+              className="flex flex-col items-center gap-0.5 px-1 py-1 rounded-xl transition-all relative"
+              style={{ minWidth: 40 }}
             >
               {active && (
                 <span
@@ -45,10 +49,20 @@ export default function BottomNav() {
                   style={{ background: "#c8a56b" }}
                 />
               )}
-              <Icon
-                className="w-5 h-5 transition-all"
-                style={{ color: active ? "#c8a56b" : "rgba(247,242,236,0.3)", strokeWidth: active ? 2.2 : 1.6 }}
-              />
+              <div className="relative">
+                <Icon
+                  className="w-5 h-5 transition-all"
+                  style={{ color: active ? "#c8a56b" : "rgba(247,242,236,0.3)", strokeWidth: active ? 2.2 : 1.6 }}
+                />
+                {isBell && notiCount > 0 && (
+                  <span
+                    className="absolute -top-1.5 -right-1.5 min-w-[14px] h-3.5 flex items-center justify-center rounded-full text-[8px] font-bold px-0.5"
+                    style={{ background: "#c8a56b", color: "#130f09" }}
+                  >
+                    {notiCount > 9 ? "9+" : notiCount}
+                  </span>
+                )}
+              </div>
               <span
                 className="text-[9px] font-medium tracking-wide transition-all"
                 style={{ color: active ? "#c8a56b" : "rgba(247,242,236,0.3)" }}

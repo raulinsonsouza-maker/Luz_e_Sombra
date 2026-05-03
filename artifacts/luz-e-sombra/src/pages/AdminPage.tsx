@@ -5,7 +5,7 @@ import {
   Users, Plus, Edit2, Trash2, Check, X, Loader2, Search, CheckCircle, AlertCircle,
   MessageSquare, GraduationCap, FileText, Youtube, ImageIcon, BookOpen,
   ChevronDown, ChevronUp, Eye, EyeOff, LayoutDashboard, Shield, TrendingUp,
-  UserCheck, Layers, Heart, Flame, Sparkles, Star, Sun, type LucideIcon,
+  UserCheck, Layers, Heart, Flame, Sparkles, Star, Sun, Bell, type LucideIcon,
 } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 
@@ -140,7 +140,7 @@ export default function AdminPage() {
 
       {/* Page content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {aba === "dashboard"  && <DashboardTab />}
+        {aba === "dashboard"  && <DashboardTab showMsg={showMsg} />}
         {aba === "usuarios"   && <UsuariosTab showMsg={showMsg} />}
         {aba === "comunidade" && <ComunidadeTab showMsg={showMsg} />}
         {aba === "cursos"     && <CursosTab showMsg={showMsg} />}
@@ -150,10 +150,16 @@ export default function AdminPage() {
 }
 
 // ── Dashboard Tab ──────────────────────────────────────────────────────────────
-function DashboardTab() {
+function DashboardTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) => void }) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [recentUsers, setRecentUsers] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
+  const [notiTitulo, setNotiTitulo] = useState("");
+  const [notiMensagem, setNotiMensagem] = useState("");
+  const [notiTipo, setNotiTipo] = useState("geral");
+  const [notiLink, setNotiLink] = useState("");
+  const [enviandoNoti, setEnviandoNoti] = useState(false);
+  const [notiResposta, setNotiResposta] = useState<{ tipo: "sucesso" | "erro"; msg: string } | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -166,6 +172,32 @@ function DashboardTab() {
     }
     load();
   }, []);
+
+  async function handleEnviarNotificacao(e: React.FormEvent) {
+    e.preventDefault();
+    setEnviandoNoti(true); setNotiResposta(null);
+    try {
+      const res = await apiFetch("/notificacoes/enviar", {
+        method: "POST",
+        body: JSON.stringify({
+          titulo: notiTitulo.trim(),
+          mensagem: notiMensagem.trim(),
+          tipo: notiTipo,
+          link: notiLink.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNotiResposta({ tipo: "sucesso", msg: `Enviado para ${data.enviadas} usuário(s) com sucesso!` });
+        setNotiTitulo(""); setNotiMensagem(""); setNotiLink(""); setNotiTipo("geral");
+      } else {
+        setNotiResposta({ tipo: "erro", msg: data.error || "Erro ao enviar" });
+      }
+    } catch {
+      setNotiResposta({ tipo: "erro", msg: "Erro ao enviar notificação" });
+    }
+    setEnviandoNoti(false);
+  }
 
   const statCards = stats ? [
     { label: "Total de Usuários", value: stats.usuarios.total, sub: `${stats.usuarios.ativos} ativos`, Icon: Users, color: "#c8a56b" },
@@ -241,6 +273,59 @@ function DashboardTab() {
             </div>
           ))
         }
+      </div>
+
+      {/* Enviar Notificação */}
+      <div className="rounded-2xl overflow-hidden" style={CARD_S}>
+        <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
+          <p className="text-xs tracking-[0.2em] uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>Mensagem Global</p>
+          <h3 className="font-semibold" style={{ color: C.text }}>Enviar Notificação</h3>
+        </div>
+        <form onSubmit={handleEnviarNotificacao} className="p-5 space-y-3">
+          {notiResposta && (
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm"
+              style={notiResposta.tipo === "sucesso"
+                ? { background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)", color: "#4ade80" }
+                : { background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)", color: "#f87171" }}>
+              {notiResposta.msg}
+            </div>
+          )}
+          <div>
+            <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>Título *</label>
+            <input value={notiTitulo} onChange={e => setNotiTitulo(e.target.value)} required
+              className="w-full px-4 py-2.5 rounded-xl text-sm outline-none"
+              style={INPUT_ST} placeholder="Ex: Novo conteúdo disponível" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>Mensagem *</label>
+            <textarea value={notiMensagem} onChange={e => setNotiMensagem(e.target.value)} required rows={3}
+              className="w-full px-4 py-2.5 rounded-xl text-sm outline-none resize-none"
+              style={INPUT_ST} placeholder="Escreva a mensagem para todos os usuários..." />
+          </div>
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>Tipo</label>
+              <select value={notiTipo} onChange={e => setNotiTipo(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl text-sm outline-none" style={SELECT_ST}>
+                <option value="geral" style={OPT}>Geral</option>
+                <option value="comunidade" style={OPT}>Comunidade</option>
+                <option value="sistema" style={OPT}>Sistema</option>
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>Link (opcional)</label>
+              <input value={notiLink} onChange={e => setNotiLink(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl text-sm outline-none"
+                style={INPUT_ST} placeholder="/comunidade" />
+            </div>
+          </div>
+          <button type="submit" disabled={enviandoNoti}
+            className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+            style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
+            <Bell className="w-4 h-4" />
+            {enviandoNoti ? "Enviando..." : "Enviar para todos os usuários"}
+          </button>
+        </form>
       </div>
     </div>
   );
@@ -521,6 +606,7 @@ function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: stri
   const [novoMediaUrl, setNovoMediaUrl] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [notificar, setNotificar] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { buscarPosts(); }, []);
@@ -544,7 +630,7 @@ function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: stri
       } else if (novoTipo === "video") {
         mediaUrl = novoMediaUrl.trim() || undefined;
       }
-      const res = await apiFetch("/comunidade", { method: "POST", body: JSON.stringify({ tipo: novoTipo, conteudo: novoConteudo.trim(), mediaUrl }) });
+      const res = await apiFetch("/comunidade", { method: "POST", body: JSON.stringify({ tipo: novoTipo, conteudo: novoConteudo.trim(), mediaUrl, notificar }) });
       if (res.ok) {
         showMsg("sucesso", "Publicação criada!");
         setNovoConteudo(""); setNovoMediaUrl(""); setUploadFile(null);
@@ -611,6 +697,25 @@ function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: stri
             <input type="url" value={novoMediaUrl} onChange={e => setNovoMediaUrl(e.target.value)}
               className={ic} style={INPUT_ST} placeholder="URL do YouTube" />
           )}
+          {/* Notificar usuários */}
+          <label
+            className="flex items-center gap-2.5 cursor-pointer select-none"
+            onClick={() => setNotificar(v => !v)}
+          >
+            <div
+              className="w-5 h-5 rounded flex items-center justify-center shrink-0 transition-all"
+              style={{
+                border: notificar ? "none" : "1.5px solid rgba(200,165,107,0.35)",
+                background: notificar ? "linear-gradient(135deg, #c8a56b, #9c7742)" : "transparent",
+              }}
+            >
+              {notificar && <Check className="w-3 h-3" style={{ color: "#1a1208" }} />}
+            </div>
+            <span className="text-xs font-medium" style={{ color: C.muted }}>
+              Notificar todos os usuários sobre esta publicação
+            </span>
+          </label>
+
           <div className="flex gap-3">
             <button type="button" onClick={() => setCriando(false)}
               className="flex-1 py-2 rounded-xl text-sm" style={{ border: "1px solid rgba(200,165,107,0.2)", color: C.muted }}>Cancelar</button>
