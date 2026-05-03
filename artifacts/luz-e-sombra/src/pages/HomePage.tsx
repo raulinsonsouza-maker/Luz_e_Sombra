@@ -198,22 +198,19 @@ export default function HomePage() {
         >
           <div className="flex items-center gap-4">
             {/* Gauge */}
-            <div className="relative flex-shrink-0">
+            <div className="relative flex-shrink-0" style={{ width: 144 }}>
               <ScoreGauge score={media ?? 0} cor={mediaCor} />
-              <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
+              <div className="absolute inset-0 flex flex-col items-center justify-end" style={{ paddingBottom: 2 }}>
                 {media !== null ? (
-                  <>
-                    <span className="font-tan-mon-cheri leading-none" style={{ fontSize: 28, color: "#f7f2ec" }}>
-                      {media.toFixed(1)}
-                    </span>
-                    <span className="text-xs" style={{ color: "rgba(200,165,107,0.55)" }}>/10</span>
-                  </>
+                  <span className="font-tan-mon-cheri leading-none" style={{ fontSize: 30, color: "#f7f2ec" }}>
+                    {media.toFixed(1)}
+                  </span>
                 ) : (
-                  <span className="text-sm font-medium" style={{ color: "rgba(200,165,107,0.4)" }}>—</span>
+                  <span className="text-base font-medium" style={{ color: "rgba(200,165,107,0.4)" }}>—</span>
                 )}
               </div>
-              <p className="text-center text-[10px] -mt-1" style={{ color: "rgba(247,242,236,0.3)" }}>
-                {media !== null ? "Sua média" : "Sem dados"}
+              <p className="text-center text-[10px] mt-0.5" style={{ color: "rgba(247,242,236,0.3)" }}>
+                {media !== null ? "média /10" : "sem avaliação"}
               </p>
             </div>
 
@@ -247,11 +244,11 @@ export default function HomePage() {
                   <div className="flex items-center gap-1">
                     <Zap className="w-3 h-3" style={{ color: "#c8a56b" }} />
                     <span className="text-[11px] font-medium" style={{ color: "#c8a56b" }}>
-                      {progresso?.xp ?? 0} XP
+                      {progresso ? `${progresso.xpNoNivel} XP` : "0 XP"}
                     </span>
                   </div>
                   <span className="text-[10px]" style={{ color: "rgba(247,242,236,0.3)" }}>
-                    {progresso ? `${progresso.xpNoNivel}/${progresso.xpParaProximo} XP` : "0/500 XP"}
+                    {progresso ? `${progresso.xpNoNivel}/${progresso.xpParaProximo}` : "0/500"}
                   </span>
                 </div>
                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(200,165,107,0.1)" }}>
@@ -272,7 +269,7 @@ export default function HomePage() {
                 <div className="flex items-center gap-1 mt-2.5">
                   <Flame className="w-3.5 h-3.5" style={{ color: "#e86c2b" }} />
                   <span className="text-[11px] font-semibold" style={{ color: "rgba(247,242,236,0.5)" }}>
-                    {progresso.streakDias} dias seguidos
+                    {progresso.streakDias} {progresso.streakDias === 1 ? "dia seguido" : "dias seguidos"}
                   </span>
                 </div>
               )}
