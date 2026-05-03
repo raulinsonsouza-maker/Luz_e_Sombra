@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { Target, TrendingUp, Hash, ArrowRight, ChevronRight, Sparkles, BookOpen, TrendingDown } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
+import {
+  Bell, ChevronRight, Flame, Zap, Map, Target, Layers, Hash,
+  CheckCircle2, Circle, TrendingUp,
+} from "lucide-react";
 
 interface Avaliacao {
   id: number;
@@ -21,30 +24,43 @@ interface Avaliacao {
   criatividadeHobbyDiversao: number;
 }
 
+interface Missao {
+  id: number;
+  titulo: string;
+  xpRecompensa: number;
+  concluida: boolean;
+}
+
+interface Progresso {
+  xp: number;
+  nivel: number;
+  nomeNivel: string;
+  descNivel: string;
+  xpNoNivel: number;
+  xpParaProximo: number;
+  streakDias: number;
+  melhorStreak: number;
+  missoes: Missao[];
+  jornada: { traco: boolean; roda: boolean; numerologia: boolean };
+}
+
 const AREAS = [
-  { key: "plenitudeFelicidade",      nome: "Plenitude",      nomeCompleto: "Plenitude e Felicidade" },
-  { key: "espiritualidade",          nome: "Espiritualidade", nomeCompleto: "Espiritualidade" },
-  { key: "saudeDisposicao",          nome: "Saúde",           nomeCompleto: "Saúde e Disposição" },
-  { key: "desenvolvimentoIntelectual", nome: "Intelecto",     nomeCompleto: "Desenvolvimento Intelectual" },
-  { key: "equilibrioEmocional",      nome: "Emoções",         nomeCompleto: "Equilíbrio Emocional" },
-  { key: "familia",                  nome: "Família",         nomeCompleto: "Família" },
-  { key: "desenvolvimentoAmoroso",   nome: "Amor",            nomeCompleto: "Desenvolvimento Amoroso" },
-  { key: "vidaSocial",               nome: "Social",          nomeCompleto: "Vida Social" },
-  { key: "realizacaoProposito",      nome: "Propósito",       nomeCompleto: "Realização e Propósito" },
-  { key: "recursosFinanceiros",      nome: "Finanças",        nomeCompleto: "Recursos Financeiros" },
-  { key: "contribuicaoSocial",       nome: "Contribuição",    nomeCompleto: "Contribuição Social" },
-  { key: "criatividadeHobbyDiversao", nome: "Criatividade",   nomeCompleto: "Criatividade e Hobbies" },
+  { key: "plenitudeFelicidade",       nome: "Plenitude"      },
+  { key: "espiritualidade",           nome: "Espiritualidade"},
+  { key: "saudeDisposicao",           nome: "Saúde"          },
+  { key: "desenvolvimentoIntelectual", nome: "Intelecto"     },
+  { key: "equilibrioEmocional",       nome: "Emoções"        },
+  { key: "familia",                   nome: "Família"        },
+  { key: "desenvolvimentoAmoroso",    nome: "Amor"           },
+  { key: "vidaSocial",                nome: "Social"         },
+  { key: "realizacaoProposito",       nome: "Propósito"      },
+  { key: "recursosFinanceiros",       nome: "Finanças"       },
+  { key: "contribuicaoSocial",        nome: "Contribuição"   },
+  { key: "criatividadeHobbyDiversao", nome: "Criatividade"   },
 ];
 
 function calcularMedia(a: Avaliacao): number {
   return AREAS.reduce((sum, { key }) => sum + (a[key as keyof Avaliacao] as number), 0) / AREAS.length;
-}
-
-function nivelMedia(m: number) {
-  if (m >= 8.5) return { label: "Florescimento", desc: "Você está em plena expansão.", cor: "#c8a56b", corBg: "rgba(200,165,107,0.12)", corBorder: "rgba(200,165,107,0.3)" };
-  if (m >= 7)   return { label: "Equilíbrio",    desc: "Sua jornada está em harmonia.",  cor: "#5db97a", corBg: "rgba(93,185,122,0.1)",  corBorder: "rgba(93,185,122,0.3)" };
-  if (m >= 5.5) return { label: "Construção",    desc: "Cada passo conta. Continue.",    cor: "#5b9bd5", corBg: "rgba(91,155,213,0.1)",  corBorder: "rgba(91,155,213,0.3)" };
-  return             { label: "Atenção",         desc: "Hora de olhar com cuidado.",     cor: "#c06fbf", corBg: "rgba(192,111,191,0.1)", corBorder: "rgba(192,111,191,0.3)" };
 }
 
 function saudacao() {
@@ -54,46 +70,38 @@ function saudacao() {
   return "Boa noite";
 }
 
-function formatarData(iso: string) {
-  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
-}
-
-// SVG Semicircle Gauge
-function Gauge({ score, cor }: { score: number; cor: string }) {
-  const r = 58;
-  const cx = 80;
-  const cy = 78;
-  const circSemi = Math.PI * r;
-  const offset = circSemi * (1 - score / 10);
-  const pathD = `M ${cx - r},${cy} A ${r},${r} 0 0 1 ${cx + r},${cy}`;
+function ScoreGauge({ score, cor }: { score: number; cor: string }) {
+  const r = 54;
+  const cx = 72;
+  const cy = 72;
+  const circ = Math.PI * r;
+  const offset = circ * (1 - score / 10);
+  const path = `M ${cx - r},${cy} A ${r},${r} 0 0 1 ${cx + r},${cy}`;
 
   return (
-    <svg width="160" height="90" viewBox="0 0 160 90" className="overflow-visible">
-      {/* Track */}
-      <path d={pathD} fill="none" stroke="rgba(200,165,107,0.12)" strokeWidth={10} strokeLinecap="round" />
-      {/* Value */}
-      <path d={pathD} fill="none" stroke={cor} strokeWidth={10} strokeLinecap="round"
-        strokeDasharray={`${circSemi}`} strokeDashoffset={offset}
-        style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)" }} />
+    <svg width="144" height="80" viewBox="0 0 144 80" className="overflow-visible">
+      <path d={path} fill="none" stroke="rgba(200,165,107,0.1)" strokeWidth={10} strokeLinecap="round" />
+      <path
+        d={path} fill="none" stroke={cor} strokeWidth={10} strokeLinecap="round"
+        strokeDasharray={`${circ}`} strokeDashoffset={offset}
+        style={{ transition: "stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)", filter: `drop-shadow(0 0 6px ${cor}55)` }}
+      />
     </svg>
   );
 }
 
-// Mini horizontal bar
-function MiniBar({ value, cor }: { value: number; cor: string }) {
-  return (
-    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(200,165,107,0.1)" }}>
-      <div className="h-full rounded-full transition-all duration-700"
-        style={{ width: `${value * 10}%`, background: cor }} />
-    </div>
-  );
-}
+const QUICK_ACTIONS = [
+  { label: "Jornada",       sub: "Ver progresso",   icon: Map,    href: "/jornada",          gold: false },
+  { label: "Roda da Vida",  sub: "Nova avaliação",  icon: Target, href: "/avaliacao",         gold: true  },
+  { label: "Traço",         sub: "Meu caráter",     icon: Layers, href: "/traco-de-carater",  gold: false },
+  { label: "Numerologia",   sub: "Meus números",    icon: Hash,   href: "/numerologia",       gold: false },
+];
 
 export default function HomePage() {
   const [, navigate] = useLocation();
   const { user, status } = useAuth();
   const [ultimaAvaliacao, setUltimaAvaliacao] = useState<Avaliacao | null>(null);
-  const [totalAvaliacoes, setTotalAvaliacoes] = useState(0);
+  const [progresso, setProgresso] = useState<Progresso | null>(null);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
@@ -105,10 +113,12 @@ export default function HomePage() {
 
   async function buscarDados() {
     try {
-      const res = await apiFetch("/avaliacoes");
-      if (res.ok) {
-        const lista: Avaliacao[] = await res.json();
-        setTotalAvaliacoes(lista.length);
+      const [resAv, resProg] = await Promise.all([
+        apiFetch("/avaliacoes"),
+        apiFetch("/gamificacao/progresso"),
+      ]);
+      if (resAv.ok) {
+        const lista: Avaliacao[] = await resAv.json();
         if (lista.length > 0) {
           const sorted = [...lista].sort(
             (a, b) => new Date(b.dataAvaliacao).getTime() - new Date(a.dataAvaliacao).getTime()
@@ -116,320 +126,351 @@ export default function HomePage() {
           setUltimaAvaliacao(sorted[0]);
         }
       }
+      if (resProg.ok) setProgresso(await resProg.json());
     } catch {}
     setCarregando(false);
   }
 
-  if (status === "loading") {
-    return (
-      <div className="luxury-shell flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-2 border-brand-gold border-t-transparent" />
-      </div>
-    );
-  }
-
   const primeiroNome = (user?.nome || "").split(" ")[0] || "Usuário";
   const media = ultimaAvaliacao ? calcularMedia(ultimaAvaliacao) : null;
-  const nivel = media !== null ? nivelMedia(media) : null;
 
-  // Area insights
-  const areaData = ultimaAvaliacao
+  const mediaCor = media === null ? "#c8a56b"
+    : media >= 8.5 ? "#c8a56b"
+    : media >= 7   ? "#5db97a"
+    : media >= 5.5 ? "#5b9bd5"
+    : "#c06fbf";
+
+  const areasSorted = ultimaAvaliacao
     ? AREAS.map(a => ({ ...a, valor: ultimaAvaliacao[a.key as keyof Avaliacao] as number }))
-        .sort((a, b) => b.valor - a.valor)
+        .sort((a, b) => a.valor - b.valor)
     : [];
-  const top3 = areaData.slice(0, 3);
-  const bottom3 = [...areaData].reverse().slice(0, 3);
+  const focoPrincipal = areasSorted[0] ?? null;
+
+  const xpPct = progresso
+    ? Math.min(100, Math.round((progresso.xpNoNivel / progresso.xpParaProximo) * 100))
+    : 0;
+
+  const missoesPreview = progresso?.missoes.slice(0, 3) ?? [];
+  const concluidasHoje = progresso?.missoes.filter(m => m.concluida).length ?? 0;
+  const totalHoje = progresso?.missoes.length ?? 0;
 
   return (
-    <div className="luxury-shell">
+    <div
+      className="min-h-screen pb-28"
+      style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
+    >
+      <div className="max-w-lg mx-auto px-4">
 
-      {/* ── HERO BANNER ───────────────────────────────────────── */}
-      <div className="relative overflow-hidden px-5 py-10 sm:py-14"
-        style={{ background: "linear-gradient(135deg, #1e1812 0%, #2f251b 60%, #1a1208 100%)" }}>
-        {/* Background glow */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 800px 400px at 60% 50%, rgba(200,165,107,0.08), transparent)" }} />
+        {/* ── MOBILE TOP BAR ─────────────────────────────── */}
+        <div className="flex items-center justify-between pt-5 pb-2 md:hidden">
+          <span className="font-tan-mon-cheri text-base tracking-wide" style={{ color: "#f7f2ec" }}>
+            Da Sombra à Luz
+          </span>
+          <button
+            className="w-9 h-9 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.15)" }}
+          >
+            <Bell className="w-4 h-4" style={{ color: "rgba(200,165,107,0.6)" }} />
+          </button>
+        </div>
 
-        <div className="max-w-5xl mx-auto relative">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-            <div>
-              <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-3"
-                style={{ color: "rgba(200,165,107,0.55)" }}>
-                {saudacao()}
+        {/* ── GREETING ───────────────────────────────────── */}
+        <div className="pt-4 pb-5 md:pt-8">
+          <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>
+            {saudacao()},
+          </p>
+          <h1 className="font-tan-mon-cheri mb-1" style={{ fontSize: "clamp(1.8rem,5vw,2.8rem)", color: "#f7f2ec", lineHeight: 1.1 }}>
+            {primeiroNome}
+          </h1>
+          <p className="text-sm" style={{ color: "rgba(247,242,236,0.4)" }}>
+            {progresso?.descNivel ?? "Sua jornada de autoconhecimento começa aqui."}
+          </p>
+        </div>
+
+        {/* ── SCORE + LEVEL CARD ─────────────────────────── */}
+        <div
+          className="rounded-3xl p-5 mb-4"
+          style={{
+            background: "linear-gradient(135deg, rgba(200,165,107,0.1) 0%, rgba(200,165,107,0.04) 100%)",
+            border: "1px solid rgba(200,165,107,0.2)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(200,165,107,0.1)",
+          }}
+        >
+          <div className="flex items-center gap-4">
+            {/* Gauge */}
+            <div className="relative flex-shrink-0">
+              <ScoreGauge score={media ?? 0} cor={mediaCor} />
+              <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
+                {media !== null ? (
+                  <>
+                    <span className="font-tan-mon-cheri leading-none" style={{ fontSize: 28, color: "#f7f2ec" }}>
+                      {media.toFixed(1)}
+                    </span>
+                    <span className="text-xs" style={{ color: "rgba(200,165,107,0.55)" }}>/10</span>
+                  </>
+                ) : (
+                  <span className="text-sm font-medium" style={{ color: "rgba(200,165,107,0.4)" }}>—</span>
+                )}
+              </div>
+              <p className="text-center text-[10px] -mt-1" style={{ color: "rgba(247,242,236,0.3)" }}>
+                {media !== null ? "Sua média" : "Sem dados"}
               </p>
-              <h1 className="font-tan-mon-cheri mb-3"
-                style={{ fontSize: "clamp(2rem, 5vw, 3.2rem)", color: "#f7f2ec", lineHeight: 1.1 }}>
-                {primeiroNome}
-              </h1>
-              {nivel ? (
-                <p className="text-sm" style={{ color: "rgba(247,242,236,0.5)" }}>
-                  {nivel.desc}
-                </p>
-              ) : (
-                <p className="text-sm" style={{ color: "rgba(247,242,236,0.5)" }}>
-                  Sua jornada de autoconhecimento começa aqui.
-                </p>
-              )}
             </div>
 
-            {/* Stats strip */}
-            <div className="flex gap-6 sm:gap-8">
-              {totalAvaliacoes > 0 && (
+            {/* Level + XP */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-3">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: "linear-gradient(135deg, #c8a56b, #9c7742)",
+                    boxShadow: "0 0 16px rgba(200,165,107,0.3)",
+                  }}
+                >
+                  <span className="font-tan-mon-cheri text-sm" style={{ color: "#1a1208" }}>
+                    {progresso?.nivel ?? 1}
+                  </span>
+                </div>
                 <div>
-                  <p className="font-tan-mon-cheri text-3xl sm:text-4xl" style={{ color: "#c8a56b", lineHeight: 1 }}>
-                    {totalAvaliacoes}
+                  <p className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
+                    Nível {progresso?.nivel ?? 1}
                   </p>
-                  <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.4)", letterSpacing: "0.05em" }}>
-                    {totalAvaliacoes === 1 ? "avaliação" : "avaliações"}
+                  <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>
+                    {progresso?.nomeNivel ?? "Iniciante"}
                   </p>
                 </div>
-              )}
-              {media !== null && (
-                <div>
-                  <p className="font-tan-mon-cheri text-3xl sm:text-4xl" style={{ color: "#c8a56b", lineHeight: 1 }}>
-                    {media.toFixed(1)}
-                  </p>
-                  <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.4)", letterSpacing: "0.05em" }}>
-                    média atual
-                  </p>
+              </div>
+
+              {/* XP Bar */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1">
+                    <Zap className="w-3 h-3" style={{ color: "#c8a56b" }} />
+                    <span className="text-[11px] font-medium" style={{ color: "#c8a56b" }}>
+                      {progresso?.xp ?? 0} XP
+                    </span>
+                  </div>
+                  <span className="text-[10px]" style={{ color: "rgba(247,242,236,0.3)" }}>
+                    {progresso ? `${progresso.xpNoNivel}/${progresso.xpParaProximo} XP` : "0/500 XP"}
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(200,165,107,0.1)" }}>
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${xpPct}%`,
+                      background: "linear-gradient(90deg, #9c7742, #c8a56b)",
+                      transition: "width 1s cubic-bezier(0.4,0,0.2,1)",
+                      boxShadow: "0 0 6px rgba(200,165,107,0.4)",
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Streak */}
+              {progresso && progresso.streakDias > 0 && (
+                <div className="flex items-center gap-1 mt-2.5">
+                  <Flame className="w-3.5 h-3.5" style={{ color: "#e86c2b" }} />
+                  <span className="text-[11px] font-semibold" style={{ color: "rgba(247,242,236,0.5)" }}>
+                    {progresso.streakDias} dias seguidos
+                  </span>
                 </div>
               )}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* ── MAIN CONTENT ──────────────────────────────────────── */}
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-5">
-
-        {carregando ? (
-          <div className="luxury-card-strong p-10 flex items-center justify-center gap-4">
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-brand-gold border-t-transparent" />
-            <span className="text-brand-medium text-sm">Carregando seu progresso...</span>
-          </div>
-
-        ) : ultimaAvaliacao && media !== null && nivel ? (
-          <>
-            {/* ── ROW 1: Score card + Quick action ───────────── */}
-            <div className="grid md:grid-cols-5 gap-5">
-
-              {/* Score card */}
-              <div className="md:col-span-3 luxury-card-strong p-6 sm:p-8">
-                <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-5">
-                  Seu momento atual
-                </p>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-
-                  {/* Gauge + number */}
-                  <div className="flex flex-col items-center flex-shrink-0">
-                    <div className="relative">
-                      <Gauge score={media} cor={nivel.cor} />
-                      <div className="absolute bottom-0 left-0 right-0 text-center">
-                        <span className="font-tan-mon-cheri" style={{ fontSize: "2.4rem", color: nivel.cor, lineHeight: 1 }}>
-                          {media.toFixed(1)}
-                        </span>
-                        <span className="text-brand-medium text-sm ml-1">/10</span>
-                      </div>
-                    </div>
-                    <span className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mt-2"
-                      style={{ background: nivel.corBg, color: nivel.cor, border: `1px solid ${nivel.corBorder}` }}>
-                      {nivel.label}
-                    </span>
-                  </div>
-
-                  {/* Details */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-brand-medium mb-5">
-                      Avaliação de {formatarData(ultimaAvaliacao.dataAvaliacao)}
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                      <button onClick={() => navigate(`/resultado/${ultimaAvaliacao.id}`)}
-                        className="luxury-btn-primary text-sm py-2.5 px-5">
-                        Ver análise completa
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => navigate("/avaliacao?novo=true")}
-                        className="luxury-btn-secondary text-sm py-2.5 px-5">
-                        Nova avaliação
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick action cards */}
-              <div className="md:col-span-2 flex flex-col sm:flex-row md:flex-col gap-4">
-                <button onClick={() => navigate("/numerologia")}
-                  className="flex-1 luxury-card p-5 text-left group hover:shadow-xl transition-all"
-                  style={{ borderColor: "rgba(200,165,107,0.3)" }}>
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ background: "rgba(200,165,107,0.1)", border: "1px solid rgba(200,165,107,0.2)" }}>
-                      <Hash className="w-5 h-5 text-brand-bronze" />
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-brand-gold/40 group-hover:text-brand-bronze group-hover:translate-x-0.5 transition-all" />
-                  </div>
-                  <p className="font-semibold text-brand-dark text-sm mb-1">Numerologia</p>
-                  <p className="text-xs text-brand-medium leading-relaxed">Descubra as energias do seu ano {new Date().getFullYear()}</p>
-                </button>
-
-                <button onClick={() => navigate("/historico")}
-                  className="flex-1 luxury-card p-5 text-left group hover:shadow-xl transition-all"
-                  style={{ borderColor: "rgba(200,165,107,0.3)" }}>
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ background: "rgba(200,165,107,0.1)", border: "1px solid rgba(200,165,107,0.2)" }}>
-                      <TrendingUp className="w-5 h-5 text-brand-bronze" />
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-brand-gold/40 group-hover:text-brand-bronze group-hover:translate-x-0.5 transition-all" />
-                  </div>
-                  <p className="font-semibold text-brand-dark text-sm mb-1">Histórico</p>
-                  <p className="text-xs text-brand-medium leading-relaxed">
-                    {totalAvaliacoes > 1 ? `${totalAvaliacoes} avaliações registradas` : "Acompanhe sua evolução"}
-                  </p>
-                </button>
-              </div>
+        {/* ── CURRENT FOCUS ──────────────────────────────── */}
+        {focoPrincipal && (
+          <div
+            className="rounded-2xl p-4 mb-4 flex items-center gap-3"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(200,165,107,0.1)",
+            }}
+          >
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: "rgba(200,165,107,0.1)" }}
+            >
+              <TrendingUp className="w-4 h-4" style={{ color: "#c8a56b" }} />
             </div>
-
-            {/* ── ÁREA INSIGHTS ──────────────────────────────── */}
-            <div className="luxury-card-strong p-6 sm:p-8">
-              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-6">
-                Sua Roda da Vida — Destaques
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold tracking-wider uppercase mb-0.5" style={{ color: "rgba(200,165,107,0.5)" }}>
+                Foco do momento
               </p>
-              <div className="grid sm:grid-cols-2 gap-6 sm:gap-10">
-
-                {/* Pontos fortes */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: "rgba(93,185,122,0.15)" }}>
-                      <TrendingUp className="w-3 h-3" style={{ color: "#5db97a" }} />
-                    </div>
-                    <p className="text-xs font-bold tracking-wider uppercase" style={{ color: "#5db97a" }}>
-                      Pontos fortes
-                    </p>
-                  </div>
-                  <div className="space-y-3.5">
-                    {top3.map(({ nome, nomeCompleto, valor }) => (
-                      <div key={nome}>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-sm text-brand-dark font-medium">{nomeCompleto}</span>
-                          <span className="text-sm font-bold text-brand-bronze ml-3 flex-shrink-0">{valor}</span>
-                        </div>
-                        <MiniBar value={valor} cor="#5db97a" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Em crescimento */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: "rgba(200,165,107,0.15)" }}>
-                      <Sparkles className="w-3 h-3 text-brand-bronze" />
-                    </div>
-                    <p className="text-xs font-bold tracking-wider uppercase text-brand-bronze">
-                      Maior oportunidade
-                    </p>
-                  </div>
-                  <div className="space-y-3.5">
-                    {bottom3.map(({ nome, nomeCompleto, valor }) => (
-                      <div key={nome}>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-sm text-brand-dark font-medium">{nomeCompleto}</span>
-                          <span className="text-sm font-bold text-brand-medium ml-3 flex-shrink-0">{valor}</span>
-                        </div>
-                        <MiniBar value={valor} cor="#c8a56b" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-5" style={{ borderTop: "1px solid rgba(200,165,107,0.15)" }}>
-                <button onClick={() => navigate(`/resultado/${ultimaAvaliacao.id}`)}
-                  className="text-xs font-semibold text-brand-bronze hover:text-brand-gold transition-colors flex items-center gap-1.5">
-                  Ver análise completa de todas as 12 áreas
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
+              <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>{focoPrincipal.nome}</p>
+              <p className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
+                {focoPrincipal.valor}/10 · Área que mais precisa de atenção
+              </p>
             </div>
-          </>
-
-        ) : (
-          /* ── SEM AVALIAÇÕES ──────────────────────────────────── */
-          <div className="luxury-card-strong p-8 sm:p-12 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6"
-              style={{ background: "rgba(200,165,107,0.1)", border: "1px solid rgba(200,165,107,0.25)" }}>
-              <Target className="w-8 h-8 text-brand-bronze" />
-            </div>
-            <h2 className="font-tan-mon-cheri text-2xl sm:text-3xl text-brand-dark mb-3">
-              Sua jornada começa aqui
-            </h2>
-            <p className="text-brand-medium text-sm leading-relaxed max-w-sm mx-auto mb-8">
-              Faça sua primeira avaliação da Roda da Vida e descubra, com clareza, onde está sua energia hoje — e onde focar para crescer.
-            </p>
-            <button onClick={() => navigate("/avaliacao")} className="luxury-btn-primary px-8 py-3.5 text-base">
-              Iniciar minha avaliação
-              <ArrowRight className="w-4 h-4" />
+            <button
+              onClick={() => navigate("/historico")}
+              className="flex-shrink-0"
+              style={{ color: "rgba(200,165,107,0.4)" }}
+            >
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        {/* ── MÓDULOS ───────────────────────────────────────────── */}
-        <div>
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-4">
+        {!ultimaAvaliacao && !carregando && (
+          <div
+            className="rounded-2xl p-4 mb-4 flex items-center gap-3"
+            style={{
+              background: "rgba(200,165,107,0.07)",
+              border: "1px dashed rgba(200,165,107,0.25)",
+            }}
+          >
+            <Target className="w-5 h-5 flex-shrink-0" style={{ color: "#c8a56b" }} />
+            <div className="flex-1">
+              <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>Inicie sua Roda da Vida</p>
+              <p className="text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>Mapeie as 12 dimensões da sua vida</p>
+            </div>
+            <button
+              onClick={() => navigate("/avaliacao")}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
+            >
+              Iniciar
+            </button>
+          </div>
+        )}
+
+        {/* ── MISSIONS PREVIEW ───────────────────────────── */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-xs font-semibold tracking-wider uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
+                Missões do dia
+              </p>
+            </div>
+            {progresso && (
+              <div className="flex items-center gap-2">
+                <span
+                  className="text-xs font-bold px-2 py-0.5 rounded-full"
+                  style={{
+                    background: concluidasHoje === totalHoje ? "rgba(93,185,122,0.15)" : "rgba(200,165,107,0.12)",
+                    color: concluidasHoje === totalHoje ? "#5db97a" : "#c8a56b",
+                  }}
+                >
+                  {concluidasHoje}/{totalHoje}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2.5">
+            {carregando
+              ? [0, 1, 2].map(i => (
+                  <div key={i} className="h-14 rounded-2xl animate-pulse" style={{ background: "rgba(200,165,107,0.05)" }} />
+                ))
+              : missoesPreview.map(missao => (
+                  <div
+                    key={missao.id}
+                    className="rounded-2xl px-4 py-3 flex items-center gap-3"
+                    style={{
+                      background: missao.concluida ? "rgba(93,185,122,0.06)" : "rgba(255,255,255,0.03)",
+                      border: missao.concluida ? "1px solid rgba(93,185,122,0.15)" : "1px solid rgba(200,165,107,0.08)",
+                    }}
+                  >
+                    {missao.concluida ? (
+                      <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: "#5db97a" }} />
+                    ) : (
+                      <Circle className="w-5 h-5 flex-shrink-0" style={{ color: "rgba(200,165,107,0.25)" }} />
+                    )}
+                    <p
+                      className="flex-1 text-sm"
+                      style={{
+                        color: missao.concluida ? "rgba(247,242,236,0.35)" : "rgba(247,242,236,0.75)",
+                        textDecoration: missao.concluida ? "line-through" : "none",
+                      }}
+                    >
+                      {missao.titulo}
+                    </p>
+                    <span
+                      className="text-[11px] font-bold flex-shrink-0"
+                      style={{ color: missao.concluida ? "rgba(93,185,122,0.5)" : "rgba(200,165,107,0.6)" }}
+                    >
+                      +{missao.xpRecompensa} XP
+                    </span>
+                  </div>
+                ))}
+          </div>
+
+          <button
+            onClick={() => navigate("/missoes")}
+            className="w-full mt-3 py-2.5 rounded-2xl flex items-center justify-center gap-2 text-sm font-semibold transition-all"
+            style={{
+              background: "rgba(200,165,107,0.07)",
+              border: "1px solid rgba(200,165,107,0.15)",
+              color: "#c8a56b",
+            }}
+          >
+            Ver todas as missões
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* ── QUICK ACTIONS ──────────────────────────────── */}
+        <div className="mb-6">
+          <p className="text-xs font-semibold tracking-wider uppercase mb-3" style={{ color: "rgba(200,165,107,0.5)" }}>
             Explorar
           </p>
-          <div className="grid sm:grid-cols-3 gap-4">
-            {[
-              {
-                icon: Target,
-                titulo: "Roda da Vida",
-                descricao: "Avalie as 12 áreas e veja um diagnóstico personalizado por área.",
-                href: ultimaAvaliacao ? "/avaliacao?novo=true" : "/avaliacao",
-                badge: ultimaAvaliacao ? `Média ${media?.toFixed(1)}` : "Começar",
-                badgeColor: nivel?.cor || "#9c7742",
-              },
-              {
-                icon: BookOpen,
-                titulo: "Numerologia",
-                descricao: "Descubra as energias numerológicas que guiam sua jornada pessoal.",
-                href: "/numerologia",
-                badge: `Ano ${new Date().getFullYear()}`,
-                badgeColor: "#c8a56b",
-              },
-              {
-                icon: TrendingUp,
-                titulo: "Histórico",
-                descricao: "Acompanhe sua evolução e compare avaliações ao longo do tempo.",
-                href: "/historico",
-                badge: totalAvaliacoes > 0 ? `${totalAvaliacoes} ${totalAvaliacoes === 1 ? "avaliação" : "avaliações"}` : "Em breve",
-                badgeColor: "#9c7742",
-              },
-            ].map(({ icon: Icon, titulo, descricao, href, badge, badgeColor }) => (
-              <button key={href} onClick={() => navigate(href)}
-                className="luxury-card-strong p-6 text-left group hover:border-brand-gold/50 transition-all hover:shadow-xl hover:-translate-y-0.5">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center"
-                    style={{ background: "rgba(200,165,107,0.1)", border: "1px solid rgba(200,165,107,0.18)" }}>
-                    <Icon className="w-5 h-5 text-brand-bronze" />
-                  </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                    style={{ background: badgeColor + "18", color: badgeColor }}>
-                    {badge}
-                  </span>
+          <div className="grid grid-cols-2 gap-3">
+            {QUICK_ACTIONS.map(({ label, sub, icon: Icon, href, gold }) => (
+              <button
+                key={href}
+                onClick={() => navigate(href)}
+                className="rounded-2xl p-4 text-left transition-all active:scale-95"
+                style={{
+                  background: gold
+                    ? "linear-gradient(135deg, rgba(200,165,107,0.18) 0%, rgba(156,119,66,0.1) 100%)"
+                    : "rgba(255,255,255,0.03)",
+                  border: gold ? "1px solid rgba(200,165,107,0.35)" : "1px solid rgba(200,165,107,0.1)",
+                  boxShadow: gold ? "0 4px 16px rgba(200,165,107,0.08)" : "none",
+                }}
+              >
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
+                  style={{
+                    background: gold ? "rgba(200,165,107,0.2)" : "rgba(200,165,107,0.08)",
+                  }}
+                >
+                  <Icon className="w-4 h-4" style={{ color: "#c8a56b" }} />
                 </div>
-                <h3 className="font-tan-mon-cheri text-lg text-brand-dark mb-1.5">{titulo}</h3>
-                <p className="text-brand-medium text-xs leading-relaxed">{descricao}</p>
-                <div className="flex items-center gap-1 mt-4 text-xs font-semibold text-brand-bronze group-hover:gap-2 transition-all">
-                  Acessar <ChevronRight className="w-3.5 h-3.5" />
-                </div>
+                <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>{label}</p>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(247,242,236,0.35)" }}>{sub}</p>
               </button>
             ))}
           </div>
         </div>
+
+        {/* ── JOURNEY PROGRESS SUMMARY ────────────────────── */}
+        {progresso && (
+          <button
+            onClick={() => navigate("/jornada")}
+            className="w-full rounded-2xl p-4 mb-4 flex items-center gap-4 transition-all"
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(200,165,107,0.1)",
+            }}
+          >
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: "rgba(200,165,107,0.08)" }}
+            >
+              <Map className="w-5 h-5" style={{ color: "#c8a56b" }} />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>Sua Jornada</p>
+              <p className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
+                {[progresso.jornada.traco, progresso.jornada.roda, progresso.jornada.numerologia].filter(Boolean).length} de 3 etapas concluídas
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(200,165,107,0.35)" }} />
+          </button>
+        )}
 
       </div>
     </div>

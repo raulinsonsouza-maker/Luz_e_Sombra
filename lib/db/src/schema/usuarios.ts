@@ -57,6 +57,29 @@ export const analiseTracoTable = pgTable("analise_traco", {
   usuarioIdIdx: index("idx_analise_traco_usuario_id").on(table.usuarioId),
 }));
 
+export const gamificacaoTable = pgTable("gamificacao", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().unique().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  xp: integer("xp").notNull().default(0),
+  nivel: integer("nivel").notNull().default(1),
+  streakDias: integer("streak_dias").notNull().default(0),
+  melhorStreak: integer("melhor_streak").notNull().default(0),
+  ultimoAcessoEm: text("ultimo_acesso_em"),
+  atualizadoEm: timestamp("atualizado_em").notNull().defaultNow(),
+});
+
+export const missoesDiariasTable = pgTable("missoes_diarias", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  titulo: text("titulo").notNull(),
+  xpRecompensa: integer("xp_recompensa").notNull(),
+  concluidaEm: timestamp("concluida_em"),
+  dataReferencia: text("data_referencia").notNull(),
+  criadaEm: timestamp("criada_em").notNull().defaultNow(),
+}, (table) => ({
+  usuarioDataIdx: index("idx_missoes_usuario_data").on(table.usuarioId, table.dataReferencia),
+}));
+
 export const insertUsuarioSchema = createInsertSchema(usuariosTable).omit({ id: true, criadoEm: true, atualizadoEm: true });
 export const insertAvaliacaoSchema = createInsertSchema(avaliacoesTable).omit({ id: true, criadaEm: true });
 
@@ -66,3 +89,5 @@ export type InsertAvaliacao = z.infer<typeof insertAvaliacaoSchema>;
 export type Avaliacao = typeof avaliacoesTable.$inferSelect;
 export type FotoTraco = typeof fotosTracoTable.$inferSelect;
 export type AnaliseTraco = typeof analiseTracoTable.$inferSelect;
+export type Gamificacao = typeof gamificacaoTable.$inferSelect;
+export type MissaoDiaria = typeof missoesDiariasTable.$inferSelect;

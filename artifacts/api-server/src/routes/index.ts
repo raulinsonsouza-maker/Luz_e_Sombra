@@ -4,6 +4,7 @@ import authRouter from "./auth";
 import avaliacoesRouter from "./avaliacoes";
 import usuariosRouter from "./usuarios";
 import tracoRouter from "./traco";
+import gamificacaoRouter from "./gamificacao";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use("/auth", authRouter);
 router.use("/avaliacoes", avaliacoesRouter);
 router.use("/usuarios", usuariosRouter);
 router.use("/traco", tracoRouter);
+router.use("/gamificacao", gamificacaoRouter);
 
 export default router;

@@ -1,6 +1,7 @@
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import SiteHeader from "@/components/SiteHeader";
+import BottomNav from "@/components/BottomNav";
 import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import AdminLoginPage from "@/pages/AdminLoginPage";
@@ -12,16 +13,18 @@ import NumerologiaPage from "@/pages/NumerologiaPage";
 import AdminPage from "@/pages/AdminPage";
 import MeuPerfilPage from "@/pages/MeuPerfilPage";
 import TracodeCaraterPage from "@/pages/TracodeCaraterPage";
+import JornadaPage from "@/pages/JornadaPage";
+import MissoesPage from "@/pages/MissoesPage";
 
 function ProtectedRoute({ component: Component, adminOnly = false }: { component: React.ComponentType; adminOnly?: boolean }) {
   const { user, status } = useAuth();
   if (status === "loading") {
     return (
-      <div className="luxury-shell flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-bronze"></div>
-          <p className="mt-4 text-brand-medium">Carregando...</p>
-        </div>
+      <div
+        className="flex items-center justify-center min-h-screen"
+        style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
+      >
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-brand-gold border-t-transparent" />
       </div>
     );
   }
@@ -40,6 +43,12 @@ function Router() {
         <Route path="/admin/login" component={AdminLoginPage} />
         <Route path="/dashboard">
           <ProtectedRoute component={HomePage} />
+        </Route>
+        <Route path="/jornada">
+          <ProtectedRoute component={JornadaPage} />
+        </Route>
+        <Route path="/missoes">
+          <ProtectedRoute component={MissoesPage} />
         </Route>
         <Route path="/avaliacao">
           <ProtectedRoute component={AvaliacaoPage} />
@@ -66,6 +75,7 @@ function Router() {
           <Redirect to="/" />
         </Route>
       </Switch>
+      <BottomNav />
     </>
   );
 }
