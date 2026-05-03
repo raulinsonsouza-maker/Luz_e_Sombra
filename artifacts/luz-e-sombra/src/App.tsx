@@ -14,6 +14,7 @@ import AdminPage from "@/pages/AdminPage";
 import MeuPerfilPage from "@/pages/MeuPerfilPage";
 import TracodeCaraterPage from "@/pages/TracodeCaraterPage";
 import DiagnosticoEmocionalPage from "@/pages/DiagnosticoEmocionalPage";
+import TemperamentoPage from "@/pages/TemperamentoPage";
 import JornadaPage from "@/pages/JornadaPage";
 import MissoesPage from "@/pages/MissoesPage";
 import ComunidadePage from "@/pages/ComunidadePage";
@@ -79,6 +80,9 @@ function Router() {
         </Route>
         <Route path="/traco-de-carater">
           <ProtectedRoute component={TracodeCaraterPage} />
+        </Route>
+        <Route path="/temperamento">
+          <ProtectedRoute component={TemperamentoPage} />
         </Route>
         <Route path="/comunidade">
           <ProtectedRoute component={ComunidadePage} />

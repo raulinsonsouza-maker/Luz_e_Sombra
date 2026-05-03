@@ -75,6 +75,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@workspace/temperamento-v1": "workspace:*",
     "@workspace/traco-diagnostico-emocional": "workspace:*",
     "@workspace/traco-diagnostico-fusion": "workspace:*",
     "@workspace/traco-eixos-multimodal": "workspace:*",

@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { CheckCircle2, Lock, ChevronRight, Layers, Target, Hash, Brain, Wallet, Sparkles, Heart } from "lucide-react";
+import { CheckCircle2, Lock, ChevronRight, Layers, Target, Hash, Brain, Wallet, Sparkles, Heart, FlaskConical } from "lucide-react";
 
 interface Progresso {
   jornada: {
     traco: boolean;
+    temperamento?: boolean;
     roda: boolean;
     numerologia: boolean;
   };
@@ -22,16 +23,16 @@ interface Etapa {
   icon: React.ElementType;
   href?: string;
   xpRecompensa: number;
-  key: "traco" | "roda" | "numerologia" | null;
+  key: "traco" | "temperamento" | "roda" | "numerologia" | null;
 }
 
 const ETAPAS: Etapa[] = [
   {
     num: "01",
     titulo: "Traço de Caráter",
-    subtitulo: "20 reflexões + fotos (2 passos)",
+    subtitulo: "Fotos + reflexão opcional (diagnóstico emocional)",
     descricao:
-      "Primeiro respondes a 20 reflexões sobre o teu jeito de sentir e agir; depois envias as fotos. O sistema cruza as duas partes para uma leitura mais firme do teu Traço de Caráter.",
+      "Envias fotos para análise do traço; podes completar o diagnóstico emocional (30 itens) para cruzar com a leitura visual. Tudo opcional à excepção das fotos para a análise principal.",
     icon: Layers,
     href: "/traco-de-carater",
     xpRecompensa: 100,
@@ -39,6 +40,17 @@ const ETAPAS: Etapa[] = [
   },
   {
     num: "02",
+    titulo: "Análise de temperamento",
+    subtitulo: "40 afirmações · modelo dos quatro temperamentos",
+    descricao:
+      "Questionário calibrado em cinco dimensões comportamentais; o resultado projeta o teu perfil nos temperamentos clássicos, sem autoetiquetas — só padrões medidos.",
+    icon: FlaskConical,
+    href: "/temperamento",
+    xpRecompensa: 60,
+    key: "temperamento",
+  },
+  {
+    num: "03",
     titulo: "Roda da Vida",
     subtitulo: "Mapeie as áreas da sua vida com honestidade",
     descricao: "Um olhar amoroso sobre 12 dimensões da sua vida. Sem julgamento — apenas clareza de onde você está e para onde quer ir.",
@@ -48,7 +60,7 @@ const ETAPAS: Etapa[] = [
     key: "roda",
   },
   {
-    num: "03",
+    num: "04",
     titulo: "Numerologia",
     subtitulo: "Os números que contam a sua história",
     descricao: "Descubra o que seu número de vida, expressão e alma revelam sobre sua missão e seus ciclos de crescimento.",
@@ -58,7 +70,7 @@ const ETAPAS: Etapa[] = [
     key: "numerologia",
   },
   {
-    num: "04",
+    num: "05",
     titulo: "Módulo Emocional",
     subtitulo: "Inteligência emocional profunda",
     descricao: "Trabalhe seus padrões emocionais, gatilhos e desenvolva regulação interna.",
@@ -68,7 +80,7 @@ const ETAPAS: Etapa[] = [
     key: null,
   },
   {
-    num: "05",
+    num: "06",
     titulo: "Módulo Mental",
     subtitulo: "Reprogramação de crenças",
     descricao: "Identifique e transforme os padrões mentais que limitam seu crescimento.",
@@ -78,7 +90,7 @@ const ETAPAS: Etapa[] = [
     key: null,
   },
   {
-    num: "06",
+    num: "07",
     titulo: "Módulo Financeiro",
     subtitulo: "Consciência e abundância",
     descricao: "Explore sua relação com dinheiro e construa uma mentalidade de prosperidade.",
@@ -88,7 +100,7 @@ const ETAPAS: Etapa[] = [
     key: null,
   },
   {
-    num: "07",
+    num: "08",
     titulo: "Módulo Espiritual",
     subtitulo: "Conexão com seu propósito maior",
     descricao: "Integre todas as dimensões do ser e viva alinhado com sua essência mais profunda.",
@@ -103,17 +115,25 @@ function getStatus(etapa: Etapa, progresso: Progresso | null, index: number): "d
   if (!progresso) return index === 0 ? "active" : "locked";
 
   if (etapa.key === "traco") return progresso.jornada.traco ? "done" : "active";
+  if (etapa.key === "temperamento") {
+    if (progresso.jornada.temperamento === true) return "done";
+    return progresso.jornada.traco ? "active" : "locked";
+  }
   if (etapa.key === "roda") {
     if (progresso.jornada.roda) return "done";
-    return progresso.jornada.traco ? "active" : "locked";
+    return progresso.jornada.traco && progresso.jornada.temperamento === true ? "active" : "locked";
   }
   if (etapa.key === "numerologia") {
     if (progresso.jornada.numerologia) return "done";
     return progresso.jornada.roda ? "active" : "locked";
   }
 
-  const firstThreeDone = progresso.jornada.traco && progresso.jornada.roda && progresso.jornada.numerologia;
-  if (index === 3) return firstThreeDone ? "active" : "locked";
+  const firstCoreDone =
+    progresso.jornada.traco &&
+    progresso.jornada.temperamento === true &&
+    progresso.jornada.roda &&
+    progresso.jornada.numerologia;
+  if (index === 4) return firstCoreDone ? "active" : "locked";
   return "locked";
 }
 
@@ -138,7 +158,12 @@ export default function JornadaPage() {
   }
 
   const concluidas = progresso
-    ? [progresso.jornada.traco, progresso.jornada.roda, progresso.jornada.numerologia].filter(Boolean).length
+    ? [
+        progresso.jornada.traco,
+        progresso.jornada.temperamento === true,
+        progresso.jornada.roda,
+        progresso.jornada.numerologia,
+      ].filter(Boolean).length
     : 0;
 
   return (

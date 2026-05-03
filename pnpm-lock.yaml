@@ -175,6 +175,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../lib/db
+      '@workspace/temperamento-v1':
+        specifier: workspace:*
+        version: link:../../lib/temperamento-v1
       '@workspace/traco-diagnostico-emocional':
         specifier: workspace:*
         version: link:../../lib/traco-diagnostico-emocional
@@ -254,6 +257,9 @@ importers:
 
   artifacts/luz-e-sombra:
     dependencies:
+      '@workspace/temperamento-v1':
+        specifier: workspace:*
+        version: link:../../lib/temperamento-v1
       '@workspace/traco-diagnostico-emocional':
         specifier: workspace:*
         version: link:../../lib/traco-diagnostico-emocional
@@ -697,6 +703,22 @@ importers:
       p-retry:
         specifier: ^7.1.1
         version: 7.1.1
+
+  lib/temperamento-v1:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
+      typescript:
+        specifier: ~5.9.2
+        version: 5.9.3
 
   lib/traco-diagnostico-emocional:
     dependencies:

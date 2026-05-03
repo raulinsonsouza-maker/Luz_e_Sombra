@@ -41,7 +41,7 @@ interface Progresso {
   streakDias: number;
   melhorStreak: number;
   missoes: Missao[];
-  jornada: { traco: boolean; roda: boolean; numerologia: boolean };
+  jornada: { traco: boolean; temperamento?: boolean; roda: boolean; numerologia: boolean };
 }
 
 const AREAS = [
@@ -466,7 +466,7 @@ export default function HomePage() {
             <div className="flex-1 text-left">
               <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>Sua Jornada</p>
               <p className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
-                {[progresso.jornada.traco, progresso.jornada.roda, progresso.jornada.numerologia].filter(Boolean).length} de 3 etapas concluídas
+                {[progresso.jornada.traco, progresso.jornada.temperamento === true, progresso.jornada.roda, progresso.jornada.numerologia].filter(Boolean).length} de 4 etapas concluídas
               </p>
             </div>
             <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(200,165,107,0.35)" }} />

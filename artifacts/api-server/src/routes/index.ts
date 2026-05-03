@@ -9,6 +9,7 @@ import comunidadeRouter from "./comunidade";
 import cursosRouter from "./cursos";
 import notificacoesRouter from "./notificacoes";
 import diagnosticoEmocionalRouter from "./diagnosticoEmocional";
+import temperamentoRouter from "./temperamento";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use("/comunidade", comunidadeRouter);
 router.use("/cursos", cursosRouter);
 router.use("/notificacoes", notificacoesRouter);
 router.use("/diagnostico-emocional", diagnosticoEmocionalRouter);
+router.use("/temperamento", temperamentoRouter);
 
 export default router;

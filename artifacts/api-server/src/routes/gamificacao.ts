@@ -5,6 +5,7 @@ import {
   missoesDiariasTable,
   avaliacoesTable,
   analiseTracoTable,
+  analiseTemperamento40Table,
   usuariosTable,
 } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -119,6 +120,12 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
       .where(eq(analiseTracoTable.usuarioId, userId))
       .limit(1);
 
+    const [temperamento] = await db
+      .select({ id: analiseTemperamento40Table.id })
+      .from(analiseTemperamento40Table)
+      .where(eq(analiseTemperamento40Table.usuarioId, userId))
+      .limit(1);
+
     const [avaliacao] = await db
       .select({ id: avaliacoesTable.id })
       .from(avaliacoesTable)
@@ -148,6 +155,7 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
       })),
       jornada: {
         traco: !!analise,
+        temperamento: !!temperamento,
         roda: !!avaliacao,
         numerologia: !!(usuario?.dataNascimento),
       },
