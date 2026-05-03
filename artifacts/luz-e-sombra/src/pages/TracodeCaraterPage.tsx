@@ -4,9 +4,15 @@ import { useAuth } from "@/context/AuthContext";
 import { Upload, X, Camera, User, ArrowRight, Loader2, RefreshCw, ChevronDown, ChevronUp, AlertCircle, ImageIcon, Plus, Users, Trash2 } from "lucide-react";
 import { analyzeTracoDeCarater } from "@/lib/tracoAnalysis";
 import type { ModeloMultimodalOutput } from "@workspace/traco-eixos-multimodal";
+import {
+  computarDiagnostico30,
+  entradaDiagnostico30Schema,
+} from "@workspace/traco-diagnostico-emocional";
+import { diagnosticoEmocionalFusaoSchema } from "@workspace/traco-diagnostico-fusion";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const STORAGE_Q20 = "luz_questionario_20_respostas";
+const STORAGE_DIAGNOSTICO_30 = "luz_diagnostico_emocional_30_v1";
 
 function readQuestionario20Respostas(): number[] | undefined {
   try {
@@ -22,6 +28,24 @@ function readQuestionario20Respostas(): number[] | undefined {
 }
 
 /** Payload opcional para fusão na API; preenchido pelo módulo de diagnóstico quando existir (ou testes via localStorage). */
+/** Diagnóstico emocional 30 (local ou recompute a partir das respostas). */
+function readDiagnosticoEmocional30Fusao(): Record<string, unknown> | undefined {
+  try {
+    const raw = localStorage.getItem(STORAGE_DIAGNOSTICO_30);
+    if (!raw?.trim()) return undefined;
+    const o = JSON.parse(raw) as { resultado?: unknown; respostas?: unknown };
+    if (o?.resultado) {
+      const v = diagnosticoEmocionalFusaoSchema.safeParse(o.resultado);
+      if (v.success) return v.data as unknown as Record<string, unknown>;
+    }
+    const ent = entradaDiagnostico30Schema.safeParse(o.respostas ?? o);
+    if (!ent.success) return undefined;
+    return computarDiagnostico30(ent.data).diagnosticoEmocional as unknown as Record<string, unknown>;
+  } catch {
+    return undefined;
+  }
+}
+
 function readOptionalDiagnosticoFusao(): Record<string, unknown> | undefined {
   try {
     const raw = localStorage.getItem("luz_diagnostico_emocional_fusao");
@@ -405,13 +429,16 @@ export default function TracodeCaraterPage() {
 
       // Save computed result to backend
       const q20 = readQuestionario20Respostas();
-      const optionalDiag = readOptionalDiagnosticoFusao();
+      const optionalDiagLegado = readOptionalDiagnosticoFusao();
+      const diagnostico30 = readDiagnosticoEmocional30Fusao();
+      const diagnosticoEmocionalPayload =
+        diagnostico30 ?? (optionalDiagLegado && !q20 ? optionalDiagLegado : undefined);
       const saveRes = await apiFetch("/traco/analisar", {
         method: "POST",
         body: JSON.stringify({
           resultado,
           pessoaId: selectedPessoaId,
-          ...(optionalDiag && !q20 ? { diagnosticoEmocional: optionalDiag } : {}),
+          ...(diagnosticoEmocionalPayload ? { diagnosticoEmocional: diagnosticoEmocionalPayload } : {}),
           ...(q20 ? { questionario20: q20 } : {}),
         }),
       });

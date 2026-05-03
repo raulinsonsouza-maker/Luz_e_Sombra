@@ -8,6 +8,7 @@ import gamificacaoRouter from "./gamificacao";
 import comunidadeRouter from "./comunidade";
 import cursosRouter from "./cursos";
 import notificacoesRouter from "./notificacoes";
+import diagnosticoEmocionalRouter from "./diagnosticoEmocional";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use("/gamificacao", gamificacaoRouter);
 router.use("/comunidade", comunidadeRouter);
 router.use("/cursos", cursosRouter);
 router.use("/notificacoes", notificacoesRouter);
+router.use("/diagnostico-emocional", diagnosticoEmocionalRouter);
 
 export default router;

@@ -355,12 +355,9 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
       }
     }
 
-    // Fusão legada (5 padrões internos): só quando não há questionário de 20 — evita dupla alteração de estruturas.
-    if (
-      diagnosticoEmocional !== undefined &&
-      diagnosticoEmocional !== null &&
-      !q20Parsed?.success
-    ) {
+    // Diagnóstico emocional (30 itens → 5 padrões): funde com **sempre** as estruturas só-fotos.
+    // Corre mesmo com questionario20 + modeloMultimodal, para o resultado final (estruturas %) refletir o declarado.
+    if (diagnosticoEmocional !== undefined && diagnosticoEmocional !== null) {
       const diagParsed = diagnosticoEmocionalFusaoSchema.safeParse(diagnosticoEmocional);
       if (!diagParsed.success) {
         const msg = diagParsed.error.issues.map((issue) => issue.message).join(" ");

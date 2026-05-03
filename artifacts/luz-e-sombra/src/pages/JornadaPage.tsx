@@ -63,7 +63,7 @@ const ETAPAS: Etapa[] = [
     subtitulo: "Inteligência emocional profunda",
     descricao: "Trabalhe seus padrões emocionais, gatilhos e desenvolva regulação interna.",
     icon: Heart,
-    href: "/quem-sou-eu",
+    href: "/diagnostico-emocional",
     xpRecompensa: 80,
     key: null,
   },

@@ -72,6 +72,18 @@ export const analiseTracoTable = pgTable("analise_traco", {
   usuarioIdIdx: index("idx_analise_traco_usuario_id").on(table.usuarioId),
 }));
 
+/** Respostas + agregado do Diagnóstico Emocional (30 itens, v1). */
+export const diagnosticoEmocional30Table = pgTable("diagnostico_emocional_30", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  respostas: jsonb("respostas").notNull(),
+  resultado: jsonb("resultado").notNull(),
+  versao: text("versao").notNull().default("diagnostico30_v1"),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  usuarioIdx: index("idx_diagnostico_emocional_30_usuario").on(table.usuarioId),
+}));
+
 export const gamificacaoTable = pgTable("gamificacao", {
   id: serial("id").primaryKey(),
   usuarioId: integer("usuario_id").notNull().unique().references(() => usuariosTable.id, { onDelete: "cascade" }),

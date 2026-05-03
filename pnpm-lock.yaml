@@ -175,6 +175,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../lib/db
+      '@workspace/traco-diagnostico-emocional':
+        specifier: workspace:*
+        version: link:../../lib/traco-diagnostico-emocional
       '@workspace/traco-diagnostico-fusion':
         specifier: workspace:*
         version: link:../../lib/traco-diagnostico-fusion
@@ -254,6 +257,12 @@ importers:
 
   artifacts/luz-e-sombra:
     dependencies:
+      '@workspace/traco-diagnostico-emocional':
+        specifier: workspace:*
+        version: link:../../lib/traco-diagnostico-emocional
+      '@workspace/traco-diagnostico-fusion':
+        specifier: workspace:*
+        version: link:../../lib/traco-diagnostico-fusion
       '@workspace/traco-eixos-multimodal':
         specifier: workspace:*
         version: link:../../lib/traco-eixos-multimodal
@@ -691,6 +700,22 @@ importers:
       p-retry:
         specifier: ^7.1.1
         version: 7.1.1
+
+  lib/traco-diagnostico-emocional:
+    dependencies:
+      '@workspace/traco-diagnostico-fusion':
+        specifier: workspace:*
+        version: link:../traco-diagnostico-fusion
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: ~5.9.2
+        version: 5.9.3
 
   lib/traco-diagnostico-fusion:
     dependencies:

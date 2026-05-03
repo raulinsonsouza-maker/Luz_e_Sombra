@@ -14,6 +14,7 @@ import AdminPage from "@/pages/AdminPage";
 import MeuPerfilPage from "@/pages/MeuPerfilPage";
 import TracodeCaraterPage from "@/pages/TracodeCaraterPage";
 import DiagnosticoEixosPage from "@/pages/DiagnosticoEixosPage";
+import DiagnosticoEmocionalPage from "@/pages/DiagnosticoEmocionalPage";
 import JornadaPage from "@/pages/JornadaPage";
 import MissoesPage from "@/pages/MissoesPage";
 import ComunidadePage from "@/pages/ComunidadePage";
@@ -76,6 +77,9 @@ function Router() {
         </Route>
         <Route path="/diagnostico-eixos">
           <ProtectedRoute component={DiagnosticoEixosPage} />
+        </Route>
+        <Route path="/diagnostico-emocional">
+          <ProtectedRoute component={DiagnosticoEmocionalPage} />
         </Route>
         <Route path="/traco-de-carater">
           <ProtectedRoute component={TracodeCaraterPage} />
