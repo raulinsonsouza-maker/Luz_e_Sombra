@@ -1,5 +1,5 @@
 /**
- * Traço de Caráter — Biomechanical Analysis Engine v2
+ * Traço de Caráter — Biomechanical Analysis Engine (hybrid v4)
  *
  * Runs entirely in the browser via Canvas API.
  * Zero external API calls, zero AI credits.
@@ -416,16 +416,21 @@ function measurePhoto(d: PixelData, tipo: TipoFoto): Metrics {
   const wsr = waistW / safeShould;
   const ulr = upperMass / safeLow;
 
-  // Head proportions (meaningful on rosto, approximate on corpo)
+  // Largura na região da cabeça (rosto) — usada em headRelW e em deteção de rosto
   const headBands = widthAtBand(0.0, 0.15);
+
+  // Head proportions (meaningful on rosto, approximate on corpo)
   const headRelW  = safeShould > 0 ? headBands / safeShould : 0;
   const headRelH  = tipo === "rosto" ? 0.8 : 0.15;
 
   const forwardLean    = computeForwardLean();
   const chestProjection = tipo === "corpo-lado" ? Math.max(0, chestW - hipW) : 0;
 
-  // Body detected?
-  const bodyDetected = bodyPct > 0.04 && (shoulderW > 0.05 || chestW > 0.05);
+  // Corpo/rosto detectado: no rosto os “ombros” em banda são o meio do rosto — critério próprio
+  const bodyDetected =
+    tipo === "rosto"
+      ? bodyPct > 0.055 && (headBands > 0.045 || shoulderW > 0.04 || chestW > 0.04)
+      : bodyPct > 0.04 && (shoulderW > 0.05 || chestW > 0.05);
 
   // Confidence: higher with more photos, good contrast, body detected
   const contrast = contrastScore();
@@ -458,6 +463,12 @@ interface EvidencePiece {
   reason: string;     // debugging / transparency
 }
 
+function meanSlice(arr: number[], start: number, end: number): number {
+  if (end <= start || start >= arr.length) return 0;
+  const slice = arr.slice(start, Math.min(end, arr.length));
+  return slice.length ? mean(slice) : 0;
+}
+
 function collectEvidence(metrics: Metrics[]): EvidencePiece[] {
   const ev: EvidencePiece[] = [];
   const front = metrics.find(m => m.tipo === "corpo-frente");
@@ -467,7 +478,23 @@ function collectEvidence(metrics: Metrics[]): EvidencePiece[] {
   // ── FRONT VIEW ─────────────────────────────────────────────────────────────
   if (front && front.bodyDetected) {
     const { shr, whr, wsr, ulr, symm, symmQ, bodyPct, confidence,
-            shoulderW, hipW, chestW, waistW, edgeDensityBody } = front;
+            shoulderW, hipW, chestW, waistW, edgeDensityBody, widthBands } = front;
+
+    // Silhueta vertical (20 bandas): V (psicópata), pera (masoquista), coluna (rígido)
+    if (widthBands.length >= 16) {
+      const upperTorso = meanSlice(widthBands, 3, 9);
+      const waistBand = meanSlice(widthBands, 8, 13);
+      const hipBand = meanSlice(widthBands, 11, 17);
+      const taper = upperTorso / (waistBand + 0.012);
+      const hipFlare = hipBand / (upperTorso + 0.012);
+      if (taper > 1.26) ev.push({ structure: "psicopata", score: 12, confidence, reason: "Silhueta em V (torso vs cintura)" });
+      else if (taper > 1.12) ev.push({ structure: "psicopata", score: 7, confidence, reason: "Ombros/cintura em V suave" });
+      if (hipFlare > 1.14 && taper < 0.96) ev.push({ structure: "masoquista", score: 11, confidence, reason: "Volume em quadril vs tronco" });
+      else if (hipFlare > 1.07 && taper < 1.02) ev.push({ structure: "masoquista", score: 6, confidence, reason: "Quadril relativamente largo" });
+      if (taper >= 0.92 && taper <= 1.1 && hipFlare >= 0.9 && hipFlare <= 1.1) {
+        ev.push({ structure: "rigido", score: 5, confidence, reason: "Proporções verticais equilibradas" });
+      }
+    }
 
     // PSICOPATA — inverted triangle, upper-heavy
     if (shr > 1.45) ev.push({ structure: "psicopata", score: 14, confidence, reason: "SHR very high" });
@@ -608,8 +635,10 @@ function scoreFromEvidence(evidence: EvidencePiece[]): EstruturasPct {
     raw[e.structure] += e.score * clamp(e.confidence, 0.05, 1);
   }
 
+  /** Evitar achatamento: o antigo "+8 em todas" empurrava todos os perfis para ~20%. */
+  const EPS = 0.06;
   for (const k of Object.keys(raw) as (keyof EstruturasPct)[]) {
-    raw[k] = Math.max(0.1, raw[k] + 8);
+    raw[k] = Math.max(EPS, raw[k]);
   }
 
   const total = Object.values(raw).reduce((s, v) => s + v, 0);
@@ -636,12 +665,13 @@ function scoreFromContinuousFeatures(metrics: Metrics[]): Record<keyof Estrutura
   const front = metrics.find((m) => m.tipo === "corpo-frente");
   const side = metrics.find((m) => m.tipo === "corpo-lado");
   const face = metrics.find((m) => m.tipo === "rosto");
+  /** Base baixa: a antiga 0.15×5 igualava demasiado o ramo contínuo antes da normalização. */
   const scores: Record<keyof EstruturasPct, number> = {
-    esquizoide: 0.15,
-    oral: 0.15,
-    psicopata: 0.15,
-    masoquista: 0.15,
-    rigido: 0.15,
+    esquizoide: 0.02,
+    oral: 0.02,
+    psicopata: 0.02,
+    masoquista: 0.02,
+    rigido: 0.02,
   };
 
   if (front) {
@@ -698,7 +728,12 @@ function mergeScores(
   };
 
   const coverageWeight = clamp(metrics.length / 3, 0.45, 1);
-  const continuousWeight = 0.58 * coverageWeight;
+  const evVals = Object.values(evidencePct);
+  const evMean = evVals.reduce((s, v) => s + v, 0) / 5;
+  const evSpread = evVals.reduce((s, v) => s + (v - evMean) ** 2, 0) / 5;
+  /** Se a parte por evidências ficou demasiado uniforme, confia mais nas features contínuas. */
+  const spreadBoost = evSpread < 28 ? 0.14 : evSpread < 45 ? 0.06 : 0;
+  const continuousWeight = clamp(0.58 * coverageWeight + spreadBoost, 0.35, 0.82);
   const evidenceWeight = 1 - continuousWeight;
   const merged = {
     esquizoide: evidencePct.esquizoide * evidenceWeight + continuousPct.esquizoide * continuousWeight,
@@ -1324,7 +1359,7 @@ export async function analyzeTracoDeCarater(
     perfilUnico,
     dinamicaFuncional,
     metadata: {
-      analysisVersion: "traco-hybrid-v3",
+      analysisVersion: "traco-hybrid-v4",
       confidenceBreakdown,
       featureSummary,
     },
