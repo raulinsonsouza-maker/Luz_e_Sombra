@@ -4,6 +4,12 @@ import { db } from "@workspace/db";
 import { fotosTracoTable, analiseTracoTable, pessoasAnaliseTable } from "@workspace/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
+import {
+  aplicarFusaoTracoDiagnostico,
+  diagnosticoEmocionalFusaoSchema,
+  ESTRUTURAS_TRACO,
+  type EstruturaTraco,
+} from "@workspace/traco-diagnostico-fusion";
 
 const router = Router();
 const objectStorage = new ObjectStorageService();
@@ -37,6 +43,19 @@ function parsePessoaId(raw: unknown): number | null {
 function toSafeNumber(value: unknown, fallback = 0): number {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
+}
+
+function parseEstruturasTraco(raw: unknown): Record<EstruturaTraco, number> | null {
+  if (!raw || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  const out = {} as Record<EstruturaTraco, number>;
+  for (const k of ESTRUTURAS_TRACO) {
+    if (!(k in o)) return null;
+    const n = Number(o[k]);
+    if (!Number.isFinite(n)) return null;
+    out[k] = n;
+  }
+  return out;
 }
 
 function normalizeMetadata(raw: unknown, fallbackConfidence: number): AnalysisMetadata {
@@ -257,7 +276,11 @@ router.get("/fotos/:id/view", requireAuth, async (req: AuthRequest, res: Respons
 // ── POST /traco/analisar ───────────────────────────────────────────────────────
 router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const { resultado, pessoaId: pessoaIdRaw } = req.body as { resultado?: Record<string, unknown>; pessoaId?: unknown };
+    const { resultado, pessoaId: pessoaIdRaw, diagnosticoEmocional } = req.body as {
+      resultado?: Record<string, unknown>;
+      pessoaId?: unknown;
+      diagnosticoEmocional?: unknown;
+    };
 
     if (!resultado || typeof resultado !== "object") {
       return res.status(400).json({ error: "Resultado da análise não fornecido." });
@@ -268,16 +291,59 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
       return res.status(400).json({ error: "Resultado da análise incompleto ou inválido." });
     }
 
-    const est = r.estruturas as Record<string, number>;
-    const sum = Object.values(est).reduce((a: number, b) => a + Number(b), 0);
+    const estParsed = parseEstruturasTraco(r.estruturas);
+    if (!estParsed) {
+      return res.status(400).json({ error: "Estruturas inválidas: são necessários os cinco percentuais (esquizoide, oral, psicopata, masoquista, rigido)." });
+    }
+
+    const sum = Object.values(estParsed).reduce((a: number, b) => a + Number(b), 0);
     if (Math.abs(sum - 100) > 2) {
       return res.status(400).json({ error: "Percentagens inválidas: devem somar 100." });
     }
     const metadata = normalizeMetadata(r.metadata, toSafeNumber(r.confiancaAnalise, 50));
-    const resultadoComMetadata = {
-      ...r,
-      metadata,
-    };
+
+    const estruturasSomenteFotos = { ...estParsed };
+    let resultadoFusao = { ...r, metadata } as Record<string, unknown>;
+    resultadoFusao.estruturasSomenteFotos = { ...estruturasSomenteFotos };
+
+    if (diagnosticoEmocional !== undefined && diagnosticoEmocional !== null) {
+      const diagParsed = diagnosticoEmocionalFusaoSchema.safeParse(diagnosticoEmocional);
+      if (!diagParsed.success) {
+        const msg = diagParsed.error.issues.map((issue) => issue.message).join(" ");
+        return res.status(400).json({
+          error: "diagnosticoEmocional inválido.",
+          detalhes: msg || diagParsed.error.flatten(),
+        });
+      }
+
+      try {
+        const confFotos = toSafeNumber(r.confiancaAnalise, 50);
+        const fusao = aplicarFusaoTracoDiagnostico(estruturasSomenteFotos, diagParsed.data, confFotos);
+        resultadoFusao = {
+          ...resultadoFusao,
+          estruturas: fusao.estruturasFusionadas,
+          estruturaPrincipal: fusao.estruturaPrincipal,
+          estruturaSecundaria: fusao.estruturaSecundaria,
+          confiancaAnalise: fusao.confiancaAnaliseAjustada,
+          sinteseIntegradaFotosQuestionario: fusao.metadata.sinteseIntegrada,
+          fusaoDiagnosticoEmocional: {
+            versaoMatriz: fusao.metadata.versaoMatriz,
+            alinhamentoFotosFormulario: fusao.metadata.alinhamentoFotosFormulario,
+            assertividadeLeitura: fusao.metadata.assertividadeLeitura,
+            pesoFormulario: Math.round(fusao.metadata.pesoFormulario * 1000) / 1000,
+            padroesEmocionaisNormalizados: fusao.metadata.padroesEmocionaisNormalizados,
+            vetorFormularioEstruturas: fusao.metadata.vetorFormularioEstruturas,
+            sinaisConvergentes: fusao.metadata.sinaisConvergentes,
+            entradaDiagnostico: diagParsed.data,
+          },
+        };
+      } catch (fe: unknown) {
+        const msg = fe instanceof Error ? fe.message : "Erro na fusão fotos + questionário.";
+        return res.status(400).json({ error: msg });
+      }
+    }
+
+    const resultadoComMetadata = resultadoFusao;
 
     const pessoaId = parsePessoaId(pessoaIdRaw);
 

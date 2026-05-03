@@ -5,6 +5,19 @@ import { analyzeTracoDeCarater } from "@/lib/tracoAnalysis";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
+/** Payload opcional para fusão na API; preenchido pelo módulo de diagnóstico quando existir (ou testes via localStorage). */
+function readOptionalDiagnosticoFusao(): Record<string, unknown> | undefined {
+  try {
+    const raw = localStorage.getItem("luz_diagnostico_emocional_fusao");
+    if (!raw?.trim()) return undefined;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object") return undefined;
+    return parsed as Record<string, unknown>;
+  } catch {
+    return undefined;
+  }
+}
+
 function apiFetch(path: string, options?: RequestInit) {
   const token = localStorage.getItem("luz_e_sombra_token");
   return fetch(`${API_BASE}/api${path}`, {
@@ -53,6 +66,18 @@ interface DinamicaFuncional {
   sombra: string;
 }
 
+/** Metadados devolvidos pela API quando `diagnosticoEmocional` é enviado em `POST /traco/analisar`. */
+interface FusaoDiagnosticoEmocionalResposta {
+  versaoMatriz: string;
+  alinhamentoFotosFormulario: number;
+  assertividadeLeitura: number;
+  pesoFormulario: number;
+  padroesEmocionaisNormalizados: Record<string, number>;
+  vetorFormularioEstruturas: Record<string, number>;
+  sinaisConvergentes: string[];
+  entradaDiagnostico: unknown;
+}
+
 interface ResultadoAnalise {
   estruturas: EstruturasPct;
   estruturaPrincipal: keyof EstruturasPct;
@@ -72,6 +97,10 @@ interface ResultadoAnalise {
   recurso?: string;
   recomendacoesPraticas?: string[];
   confiancaAnalise?: number;
+  /** Snapshot das percentagens só pelas fotos, quando houve fusão com questionário. */
+  estruturasSomenteFotos?: EstruturasPct;
+  sinteseIntegradaFotosQuestionario?: string;
+  fusaoDiagnosticoEmocional?: FusaoDiagnosticoEmocionalResposta;
   perfilFisicoNarrado?: string;
   estiloComunicacao?: EstiloComunicacao;
   perfilUnico?: string;
@@ -344,9 +373,14 @@ export default function TracodeCaraterPage() {
       setAnalisandoEtapa("Gerando análise completa...");
 
       // Save computed result to backend
+      const optionalDiag = readOptionalDiagnosticoFusao();
       const saveRes = await apiFetch("/traco/analisar", {
         method: "POST",
-        body: JSON.stringify({ resultado, pessoaId: selectedPessoaId }),
+        body: JSON.stringify({
+          resultado,
+          pessoaId: selectedPessoaId,
+          ...(optionalDiag ? { diagnosticoEmocional: optionalDiag } : {}),
+        }),
       });
       if (!saveRes.ok) {
         const errData = await saveRes.json().catch(() => ({}));
@@ -976,6 +1010,66 @@ export default function TracodeCaraterPage() {
                       ))}
                     </div>
                   </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Leitura integrada (API: fotos + questionário) ── */}
+            {(resultado.sinteseIntegradaFotosQuestionario || resultado.fusaoDiagnosticoEmocional) && (
+              <div
+                className="rounded-2xl p-6"
+                style={{
+                  background: "linear-gradient(135deg, rgba(109,185,109,0.06) 0%, rgba(200,165,107,0.05) 100%)",
+                  border: "1px solid rgba(109,185,109,0.22)",
+                }}
+              >
+                <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(109,185,109,0.65)" }}>
+                  Leitura integrada
+                </p>
+                <h3 className="font-tan-mon-cheri text-base mb-3" style={{ color: "rgba(247,242,236,0.9)" }}>
+                  Fotos + diagnóstico emocional
+                </h3>
+                {resultado.sinteseIntegradaFotosQuestionario && (
+                  <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.72)" }}>
+                    {resultado.sinteseIntegradaFotosQuestionario}
+                  </p>
+                )}
+                {resultado.fusaoDiagnosticoEmocional && (
+                  <div className="flex flex-wrap gap-3 text-xs mb-4">
+                    <span
+                      className="px-3 py-1.5 rounded-full"
+                      style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(200,165,107,0.2)", color: "rgba(247,242,236,0.75)" }}
+                    >
+                      Alinhamento fotos / formulário:{" "}
+                      <strong>{resultado.fusaoDiagnosticoEmocional.alinhamentoFotosFormulario}%</strong>
+                    </span>
+                    <span
+                      className="px-3 py-1.5 rounded-full"
+                      style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(109,185,109,0.25)", color: "rgba(109,185,109,0.9)" }}
+                    >
+                      Assertividade da leitura:{" "}
+                      <strong>{resultado.fusaoDiagnosticoEmocional.assertividadeLeitura}%</strong>
+                    </span>
+                    <span
+                      className="px-3 py-1.5 rounded-full"
+                      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(247,242,236,0.5)" }}
+                    >
+                      Peso do formulário na fusão: {Math.round(resultado.fusaoDiagnosticoEmocional.pesoFormulario * 100)}%
+                    </span>
+                  </div>
+                )}
+                {resultado.fusaoDiagnosticoEmocional?.sinaisConvergentes &&
+                  resultado.fusaoDiagnosticoEmocional.sinaisConvergentes.length > 0 && (
+                    <ul className="list-disc pl-5 space-y-1.5 text-sm" style={{ color: "rgba(247,242,236,0.58)" }}>
+                      {resultado.fusaoDiagnosticoEmocional.sinaisConvergentes.map((s, i) => (
+                        <li key={i}>{s}</li>
+                      ))}
+                    </ul>
+                  )}
+                {resultado.estruturasSomenteFotos && (
+                  <p className="text-xs mt-4" style={{ color: "rgba(200,165,107,0.45)" }}>
+                    As barras abaixo refletem a leitura já integrada; o perfil só-fotos fica guardado nos dados para transparência.
+                  </p>
                 )}
               </div>
             )}

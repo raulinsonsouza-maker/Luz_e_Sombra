@@ -175,6 +175,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../lib/db
+      '@workspace/traco-diagnostico-fusion':
+        specifier: workspace:*
+        version: link:../../lib/traco-diagnostico-fusion
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -682,6 +685,19 @@ importers:
       p-retry:
         specifier: ^7.1.1
         version: 7.1.1
+
+  lib/traco-diagnostico-fusion:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: ~5.9.2
+        version: 5.9.3
 
   scripts:
     devDependencies:
