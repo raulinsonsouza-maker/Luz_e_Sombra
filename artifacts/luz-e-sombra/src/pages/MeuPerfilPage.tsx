@@ -5,7 +5,7 @@ import { apiFetch } from "@/lib/auth";
 import { profilePhotoViewResponseIsImageBody } from "@/lib/profilePhotoView";
 import {
   User, Calendar, Lock, CheckCircle, AlertCircle, Zap, Flame, Target,
-  Star, Camera, Loader2, Sparkles, ArrowRight, Edit2, X, Save, KeyRound,
+  Star, Camera, Loader2, Sparkles, ArrowRight, Edit2, X, Save, KeyRound, LogOut,
 } from "lucide-react";
 
 interface Progresso {
@@ -30,7 +30,7 @@ function formatarData(iso: string) {
 
 export default function MeuPerfilPage() {
   const [, navigate] = useLocation();
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
 
   // ── Edit mode ──────────────────────────────────────────────────────────────
   const [editando, setEditando] = useState(false);
@@ -172,6 +172,11 @@ export default function MeuPerfilPage() {
       }
     } catch { setErrorMsg("Erro de conexão. Tente novamente."); }
     setSaving(false);
+  }
+
+  function handleLogout() {
+    logout();
+    navigate("/login");
   }
 
   function showSuccess(msg: string) {
@@ -422,6 +427,18 @@ export default function MeuPerfilPage() {
                 <Edit2 className="w-3.5 h-3.5 ml-1" />
               </div>
             </div>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full rounded-2xl flex items-center justify-center gap-2 px-5 py-4 transition-all"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(220,38,38,0.25)", color: "#f87171" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(220,38,38,0.08)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="text-sm font-medium">Sair da conta</span>
+            </button>
           </div>
         )}
 

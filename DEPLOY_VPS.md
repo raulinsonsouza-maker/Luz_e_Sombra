@@ -369,7 +369,27 @@ No navegador:
 
 ---
 
-## 19) Como atualizar o sistema quando subir novo commit
+## 19) Produção: primeiro Git (push), depois a VPS
+
+**Regra fixa:** o que corre em produção vem **só** do repositório remoto (GitHub/GitLab, etc.). Alterações só na tua máquina **não** entram na VPS até estarem **commitadas e enviadas** (`git push`).
+
+### 19.1 Na tua máquina (sempre antes do deploy)
+
+1. Confirma o branch (normalmente `main`, o mesmo que a VPS faz `pull`).
+2. Envia o código para o remoto:
+
+```bash
+git status
+git add -A
+git commit -m "Descrição clara da alteração"
+git push origin main
+```
+
+(Substitui `main` pelo nome do branch de produção, se for outro.)
+
+Só depois disto faz sentido correr `git pull` na VPS ou o script `deploy-vps.sh`.
+
+### 19.2 Na VPS — atualizar quando já existir commit no remoto
 
 Dentro de `/opt/luzesombra`:
 
@@ -381,6 +401,12 @@ pnpm --filter @workspace/luz-e-sombra build
 pnpm --filter @workspace/api-server build
 systemctl restart luzesombra-api
 systemctl reload nginx
+```
+
+Ou, em vez da sequência manual acima, a partir da raiz do clone na VPS:
+
+```bash
+sudo bash scripts/deploy-vps.sh
 ```
 
 ---

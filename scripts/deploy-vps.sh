@@ -2,6 +2,11 @@
 #
 # Atualiza LuzeSombra na VPS: pull, dependências, schema (opcional), build, restart.
 #
+# IMPORTANTE (produção): na máquina de desenvolvimento, faz sempre
+#   git commit && git push
+# para o branch que a VPS usa (ex.: main) ANTES de correr este script na VPS.
+# O deploy só traz o que já está no remoto; código só local nunca aparece em produção.
+#
 # Uso:
 #   sudo bash scripts/deploy-vps.sh
 #   ou, a partir da raiz do projeto:

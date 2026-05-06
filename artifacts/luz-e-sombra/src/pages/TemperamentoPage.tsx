@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, ArrowRight, FlaskConical, Loader2 } from "lucide-react";
+import { ArrowRight, FlaskConical, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import {
@@ -11,29 +11,30 @@ import {
 } from "@workspace/temperamento-v1";
 
 const STORAGE_KEY = "luz_temperamento_v1_draft";
+const TOTAL = 40;
 
 const NOME_DIM: Record<string, string> = {
-  ENG: "Energia / ritmo",
-  SOC: "Sociabilidade / expressão",
-  DOM: "Dominância / controlo",
+  ENG: "Energia e ritmo",
+  SOC: "Sociabilidade e expressão",
+  DOM: "Dominância e controlo",
   EST: "Estabilidade emocional",
-  PRO: "Profundidade / análise",
+  PRO: "Profundidade e análise",
 };
 
-const ESCALA = [
-  { v: 1, l: "Discordo totalmente" },
-  { v: 2, l: "Discordo" },
-  { v: 3, l: "Neutro" },
-  { v: 4, l: "Concordo" },
-  { v: 5, l: "Concordo totalmente" },
-] as const;
+const ESCALA_EXTREMOS = {
+  um: "Discordo totalmente",
+  cinco: "Concordo totalmente",
+} as const;
 
-type Fase = "intro" | "blocos" | "enviando" | "resultado";
+type Fase = "intro" | "perguntas" | "enviando" | "resultado";
 
 type DraftPersist = {
   blocosCodes: string[][];
   answers: Record<string, number>;
-  blockIndex: number;
+  /** Índice global 0–39 na ordem dos blocos (preferido) */
+  qIndex?: number;
+  /** Legado: bloco 0–4 (migrado para qIndex ao carregar) */
+  blockIndex?: number;
   startedAt: number;
 };
 
@@ -46,8 +47,22 @@ function codesFromBlocos(blocos: ItemPergunta[][]): string[][] {
   return blocos.map((b) => b.map((p) => p.codigo));
 }
 
-function isBlocoCompleto(bloco: ItemPergunta[], answers: Record<string, number>): boolean {
-  return bloco.every((p) => typeof answers[p.codigo] === "number");
+function flatFromBlocos(blocos: ItemPergunta[][]): ItemPergunta[] {
+  return blocos.flat();
+}
+
+function primeiroIndiceSemResposta(flat: ItemPergunta[], answers: Record<string, number>): number {
+  const i = flat.findIndex((p) => typeof answers[p.codigo] !== "number");
+  return i === -1 ? Math.max(0, flat.length - 1) : i;
+}
+
+function migrarQIndex(d: DraftPersist, flat: ItemPergunta[]): number {
+  if (typeof d.qIndex === "number" && d.qIndex >= 0 && d.qIndex < flat.length) return d.qIndex;
+  if (typeof d.blockIndex === "number") {
+    const b = Math.min(4, Math.max(0, d.blockIndex));
+    return Math.min(flat.length - 1, b * 8);
+  }
+  return primeiroIndiceSemResposta(flat, d.answers ?? {});
 }
 
 export default function TemperamentoPage() {
@@ -55,17 +70,26 @@ export default function TemperamentoPage() {
   const { status } = useAuth();
   const [fase, setFase] = useState<Fase>("intro");
   const [blocos, setBlocos] = useState<ItemPergunta[][]>([]);
-  const [blockIndex, setBlockIndex] = useState(0);
+  const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [startedAt, setStartedAt] = useState<number>(() => Date.now());
   const [erro, setErro] = useState<string | null>(null);
   const [resultadoApi, setResultadoApi] = useState<Record<string, unknown> | null>(null);
+  const [carregandoUltimo, setCarregandoUltimo] = useState(false);
+  const [msgIntro, setMsgIntro] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") navigate("/login");
   }, [status, navigate]);
 
+  const flatPerguntas = useMemo(() => flatFromBlocos(blocos), [blocos]);
+  const perguntaAtual = flatPerguntas[qIndex];
+  const progresso = fase === "perguntas" && flatPerguntas.length === TOTAL ? (qIndex + 1) / TOTAL : 0;
+  const respostaAtual = perguntaAtual ? answers[perguntaAtual.codigo] : undefined;
+  const podeAvancar = typeof respostaAtual === "number";
+
   const iniciarOuRecuperar = useCallback(() => {
+    setMsgIntro(null);
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
@@ -75,11 +99,13 @@ export default function TemperamentoPage() {
           d.blocosCodes.length === 5 &&
           d.blocosCodes.every((row) => row.length === 8)
         ) {
-          setBlocos(blocosFromCodes(d.blocosCodes));
+          const b = blocosFromCodes(d.blocosCodes);
+          const flat = flatFromBlocos(b);
+          setBlocos(b);
           setAnswers(typeof d.answers === "object" && d.answers ? d.answers : {});
-          setBlockIndex(Math.min(4, Math.max(0, d.blockIndex ?? 0)));
+          setQIndex(migrarQIndex(d, flat));
           setStartedAt(typeof d.startedAt === "number" ? d.startedAt : Date.now());
-          setFase("blocos");
+          setFase("perguntas");
           return;
         }
       }
@@ -89,13 +115,13 @@ export default function TemperamentoPage() {
     const novo = gerarOrdemBlocosPerguntas();
     setBlocos(novo);
     setAnswers({});
-    setBlockIndex(0);
+    setQIndex(0);
     const t = Date.now();
     setStartedAt(t);
     const draft: DraftPersist = {
       blocosCodes: codesFromBlocos(novo),
       answers: {},
-      blockIndex: 0,
+      qIndex: 0,
       startedAt: t,
     };
     try {
@@ -103,29 +129,38 @@ export default function TemperamentoPage() {
     } catch {
       /* ignore */
     }
-    setFase("blocos");
+    setFase("perguntas");
   }, []);
 
   const carregarUltimoServidor = useCallback(async () => {
+    setMsgIntro(null);
+    setCarregandoUltimo(true);
     try {
       const res = await apiFetch("/temperamento/ultimo");
-      if (!res.ok) return;
+      if (!res.ok) {
+        setMsgIntro("Não foi possível carregar agora. Tenta de novo daqui a pouco.");
+        return;
+      }
       const row = (await res.json()) as { resultado?: Record<string, unknown> } | null;
       if (row?.resultado?.perfil) {
         setResultadoApi(row.resultado);
         setFase("resultado");
+        return;
       }
+      setMsgIntro("Ainda não há um resultado guardado nesta conta. Completa o questionário uma vez para o veres aqui.");
     } catch {
-      /* ignore */
+      setMsgIntro("Não foi possível carregar. Verifica a ligação à internet.");
+    } finally {
+      setCarregandoUltimo(false);
     }
   }, []);
 
   useEffect(() => {
-    if (fase !== "blocos" || blocos.length === 0) return;
+    if (fase !== "perguntas" || blocos.length === 0) return;
     const draft: DraftPersist = {
       blocosCodes: codesFromBlocos(blocos),
       answers,
-      blockIndex,
+      qIndex,
       startedAt,
     };
     try {
@@ -133,13 +168,7 @@ export default function TemperamentoPage() {
     } catch {
       /* ignore */
     }
-  }, [fase, blocos, answers, blockIndex, startedAt]);
-
-  const blocoAtual = blocos[blockIndex];
-  const preenchidosNoBloco = useMemo(() => {
-    if (!blocoAtual) return 0;
-    return blocoAtual.filter((p) => typeof answers[p.codigo] === "number").length;
-  }, [blocoAtual, answers]);
+  }, [fase, blocos, answers, qIndex, startedAt]);
 
   function setResposta(codigo: string, valor: number) {
     setAnswers((prev) => ({ ...prev, [codigo]: valor }));
@@ -168,7 +197,7 @@ export default function TemperamentoPage() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setErro((data as { error?: string }).error ?? "Erro ao enviar.");
-        setFase("blocos");
+        setFase("perguntas");
         return;
       }
       localStorage.removeItem(STORAGE_KEY);
@@ -176,25 +205,25 @@ export default function TemperamentoPage() {
       setFase("resultado");
     } catch {
       setErro("Falha de rede.");
-      setFase("blocos");
+      setFase("perguntas");
     }
   }
 
-  const podeAvancarBloco = blocoAtual && isBlocoCompleto(blocoAtual, answers);
-
-  function avancarBloco() {
-    if (!podeAvancarBloco) return;
-    if (blockIndex < 4) {
-      const ni = blockIndex + 1;
-      setBlockIndex(ni);
-    } else {
-      void enviar();
+  function avancar() {
+    if (!podeAvancar || flatPerguntas.length !== TOTAL) return;
+    if (qIndex < TOTAL - 1) {
+      setQIndex((i) => i + 1);
+      return;
     }
+    void enviar();
   }
 
-  function voltarBloco() {
-    if (blockIndex <= 0) return;
-    setBlockIndex((i) => i - 1);
+  function voltar() {
+    if (qIndex > 0) {
+      setQIndex((i) => i - 1);
+      return;
+    }
+    setFase("intro");
   }
 
   const bg = "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)";
@@ -284,6 +313,7 @@ export default function TemperamentoPage() {
               setResultadoApi(null);
               setFase("intro");
               setBlocos([]);
+              setQIndex(0);
             }}
           >
             Refazer questionário
@@ -295,37 +325,85 @@ export default function TemperamentoPage() {
 
   if (fase === "intro") {
     return (
-      <div className="min-h-screen pb-28 px-4 pt-8 flex flex-col" style={{ background: bg }}>
-        <div className="max-w-lg mx-auto flex-1 flex flex-col">
-          <FlaskConical className="w-12 h-12 mb-4 mx-auto" style={{ color: "#c8a56b" }} />
-          <h1 className="font-tan-mon-cheri text-2xl text-center mb-3" style={{ color: "#f7f2ec" }}>
+      <div className="min-h-screen pb-28" style={{ background: bg }}>
+        <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
+          <button
+            type="button"
+            className="text-sm mb-6 opacity-75 hover:opacity-100"
+            style={{ color: "#c8a56b" }}
+            onClick={() => navigate("/jornada")}
+          >
+            ← Jornada
+          </button>
+          <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
             Análise de temperamento
-          </h1>
-          <p className="text-sm text-center mb-6 leading-relaxed" style={{ color: "rgba(247,242,236,0.65)" }}>
-            40 afirmações em escala de 1 a 5. Os blocos são temáticos (5 temas de 8 perguntas); a ordem dos temas varia a
-            cada sessão. Responde com honestidade — não existem respostas certas ou erradas.
           </p>
-          <div className="mt-auto space-y-3">
-            <button
-              type="button"
-              className="w-full py-3.5 rounded-xl font-semibold"
-              style={{ background: "#c8a56b", color: "#1e1812" }}
-              onClick={iniciarOuRecuperar}
+          <h1 className="font-tan-mon-cheri text-2xl mb-4" style={{ color: "#f7f2ec" }}>
+            Cinco dimensões, quarenta reflexões
+          </h1>
+          <p className="text-sm leading-relaxed mb-2" style={{ color: "rgba(247,242,236,0.55)" }}>
+            Vais ver <strong>uma afirmação de cada vez</strong>, numa escala de 1 a 5. A ordem dos temas muda em cada sessão.
+            Não há respostas certas: o importante é o que é verdade para ti na maior parte do tempo.
+          </p>
+          <p className="text-xs leading-relaxed mb-8" style={{ color: "rgba(247,242,236,0.38)" }}>
+            O progresso guarda-se automaticamente neste dispositivo se saíres a meio.
+          </p>
+          {msgIntro && (
+            <div
+              className="rounded-xl px-3 py-2.5 text-sm mb-4"
+              style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.22)", color: "rgba(247,242,236,0.85)" }}
             >
-              Começar
-            </button>
-            <button
-              type="button"
-              className="w-full py-2.5 rounded-xl text-sm"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#f7f2ec" }}
-              onClick={() => void carregarUltimoServidor()}
-            >
-              Ver última análise guardada
-            </button>
-            <button type="button" className="w-full py-2 text-sm opacity-70" style={{ color: "#f7f2ec" }} onClick={() => navigate("/jornada")}>
-              Voltar
-            </button>
-          </div>
+              {msgIntro}
+            </div>
+          )}
+          <button
+            type="button"
+            className="w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 transition-transform active:scale-[0.98] mb-3"
+            style={{
+              background: "linear-gradient(135deg, #c8a56b, #8a6a3a)",
+              color: "#1a1208",
+            }}
+            onClick={iniciarOuRecuperar}
+          >
+            {(() => {
+              try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                  const d = JSON.parse(raw) as DraftPersist;
+                  if (Array.isArray(d.blocosCodes) && d.blocosCodes.length === 5) {
+                    return "Continuar onde parei";
+                  }
+                }
+              } catch {
+                /* ignore */
+              }
+              return "Começar";
+            })()}
+            <ArrowRight className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            disabled={carregandoUltimo}
+            className="w-full py-3 rounded-2xl text-sm font-medium disabled:opacity-45"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              color: "rgba(247,242,236,0.85)",
+              border: "1px solid rgba(200,165,107,0.2)",
+            }}
+            onClick={() => void carregarUltimoServidor()}
+          >
+            {carregandoUltimo ? (
+              <span className="inline-flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#c8a56b" }} />
+                A carregar…
+              </span>
+            ) : (
+              "Ver o meu último resultado (conta)"
+            )}
+          </button>
+          <p className="text-[11px] mt-2 text-center leading-snug" style={{ color: "rgba(247,242,236,0.35)" }}>
+            Só disponível depois de concluíres o questionário pelo menos uma vez com sessão iniciada.
+          </p>
         </div>
       </div>
     );
@@ -339,7 +417,7 @@ export default function TemperamentoPage() {
     );
   }
 
-  if (!blocoAtual) {
+  if (!perguntaAtual || flatPerguntas.length !== TOTAL) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm" style={{ background: bg, color: "#f7f2ec" }}>
         A carregar…
@@ -347,93 +425,92 @@ export default function TemperamentoPage() {
     );
   }
 
-  const dimNome = NOME_DIM[blocoAtual[0]!.dimensao] ?? blocoAtual[0]!.dimensao;
+  const dimNome = NOME_DIM[perguntaAtual.dimensao] ?? perguntaAtual.dimensao;
+  const noBloco = (qIndex % 8) + 1;
 
   return (
-    <div className="min-h-screen pb-32 px-4 pt-6" style={{ background: bg }}>
-      <div className="max-w-lg mx-auto">
-        <div className="flex items-center justify-between mb-4">
-          <button type="button" className="text-sm flex items-center gap-1 opacity-80" style={{ color: "#c8a56b" }} onClick={() => navigate("/jornada")}>
-            <ArrowLeft className="w-4 h-4" /> Jornada
-          </button>
-          <span className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.6)" }}>
-            Bloco {blockIndex + 1} / 5
-          </span>
+    <div className="min-h-screen pb-28" style={{ background: bg }}>
+      <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
+        <div className="mb-6" style={{ borderBottom: "1px solid rgba(200,165,107,0.12)" }}>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <p className="text-xs" style={{ color: "rgba(200,165,107,0.45)" }}>
+              {qIndex + 1} / {TOTAL}
+            </p>
+            <span
+              className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md"
+              style={{ color: "rgba(200,165,107,0.85)", background: "rgba(200,165,107,0.1)", border: "1px solid rgba(200,165,107,0.2)" }}
+            >
+              {dimNome}
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full overflow-hidden mb-2" style={{ background: "rgba(255,255,255,0.06)" }}>
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{
+                width: `${progresso * 100}%`,
+                background: "linear-gradient(90deg, #9c7742, #c8a56b)",
+              }}
+            />
+          </div>
+          <p className="text-[10px] mb-3" style={{ color: "rgba(247,242,236,0.35)" }}>
+            Pergunta {noBloco} de 8 neste tema · marca o grau em que a frase te descreve
+          </p>
         </div>
-        <div className="h-2 rounded-full mb-2 overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-          <div
-            className="h-full transition-all rounded-full"
-            style={{
-              width: `${((blockIndex + preenchidosNoBloco / 8) / 5) * 100}%`,
-              background: "linear-gradient(90deg, #9c7742, #c8a56b)",
-            }}
-          />
-        </div>
-        <p className="text-xs mb-6" style={{ color: "rgba(247,242,236,0.45)" }}>
-          {dimNome} · {preenchidosNoBloco}/8 neste bloco
-        </p>
+
         {erro && <p className="text-sm mb-4 text-red-300">{erro}</p>}
 
         <div className="space-y-6">
-          {blocoAtual.map((p) => (
-            <div
-              key={p.codigo}
-              className="rounded-2xl p-4"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
-            >
-              <p className="text-[10px] font-bold tracking-wider mb-2" style={{ color: "rgba(200,165,107,0.55)" }}>
-                {p.codigo}
-              </p>
-              <p className="text-sm mb-3 leading-snug" style={{ color: "#f7f2ec" }}>
-                {p.texto}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {ESCALA.map(({ v, l }) => (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => setResposta(p.codigo, v)}
-                    className="flex-1 min-w-[52px] py-2 px-1 rounded-lg text-[10px] leading-tight transition-all"
-                    style={{
-                      background: answers[p.codigo] === v ? "rgba(200,165,107,0.25)" : "rgba(255,255,255,0.04)",
-                      border: answers[p.codigo] === v ? "1px solid #c8a56b" : "1px solid rgba(255,255,255,0.08)",
-                      color: answers[p.codigo] === v ? "#f7f2ec" : "rgba(247,242,236,0.55)",
-                    }}
-                  >
-                    <span className="block font-bold mb-0.5">{v}</span>
-                    {l}
-                  </button>
-                ))}
-              </div>
+          <h2 className="font-tan-mon-cheri text-lg leading-snug" style={{ color: "#f7f2ec" }}>
+            {perguntaAtual.texto}
+          </h2>
+          <div>
+            <p className="text-xs mb-2" style={{ color: "rgba(200,165,107,0.65)" }}>
+              Quanto concordas com esta afirmação?
+            </p>
+            <div className="grid grid-cols-5 gap-2">
+              {[1, 2, 3, 4, 5].map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setResposta(perguntaAtual.codigo, v)}
+                  className="py-3 rounded-xl text-sm font-bold leading-tight"
+                  style={{
+                    background: respostaAtual === v ? "rgba(200,165,107,0.25)" : "rgba(255,255,255,0.05)",
+                    border: `1px solid ${respostaAtual === v ? "rgba(200,165,107,0.45)" : "rgba(255,255,255,0.08)"}`,
+                    color: respostaAtual === v ? "#c8a56b" : "rgba(247,242,236,0.5)",
+                  }}
+                >
+                  {v}
+                </button>
+              ))}
             </div>
-          ))}
+            <p className="text-[10px] mt-2 leading-snug" style={{ color: "rgba(247,242,236,0.35)" }}>
+              1 = {ESCALA_EXTREMOS.um} · 5 = {ESCALA_EXTREMOS.cinco}
+            </p>
+          </div>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 p-4 pt-2 max-w-lg mx-auto flex gap-2" style={{ background: "linear-gradient(transparent, #1e1812 40%)" }}>
-          {blockIndex > 0 && (
-            <button
-              type="button"
-              onClick={voltarBloco}
-              className="flex-1 py-3 rounded-xl font-medium flex items-center justify-center gap-2"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#f7f2ec" }}
-            >
-              <ArrowLeft className="w-4 h-4" /> Anterior
-            </button>
-          )}
+        <div className="flex gap-3 mt-10">
           <button
             type="button"
-            disabled={!podeAvancarBloco}
-            onClick={avancarBloco}
-            className="flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-35"
-            style={{ background: "#c8a56b", color: "#1e1812" }}
+            onClick={voltar}
+            className="flex-1 py-3 rounded-xl text-sm"
+            style={{ color: "rgba(200,165,107,0.75)", border: "1px solid rgba(200,165,107,0.2)" }}
           >
-            {blockIndex < 4 ? (
-              <>
-                Seguinte <ArrowRight className="w-4 h-4" />
-              </>
-            ) : (
-              "Concluir e ver resultado"
-            )}
+            Voltar
+          </button>
+          <button
+            type="button"
+            disabled={!podeAvancar}
+            onClick={avancar}
+            className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-35 flex items-center justify-center gap-2"
+            style={{
+              background: "linear-gradient(135deg, #c8a56b, #8a6a3a)",
+              color: "#1a1208",
+            }}
+          >
+            {qIndex >= TOTAL - 1 ? "Concluir" : "Seguinte"}
+            {qIndex < TOTAL - 1 && <ArrowRight className="w-4 h-4" />}
           </button>
         </div>
       </div>
