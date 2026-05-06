@@ -9,6 +9,7 @@ import {
   comentariosComunidadeTable,
   salvosComunidadeTable,
   compartilhamentosComunidadeTable,
+  visualizacoesComunidadeTable,
 } from "@workspace/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
@@ -35,6 +36,15 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
 
     const postIds = posts.map(p => p.id);
     if (postIds.length === 0) return res.json([]);
+
+    // Registra visualização única por usuário/publicação.
+    await db
+      .insert(visualizacoesComunidadeTable)
+      .values(postIds.map((id) => ({
+        publicacaoId: id,
+        usuarioId: req.user!.id,
+      })))
+      .onConflictDoNothing();
 
     const reacoes = await db
       .select({
@@ -81,12 +91,22 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
       .where(sql`${compartilhamentosComunidadeTable.publicacaoId} = ANY(${sql`ARRAY[${sql.join(postIds.map(id => sql`${id}`), sql`, `)}]::int[]`})`)
       .groupBy(compartilhamentosComunidadeTable.publicacaoId);
 
+    const visualizacoes = await db
+      .select({
+        publicacaoId: visualizacoesComunidadeTable.publicacaoId,
+        count: sql<number>`count(*)::int`.as("count"),
+      })
+      .from(visualizacoesComunidadeTable)
+      .where(sql`${visualizacoesComunidadeTable.publicacaoId} = ANY(${sql`ARRAY[${sql.join(postIds.map(id => sql`${id}`), sql`, `)}]::int[]`})`)
+      .groupBy(visualizacoesComunidadeTable.publicacaoId);
+
     const userId = req.user!.id;
 
     const result = posts.map(post => {
       const postReacoes = reacoes.filter(r => r.publicacaoId === post.id);
       const postComentarios = comentarios.filter(c => c.publicacaoId === post.id);
       const postCompart = compartilhamentos.find(c => c.publicacaoId === post.id);
+      const postViews = visualizacoes.find(c => c.publicacaoId === post.id);
       const postSalvos = salvos.filter(s => s.publicacaoId === post.id);
       const contagens: Record<string, number> = {};
       const minhasReacoes: string[] = [];
@@ -113,6 +133,7 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
         })),
         totalComentarios: postComentarios.length,
         totalCompartilhamentos: Number(postCompart?.count ?? 0),
+        totalVisualizacoes: Number(postViews?.count ?? 0),
         totalSalvos,
         salvoPorMim,
       };

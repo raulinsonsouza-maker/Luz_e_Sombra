@@ -174,6 +174,16 @@ export const compartilhamentosComunidadeTable = pgTable("compartilhamentos_comun
   publicacaoIdx: index("idx_compart_publicacao_id").on(table.publicacaoId),
 }));
 
+export const visualizacoesComunidadeTable = pgTable("visualizacoes_comunidade", {
+  id: serial("id").primaryKey(),
+  publicacaoId: integer("publicacao_id").notNull().references(() => comunidadeTable.id, { onDelete: "cascade" }),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  uniqueView: unique("uq_visualizacao_pub_usuario").on(table.publicacaoId, table.usuarioId),
+  publicacaoIdx: index("idx_visualizacoes_publicacao_id").on(table.publicacaoId),
+}));
+
 // ── Notificações ───────────────────────────────────────────────────────────────
 
 export const notificacoesTable = pgTable("notificacoes", {
@@ -248,6 +258,7 @@ export type Reacao = typeof reacoesTable.$inferSelect;
 export type ComentarioComunidade = typeof comentariosComunidadeTable.$inferSelect;
 export type SalvoComunidade = typeof salvosComunidadeTable.$inferSelect;
 export type CompartilhamentoComunidade = typeof compartilhamentosComunidadeTable.$inferSelect;
+export type VisualizacaoComunidade = typeof visualizacoesComunidadeTable.$inferSelect;
 export type Curso = typeof cursosTable.$inferSelect;
 export type Aula = typeof aulasTable.$inferSelect;
 export type ProgressoCurso = typeof progressoCursosTable.$inferSelect;

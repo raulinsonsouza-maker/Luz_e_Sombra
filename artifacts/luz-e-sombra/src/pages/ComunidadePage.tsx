@@ -34,6 +34,7 @@ interface Post {
   totalComentarios?: number;
   totalCompartilhamentos?: number;
   totalSalvos?: number;
+  totalVisualizacoes?: number;
   salvoPorMim?: boolean;
 }
 
@@ -593,7 +594,7 @@ function PostCard({
 
       {/* Meta row */}
       <div className="px-5 pb-2 text-xs" style={{ color: "rgba(247,242,236,0.42)" }}>
-        {timeAgo(post.criadoEm)}
+        {timeAgo(post.criadoEm)} · {(post.totalVisualizacoes ?? 0).toLocaleString("pt-BR")} visualizações
       </div>
 
       {/* Main actions row */}
