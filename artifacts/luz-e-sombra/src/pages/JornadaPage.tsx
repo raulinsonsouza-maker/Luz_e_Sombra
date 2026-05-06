@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { CheckCircle2, Lock, ChevronRight, Layers, Target, Hash, Brain, Wallet, Sparkles, Heart, FlaskConical, Trophy, Flame } from "lucide-react";
+import { CheckCircle2, Lock, ChevronRight, Layers, Target, Hash, Brain, Wallet, Sparkles, Heart, FlaskConical } from "lucide-react";
 
 interface Progresso {
   jornada: {
@@ -167,50 +167,9 @@ export default function JornadaPage() {
       ].filter(Boolean).length
     : 0;
 
-  const progressoPct = Math.round((concluidas / ETAPAS.filter((e) => e.key !== null).length) * 100);
-
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
       <div className="max-w-lg mx-auto px-4 pt-6">
-        <div
-          className="rounded-3xl p-4 mb-6 journey-card-glow"
-        >
-          <div className="flex items-center gap-3">
-            <img
-              src="/images/peao.jpeg"
-              alt="Peão na trilha da jornada"
-              className="w-16 h-16 rounded-2xl object-cover"
-              style={{ border: "1px solid rgba(200,165,107,0.35)" }}
-            />
-            <div className="flex-1">
-              <p className="text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(200,165,107,0.65)" }}>
-                Jornada Gamificada
-              </p>
-              <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>
-                Você avança casa por casa até a luz.
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-2 mt-3">
-            <div className="rounded-xl px-2 py-2 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
-              <p className="text-[10px]" style={{ color: "rgba(247,242,236,0.4)" }}>Progresso</p>
-              <p className="text-xs font-bold" style={{ color: "#c8a56b" }}>{progressoPct}%</p>
-            </div>
-            <div className="rounded-xl px-2 py-2 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
-              <p className="text-[10px]" style={{ color: "rgba(247,242,236,0.4)" }}>Nível</p>
-              <p className="text-xs font-bold flex items-center justify-center gap-1" style={{ color: "#f0d39a" }}>
-                <Trophy className="w-3 h-3" /> {progresso?.nivel ?? 1}
-              </p>
-            </div>
-            <div className="rounded-xl px-2 py-2 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
-              <p className="text-[10px]" style={{ color: "rgba(247,242,236,0.4)" }}>Streak</p>
-              <p className="text-xs font-bold flex items-center justify-center gap-1" style={{ color: "#ff9f5a" }}>
-                <Flame className="w-3 h-3" /> {progresso?.streakDias ?? 0}
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Header */}
         <div className="mb-8">
           <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>

@@ -175,25 +175,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
       <div className="max-w-lg mx-auto px-4">
-        <div className="rounded-3xl p-3 mt-4 mb-2 journey-card-glow">
-          <div className="flex items-center gap-3">
-            <img
-              src="/images/peao.jpeg"
-              alt="Peão representando sua jornada"
-              className="w-14 h-14 rounded-xl object-cover"
-              style={{ border: "1px solid rgba(200,165,107,0.35)" }}
-            />
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: "rgba(200,165,107,0.65)" }}>
-                Da Sombra à Luz
-              </p>
-              <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>
-                Sua trilha gamificada começa aqui.
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* ── MOBILE TOP BAR ─────────────────────────────── */}
         <div className="flex items-center justify-between pt-5 pb-2 md:hidden">
           <span className="font-tan-mon-cheri text-base tracking-wide" style={{ color: "#f7f2ec" }}>
