@@ -75,6 +75,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@workspace/cinco-linguagens-amor": "workspace:*",
     "@workspace/temperamento-v1": "workspace:*",
     "@workspace/traco-diagnostico-emocional": "workspace:*",
     "@workspace/traco-diagnostico-fusion": "workspace:*",

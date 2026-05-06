@@ -12,6 +12,7 @@
   "dependencies": {
     "@google-cloud/storage": "^7.19.0",
     "@workspace/api-zod": "workspace:*",
+    "@workspace/cinco-linguagens-amor": "workspace:*",
     "@workspace/db": "workspace:*",
     "@workspace/temperamento-v1": "workspace:*",
     "@workspace/traco-diagnostico-emocional": "workspace:*",

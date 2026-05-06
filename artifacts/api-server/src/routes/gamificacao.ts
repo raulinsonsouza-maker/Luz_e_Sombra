@@ -6,10 +6,13 @@ import {
   avaliacoesTable,
   analiseTracoTable,
   analiseTemperamento40Table,
+  analiseLinguagensAmorTable,
+  configuracoesModulosTable,
   usuariosTable,
 } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
+import { minicursoCompletoParaUsuario } from "./modulosJornada";
 
 const router = Router();
 
@@ -132,6 +135,32 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
       .where(eq(avaliacoesTable.usuarioId, userId))
       .limit(1);
 
+    const [linguagensRow] = await db
+      .select({ id: analiseLinguagensAmorTable.id })
+      .from(analiseLinguagensAmorTable)
+      .where(eq(analiseLinguagensAmorTable.usuarioId, userId))
+      .limit(1);
+
+    const configsMod = await db.select().from(configuracoesModulosTable);
+    const minicursoConcluido: {
+      traco: boolean;
+      temperamento: boolean;
+      linguagensAmor: boolean;
+      roda: boolean;
+    } = {
+      traco: true,
+      temperamento: true,
+      linguagensAmor: true,
+      roda: true,
+    };
+    for (const c of configsMod) {
+      const ok = await minicursoCompletoParaUsuario(userId, c.cursoVinculadoId);
+      if (c.slug === "traco") minicursoConcluido.traco = ok;
+      else if (c.slug === "temperamento") minicursoConcluido.temperamento = ok;
+      else if (c.slug === "linguagens-amor") minicursoConcluido.linguagensAmor = ok;
+      else if (c.slug === "roda") minicursoConcluido.roda = ok;
+    }
+
     const [usuario] = await db
       .select({ dataNascimento: usuariosTable.dataNascimento })
       .from(usuariosTable)
@@ -157,7 +186,9 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
         traco: !!analise,
         temperamento: !!temperamento,
         roda: !!avaliacao,
+        linguagensAmor: !!linguagensRow,
         numerologia: !!(usuario?.dataNascimento),
+        minicursoConcluido,
       },
     });
   } catch (err) {

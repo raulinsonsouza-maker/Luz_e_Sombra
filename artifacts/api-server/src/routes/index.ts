@@ -10,6 +10,8 @@ import cursosRouter from "./cursos";
 import notificacoesRouter from "./notificacoes";
 import diagnosticoEmocionalRouter from "./diagnosticoEmocional";
 import temperamentoRouter from "./temperamento";
+import linguagensAmorRouter from "./linguagensAmor";
+import modulosJornadaRouter from "./modulosJornada";
 
 const router: IRouter = Router();
 
@@ -24,5 +26,7 @@ router.use("/cursos", cursosRouter);
 router.use("/notificacoes", notificacoesRouter);
 router.use("/diagnostico-emocional", diagnosticoEmocionalRouter);
 router.use("/temperamento", temperamentoRouter);
+router.use("/linguagens-amor", linguagensAmorRouter);
+router.use("/modulos-jornada", modulosJornadaRouter);
 
 export default router;

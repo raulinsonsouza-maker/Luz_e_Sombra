@@ -21,6 +21,7 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
         imagemUrl: cursosTable.imagemUrl,
         categoria: cursosTable.categoria,
         nivel: cursosTable.nivel,
+        moduloJornada: cursosTable.moduloJornada,
         publicado: cursosTable.publicado,
         criadoEm: cursosTable.criadoEm,
         aulasCount: count(aulasTable.id),
@@ -153,14 +154,20 @@ router.get("/:id", requireAuth, async (req: AuthRequest, res: Response) => {
 // POST /api/cursos — admin create course
 router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const { titulo, descricao, imagemUrl, categoria, nivel, publicado } = req.body as {
+    const { titulo, descricao, imagemUrl, categoria, nivel, publicado, moduloJornada } = req.body as {
       titulo?: string; descricao?: string; imagemUrl?: string;
       categoria?: string; nivel?: string; publicado?: boolean;
+      moduloJornada?: string | null;
     };
 
     if (!titulo?.trim() || !descricao?.trim()) {
       return res.status(400).json({ error: "Título e descrição são obrigatórios" });
     }
+
+    const modJn =
+      moduloJornada === undefined || moduloJornada === null || moduloJornada === ""
+        ? null
+        : String(moduloJornada).trim();
 
     const [curso] = await db
       .insert(cursosTable)
@@ -170,6 +177,7 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
         imagemUrl: imagemUrl?.trim() || null,
         categoria: categoria?.trim() || null,
         nivel: nivel || "todos",
+        moduloJornada: modJn,
         publicado: publicado ?? false,
       })
       .returning();
@@ -187,9 +195,10 @@ router.put("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
     const cursoId = parseInt(String(req.params.id), 10);
     if (isNaN(cursoId)) return res.status(400).json({ error: "ID inválido" });
 
-    const { titulo, descricao, imagemUrl, categoria, nivel, publicado } = req.body as {
+    const { titulo, descricao, imagemUrl, categoria, nivel, publicado, moduloJornada } = req.body as {
       titulo?: string; descricao?: string; imagemUrl?: string;
       categoria?: string; nivel?: string; publicado?: boolean;
+      moduloJornada?: string | null;
     };
 
     const updates: Record<string, unknown> = { atualizadoEm: new Date() };
@@ -199,6 +208,10 @@ router.put("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
     if (categoria !== undefined) updates.categoria = categoria?.trim() || null;
     if (nivel !== undefined) updates.nivel = nivel;
     if (publicado !== undefined) updates.publicado = publicado;
+    if (moduloJornada !== undefined) {
+      updates.moduloJornada =
+        moduloJornada === null || moduloJornada === "" ? null : String(moduloJornada).trim();
+    }
 
     const [curso] = await db
       .update(cursosTable)

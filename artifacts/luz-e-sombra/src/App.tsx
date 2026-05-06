@@ -16,6 +16,8 @@ import TracodeCaraterPage from "@/pages/TracodeCaraterPage";
 import DiagnosticoEmocionalPage from "@/pages/DiagnosticoEmocionalPage";
 import TemperamentoPage from "@/pages/TemperamentoPage";
 import JornadaPage from "@/pages/JornadaPage";
+import JornadaHubPage from "@/pages/JornadaHubPage";
+import LinguagensAmorPage from "@/pages/LinguagensAmorPage";
 import MissoesPage from "@/pages/MissoesPage";
 import ComunidadePage from "@/pages/ComunidadePage";
 import CursosPage from "@/pages/CursosPage";
@@ -51,8 +53,14 @@ function Router() {
         <Route path="/dashboard">
           <ProtectedRoute component={HomePage} />
         </Route>
+        <Route path="/jornada/:slug">
+          <ProtectedRoute component={JornadaHubPage} />
+        </Route>
         <Route path="/jornada">
           <ProtectedRoute component={JornadaPage} />
+        </Route>
+        <Route path="/linguagens-amor">
+          <ProtectedRoute component={LinguagensAmorPage} />
         </Route>
         <Route path="/missoes">
           <ProtectedRoute component={MissoesPage} />

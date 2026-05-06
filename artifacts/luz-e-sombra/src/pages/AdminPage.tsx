@@ -48,7 +48,7 @@ interface Aula {
 }
 interface Curso {
   id: number; titulo: string; descricao: string; imagemUrl: string | null;
-  categoria: string | null; nivel: string | null; publicado: boolean;
+  categoria: string | null; nivel: string | null; moduloJornada: string | null; publicado: boolean;
   aulasCount: number; aulasConcluidasCount: number;
 }
 interface CursoDetalhe extends Curso { aulas: Aula[] }
@@ -56,7 +56,7 @@ interface Stats {
   usuarios: { total: number; ativos: number };
   posts: number; reacoes: number; cursos: number; analiseTraco: number;
 }
-type Tab = "dashboard" | "usuarios" | "comunidade" | "cursos";
+type Tab = "dashboard" | "usuarios" | "comunidade" | "modulosJornada" | "cursos";
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function AdminPage() {
@@ -87,6 +87,7 @@ export default function AdminPage() {
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { key: "usuarios", label: "Usuários", icon: Users },
     { key: "comunidade", label: "Comunidade", icon: MessageSquare },
+    { key: "modulosJornada", label: "Módulos da Jornada", icon: Layers },
     { key: "cursos", label: "Cursos", icon: GraduationCap },
   ];
 
@@ -145,6 +146,7 @@ export default function AdminPage() {
         {aba === "dashboard"  && <DashboardTab showMsg={showMsg} />}
         {aba === "usuarios"   && <UsuariosTab showMsg={showMsg} />}
         {aba === "comunidade" && <ComunidadeTab showMsg={showMsg} />}
+        {aba === "modulosJornada" && <ModulosJornadaTab showMsg={showMsg} />}
         {aba === "cursos"     && <CursosTab showMsg={showMsg} />}
       </div>
     </div>
@@ -826,6 +828,183 @@ function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: stri
   );
 }
 
+// ── Módulos da Jornada (admin) ─────────────────────────────────────────────────
+interface ModuloJornadaLinha {
+  slug: string;
+  tituloIntro: string;
+  descricaoIntro: string;
+  videoIntroUrl: string | null;
+  cursoVinculadoId: number | null;
+  ordem: number;
+}
+
+function ModulosJornadaTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) => void }) {
+  const [modulos, setModulos] = useState<ModuloJornadaLinha[]>([]);
+  const [cursos, setCursos] = useState<Curso[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [edit, setEdit] = useState<Record<string, {
+    tituloIntro: string;
+    descricaoIntro: string;
+    videoIntroUrl: string;
+    cursoVinculadoId: string;
+  }>>({});
+  const [salvando, setSalvando] = useState<string | null>(null);
+
+  async function carregar() {
+    setLoading(true);
+    try {
+      const [mRes, cRes] = await Promise.all([
+        apiFetch("/modulos-jornada"),
+        apiFetch("/cursos"),
+      ]);
+      if (mRes.ok) {
+        const data = (await mRes.json()) as ModuloJornadaLinha[];
+        setModulos(data);
+        const e: Record<string, { tituloIntro: string; descricaoIntro: string; videoIntroUrl: string; cursoVinculadoId: string }> = {};
+        for (const m of data) {
+          e[m.slug] = {
+            tituloIntro: m.tituloIntro,
+            descricaoIntro: m.descricaoIntro,
+            videoIntroUrl: m.videoIntroUrl ?? "",
+            cursoVinculadoId: m.cursoVinculadoId != null ? String(m.cursoVinculadoId) : "",
+          };
+        }
+        setEdit(e);
+      }
+      if (cRes.ok) setCursos(await cRes.json());
+    } catch {
+      /* ignore */
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => { void carregar(); }, []);
+
+  async function salvar(slug: string) {
+    const row = edit[slug];
+    if (!row) return;
+    setSalvando(slug);
+    try {
+      const body = {
+        tituloIntro: row.tituloIntro.trim(),
+        descricaoIntro: row.descricaoIntro.trim(),
+        videoIntroUrl: row.videoIntroUrl.trim() || null,
+        cursoVinculadoId: row.cursoVinculadoId === "" ? null : parseInt(row.cursoVinculadoId, 10),
+      };
+      if (body.cursoVinculadoId !== null && !Number.isFinite(body.cursoVinculadoId)) {
+        showMsg("erro", "ID do curso inválido.");
+        setSalvando(null);
+        return;
+      }
+      const res = await apiFetch(`/modulos-jornada/${slug}`, {
+        method: "PUT",
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        showMsg("sucesso", "Módulo atualizado.");
+        await carregar();
+      } else {
+        showMsg("erro", (data as { error?: string }).error ?? "Erro ao guardar.");
+      }
+    } catch {
+      showMsg("erro", "Erro ao guardar.");
+    }
+    setSalvando(null);
+  }
+
+  const ic = "w-full px-4 py-2.5 rounded-xl text-sm outline-none";
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: C.gold }} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <p className="text-xs tracking-[0.2em] uppercase mb-0.5" style={{ color: "rgba(200,165,107,0.45)" }}>Admin</p>
+        <h2 className="font-tan-mon-cheri text-2xl md:text-3xl" style={{ color: C.text }}>Módulos da Jornada</h2>
+        <p className="text-sm mt-2" style={{ color: C.muted }}>
+          Configure o vídeo de introdução e o curso-minicurso de cada etapa Iniciante.
+        </p>
+      </div>
+
+      {[...modulos].sort((a, b) => a.ordem - b.ordem).map((m) => {
+        const row = edit[m.slug];
+        if (!row) return null;
+        return (
+          <div key={m.slug} className="p-5 rounded-2xl space-y-4" style={CARD_S}>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <span className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.55)" }}>
+                Ordem {m.ordem} · {m.slug}
+              </span>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Título (intro)</label>
+              <input
+                value={row.tituloIntro}
+                onChange={(e) => setEdit((prev) => ({ ...prev, [m.slug]: { ...prev[m.slug], tituloIntro: e.target.value } }))}
+                className={ic}
+                style={INPUT_ST}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Descrição (intro)</label>
+              <textarea
+                value={row.descricaoIntro}
+                onChange={(e) => setEdit((prev) => ({ ...prev, [m.slug]: { ...prev[m.slug], descricaoIntro: e.target.value } }))}
+                rows={3}
+                className={`${ic} resize-none`}
+                style={INPUT_ST}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>URL do vídeo (YouTube/Vimeo)</label>
+              <input
+                value={row.videoIntroUrl}
+                onChange={(e) => setEdit((prev) => ({ ...prev, [m.slug]: { ...prev[m.slug], videoIntroUrl: e.target.value } }))}
+                className={ic}
+                style={INPUT_ST}
+                placeholder="https://..."
+                type="url"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Curso minicurso (publicado)</label>
+              <select
+                value={row.cursoVinculadoId}
+                onChange={(e) => setEdit((prev) => ({ ...prev, [m.slug]: { ...prev[m.slug], cursoVinculadoId: e.target.value } }))}
+                className={ic}
+                style={SELECT_ST}
+              >
+                <option value="" style={OPT}>— Nenhum —</option>
+                {cursos.map((c) => (
+                  <option key={c.id} value={c.id} style={OPT}>
+                    #{c.id} · {c.titulo} ({c.aulasCount} aulas{c.publicado ? "" : " · rascunho"})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              disabled={salvando === m.slug}
+              onClick={() => void salvar(m.slug)}
+              className="w-full py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
+            >
+              {salvando === m.slug ? "A guardar…" : "Guardar módulo"}
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Cursos Tab ─────────────────────────────────────────────────────────────────
 function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) => void }) {
   const [cursos, setCursos] = useState<Curso[]>([]);
@@ -834,11 +1013,20 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
   const [cursoAberto, setCursoAberto] = useState<number | null>(null);
   const [cursoDetalhe, setCursoDetalhe] = useState<CursoDetalhe | null>(null);
   const [loadingDetalhe, setLoadingDetalhe] = useState(false);
-  const [novoCurso, setNovoCurso] = useState({ titulo: "", descricao: "", categoria: "", nivel: "todos", imagemUrl: "" });
+  const [novoCurso, setNovoCurso] = useState({
+    titulo: "",
+    descricao: "",
+    categoria: "",
+    nivel: "todos",
+    imagemUrl: "",
+    moduloJornada: "" as string,
+  });
   const [capaArquivoNovo, setCapaArquivoNovo] = useState<File | null>(null);
   const [capaUrlEdicao, setCapaUrlEdicao] = useState("");
   const [capaArquivoEdicao, setCapaArquivoEdicao] = useState<File | null>(null);
   const [salvandoCapa, setSalvandoCapa] = useState(false);
+  const [moduloJornadaEdicao, setModuloJornadaEdicao] = useState("");
+  const [salvandoModJn, setSalvandoModJn] = useState(false);
   const [enviandoCurso, setEnviandoCurso] = useState(false);
   const [novaAula, setNovaAula] = useState({ titulo: "", descricao: "", videoUrl: "", conteudo: "", duracaoMin: "", ordem: "0" });
   const [criandoAula, setCriandoAula] = useState(false);
@@ -852,6 +1040,7 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
     if (cursoDetalhe) {
       setCapaUrlEdicao(cursoDetalhe.imagemUrl || "");
       setCapaArquivoEdicao(null);
+      setModuloJornadaEdicao(cursoDetalhe.moduloJornada ?? "");
       if (capaEdicaoRef.current) capaEdicaoRef.current.value = "";
     }
   }, [cursoDetalhe?.id]);
@@ -898,12 +1087,13 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
           categoria: novoCurso.categoria,
           nivel: novoCurso.nivel,
           imagemUrl: imagemUrl || "",
+          moduloJornada: novoCurso.moduloJornada.trim() || null,
         }),
       });
       const data = await res.json();
       if (res.ok) {
         showMsg("sucesso", "Curso criado!");
-        setNovoCurso({ titulo: "", descricao: "", categoria: "", nivel: "todos", imagemUrl: "" });
+        setNovoCurso({ titulo: "", descricao: "", categoria: "", nivel: "todos", imagemUrl: "", moduloJornada: "" });
         setCapaArquivoNovo(null);
         if (capaNovoRef.current) capaNovoRef.current.value = "";
         setCriandoCurso(false);
@@ -912,6 +1102,30 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
       else showMsg("erro", data.error || "Erro ao criar curso");
     } catch { showMsg("erro", "Erro ao criar curso"); }
     setEnviandoCurso(false);
+  }
+
+  async function handleSalvarModuloJornada(cursoId: number) {
+    setSalvandoModJn(true);
+    try {
+      const res = await apiFetch(`/cursos/${cursoId}`, {
+        method: "PUT",
+        body: JSON.stringify({ moduloJornada: moduloJornadaEdicao.trim() || null }),
+      });
+      if (res.ok) {
+        showMsg("sucesso", "Vínculo com a jornada atualizado.");
+        buscarCursos();
+        if (cursoAberto === cursoId) {
+          const det = await apiFetch(`/cursos/${cursoId}`);
+          if (det.ok) setCursoDetalhe(await det.json() as CursoDetalhe);
+        }
+      } else {
+        const d = await res.json().catch(() => ({}));
+        showMsg("erro", (d as { error?: string }).error ?? "Erro ao atualizar");
+      }
+    } catch {
+      showMsg("erro", "Erro ao atualizar");
+    }
+    setSalvandoModJn(false);
   }
 
   async function handleSalvarCapa(cursoId: number) {
@@ -1005,7 +1219,7 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
             <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Descrição *</label>
             <textarea required value={novoCurso.descricao} onChange={e => setNovoCurso({ ...novoCurso, descricao: e.target.value })} rows={2} className={`${ic} resize-none`} style={INPUT_ST} placeholder="Descrição breve" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Categoria</label>
               <input value={novoCurso.categoria} onChange={e => setNovoCurso({ ...novoCurso, categoria: e.target.value })} className={ic} style={INPUT_ST} placeholder="Ex: Bioenergia" />
@@ -1019,6 +1233,21 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
                 <option value="avancado" style={OPT}>Avançado</option>
               </select>
             </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold mb-1" style={{ color: C.muted }}>Módulo da jornada (opcional)</label>
+            <select
+              value={novoCurso.moduloJornada}
+              onChange={(e) => setNovoCurso({ ...novoCurso, moduloJornada: e.target.value })}
+              className={ic}
+              style={SELECT_ST}
+            >
+              <option value="" style={OPT}>— Nenhum —</option>
+              <option value="traco" style={OPT}>traco</option>
+              <option value="temperamento" style={OPT}>temperamento</option>
+              <option value="linguagens-amor" style={OPT}>linguagens-amor</option>
+              <option value="roda" style={OPT}>roda</option>
+            </select>
           </div>
           <div className="space-y-2">
             <label className="block text-xs font-semibold" style={{ color: C.muted }}>Capa do curso (opcional)</label>
@@ -1073,7 +1302,7 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
                         {curso.categoria && <span className="text-xs" style={{ color: C.muted }}>{curso.categoria}</span>}
                       </div>
                       <p className="font-semibold text-sm" style={{ color: C.text }}>{curso.titulo}</p>
-                      <p className="text-xs mt-0.5" style={{ color: C.muted }}>{curso.aulasCount} aula{curso.aulasCount !== 1 ? "s" : ""}</p>
+                      <p className="text-xs mt-0.5" style={{ color: C.muted }}>{curso.aulasCount} aula{curso.aulasCount !== 1 ? "s" : ""}{curso.moduloJornada ? ` · jornada: ${curso.moduloJornada}` : ""}</p>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <button onClick={e => { e.stopPropagation(); togglePublicado(curso); }}
@@ -1126,6 +1355,33 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
                           className="w-full py-2 rounded-xl text-xs font-semibold disabled:opacity-50"
                           style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
                           {salvandoCapa ? "Salvando capa…" : "Salvar capa"}
+                        </button>
+                      </div>
+                      <div className="p-4 rounded-xl space-y-2" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.12)" }}>
+                        <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.55)" }}>Vínculo jornada</p>
+                        <p className="text-[10px] leading-relaxed" style={{ color: C.dim }}>
+                          Associa este curso a um módulo (metadado). Em “Módulos da Jornada”, escolhe o mesmo curso como minicurso.
+                        </p>
+                        <select
+                          value={moduloJornadaEdicao}
+                          onChange={(e) => setModuloJornadaEdicao(e.target.value)}
+                          className={ic}
+                          style={SELECT_ST}
+                        >
+                          <option value="" style={OPT}>— Nenhum —</option>
+                          <option value="traco" style={OPT}>traco</option>
+                          <option value="temperamento" style={OPT}>temperamento</option>
+                          <option value="linguagens-amor" style={OPT}>linguagens-amor</option>
+                          <option value="roda" style={OPT}>roda</option>
+                        </select>
+                        <button
+                          type="button"
+                          disabled={salvandoModJn}
+                          onClick={() => void handleSalvarModuloJornada(curso.id)}
+                          className="w-full py-2 rounded-xl text-xs font-semibold disabled:opacity-50"
+                          style={{ border: "1px solid rgba(200,165,107,0.25)", color: C.gold }}
+                        >
+                          {salvandoModJn ? "A guardar…" : "Guardar vínculo"}
                         </button>
                       </div>
                       {loadingDetalhe

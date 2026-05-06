@@ -209,10 +209,14 @@ export const cursosTable = pgTable("cursos", {
   imagemUrl: text("imagem_url"),
   categoria: text("categoria"),
   nivel: text("nivel").default("todos"),
+  /** Slug do módulo da jornada (`traco`, `temperamento`, `linguagens-amor`, `roda`), quando for minicurso vinculado. */
+  moduloJornada: text("modulo_jornada"),
   publicado: boolean("publicado").notNull().default(false),
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
   atualizadoEm: timestamp("atualizado_em").notNull().defaultNow(),
-});
+}, (table) => ({
+  moduloJornadaIdx: index("idx_cursos_modulo_jornada").on(table.moduloJornada),
+}));
 
 export const aulasTable = pgTable("aulas", {
   id: serial("id").primaryKey(),
@@ -239,6 +243,35 @@ export const progressoCursosTable = pgTable("progresso_cursos", {
   usuarioIdx: index("idx_progresso_usuario_id").on(table.usuarioId),
 }));
 
+/** Uma linha por slug de módulo da jornada (intro + curso minicurso opcional). */
+export const configuracoesModulosTable = pgTable("configuracoes_modulos", {
+  slug: text("slug").primaryKey(),
+  tituloIntro: text("titulo_intro").notNull(),
+  descricaoIntro: text("descricao_intro").notNull(),
+  videoIntroUrl: text("video_intro_url"),
+  cursoVinculadoId: integer("curso_vinculado_id").references(() => cursosTable.id, { onDelete: "set null" }),
+  ordem: integer("ordem").notNull().default(0),
+  nivelDificuldade: text("nivel_dificuldade").notNull().default("iniciante"),
+  atualizadoEm: timestamp("atualizado_em").notNull().defaultNow(),
+}, (table) => ({
+  ordemIdx: index("idx_config_modulos_ordem").on(table.ordem),
+}));
+
+/** Resultado do questionário das 5 linguagens do amor (30 escolhas forçadas, v1). */
+export const analiseLinguagensAmorTable = pgTable("analise_linguagens_amor", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  respostas: jsonb("respostas").notNull(),
+  pontuacoes: jsonb("pontuacoes").notNull(),
+  linguagemPrincipal: text("linguagem_principal").notNull(),
+  linguagemSecundaria: text("linguagem_secundaria").notNull(),
+  resultado: jsonb("resultado").notNull(),
+  versao: text("versao").notNull().default("linguagens_amor_v1"),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  usuarioIdx: index("idx_analise_linguagens_amor_usuario").on(table.usuarioId),
+}));
+
 // ── Schemas & types ────────────────────────────────────────────────────────────
 
 export const insertUsuarioSchema = createInsertSchema(usuariosTable).omit({ id: true, criadoEm: true, atualizadoEm: true });
@@ -263,3 +296,5 @@ export type Curso = typeof cursosTable.$inferSelect;
 export type Aula = typeof aulasTable.$inferSelect;
 export type ProgressoCurso = typeof progressoCursosTable.$inferSelect;
 export type Notificacao = typeof notificacoesTable.$inferSelect;
+export type ConfiguracaoModulo = typeof configuracoesModulosTable.$inferSelect;
+export type AnaliseLinguagensAmor = typeof analiseLinguagensAmorTable.$inferSelect;
