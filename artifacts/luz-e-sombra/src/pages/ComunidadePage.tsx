@@ -12,26 +12,13 @@ import {
   Youtube,
   FileText,
   Heart,
-  Flame,
-  Sparkles,
-  Star,
-  Sun,
   ExternalLink,
   MessageCircle,
   Share2,
   Bookmark,
   Send,
   CheckCircle2,
-  type LucideIcon,
 } from "lucide-react";
-
-const REACTIONS: { key: string; icon: LucideIcon; color: string; label: string }[] = [
-  { key: "❤️", icon: Heart,    color: "#e85555", label: "Amor" },
-  { key: "🔥", icon: Flame,    color: "#e86c2b", label: "Fogo" },
-  { key: "💫", icon: Sparkles, color: "#c8a56b", label: "Magia" },
-  { key: "🙏", icon: Sun,      color: "#f0c040", label: "Gratidão" },
-  { key: "✨", icon: Star,     color: "#c8a56b", label: "Inspiração" },
-];
 
 interface Post {
   id: number;
@@ -603,31 +590,6 @@ function PostCard({
           </p>
         </div>
       )}
-
-      {/* Reactions */}
-      <div className="flex items-center gap-1 px-5 pt-1 pb-2 flex-wrap">
-        {REACTIONS.map(({ key, icon: Icon, color, label }) => {
-          const cnt = post.reacoes[key] ?? 0;
-          const ativo = post.minhasReacoes.includes(key);
-          return (
-            <button
-              key={key}
-              onClick={() => onReagir(post.id, key)}
-              title={label}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all"
-              style={ativo
-                ? { background: "rgba(200,165,107,0.15)", border: `1px solid ${color}55`, color }
-                : { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(247,242,236,0.4)" }
-              }
-              onMouseEnter={e => { if (!ativo) { (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.25)"; (e.currentTarget as HTMLElement).style.color = color; } }}
-              onMouseLeave={e => { if (!ativo) { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)"; (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.4)"; } }}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {cnt > 0 && <span>{cnt}</span>}
-            </button>
-          );
-        })}
-      </div>
 
       {/* Meta row */}
       <div className="px-5 pb-2 text-xs" style={{ color: "rgba(247,242,236,0.42)" }}>
