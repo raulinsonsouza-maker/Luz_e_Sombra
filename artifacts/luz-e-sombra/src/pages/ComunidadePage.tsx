@@ -629,9 +629,9 @@ function PostCard({
         })}
       </div>
 
-      {/* Meta row like screenshot */}
+      {/* Meta row */}
       <div className="px-5 pb-2 text-xs" style={{ color: "rgba(247,242,236,0.42)" }}>
-        {timeAgo(post.criadoEm)} · {(totalCurtidas * 7 + 800).toLocaleString("pt-BR")} visualizações
+        {timeAgo(post.criadoEm)}
       </div>
 
       {/* Main actions row */}
