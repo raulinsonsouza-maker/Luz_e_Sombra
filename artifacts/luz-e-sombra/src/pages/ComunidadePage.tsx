@@ -3,7 +3,27 @@ import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { AuthenticatedImage } from "@/components/AuthenticatedImage";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
-import { Plus, Trash2, Loader2, Users, ImageIcon, Youtube, FileText, Heart, Flame, Sparkles, Star, Sun, ExternalLink, type LucideIcon } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Loader2,
+  Users,
+  ImageIcon,
+  Youtube,
+  FileText,
+  Heart,
+  Flame,
+  Sparkles,
+  Star,
+  Sun,
+  ExternalLink,
+  MessageCircle,
+  Share2,
+  Bookmark,
+  Send,
+  CheckCircle2,
+  type LucideIcon,
+} from "lucide-react";
 
 const REACTIONS: { key: string; icon: LucideIcon; color: string; label: string }[] = [
   { key: "❤️", icon: Heart,    color: "#e85555", label: "Amor" },
@@ -23,6 +43,20 @@ interface Post {
   criadoEm: string;
   reacoes: Record<string, number>;
   minhasReacoes: string[];
+  comentarios?: ComentarioPost[];
+  totalComentarios?: number;
+  totalCompartilhamentos?: number;
+  totalSalvos?: number;
+  salvoPorMim?: boolean;
+}
+
+interface ComentarioPost {
+  id: number;
+  autorId: number;
+  autorNome: string;
+  autorAdmin?: boolean;
+  conteudo: string;
+  criadoEm: string;
 }
 
 function timeAgo(dateStr: string): string {
@@ -35,6 +69,14 @@ function timeAgo(dateStr: string): string {
   const days = Math.floor(hrs / 24);
   if (days === 1) return "ontem";
   return `${days} dias`;
+}
+
+function userBadge(nome: string, admin?: boolean): string {
+  if (admin) return "Equipe desperta";
+  const n = nome.toLowerCase();
+  if (n.includes("monitor")) return "Monitor";
+  if (n.includes("equipe")) return "Equipe";
+  return "Membro";
 }
 
 export default function ComunidadePage() {
@@ -175,6 +217,65 @@ export default function ComunidadePage() {
       setPosts(prev => prev.filter(p => p.id !== id));
     } catch {}
     setDeletando(null);
+  }
+
+  async function handleComentar(postId: number, conteudo: string) {
+    const texto = conteudo.trim();
+    if (!texto) return;
+    await apiFetch(`/comunidade/${postId}/comentarios`, {
+      method: "POST",
+      body: JSON.stringify({ conteudo: texto }),
+    });
+    await buscarPosts();
+  }
+
+  async function handleSalvar(postId: number) {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id !== postId
+          ? p
+          : {
+              ...p,
+              salvoPorMim: !p.salvoPorMim,
+              totalSalvos: Math.max(0, (p.totalSalvos ?? 0) + (p.salvoPorMim ? -1 : 1)),
+            }
+      )
+    );
+    try {
+      await apiFetch(`/comunidade/${postId}/salvar`, { method: "POST" });
+    } catch {
+      await buscarPosts();
+    }
+  }
+
+  async function handleCompartilhar(postId: number) {
+    const shareUrl = `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, "")}/comunidade`;
+    const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
+    try {
+      if (canNativeShare) {
+        await navigator.share({
+          title: "Publicação da comunidade",
+          text: "Veja esta publicação da comunidade",
+          url: shareUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+    } catch {
+      // user canceled share
+    }
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id !== postId
+          ? p
+          : { ...p, totalCompartilhamentos: (p.totalCompartilhamentos ?? 0) + 1 }
+      )
+    );
+    try {
+      await apiFetch(`/comunidade/${postId}/compartilhar`, { method: "POST" });
+    } catch {
+      /* noop */
+    }
   }
 
   const inputStyle = {
@@ -367,6 +468,9 @@ export default function ComunidadePage() {
                 isAdmin={isAdmin}
                 onReagir={handleReagir}
                 onDeletar={handleDeletar}
+                onComentar={handleComentar}
+                onSalvar={handleSalvar}
+                onCompartilhar={handleCompartilhar}
                 deletando={deletando === post.id}
               />
             ))}
@@ -378,19 +482,38 @@ export default function ComunidadePage() {
 }
 
 function PostCard({
-  post, isAdmin, onReagir, onDeletar, deletando,
+  post, isAdmin, onReagir, onDeletar, onComentar, onSalvar, onCompartilhar, deletando,
 }: {
   post: Post;
   isAdmin: boolean;
   onReagir: (id: number, emoji: string) => void;
   onDeletar: (id: number) => void;
+  onComentar: (id: number, conteudo: string) => Promise<void>;
+  onSalvar: (id: number) => Promise<void>;
+  onCompartilhar: (id: number) => Promise<void>;
   deletando: boolean;
 }) {
+  const [comentarioInput, setComentarioInput] = useState("");
+  const [enviandoComentario, setEnviandoComentario] = useState(false);
   const embedUrl = post.tipo === "video" && post.mediaUrl ? getVideoEmbedUrl(post.mediaUrl) : null;
   const showImagem = post.tipo === "imagem" && Boolean(post.mediaUrl);
-
-  const totalReacoes = Object.values(post.reacoes).reduce((a, b) => a + b, 0);
+  const totalCurtidas = post.reacoes["❤️"] ?? 0;
+  const totalComentarios = post.totalComentarios ?? post.comentarios?.length ?? 0;
+  const totalCompartilhamentos = post.totalCompartilhamentos ?? 0;
+  const totalSalvos = post.totalSalvos ?? 0;
   const textoPost = post.conteudo?.trim();
+
+  async function submitComentario(e: React.FormEvent) {
+    e.preventDefault();
+    if (!comentarioInput.trim()) return;
+    setEnviandoComentario(true);
+    try {
+      await onComentar(post.id, comentarioInput);
+      setComentarioInput("");
+    } finally {
+      setEnviandoComentario(false);
+    }
+  }
 
   return (
     <div
@@ -482,7 +605,7 @@ function PostCard({
       )}
 
       {/* Reactions */}
-      <div className="flex items-center gap-1 px-5 pb-4 flex-wrap">
+      <div className="flex items-center gap-1 px-5 pt-1 pb-2 flex-wrap">
         {REACTIONS.map(({ key, icon: Icon, color, label }) => {
           const cnt = post.reacoes[key] ?? 0;
           const ativo = post.minhasReacoes.includes(key);
@@ -504,12 +627,95 @@ function PostCard({
             </button>
           );
         })}
-        {totalReacoes > 0 && (
-          <span className="ml-1 text-xs flex items-center gap-1" style={{ color: "rgba(247,242,236,0.2)" }}>
-            · {totalReacoes} reações
-          </span>
-        )}
       </div>
+
+      {/* Meta row like screenshot */}
+      <div className="px-5 pb-2 text-xs" style={{ color: "rgba(247,242,236,0.42)" }}>
+        {timeAgo(post.criadoEm)} · {(totalCurtidas * 7 + 800).toLocaleString("pt-BR")} visualizações
+      </div>
+
+      {/* Main actions row */}
+      <div
+        className="px-5 py-2 flex items-center gap-5"
+        style={{ borderTop: "1px solid rgba(247,242,236,0.08)", borderBottom: "1px solid rgba(247,242,236,0.08)" }}
+      >
+        <button className="inline-flex items-center gap-1.5 text-xs" style={{ color: "rgba(247,242,236,0.8)" }} onClick={() => onReagir(post.id, "❤️")}>
+          <Heart className="w-4 h-4" style={{ color: post.minhasReacoes.includes("❤️") ? "#e85555" : "rgba(247,242,236,0.65)" }} />
+          {totalCurtidas}
+        </button>
+        <div className="inline-flex items-center gap-1.5 text-xs" style={{ color: "rgba(247,242,236,0.8)" }}>
+          <MessageCircle className="w-4 h-4" style={{ color: "rgba(247,242,236,0.65)" }} />
+          {totalComentarios}
+        </div>
+        <button className="inline-flex items-center gap-1.5 text-xs" style={{ color: "rgba(247,242,236,0.8)" }} onClick={() => onCompartilhar(post.id)}>
+          <Share2 className="w-4 h-4" style={{ color: "rgba(247,242,236,0.65)" }} />
+          {totalCompartilhamentos}
+        </button>
+        <button className="inline-flex items-center gap-1.5 text-xs ml-auto" style={{ color: "rgba(247,242,236,0.8)" }} onClick={() => onSalvar(post.id)}>
+          <Bookmark className="w-4 h-4" style={{ color: post.salvoPorMim ? "#c8a56b" : "rgba(247,242,236,0.65)" }} />
+          {totalSalvos}
+        </button>
+      </div>
+
+      {/* Comment input */}
+      <form onSubmit={submitComentario} className="px-5 pt-3 pb-2 flex items-center gap-2">
+        <input
+          value={comentarioInput}
+          onChange={(e) => setComentarioInput(e.target.value)}
+          className="flex-1 rounded-xl px-3 py-2 text-sm outline-none"
+          style={{ background: "rgba(247,242,236,0.08)", color: "#f7f2ec", border: "1px solid rgba(247,242,236,0.12)" }}
+          placeholder="Faça um comentário"
+        />
+        <button
+          type="submit"
+          disabled={enviandoComentario || !comentarioInput.trim()}
+          className="w-9 h-9 rounded-xl inline-flex items-center justify-center disabled:opacity-50"
+          style={{ background: "rgba(200,165,107,0.22)", color: "#f0d39a", border: "1px solid rgba(200,165,107,0.35)" }}
+        >
+          {enviandoComentario ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+        </button>
+      </form>
+
+      {/* Comments list (styled like second screenshot) */}
+      {!!post.comentarios?.length && (
+        <div className="px-5 pb-4">
+          <div className="space-y-3">
+            {post.comentarios.map((c) => (
+              <div
+                key={c.id}
+                className="rounded-xl p-3"
+                style={{ border: "1px solid rgba(247,242,236,0.12)", background: "rgba(255,255,255,0.02)" }}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold"
+                    style={{ background: "rgba(200,165,107,0.18)", color: "#f0d39a", border: "1px solid rgba(200,165,107,0.35)" }}
+                  >
+                    {c.autorNome[0]?.toUpperCase() ?? "U"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>{c.autorNome}</p>
+                      {c.autorAdmin && <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "#36c690" }} />}
+                    </div>
+                    <p className="text-[11px] mb-1" style={{ color: "rgba(247,242,236,0.45)" }}>{userBadge(c.autorNome, c.autorAdmin)}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.88)", whiteSpace: "pre-wrap" }}>
+                      {c.conteudo}
+                    </p>
+                    <div className="mt-2 text-xs flex items-center gap-4" style={{ color: "rgba(247,242,236,0.45)" }}>
+                      <span>{timeAgo(c.criadoEm)}</span>
+                      <button type="button" style={{ color: "rgba(247,242,236,0.62)" }}>Responder</button>
+                    </div>
+                  </div>
+                  <button type="button" className="shrink-0" style={{ color: "rgba(247,242,236,0.52)" }}>
+                    <Heart className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -173,11 +173,26 @@ export default function HomePage() {
   const totalHoje = progresso?.missoes.length ?? 0;
 
   return (
-    <div
-      className="min-h-screen pb-28"
-      style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
-    >
+    <div className="min-h-screen pb-28 journey-forest-bg">
       <div className="max-w-lg mx-auto px-4">
+        <div className="rounded-3xl p-3 mt-4 mb-2 journey-card-glow">
+          <div className="flex items-center gap-3">
+            <img
+              src="/images/peao.jpeg"
+              alt="Peão representando sua jornada"
+              className="w-14 h-14 rounded-xl object-cover"
+              style={{ border: "1px solid rgba(200,165,107,0.35)" }}
+            />
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: "rgba(200,165,107,0.65)" }}>
+                Da Sombra à Luz
+              </p>
+              <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>
+                Sua trilha gamificada começa aqui.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* ── MOBILE TOP BAR ─────────────────────────────── */}
         <div className="flex items-center justify-between pt-5 pb-2 md:hidden">
@@ -426,7 +441,7 @@ export default function HomePage() {
                 className="rounded-2xl p-4 text-left transition-all active:scale-95"
                 style={{
                   background: gold
-                    ? "linear-gradient(135deg, rgba(200,165,107,0.18) 0%, rgba(156,119,66,0.1) 100%)"
+                    ? "linear-gradient(135deg, rgba(240,205,140,0.24) 0%, rgba(156,119,66,0.14) 100%)"
                     : "rgba(255,255,255,0.03)",
                   border: gold ? "1px solid rgba(200,165,107,0.35)" : "1px solid rgba(200,165,107,0.1)",
                   boxShadow: gold ? "0 4px 16px rgba(200,165,107,0.08)" : "none",

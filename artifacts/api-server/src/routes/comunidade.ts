@@ -1,7 +1,15 @@
 import { Router, Response } from "express";
 import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
 import { db } from "@workspace/db";
-import { comunidadeTable, reacoesTable, usuariosTable, notificacoesTable } from "@workspace/db/schema";
+import {
+  comunidadeTable,
+  reacoesTable,
+  usuariosTable,
+  notificacoesTable,
+  comentariosComunidadeTable,
+  salvosComunidadeTable,
+  compartilhamentosComunidadeTable,
+} from "@workspace/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
 
@@ -39,10 +47,47 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
       .where(sql`${reacoesTable.publicacaoId} = ANY(${sql`ARRAY[${sql.join(postIds.map(id => sql`${id}`), sql`, `)}]::int[]`})`)
       .groupBy(reacoesTable.publicacaoId, reacoesTable.emoji, reacoesTable.usuarioId);
 
+    const comentarios = await db
+      .select({
+        id: comentariosComunidadeTable.id,
+        publicacaoId: comentariosComunidadeTable.publicacaoId,
+        autorId: comentariosComunidadeTable.autorId,
+        autorNome: usuariosTable.nome,
+        autorAdmin: usuariosTable.isAdmin,
+        conteudo: comentariosComunidadeTable.conteudo,
+        criadoEm: comentariosComunidadeTable.criadoEm,
+      })
+      .from(comentariosComunidadeTable)
+      .leftJoin(usuariosTable, eq(usuariosTable.id, comentariosComunidadeTable.autorId))
+      .where(sql`${comentariosComunidadeTable.publicacaoId} = ANY(${sql`ARRAY[${sql.join(postIds.map(id => sql`${id}`), sql`, `)}]::int[]`})`)
+      .orderBy(comentariosComunidadeTable.criadoEm);
+
+    const salvos = await db
+      .select({
+        publicacaoId: salvosComunidadeTable.publicacaoId,
+        usuarioId: salvosComunidadeTable.usuarioId,
+        count: sql<number>`count(*)::int`.as("count"),
+      })
+      .from(salvosComunidadeTable)
+      .where(sql`${salvosComunidadeTable.publicacaoId} = ANY(${sql`ARRAY[${sql.join(postIds.map(id => sql`${id}`), sql`, `)}]::int[]`})`)
+      .groupBy(salvosComunidadeTable.publicacaoId, salvosComunidadeTable.usuarioId);
+
+    const compartilhamentos = await db
+      .select({
+        publicacaoId: compartilhamentosComunidadeTable.publicacaoId,
+        count: sql<number>`count(*)::int`.as("count"),
+      })
+      .from(compartilhamentosComunidadeTable)
+      .where(sql`${compartilhamentosComunidadeTable.publicacaoId} = ANY(${sql`ARRAY[${sql.join(postIds.map(id => sql`${id}`), sql`, `)}]::int[]`})`)
+      .groupBy(compartilhamentosComunidadeTable.publicacaoId);
+
     const userId = req.user!.id;
 
     const result = posts.map(post => {
       const postReacoes = reacoes.filter(r => r.publicacaoId === post.id);
+      const postComentarios = comentarios.filter(c => c.publicacaoId === post.id);
+      const postCompart = compartilhamentos.find(c => c.publicacaoId === post.id);
+      const postSalvos = salvos.filter(s => s.publicacaoId === post.id);
       const contagens: Record<string, number> = {};
       const minhasReacoes: string[] = [];
 
@@ -51,7 +96,26 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
         if (r.usuarioId === userId) minhasReacoes.push(r.emoji);
       });
 
-      return { ...post, reacoes: contagens, minhasReacoes };
+      const totalSalvos = postSalvos.reduce((sum, it) => sum + Number(it.count), 0);
+      const salvoPorMim = postSalvos.some((it) => it.usuarioId === userId);
+
+      return {
+        ...post,
+        reacoes: contagens,
+        minhasReacoes,
+        comentarios: postComentarios.map((c) => ({
+          id: c.id,
+          autorId: c.autorId,
+          autorNome: c.autorNome ?? "Usuário",
+          autorAdmin: Boolean(c.autorAdmin),
+          conteudo: c.conteudo,
+          criadoEm: c.criadoEm,
+        })),
+        totalComentarios: postComentarios.length,
+        totalCompartilhamentos: Number(postCompart?.count ?? 0),
+        totalSalvos,
+        salvoPorMim,
+      };
     });
 
     return res.json(result);
@@ -173,6 +237,80 @@ router.post("/:id/reagir", requireAuth, async (req: AuthRequest, res: Response) 
   } catch (err) {
     req.log.error({ err }, "Erro ao reagir");
     return res.status(500).json({ error: "Erro ao processar reação" });
+  }
+});
+
+// POST /api/comunidade/:id/comentarios — add comment
+router.post("/:id/comentarios", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const publicacaoId = parseInt(String(req.params.id), 10);
+    if (isNaN(publicacaoId)) return res.status(400).json({ error: "ID inválido" });
+    const conteudo = String((req.body as { conteudo?: string })?.conteudo ?? "").trim();
+    if (!conteudo) return res.status(400).json({ error: "Comentário vazio." });
+
+    const [post] = await db
+      .select({ id: comunidadeTable.id })
+      .from(comunidadeTable)
+      .where(eq(comunidadeTable.id, publicacaoId))
+      .limit(1);
+    if (!post) return res.status(404).json({ error: "Publicação não encontrada." });
+
+    const [comentario] = await db
+      .insert(comentariosComunidadeTable)
+      .values({
+        publicacaoId,
+        autorId: req.user!.id,
+        conteudo,
+      })
+      .returning();
+
+    return res.status(201).json(comentario);
+  } catch (err) {
+    req.log.error({ err }, "Erro ao comentar");
+    return res.status(500).json({ error: "Erro ao comentar publicação" });
+  }
+});
+
+// POST /api/comunidade/:id/salvar — toggle save
+router.post("/:id/salvar", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const publicacaoId = parseInt(String(req.params.id), 10);
+    if (isNaN(publicacaoId)) return res.status(400).json({ error: "ID inválido" });
+
+    const [existing] = await db
+      .select()
+      .from(salvosComunidadeTable)
+      .where(and(
+        eq(salvosComunidadeTable.publicacaoId, publicacaoId),
+        eq(salvosComunidadeTable.usuarioId, req.user!.id),
+      ))
+      .limit(1);
+
+    if (existing) {
+      await db.delete(salvosComunidadeTable).where(eq(salvosComunidadeTable.id, existing.id));
+      return res.json({ salvo: false });
+    }
+    await db.insert(salvosComunidadeTable).values({ publicacaoId, usuarioId: req.user!.id });
+    return res.json({ salvo: true });
+  } catch (err) {
+    req.log.error({ err }, "Erro ao salvar publicação");
+    return res.status(500).json({ error: "Erro ao salvar publicação" });
+  }
+});
+
+// POST /api/comunidade/:id/compartilhar — register share click
+router.post("/:id/compartilhar", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const publicacaoId = parseInt(String(req.params.id), 10);
+    if (isNaN(publicacaoId)) return res.status(400).json({ error: "ID inválido" });
+    await db.insert(compartilhamentosComunidadeTable).values({
+      publicacaoId,
+      usuarioId: req.user!.id,
+    });
+    return res.json({ ok: true });
+  } catch (err) {
+    req.log.error({ err }, "Erro ao compartilhar publicação");
+    return res.status(500).json({ error: "Erro ao compartilhar publicação" });
   }
 });
 

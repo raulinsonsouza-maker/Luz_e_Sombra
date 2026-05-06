@@ -144,6 +144,36 @@ export const reacoesTable = pgTable("reacoes_comunidade", {
   publicacaoIdx: index("idx_reacoes_publicacao_id").on(table.publicacaoId),
 }));
 
+export const comentariosComunidadeTable = pgTable("comentarios_comunidade", {
+  id: serial("id").primaryKey(),
+  publicacaoId: integer("publicacao_id").notNull().references(() => comunidadeTable.id, { onDelete: "cascade" }),
+  autorId: integer("autor_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  conteudo: text("conteudo").notNull(),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  publicacaoIdx: index("idx_comentarios_publicacao_id").on(table.publicacaoId),
+  autorIdx: index("idx_comentarios_autor_id").on(table.autorId),
+}));
+
+export const salvosComunidadeTable = pgTable("salvos_comunidade", {
+  id: serial("id").primaryKey(),
+  publicacaoId: integer("publicacao_id").notNull().references(() => comunidadeTable.id, { onDelete: "cascade" }),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  uniqueSave: unique("uq_salvo_pub_usuario").on(table.publicacaoId, table.usuarioId),
+  publicacaoIdx: index("idx_salvos_publicacao_id").on(table.publicacaoId),
+}));
+
+export const compartilhamentosComunidadeTable = pgTable("compartilhamentos_comunidade", {
+  id: serial("id").primaryKey(),
+  publicacaoId: integer("publicacao_id").notNull().references(() => comunidadeTable.id, { onDelete: "cascade" }),
+  usuarioId: integer("usuario_id").references(() => usuariosTable.id, { onDelete: "set null" }),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  publicacaoIdx: index("idx_compart_publicacao_id").on(table.publicacaoId),
+}));
+
 // ── Notificações ───────────────────────────────────────────────────────────────
 
 export const notificacoesTable = pgTable("notificacoes", {
@@ -215,6 +245,9 @@ export type Gamificacao = typeof gamificacaoTable.$inferSelect;
 export type MissaoDiaria = typeof missoesDiariasTable.$inferSelect;
 export type Comunidade = typeof comunidadeTable.$inferSelect;
 export type Reacao = typeof reacoesTable.$inferSelect;
+export type ComentarioComunidade = typeof comentariosComunidadeTable.$inferSelect;
+export type SalvoComunidade = typeof salvosComunidadeTable.$inferSelect;
+export type CompartilhamentoComunidade = typeof compartilhamentosComunidadeTable.$inferSelect;
 export type Curso = typeof cursosTable.$inferSelect;
 export type Aula = typeof aulasTable.$inferSelect;
 export type ProgressoCurso = typeof progressoCursosTable.$inferSelect;
