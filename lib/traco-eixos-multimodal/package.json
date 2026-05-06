@@ -2,6 +2,7 @@
   "name": "@workspace/traco-eixos-multimodal",
   "version": "0.0.0",
   "private": true,
+  "deprecated": "Substituído por lib/traco-imagem-engine + @workspace/traco-diagnostico-fusion; não usar em fluxos novos.",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"

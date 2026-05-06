@@ -6,7 +6,6 @@ import {
 import { diagnosticoEmocionalFusaoSchema } from "@workspace/traco-diagnostico-fusion";
 
 export const LEGACY_STORAGE_DIAGNOSTICO_30 = "luz_diagnostico_emocional_30_v1";
-export const LEGACY_STORAGE_DIAGNOSTICO_FUSAO = "luz_diagnostico_emocional_fusao";
 
 /** Remove resíduos do antigo questionário de 20 (evita confusão com o diagnóstico de 30). */
 export function purgeQuestionario20Storage(): void {
@@ -26,10 +25,6 @@ export function storageSuffixForPessoa(pessoaId: number | null): "eu" | `p${numb
 
 export function storageKeyDiagnostico30(pessoaId: number | null): string {
   return `luz_diagnostico_emocional_30_v1_${storageSuffixForPessoa(pessoaId)}`;
-}
-
-export function storageKeyDiagnosticoFusao(pessoaId: number | null): string {
-  return `luz_diagnostico_emocional_fusao_${storageSuffixForPessoa(pessoaId)}`;
 }
 
 /** Query para ancorar formulários e análise à mesma pessoa (`null` = Eu). */
@@ -123,27 +118,3 @@ export function readDiagnosticoEmocional30Fusao(pessoaId: number | null): Record
   }
 }
 
-export function readOptionalDiagnosticoFusao(pessoaId: number | null): Record<string, unknown> | undefined {
-  try {
-    const key = storageKeyDiagnosticoFusao(pessoaId);
-    let raw = localStorage.getItem(key);
-    if (!raw?.trim() && pessoaId === null) {
-      const leg = localStorage.getItem(LEGACY_STORAGE_DIAGNOSTICO_FUSAO);
-      if (leg?.trim()) {
-        try {
-          localStorage.setItem(key, leg);
-          localStorage.removeItem(LEGACY_STORAGE_DIAGNOSTICO_FUSAO);
-          raw = localStorage.getItem(key);
-        } catch {
-          /* ignore */
-        }
-      }
-    }
-    if (!raw?.trim()) return undefined;
-    const parsed = JSON.parse(raw) as unknown;
-    if (parsed && typeof parsed === "object") return parsed as Record<string, unknown>;
-  } catch {
-    /* ignore */
-  }
-  return undefined;
-}

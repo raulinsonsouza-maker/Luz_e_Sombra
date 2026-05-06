@@ -1,6 +1,8 @@
 # Modelo multimodal por eixos (imagem + questionário)
 
-Este documento descreve o modelo **operacional** implementado no monorepo: cinco eixos, vinte perguntas, fusão com pesos explícitos e métrica de confiança **sem** colapsar scores quando há divergência.
+> **Documento descontinuado.** O fluxo atual de Traço de Caráter usa `lib/traco-imagem-engine` (MediaPipe) + narrativa em `@workspace/traco-narrativa` e fusão opcional com o questionário conforme `DIAGNOSTICO_EMOCIONAL_ESPECIFICACAO.md`. Mantemos este ficheiro apenas como arquivo histórico.
+
+Este documento descrevia o modelo **operacional** implementado no monorepo: cinco eixos, vinte perguntas, fusão com pesos explícitos e métrica de confiança **sem** colapsar scores quando há divergência.
 
 ---
 

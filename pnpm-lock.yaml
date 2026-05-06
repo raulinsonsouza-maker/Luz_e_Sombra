@@ -266,9 +266,12 @@ importers:
       '@workspace/traco-diagnostico-fusion':
         specifier: workspace:*
         version: link:../../lib/traco-diagnostico-fusion
-      '@workspace/traco-eixos-multimodal':
+      '@workspace/traco-imagem-engine':
         specifier: workspace:*
-        version: link:../../lib/traco-eixos-multimodal
+        version: link:../../lib/traco-imagem-engine
+      '@workspace/traco-narrativa':
+        specifier: workspace:*
+        version: link:../../lib/traco-narrativa
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
@@ -762,6 +765,41 @@ importers:
         specifier: ~5.9.2
         version: 5.9.3
 
+  lib/traco-imagem-engine:
+    dependencies:
+      '@mediapipe/tasks-vision':
+        specifier: ^0.10.22
+        version: 0.10.35
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ~5.9.2
+        version: 5.9.3
+
+  lib/traco-narrativa:
+    dependencies:
+      '@workspace/traco-diagnostico-fusion':
+        specifier: workspace:*
+        version: link:../traco-diagnostico-fusion
+      '@workspace/traco-imagem-engine':
+        specifier: workspace:*
+        version: link:../traco-imagem-engine
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ~5.9.2
+        version: 5.9.3
+
   scripts:
     devDependencies:
       '@types/node':
@@ -937,6 +975,9 @@ packages:
 
   '@kurkle/color@0.3.4':
     resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
+
+  '@mediapipe/tasks-vision@0.10.35':
+    resolution: {integrity: sha512-HOvadwVRE6JC+45nyYhmnywnr5h/J8KZvOeUNVOG9q/0875pZgItznFB9bRTvLc264YSJqiZ1NsIpCStJw/egg==}
 
   '@nodable/entities@2.1.0':
     resolution: {integrity: sha512-nyT7T3nbMyBI/lvr6L5TyWbFJAI9FTgVRakNoBqCD+PmID8DzFrrNdLLtHMwMszOtqZa8PAOV24ZqDnQrhQINA==}
@@ -3904,6 +3945,8 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@kurkle/color@0.3.4': {}
+
+  '@mediapipe/tasks-vision@0.10.35': {}
 
   '@nodable/entities@2.1.0': {}
 

@@ -78,7 +78,8 @@
     "@workspace/temperamento-v1": "workspace:*",
     "@workspace/traco-diagnostico-emocional": "workspace:*",
     "@workspace/traco-diagnostico-fusion": "workspace:*",
-    "@workspace/traco-eixos-multimodal": "workspace:*",
+    "@workspace/traco-imagem-engine": "workspace:*",
+    "@workspace/traco-narrativa": "workspace:*",
     "chart.js": "^4.5.1",
     "react-chartjs-2": "^5.3.1"
   }

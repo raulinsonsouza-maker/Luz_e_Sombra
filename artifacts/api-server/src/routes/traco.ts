@@ -58,6 +58,54 @@ function parseEstruturasTraco(raw: unknown): Record<EstruturaTraco, number> | nu
   return out;
 }
 
+const TIPOS_FOTO_MARCADORES = ["rosto", "corpo-frente", "corpo-lado"] as const;
+
+function parseMarcadoresPorFoto(raw: unknown): boolean {
+  if (!Array.isArray(raw) || raw.length === 0) return false;
+  const tipos = new Set<string>(TIPOS_FOTO_MARCADORES);
+  for (const item of raw) {
+    if (!item || typeof item !== "object") return false;
+    const o = item as Record<string, unknown>;
+    if (typeof o.tipo !== "string" || !tipos.has(o.tipo)) return false;
+    if (typeof o.poseDetectada !== "boolean") return false;
+    if (typeof o.qualidadeFoto !== "number" || !Number.isFinite(o.qualidadeFoto)) return false;
+  }
+  return true;
+}
+
+function parseEvidenciasMotor(raw: unknown): boolean {
+  if (!Array.isArray(raw)) return false;
+  for (const item of raw) {
+    if (!item || typeof item !== "object") return false;
+    const o = item as Record<string, unknown>;
+    if (!ESTRUTURAS_TRACO.includes(o.estrutura as EstruturaTraco)) return false;
+    if (typeof o.peso !== "number" || !Number.isFinite(o.peso)) return false;
+    if (typeof o.descricao !== "string") return false;
+  }
+  return true;
+}
+
+function parseMarcadoresAgregados(raw: unknown): boolean {
+  if (!raw || typeof raw !== "object") return false;
+  const o = raw as Record<string, unknown>;
+  const nums = [
+    "shrMedio",
+    "wsrMedio",
+    "ulrMedio",
+    "simetriaMedia",
+    "densidadeMedia",
+    "definicaoMedia",
+    "inclinacaoMedia",
+    "projecaoPeitoMedia",
+  ];
+  for (const k of nums) {
+    const v = o[k];
+    if (v !== null && v !== undefined && typeof v !== "number") return false;
+  }
+  if (typeof o.fotosComPoseCorpo !== "number" || !Number.isFinite(o.fotosComPoseCorpo)) return false;
+  return true;
+}
+
 function normalizeMetadata(raw: unknown, fallbackConfidence: number): AnalysisMetadata {
   const data = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const conf = (data.confidenceBreakdown && typeof data.confidenceBreakdown === "object"
@@ -300,6 +348,22 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
     if (Math.abs(sum - 100) > 2) {
       return res.status(400).json({ error: "Percentagens inválidas: devem somar 100." });
     }
+
+    if (!parseMarcadoresPorFoto(r.marcadoresPorFoto)) {
+      return res.status(400).json({
+        error:
+          "marcadoresPorFoto é obrigatório: inclua o array devolvido pela análise no navegador (MediaPipe) para auditoria.",
+      });
+    }
+    if (!parseEvidenciasMotor(r.evidenciasMotor)) {
+      return res.status(400).json({
+        error: "evidenciasMotor é obrigatório (array de evidências; pode ser vazio).",
+      });
+    }
+    if (r.marcadoresAgregados !== undefined && !parseMarcadoresAgregados(r.marcadoresAgregados)) {
+      return res.status(400).json({ error: "marcadoresAgregados inválido." });
+    }
+
     const metadata = normalizeMetadata(r.metadata, toSafeNumber(r.confiancaAnalise, 50));
 
     const estruturasSomenteFotos = { ...estParsed };
