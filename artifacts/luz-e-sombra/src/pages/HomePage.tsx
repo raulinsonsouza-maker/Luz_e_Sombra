@@ -94,7 +94,7 @@ function ScoreGauge({ score, cor }: { score: number; cor: string }) {
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
         {score > 0 ? (
           <>
-            <span className="font-tan-mon-cheri" style={{ fontSize: 22, color: "#f7f2ec", lineHeight: 1 }}>
+            <span className="font-semibold tracking-tight" style={{ fontSize: 22, color: "#f7f2ec", lineHeight: 1 }}>
               {score.toFixed(1)}
             </span>
             <span style={{ fontSize: 9, color: "rgba(247,242,236,0.35)", marginTop: 3, letterSpacing: "0.08em" }}>
@@ -224,7 +224,7 @@ export default function HomePage() {
                     boxShadow: "0 0 16px rgba(200,165,107,0.3)",
                   }}
                 >
-                  <span className="font-tan-mon-cheri text-sm" style={{ color: "#1a1208" }}>
+                  <span className="text-sm font-bold" style={{ color: "#1a1208" }}>
                     {progresso?.nivel ?? 1}
                   </span>
                 </div>

@@ -14,7 +14,7 @@ export default function LandingPage() {
   const handleCTA = () => navigate("/login");
 
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif" }}>
+    <div>
 
       {/* ── NAV ─────────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 h-16 flex items-center"

@@ -98,7 +98,7 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-5 pt-3 flex items-center justify-between gap-4">
           {/* Brand */}
           <div className="flex items-center gap-3 shrink-0">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl font-tan-mon-cheri text-sm"
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl font-semibold text-sm"
               style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.15), rgba(156,119,66,0.05))", border: "1px solid rgba(200,165,107,0.3)", color: C.gold, letterSpacing: "0.04em" }}>
               SL
             </div>
