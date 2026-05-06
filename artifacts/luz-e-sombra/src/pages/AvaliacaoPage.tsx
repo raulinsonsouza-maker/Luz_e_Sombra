@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { AREAS_DA_VIDA, FormData } from "@/lib/types";
 import { ChevronLeft, ChevronRight, Target, User, Calendar, ExternalLink } from "lucide-react";
+import MobileTopBar from "@/components/MobileTopBar";
 import { apiFetch } from "@/lib/auth";
 
 // Icon map inline (avoids AreaIcon which uses brand-* classes)
@@ -177,10 +178,10 @@ function AvaliacaoContent() {
   // ── Welcome step ──────────────────────────────────────────────────────────
   const renderWelcome = () => (
     <div className="space-y-5">
-      {/* Hero */}
+      {/* Hero (título em mobile via MobileTopBar) */}
       <div className="text-center pt-2 pb-4">
         <div
-          className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-5 mx-auto"
+          className="hidden md:inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-5 mx-auto"
           style={{
             background: "linear-gradient(135deg, rgba(200,165,107,0.15) 0%, rgba(156,119,66,0.08) 100%)",
             border: "1px solid rgba(200,165,107,0.3)",
@@ -189,7 +190,7 @@ function AvaliacaoContent() {
           <Target className="w-8 h-8" style={{ color: "#c8a56b" }} strokeWidth={1.4} />
         </div>
 
-        <div className="flex items-center justify-center gap-3 mb-3">
+        <div className="hidden md:flex items-center justify-center gap-3 mb-3">
           <div className="w-6 h-px" style={{ background: "rgba(200,165,107,0.4)" }} />
           <span className="text-xs tracking-[0.25em] uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
             Autoconhecimento
@@ -198,12 +199,12 @@ function AvaliacaoContent() {
         </div>
 
         <h1
-          className="font-tan-mon-cheri text-3xl md:text-4xl mb-3"
+          className="hidden md:block font-tan-mon-cheri text-3xl md:text-4xl mb-3"
           style={{ color: "#f7f2ec", lineHeight: 1.25 }}
         >
           Roda da Vida
         </h1>
-        <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.5)", maxWidth: 340, margin: "0 auto" }}>
+        <p className="text-sm leading-relaxed mt-2 md:mt-0" style={{ color: "rgba(247,242,236,0.5)", maxWidth: 340, margin: "0 auto" }}>
           Uma fotografia honesta do seu momento atual em 12 dimensões da vida
         </p>
       </div>
@@ -423,6 +424,7 @@ function AvaliacaoContent() {
       className="min-h-screen pb-28"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
+      <MobileTopBar titulo="Roda da Vida" subtitulo="12 dimensões da vida" />
       <div className="max-w-lg mx-auto px-4 pt-6">
 
         {/* ── Progress bar ── */}

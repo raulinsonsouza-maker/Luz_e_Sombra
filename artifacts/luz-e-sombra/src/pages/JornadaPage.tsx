@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import MobileTopBar from "@/components/MobileTopBar";
 import {
   CheckCircle2,
   Lock,
@@ -90,6 +91,7 @@ export default function JornadaPage() {
 
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
+      <MobileTopBar />
       <div className="max-w-lg mx-auto px-4 pt-6">
         <div className="mb-8">
           <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>

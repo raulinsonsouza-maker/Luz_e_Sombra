@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { ANOS_UNIVERSAIS, ANOS_PESSOAIS, COMBINACOES, NUMEROS_DE_VIDA } from "@/lib/numerologia-data";
+import MobileTopBar from "@/components/MobileTopBar";
 import {
   MesPessoal,
   calcularAnoPessoal,
@@ -654,6 +655,7 @@ export default function NumerologiaPage() {
 
   return (
     <div className="luxury-shell pt-6 pb-28 px-4">
+      <MobileTopBar titulo="Numerologia" subtitulo="Meus números e ciclos" />
       <div className="max-w-4xl mx-auto space-y-5 md:space-y-6">
 
         {/* Hero card */}
@@ -664,17 +666,19 @@ export default function NumerologiaPage() {
           <div className="h-px w-full" style={{ background: "linear-gradient(90deg, transparent, #c8a56b 40%, #9c7742 60%, transparent)" }} />
 
           <div className="p-6 sm:p-8 md:p-10">
-            {/* Header */}
+            {/* Header (título em mobile via MobileTopBar) */}
             <div className="text-center mb-8 md:mb-10">
-              <p className="text-xs font-semibold tracking-[0.12em] sm:tracking-[0.3em] uppercase mb-4"
-                style={{ color: "rgba(200,165,107,0.85)" }}>
-                Análise · Numerológica · Pessoal
-              </p>
-              <h1 className="font-tan-mon-cheri text-3xl sm:text-4xl md:text-6xl mb-3"
-                style={{ color: "#c8a56b" }}>
-                Numerologia
-              </h1>
-              <p className="text-sm" style={{ color: "rgba(247,242,236,0.65)" }}>
+              <div className="hidden md:block">
+                <p className="text-xs font-semibold tracking-[0.12em] sm:tracking-[0.3em] uppercase mb-4"
+                  style={{ color: "rgba(200,165,107,0.85)" }}>
+                  Análise · Numerológica · Pessoal
+                </p>
+                <h1 className="font-tan-mon-cheri text-3xl sm:text-4xl md:text-6xl mb-3"
+                  style={{ color: "#c8a56b" }}>
+                  Numerologia
+                </h1>
+              </div>
+              <p className="text-sm mt-2 md:mt-0" style={{ color: "rgba(247,242,236,0.65)" }}>
                 Decifre os padrões do seu destino
               </p>
             </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import MobileTopBar from "@/components/MobileTopBar";
 import { AuthenticatedImage } from "@/components/AuthenticatedImage";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 import {
@@ -278,10 +279,11 @@ export default function ComunidadePage() {
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
       <div className="max-w-xl mx-auto px-4 pt-6">
+        <MobileTopBar titulo="Comunidade" subtitulo="Espaço compartilhado" />
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
+        {/* Header (desktop — mobile usa MobileTopBar) */}
+        <div className={`flex items-center mb-6 ${isAdmin ? "justify-end md:justify-between" : "hidden md:flex justify-between"}`}>
+          <div className="hidden md:block">
             <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
               Espaço Compartilhado
             </p>
@@ -483,6 +485,8 @@ function PostCard({
 }) {
   const [comentarioInput, setComentarioInput] = useState("");
   const [enviandoComentario, setEnviandoComentario] = useState(false);
+  const [comentariosAbertos, setComentariosAbertos] = useState(false);
+  const [comentariosVisiveis, setComentariosVisiveis] = useState(2);
   const embedUrl = post.tipo === "video" && post.mediaUrl ? getVideoEmbedUrl(post.mediaUrl) : null;
   const showImagem = post.tipo === "imagem" && Boolean(post.mediaUrl);
   const totalCurtidas = post.reacoes["❤️"] ?? 0;
@@ -490,6 +494,22 @@ function PostCard({
   const totalCompartilhamentos = post.totalCompartilhamentos ?? 0;
   const totalSalvos = post.totalSalvos ?? 0;
   const textoPost = post.conteudo?.trim();
+  const comentariosLista = post.comentarios ?? [];
+  const comentariosRender = comentariosLista.slice(0, comentariosVisiveis);
+  const temMaisComentarios = comentariosVisiveis < comentariosLista.length;
+
+  useEffect(() => {
+    setComentariosAbertos(false);
+    setComentariosVisiveis(2);
+  }, [post.id, totalComentarios]);
+
+  function toggleComentarios() {
+    setComentariosAbertos((prev) => !prev);
+  }
+
+  function verMaisComentarios() {
+    setComentariosVisiveis((prev) => prev + 3);
+  }
 
   async function submitComentario(e: React.FormEvent) {
     e.preventDefault();
@@ -606,10 +626,15 @@ function PostCard({
           <Heart className="w-4 h-4" style={{ color: post.minhasReacoes.includes("❤️") ? "#e85555" : "rgba(247,242,236,0.65)" }} />
           {totalCurtidas}
         </button>
-        <div className="inline-flex items-center gap-1.5 text-xs" style={{ color: "rgba(247,242,236,0.8)" }}>
+        <button
+          type="button"
+          onClick={toggleComentarios}
+          className="inline-flex items-center gap-1.5 text-xs transition-all"
+          style={{ color: comentariosAbertos ? "#f0d39a" : "rgba(247,242,236,0.8)" }}
+        >
           <MessageCircle className="w-4 h-4" style={{ color: "rgba(247,242,236,0.65)" }} />
           {totalComentarios}
-        </div>
+        </button>
         <button className="inline-flex items-center gap-1.5 text-xs" style={{ color: "rgba(247,242,236,0.8)" }} onClick={() => onCompartilhar(post.id)}>
           <Share2 className="w-4 h-4" style={{ color: "rgba(247,242,236,0.65)" }} />
           {totalCompartilhamentos}
@@ -620,30 +645,42 @@ function PostCard({
         </button>
       </div>
 
-      {/* Comment input */}
-      <form onSubmit={submitComentario} className="px-5 pt-3 pb-2 flex items-center gap-2">
-        <input
-          value={comentarioInput}
-          onChange={(e) => setComentarioInput(e.target.value)}
-          className="flex-1 rounded-xl px-3 py-2 text-sm outline-none"
-          style={{ background: "rgba(247,242,236,0.08)", color: "#f7f2ec", border: "1px solid rgba(247,242,236,0.12)" }}
-          placeholder="Faça um comentário"
-        />
+      {totalComentarios > 0 && !comentariosAbertos && (
         <button
-          type="submit"
-          disabled={enviandoComentario || !comentarioInput.trim()}
-          className="w-9 h-9 rounded-xl inline-flex items-center justify-center disabled:opacity-50"
-          style={{ background: "rgba(200,165,107,0.22)", color: "#f0d39a", border: "1px solid rgba(200,165,107,0.35)" }}
+          type="button"
+          onClick={toggleComentarios}
+          className="w-full px-5 py-2.5 text-left text-xs transition-all"
+          style={{ color: "rgba(247,242,236,0.55)" }}
         >
-          {enviandoComentario ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          Ver {Math.min(totalComentarios, 2)} de {totalComentarios} comentário{totalComentarios > 1 ? "s" : ""}
         </button>
-      </form>
+      )}
 
-      {/* Comments list (styled like second screenshot) */}
-      {!!post.comentarios?.length && (
+      {comentariosAbertos && (
+        <form onSubmit={submitComentario} className="px-5 pt-3 pb-2 flex items-center gap-2">
+          <input
+            value={comentarioInput}
+            onChange={(e) => setComentarioInput(e.target.value)}
+            className="flex-1 rounded-xl px-3 py-2 text-sm outline-none"
+            style={{ background: "rgba(247,242,236,0.08)", color: "#f7f2ec", border: "1px solid rgba(247,242,236,0.12)" }}
+            placeholder="Faça um comentário"
+          />
+          <button
+            type="submit"
+            disabled={enviandoComentario || !comentarioInput.trim()}
+            className="w-9 h-9 rounded-xl inline-flex items-center justify-center disabled:opacity-50"
+            style={{ background: "rgba(200,165,107,0.22)", color: "#f0d39a", border: "1px solid rgba(200,165,107,0.35)" }}
+          >
+            {enviandoComentario ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          </button>
+        </form>
+      )}
+
+      {/* Comments list (estilo feed social com paginação visual) */}
+      {comentariosAbertos && !!comentariosLista.length && (
         <div className="px-5 pb-4">
           <div className="space-y-3">
-            {post.comentarios.map((c) => (
+            {comentariosRender.map((c) => (
               <div
                 key={c.id}
                 className="rounded-xl p-3"
@@ -676,6 +713,31 @@ function PostCard({
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="mt-3 flex items-center justify-between">
+            {temMaisComentarios ? (
+              <button
+                type="button"
+                onClick={verMaisComentarios}
+                className="text-xs font-medium"
+                style={{ color: "#c8a56b" }}
+              >
+                Ver mais comentários
+              </button>
+            ) : (
+              <span className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
+                Todos os comentários carregados
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={toggleComentarios}
+              className="text-xs"
+              style={{ color: "rgba(247,242,236,0.45)" }}
+            >
+              Ocultar comentários
+            </button>
           </div>
         </div>
       )}

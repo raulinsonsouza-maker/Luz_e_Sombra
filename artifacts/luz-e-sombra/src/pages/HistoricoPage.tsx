@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { TrendingUp, TrendingDown, Minus, Target, Loader2, ArrowRight, ArrowUp, ArrowDown } from "lucide-react";
+import MobileTopBar from "@/components/MobileTopBar";
 import { apiFetch } from "@/lib/auth";
 
 interface Avaliacao {
@@ -110,10 +111,11 @@ export default function HistoricoPage() {
       className="min-h-screen pb-28"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
+      <MobileTopBar titulo="Histórico" subtitulo="Evolução da Roda da Vida" />
       <div className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-4">
 
-        {/* ── Header ── */}
-        <div className="mb-2">
+        {/* ── Header (desktop — mobile via MobileTopBar) ── */}
+        <div className="mb-2 hidden md:block">
           <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
             Evolução
           </p>

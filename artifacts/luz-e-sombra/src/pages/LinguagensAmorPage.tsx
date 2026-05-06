@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { ArrowRight, Heart, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import MobileTopBar from "@/components/MobileTopBar";
 import {
   PARES_FORCADOS,
   entradaLinguagensAmorSchema,
@@ -140,6 +141,7 @@ export default function LinguagensAmorPage() {
     const sec = String(resultadoApi.secundaria ?? "");
     return (
       <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
+        <MobileTopBar titulo="Linguagens do amor" subtitulo="As tuas escolhas" />
         <div className="max-w-lg mx-auto space-y-6">
           <button
             type="button"
@@ -181,7 +183,10 @@ export default function LinguagensAmorPage() {
 
   if (fase === "enviando") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: bg }}>
+      <div className="min-h-screen relative flex flex-col items-center justify-center px-4" style={{ background: bg }}>
+        <div className="absolute top-0 left-0 right-0">
+          <MobileTopBar titulo="Linguagens do amor" subtitulo="A guardar…" />
+        </div>
         <Loader2 className="w-10 h-10 animate-spin mb-4" style={{ color: "#c8a56b" }} />
         <p className="text-sm" style={{ color: "rgba(247,242,236,0.5)" }}>
           A guardar a tua análise…
@@ -193,9 +198,10 @@ export default function LinguagensAmorPage() {
   if (fase === "intro") {
     return (
       <div className="min-h-screen pb-28 px-4 pt-8" style={{ background: bg }}>
+        <MobileTopBar titulo="5 Linguagens do Amor" subtitulo="Questionário de pares" />
         <div className="max-w-lg mx-auto">
-          <Heart className="w-12 h-12 mb-6" style={{ color: "#c8a56b" }} />
-          <h1 className="font-tan-mon-cheri text-3xl mb-4" style={{ color: "#f7f2ec" }}>
+          <Heart className="w-12 h-12 mb-6 hidden md:block" style={{ color: "#c8a56b" }} />
+          <h1 className="font-tan-mon-cheri text-3xl mb-4 hidden md:block" style={{ color: "#f7f2ec" }}>
             5 Linguagens do Amor
           </h1>
           <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(247,242,236,0.55)" }}>
@@ -218,6 +224,7 @@ export default function LinguagensAmorPage() {
 
   return (
     <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
+      <MobileTopBar titulo="Linguagens do amor" subtitulo={`${qIndex + 1} de ${TOTAL}`} />
       <div className="max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-4">
           <button type="button" onClick={voltar} className="text-xs" style={{ color: "rgba(200,165,107,0.65)" }}>

@@ -6,6 +6,7 @@ import {
   BookOpen, Clock, ChevronRight, ExternalLink,
 } from "lucide-react";
 import { CursoCapa } from "@/components/CursoCapa";
+import MobileTopBar from "@/components/MobileTopBar";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 
 interface Aula {
@@ -110,6 +111,7 @@ export default function CursoPage() {
   return (
     <div className="min-h-screen pb-32"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}>
+      <MobileTopBar titulo={curso.titulo} subtitulo={curso.categoria ?? "Curso"} />
       <div className="max-w-2xl mx-auto px-4 sm:px-5 pt-4 sm:pt-6">
 
         <button
@@ -135,7 +137,7 @@ export default function CursoPage() {
                 {curso.categoria}
               </span>
             )}
-            <h1 className="font-tan-mon-cheri text-2xl sm:text-3xl mb-3 leading-tight" style={{ color: "#f7f2ec" }}>
+            <h1 className="hidden md:block font-tan-mon-cheri text-2xl sm:text-3xl mb-3 leading-tight" style={{ color: "#f7f2ec" }}>
               {curso.titulo}
             </h1>
             <p className="text-sm sm:text-[15px] leading-relaxed mb-6" style={{ color: "rgba(247,242,236,0.52)" }}>

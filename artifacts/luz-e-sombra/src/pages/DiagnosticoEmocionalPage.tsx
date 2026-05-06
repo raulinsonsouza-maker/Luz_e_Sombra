@@ -11,6 +11,7 @@ import {
   ESCALA_PRESENTE_LABELS,
   ESCALA_CONSCIENCIA_LABELS,
 } from "@workspace/traco-diagnostico-emocional";
+import MobileTopBar from "@/components/MobileTopBar";
 import {
   isDiagnostico30RespostasCompletas,
   parsePessoaIdFromSearch,
@@ -145,13 +146,14 @@ export default function DiagnosticoEmocionalPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}>
-      <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
+      <MobileTopBar titulo="Diagnóstico emocional" subtitulo="Contexto antes do corpo" />
+      <div className="max-w-lg mx-auto px-4 pt-4 md:pt-8 pb-10">
         {fase === "intro" && (
           <section>
-            <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
+            <p className="text-xs tracking-widest uppercase mb-3 hidden md:block" style={{ color: "rgba(200,165,107,0.55)" }}>
               Diagnóstico Emocional
             </p>
-            <h1 className="font-tan-mon-cheri text-2xl mb-4" style={{ color: "#f7f2ec" }}>
+            <h1 className="font-tan-mon-cheri text-2xl mb-4 hidden md:block" style={{ color: "#f7f2ec" }}>
               Antes de olhar o corpo, o contexto emocional
             </h1>
             {pessoaId !== null && (

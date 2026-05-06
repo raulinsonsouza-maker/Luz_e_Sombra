@@ -3,6 +3,7 @@ import { useLocation, useParams } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { ChevronLeft, Lock, Loader2, CheckCircle2, Sparkles } from "lucide-react";
+import MobileTopBar from "@/components/MobileTopBar";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 import { MinicursoEmbedido } from "@/components/MinicursoEmbedido";
 
@@ -73,6 +74,7 @@ export default function JornadaHubPage() {
   if (!modulo) {
     return (
       <div className="min-h-screen px-4 pt-8 journey-forest-bg">
+        <MobileTopBar titulo="Jornada" subtitulo="Módulo não encontrado" />
         <div className="max-w-lg mx-auto text-center">
           <p className="text-sm mb-4" style={{ color: "rgba(247,242,236,0.5)" }}>
             Módulo não encontrado.
@@ -93,6 +95,7 @@ export default function JornadaHubPage() {
   if (modulo.status === "locked") {
     return (
       <div className="min-h-screen px-4 pt-6 pb-28 journey-forest-bg">
+        <MobileTopBar titulo={modulo.tituloIntro} subtitulo="Módulo bloqueado" />
         <div className="max-w-lg mx-auto">
           <button
             type="button"
@@ -122,6 +125,7 @@ export default function JornadaHubPage() {
 
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
+      <MobileTopBar titulo={modulo.tituloIntro} subtitulo="Módulo da jornada" />
       <div className="max-w-lg mx-auto px-4 pt-6">
         <button
           type="button"
@@ -134,13 +138,13 @@ export default function JornadaHubPage() {
         </button>
 
         <div className="mb-8">
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
+          <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-2 hidden md:block" style={{ color: "rgba(200,165,107,0.5)" }}>
             Módulo
           </p>
-          <h1 className="font-tan-mon-cheri text-2xl mb-2" style={{ color: "#f7f2ec" }}>
+          <h1 className="font-tan-mon-cheri text-2xl mb-2 hidden md:block" style={{ color: "#f7f2ec" }}>
             {modulo.tituloIntro}
           </h1>
-          <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
+          <p className="text-sm leading-relaxed mt-1 md:mt-0" style={{ color: "rgba(247,242,236,0.5)" }}>
             {modulo.descricaoIntro}
           </p>
         </div>
