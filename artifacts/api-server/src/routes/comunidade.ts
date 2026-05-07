@@ -62,6 +62,7 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
         id: comentariosComunidadeTable.id,
         publicacaoId: comentariosComunidadeTable.publicacaoId,
         autorId: comentariosComunidadeTable.autorId,
+        parentComentarioId: comentariosComunidadeTable.parentComentarioId,
         autorNome: usuariosTable.nome,
         autorAdmin: usuariosTable.isAdmin,
         conteudo: comentariosComunidadeTable.conteudo,
@@ -126,6 +127,7 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
         comentarios: postComentarios.map((c) => ({
           id: c.id,
           autorId: c.autorId,
+          parentComentarioId: c.parentComentarioId,
           autorNome: c.autorNome ?? "Usuário",
           autorAdmin: Boolean(c.autorAdmin),
           conteudo: c.conteudo,
@@ -308,7 +310,12 @@ router.post("/:id/comentarios", requireAuth, async (req: AuthRequest, res: Respo
     const publicacaoId = parseInt(String(req.params.id), 10);
     if (isNaN(publicacaoId)) return res.status(400).json({ error: "ID inválido" });
     const conteudo = String((req.body as { conteudo?: string })?.conteudo ?? "").trim();
+    const parentComentarioIdRaw = (req.body as { parentComentarioId?: unknown })?.parentComentarioId;
+    const parentComentarioId = parentComentarioIdRaw == null ? null : Number(parentComentarioIdRaw);
     if (!conteudo) return res.status(400).json({ error: "Comentário vazio." });
+    if (parentComentarioId !== null && !Number.isInteger(parentComentarioId)) {
+      return res.status(400).json({ error: "parentComentarioId inválido." });
+    }
 
     const [post] = await db
       .select({ id: comunidadeTable.id })
@@ -317,11 +324,33 @@ router.post("/:id/comentarios", requireAuth, async (req: AuthRequest, res: Respo
       .limit(1);
     if (!post) return res.status(404).json({ error: "Publicação não encontrada." });
 
+    if (parentComentarioId !== null) {
+      const [parent] = await db
+        .select({
+          id: comentariosComunidadeTable.id,
+          publicacaoId: comentariosComunidadeTable.publicacaoId,
+          parentComentarioId: comentariosComunidadeTable.parentComentarioId,
+        })
+        .from(comentariosComunidadeTable)
+        .where(eq(comentariosComunidadeTable.id, parentComentarioId))
+        .limit(1);
+
+      if (!parent || parent.publicacaoId !== publicacaoId) {
+        return res.status(400).json({ error: "Comentário pai inválido para esta publicação." });
+      }
+
+      // Mantém apenas 2 níveis: comentário + resposta
+      if (parent.parentComentarioId !== null) {
+        return res.status(400).json({ error: "Só é permitido responder comentários de 1º nível." });
+      }
+    }
+
     const [comentario] = await db
       .insert(comentariosComunidadeTable)
       .values({
         publicacaoId,
         autorId: req.user!.id,
+        parentComentarioId,
         conteudo,
       })
       .returning();

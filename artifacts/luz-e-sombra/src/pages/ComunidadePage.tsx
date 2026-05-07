@@ -42,6 +42,7 @@ interface Post {
 interface ComentarioPost {
   id: number;
   autorId: number;
+  parentComentarioId?: number | null;
   autorNome: string;
   autorAdmin?: boolean;
   conteudo: string;
@@ -61,7 +62,7 @@ function timeAgo(dateStr: string): string {
 }
 
 function userBadge(nome: string, admin?: boolean): string {
-  if (admin) return "Equipe desperta";
+  if (admin) return "Administrador";
   const n = nome.toLowerCase();
   if (n.includes("monitor")) return "Monitor";
   if (n.includes("equipe")) return "Equipe";
@@ -208,12 +209,12 @@ export default function ComunidadePage() {
     setDeletando(null);
   }
 
-  async function handleComentar(postId: number, conteudo: string) {
+  async function handleComentar(postId: number, conteudo: string, parentComentarioId?: number | null) {
     const texto = conteudo.trim();
     if (!texto) return;
     await apiFetch(`/comunidade/${postId}/comentarios`, {
       method: "POST",
-      body: JSON.stringify({ conteudo: texto }),
+      body: JSON.stringify({ conteudo: texto, parentComentarioId: parentComentarioId ?? null }),
     });
     await buscarPosts();
   }
@@ -478,7 +479,7 @@ function PostCard({
   isAdmin: boolean;
   onReagir: (id: number, emoji: string) => void;
   onDeletar: (id: number) => void;
-  onComentar: (id: number, conteudo: string) => Promise<void>;
+  onComentar: (id: number, conteudo: string, parentComentarioId?: number | null) => Promise<void>;
   onSalvar: (id: number) => Promise<void>;
   onCompartilhar: (id: number) => Promise<void>;
   deletando: boolean;
@@ -497,8 +498,16 @@ function PostCard({
   const totalSalvos = post.totalSalvos ?? 0;
   const textoPost = post.conteudo?.trim();
   const comentariosLista = post.comentarios ?? [];
-  const comentariosRender = comentariosLista.slice(0, comentariosVisiveis);
-  const temMaisComentarios = comentariosVisiveis < comentariosLista.length;
+  const comentariosRaiz = comentariosLista.filter((c) => !c.parentComentarioId);
+  const respostasPorPai = new Map<number, ComentarioPost[]>();
+  for (const c of comentariosLista) {
+    if (!c.parentComentarioId) continue;
+    const atual = respostasPorPai.get(c.parentComentarioId) ?? [];
+    atual.push(c);
+    respostasPorPai.set(c.parentComentarioId, atual);
+  }
+  const comentariosRender = comentariosRaiz.slice(0, comentariosVisiveis);
+  const temMaisComentarios = comentariosVisiveis < comentariosRaiz.length;
 
   useEffect(() => {
     setComentariosAbertos(false);
@@ -518,7 +527,7 @@ function PostCard({
     if (!comentarioInput.trim()) return;
     setEnviandoComentario(true);
     try {
-      await onComentar(post.id, comentarioInput);
+      await onComentar(post.id, comentarioInput, respondendoA?.id ?? null);
       setComentarioInput("");
       setRespondendoA(null);
     } finally {
@@ -712,48 +721,87 @@ function PostCard({
       {comentariosAbertos && !!comentariosLista.length && (
         <div className="px-5 pb-4">
           <div className="space-y-3">
-            {comentariosRender.map((c) => (
-              <div key={c.id} className="flex items-start gap-3">
-                <div
-                  className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold"
-                  style={{ background: "rgba(200,165,107,0.18)", color: "#f0d39a", border: "1px solid rgba(200,165,107,0.35)" }}
-                >
-                  {c.autorNome[0]?.toUpperCase() ?? "U"}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div
-                    className="rounded-2xl px-3 py-2.5"
-                    style={{ background: "rgba(247,242,236,0.08)", border: "1px solid rgba(247,242,236,0.12)" }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>{c.autorNome}</p>
-                      {c.autorAdmin && <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "#36c690" }} />}
-                    </div>
-                    <p className="text-[11px] mb-1" style={{ color: "rgba(247,242,236,0.45)" }}>{userBadge(c.autorNome, c.autorAdmin)}</p>
-                    <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.88)", whiteSpace: "pre-wrap" }}>
-                      {c.conteudo}
-                    </p>
-                  </div>
-
-                  <div className="mt-2 pl-1 text-xs flex items-center gap-4" style={{ color: "rgba(247,242,236,0.45)" }}>
-                    <span>{timeAgo(c.criadoEm)}</span>
-                    <button
-                      type="button"
-                      onClick={() => responderComentario(c.id, c.autorNome)}
-                      style={{ color: "rgba(247,242,236,0.62)" }}
+            {comentariosRender.map((c) => {
+              const respostas = respostasPorPai.get(c.id) ?? [];
+              return (
+                <div key={c.id} className="space-y-2">
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold"
+                      style={{ background: "rgba(200,165,107,0.18)", color: "#f0d39a", border: "1px solid rgba(200,165,107,0.35)" }}
                     >
-                      Responder
-                    </button>
-                  </div>
-                </div>
+                      {c.autorNome[0]?.toUpperCase() ?? "U"}
+                    </div>
 
-                <button type="button" className="shrink-0 mt-2 inline-flex items-center gap-1" style={{ color: "rgba(247,242,236,0.52)" }}>
-                  <Heart className="w-4 h-4" />
-                  <span className="text-[11px]">0</span>
-                </button>
-              </div>
-            ))}
+                    <div className="flex-1 min-w-0">
+                      <div
+                        className="rounded-2xl px-3 py-2.5"
+                        style={{ background: "rgba(247,242,236,0.08)", border: "1px solid rgba(247,242,236,0.12)" }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>{c.autorNome}</p>
+                          {c.autorAdmin && <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "#36c690" }} />}
+                        </div>
+                        <p className="text-[11px] mb-1" style={{ color: "rgba(247,242,236,0.45)" }}>{userBadge(c.autorNome, c.autorAdmin)}</p>
+                        <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.88)", whiteSpace: "pre-wrap" }}>
+                          {c.conteudo}
+                        </p>
+                      </div>
+
+                      <div className="mt-2 pl-1 text-xs flex items-center gap-4" style={{ color: "rgba(247,242,236,0.45)" }}>
+                        <span>{timeAgo(c.criadoEm)}</span>
+                        <button
+                          type="button"
+                          onClick={() => responderComentario(c.id, c.autorNome)}
+                          style={{ color: "rgba(247,242,236,0.62)" }}
+                        >
+                          Responder
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {!!respostas.length && (
+                    <div className="ml-12 space-y-2">
+                      {respostas.map((r) => (
+                        <div key={r.id} className="flex items-start gap-2.5">
+                          <div
+                            className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[10px] font-semibold"
+                            style={{ background: "rgba(200,165,107,0.14)", color: "#f0d39a", border: "1px solid rgba(200,165,107,0.25)" }}
+                          >
+                            {r.autorNome[0]?.toUpperCase() ?? "U"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div
+                              className="rounded-2xl px-3 py-2"
+                              style={{ background: "rgba(247,242,236,0.06)", border: "1px solid rgba(247,242,236,0.1)" }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>{r.autorNome}</p>
+                                {r.autorAdmin && <CheckCircle2 className="w-3 h-3" style={{ color: "#36c690" }} />}
+                              </div>
+                              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.86)", whiteSpace: "pre-wrap" }}>
+                                {r.conteudo}
+                              </p>
+                            </div>
+                            <div className="mt-1 pl-1 text-xs flex items-center gap-4" style={{ color: "rgba(247,242,236,0.42)" }}>
+                              <span>{timeAgo(r.criadoEm)}</span>
+                              <button
+                                type="button"
+                                onClick={() => responderComentario(c.id, c.autorNome)}
+                                style={{ color: "rgba(247,242,236,0.6)" }}
+                              >
+                                Responder
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           <div className="mt-3 flex items-center justify-between">

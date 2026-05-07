@@ -1,4 +1,4 @@
-import { pgTable, text, serial, boolean, timestamp, integer, index, jsonb, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, integer, index, jsonb, unique, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -148,11 +148,13 @@ export const comentariosComunidadeTable = pgTable("comentarios_comunidade", {
   id: serial("id").primaryKey(),
   publicacaoId: integer("publicacao_id").notNull().references(() => comunidadeTable.id, { onDelete: "cascade" }),
   autorId: integer("autor_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  parentComentarioId: integer("parent_comentario_id").references((): AnyPgColumn => comentariosComunidadeTable.id, { onDelete: "cascade" }),
   conteudo: text("conteudo").notNull(),
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
 }, (table) => ({
   publicacaoIdx: index("idx_comentarios_publicacao_id").on(table.publicacaoId),
   autorIdx: index("idx_comentarios_autor_id").on(table.autorId),
+  parentIdx: index("idx_comentarios_parent_id").on(table.parentComentarioId),
 }));
 
 export const salvosComunidadeTable = pgTable("salvos_comunidade", {
