@@ -4,7 +4,6 @@ import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { mensagemDoDia } from "@/lib/mensagensDiarias";
 import MobileTopBar from "@/components/MobileTopBar";
-import PageIntroHeader from "@/components/PageIntroHeader";
 import {
   ChevronRight,
   Flame,
@@ -106,15 +105,8 @@ export default function HomePage() {
       <MobileTopBar />
 
       <div className="max-w-lg mx-auto px-4">
-        <PageIntroHeader
-          eyebrow="Início"
-          titulo="Sua evolução"
-          subtitulo="Um passo de cada vez."
-          className="mb-4"
-        />
-
         {/* Saudação */}
-        <div className="pb-5">
+        <div className="pt-4 pb-5 md:pt-8">
           <div
             className="rounded-3xl p-6"
             style={{
