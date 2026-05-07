@@ -20,6 +20,10 @@ interface Progresso {
   streakDias: number;
   melhorStreak: number;
   missoes: Missao[];
+  jornada?: {
+    traco?: boolean;
+    roda?: boolean;
+  };
 }
 
 interface LevelUpInfo {
@@ -95,6 +99,17 @@ export default function MissoesPage() {
   const concluidasHoje = progresso?.missoes.filter(m => m.concluida).length ?? 0;
   const totalHoje = progresso?.missoes.length ?? 0;
   const xpDisponivelHoje = progresso?.missoes.filter(m => !m.concluida).reduce((s, m) => s + m.xpRecompensa, 0) ?? 0;
+  const conquistasComputadas: ConquistaItem[] = CONQUISTAS.map((c) => {
+    let desbloqueada = false;
+    if (!progresso) return { ...c, desbloqueada: false };
+    if (c.titulo === "Primeiro Passo") desbloqueada = concluidasHoje >= 1 || progresso.xp > 0;
+    else if (c.titulo === "7 Dias Seguidos") desbloqueada = progresso.streakDias >= 7;
+    else if (c.titulo === "Autoconhecedor") desbloqueada = progresso.xp >= 300;
+    else if (c.titulo === "Traço Revelado") desbloqueada = progresso.jornada?.traco === true;
+    else if (c.titulo === "Roda Completa") desbloqueada = progresso.jornada?.roda === true;
+    else if (c.titulo === "Observador") desbloqueada = progresso.nivel >= 2;
+    return { ...c, desbloqueada };
+  });
 
   return (
     <div
@@ -292,7 +307,7 @@ export default function MissoesPage() {
         {/* Conquistas */}
         {tab === "conquistas" && (
           <div className="space-y-3">
-            {CONQUISTAS.map((c, i) => (
+            {conquistasComputadas.map((c, i) => (
               <div
                 key={i}
                 className="rounded-2xl p-4 flex items-center gap-4"
