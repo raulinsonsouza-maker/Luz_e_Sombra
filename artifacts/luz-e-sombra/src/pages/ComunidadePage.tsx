@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import MobileTopBar from "@/components/MobileTopBar";
+import PageIntroHeader from "@/components/PageIntroHeader";
 import { AuthenticatedImage } from "@/components/AuthenticatedImage";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 import {
@@ -280,16 +281,11 @@ export default function ComunidadePage() {
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
       <div className="max-w-xl mx-auto px-4 pt-6">
-        <MobileTopBar titulo="Comunidade" subtitulo="Espaço compartilhado" />
+        <MobileTopBar />
 
-        {/* Header (desktop — mobile usa MobileTopBar) */}
-        <div className={`flex items-center mb-6 ${isAdmin ? "justify-end md:justify-between" : "hidden md:flex justify-between"}`}>
-          <div className="hidden md:block">
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
-              Espaço Compartilhado
-            </p>
-            <h1 className="font-tan-mon-cheri text-3xl" style={{ color: "#f7f2ec" }}>Comunidade</h1>
-          </div>
+        <PageIntroHeader eyebrow="Espaço Compartilhado" titulo="Comunidade" subtitulo="Partilhas, dúvidas e conexões" />
+
+        <div className={`mb-6 ${isAdmin ? "flex justify-end" : "hidden"}`}>
           {isAdmin && (
             <button
               onClick={() => setCriando(!criando)}

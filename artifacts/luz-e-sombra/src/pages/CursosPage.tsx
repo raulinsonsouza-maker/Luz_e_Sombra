@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { CursoCapa } from "@/components/CursoCapa";
+import MobileTopBar from "@/components/MobileTopBar";
+import PageIntroHeader from "@/components/PageIntroHeader";
 import { GraduationCap, Loader2, BookOpen, CheckCircle2, ChevronRight, Lock, Sparkles } from "lucide-react";
 
 interface Curso {
@@ -51,18 +53,13 @@ export default function CursosPage() {
       className="min-h-screen pb-28"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
+      <MobileTopBar />
       <div className="max-w-lg mx-auto px-4 pt-6">
-
-        {/* Header */}
-        <div className="mb-6">
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
-            Aprendizado & Crescimento
-          </p>
-          <h1 className="font-tan-mon-cheri text-3xl mb-1" style={{ color: "#f7f2ec" }}>Cursos</h1>
-          <p className="text-sm" style={{ color: "rgba(247,242,236,0.4)" }}>
-            Transforme conhecimento em prática
-          </p>
-        </div>
+        <PageIntroHeader
+          eyebrow="Aprendizado & Crescimento"
+          titulo="Cursos"
+          subtitulo="Transforme conhecimento em prática"
+        />
 
         {loading ? (
           <div className="flex justify-center py-16">

@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import MobileTopBar from "@/components/MobileTopBar";
+import PageIntroHeader from "@/components/PageIntroHeader";
 import {
   CheckCircle2,
   Lock,
@@ -94,14 +95,12 @@ export default function JornadaPage() {
       <MobileTopBar />
       <div className="max-w-lg mx-auto px-4 pt-6">
         <div className="mb-8">
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
-            Sua Jornada
-          </p>
-          <h1 className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>
-            Cada etapa revela
-            <br />
-            uma nova versão sua.
-          </h1>
+          <PageIntroHeader
+            eyebrow="Sua Jornada"
+            titulo="Cada etapa revela"
+            subtitulo="Uma nova versão sua."
+            className="mb-1"
+          />
           {progresso && (
             <p className="text-sm mt-3" style={{ color: "rgba(247,242,236,0.45)" }}>
               Nível {progresso.nivel} · {progresso.nomeNivel}
