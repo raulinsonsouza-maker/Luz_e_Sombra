@@ -713,19 +713,19 @@ function PostCard({
         <div className="px-5 pb-4">
           <div className="space-y-3">
             {comentariosRender.map((c) => (
-              <div
-                key={c.id}
-                className="rounded-xl p-3"
-                style={{ border: "1px solid rgba(247,242,236,0.12)", background: "rgba(255,255,255,0.02)" }}
-              >
-                <div className="flex items-start gap-3">
+              <div key={c.id} className="flex items-start gap-3">
+                <div
+                  className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold"
+                  style={{ background: "rgba(200,165,107,0.18)", color: "#f0d39a", border: "1px solid rgba(200,165,107,0.35)" }}
+                >
+                  {c.autorNome[0]?.toUpperCase() ?? "U"}
+                </div>
+
+                <div className="flex-1 min-w-0">
                   <div
-                    className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold"
-                    style={{ background: "rgba(200,165,107,0.18)", color: "#f0d39a", border: "1px solid rgba(200,165,107,0.35)" }}
+                    className="rounded-2xl px-3 py-2.5"
+                    style={{ background: "rgba(247,242,236,0.08)", border: "1px solid rgba(247,242,236,0.12)" }}
                   >
-                    {c.autorNome[0]?.toUpperCase() ?? "U"}
-                  </div>
-                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>{c.autorNome}</p>
                       {c.autorAdmin && <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "#36c690" }} />}
@@ -734,21 +734,24 @@ function PostCard({
                     <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.88)", whiteSpace: "pre-wrap" }}>
                       {c.conteudo}
                     </p>
-                    <div className="mt-2 text-xs flex items-center gap-4" style={{ color: "rgba(247,242,236,0.45)" }}>
-                      <span>{timeAgo(c.criadoEm)}</span>
-                      <button
-                        type="button"
-                        onClick={() => responderComentario(c.id, c.autorNome)}
-                        style={{ color: "rgba(247,242,236,0.62)" }}
-                      >
-                        Responder
-                      </button>
-                    </div>
                   </div>
-                  <button type="button" className="shrink-0" style={{ color: "rgba(247,242,236,0.52)" }}>
-                    <Heart className="w-4 h-4" />
-                  </button>
+
+                  <div className="mt-2 pl-1 text-xs flex items-center gap-4" style={{ color: "rgba(247,242,236,0.45)" }}>
+                    <span>{timeAgo(c.criadoEm)}</span>
+                    <button
+                      type="button"
+                      onClick={() => responderComentario(c.id, c.autorNome)}
+                      style={{ color: "rgba(247,242,236,0.62)" }}
+                    >
+                      Responder
+                    </button>
+                  </div>
                 </div>
+
+                <button type="button" className="shrink-0 mt-2 inline-flex items-center gap-1" style={{ color: "rgba(247,242,236,0.52)" }}>
+                  <Heart className="w-4 h-4" />
+                  <span className="text-[11px]">0</span>
+                </button>
               </div>
             ))}
           </div>
