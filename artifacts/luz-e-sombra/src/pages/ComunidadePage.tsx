@@ -485,6 +485,8 @@ function PostCard({
 }) {
   const [comentarioInput, setComentarioInput] = useState("");
   const [enviandoComentario, setEnviandoComentario] = useState(false);
+  const [respondendoA, setRespondendoA] = useState<{ id: number; nome: string } | null>(null);
+  const comentarioInputRef = useRef<HTMLInputElement>(null);
   const [comentariosAbertos, setComentariosAbertos] = useState(false);
   const [comentariosVisiveis, setComentariosVisiveis] = useState(2);
   const embedUrl = post.tipo === "video" && post.mediaUrl ? getVideoEmbedUrl(post.mediaUrl) : null;
@@ -518,9 +520,21 @@ function PostCard({
     try {
       await onComentar(post.id, comentarioInput);
       setComentarioInput("");
+      setRespondendoA(null);
     } finally {
       setEnviandoComentario(false);
     }
+  }
+
+  function responderComentario(comentarioId: number, autorNome: string) {
+    const prefixo = `@${autorNome} `;
+    setComentariosAbertos(true);
+    setRespondendoA({ id: comentarioId, nome: autorNome });
+    setComentarioInput((prev) => (prev.trim().startsWith(prefixo.trim()) ? prev : `${prefixo}${prev}`));
+    setTimeout(() => {
+      comentarioInputRef.current?.focus();
+      comentarioInputRef.current?.setSelectionRange(prefixo.length, prefixo.length);
+    }, 0);
   }
 
   return (
@@ -657,22 +671,40 @@ function PostCard({
       )}
 
       {comentariosAbertos && (
-        <form onSubmit={submitComentario} className="px-5 pt-3 pb-2 flex items-center gap-2">
-          <input
-            value={comentarioInput}
-            onChange={(e) => setComentarioInput(e.target.value)}
-            className="flex-1 rounded-xl px-3 py-2 text-sm outline-none"
-            style={{ background: "rgba(247,242,236,0.08)", color: "#f7f2ec", border: "1px solid rgba(247,242,236,0.12)" }}
-            placeholder="Faça um comentário"
-          />
-          <button
-            type="submit"
-            disabled={enviandoComentario || !comentarioInput.trim()}
-            className="w-9 h-9 rounded-xl inline-flex items-center justify-center disabled:opacity-50"
-            style={{ background: "rgba(200,165,107,0.22)", color: "#f0d39a", border: "1px solid rgba(200,165,107,0.35)" }}
-          >
-            {enviandoComentario ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          </button>
+        <form onSubmit={submitComentario} className="px-5 pt-3 pb-2 space-y-2">
+          {respondendoA && (
+            <div
+              className="w-full mb-2 px-3 py-1.5 rounded-lg text-xs flex items-center justify-between"
+              style={{ background: "rgba(200,165,107,0.1)", border: "1px solid rgba(200,165,107,0.2)", color: "rgba(247,242,236,0.72)" }}
+            >
+              <span>Respondendo a {respondendoA.nome}</span>
+              <button
+                type="button"
+                onClick={() => setRespondendoA(null)}
+                style={{ color: "#c8a56b" }}
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <input
+              ref={comentarioInputRef}
+              value={comentarioInput}
+              onChange={(e) => setComentarioInput(e.target.value)}
+              className="flex-1 rounded-xl px-3 py-2 text-sm outline-none"
+              style={{ background: "rgba(247,242,236,0.08)", color: "#f7f2ec", border: "1px solid rgba(247,242,236,0.12)" }}
+              placeholder="Faça um comentário"
+            />
+            <button
+              type="submit"
+              disabled={enviandoComentario || !comentarioInput.trim()}
+              className="w-9 h-9 rounded-xl inline-flex items-center justify-center disabled:opacity-50"
+              style={{ background: "rgba(200,165,107,0.22)", color: "#f0d39a", border: "1px solid rgba(200,165,107,0.35)" }}
+            >
+              {enviandoComentario ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </button>
+          </div>
         </form>
       )}
 
@@ -704,7 +736,13 @@ function PostCard({
                     </p>
                     <div className="mt-2 text-xs flex items-center gap-4" style={{ color: "rgba(247,242,236,0.45)" }}>
                       <span>{timeAgo(c.criadoEm)}</span>
-                      <button type="button" style={{ color: "rgba(247,242,236,0.62)" }}>Responder</button>
+                      <button
+                        type="button"
+                        onClick={() => responderComentario(c.id, c.autorNome)}
+                        style={{ color: "rgba(247,242,236,0.62)" }}
+                      >
+                        Responder
+                      </button>
                     </div>
                   </div>
                   <button type="button" className="shrink-0" style={{ color: "rgba(247,242,236,0.52)" }}>
