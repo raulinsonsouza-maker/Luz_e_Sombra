@@ -4,6 +4,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import RadarChart from "@/components/RadarChart";
 import LineChart from "@/components/LineChart";
+import MobileTopBar from "@/components/MobileTopBar";
+import PageIntroHeader from "@/components/PageIntroHeader";
 import { AREAS_DA_VIDA } from "@/lib/types";
 import {
   ArrowRight, Sparkles, TrendingUp, ArrowUp, ArrowDown, Minus,
@@ -449,6 +451,8 @@ export default function ResultadoPage() {
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
       <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-4 animate-fadeIn">
+        <MobileTopBar />
+        <PageIntroHeader eyebrow="Roda da Vida" titulo="Resultado" subtitulo="Leitura completa da sua avaliação" className="mb-2" />
 
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <div className="rounded-3xl overflow-hidden"

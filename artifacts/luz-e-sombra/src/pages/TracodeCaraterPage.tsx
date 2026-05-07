@@ -10,6 +10,7 @@ import {
   tracoQueryPessoa,
   parsePessoaIdFromSearch,
 } from "@/lib/tracoFormStorage";
+import MobileTopBar from "@/components/MobileTopBar";
 import { FOTOS_CONFIG, type EstruturasPct, type TipoFoto } from "@/pages/traco/tracoConfig";
 import { TracoPainelResultado } from "@/pages/traco/components/TracoPainelResultado";
 
@@ -354,6 +355,7 @@ export default function TracodeCaraterPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #1e1812 0%, #2a1f14 50%, #2f251b 100%)" }}>
+      <MobileTopBar titulo="Traço de caráter" subtitulo="Análise corporal e emocional" />
       {/* ── Hero ── */}
       <section
         className="relative overflow-hidden"

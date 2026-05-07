@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { profilePhotoViewResponseIsImageBody } from "@/lib/profilePhotoView";
+import MobileTopBar from "@/components/MobileTopBar";
+import PageIntroHeader from "@/components/PageIntroHeader";
 import {
   calcularNumerodeVida,
   calcularNumerodeExpressao,
@@ -653,29 +655,22 @@ export default function QuemSouEuPage() {
       className="min-h-screen pb-28"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
-      {/* Nav */}
-      <div
-        className="sticky top-0 z-10 px-4 pt-4 pb-2"
-        style={{ background: "rgba(19,15,9,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(200,165,107,0.08)" }}
-      >
-        <div className="max-w-lg mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/perfil")}
-              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
-              style={{ background: "rgba(200,165,107,0.08)", color: "#c8a56b" }}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <h1 className="font-tan-mon-cheri text-lg" style={{ color: "#f7f2ec" }}>Dossiê de Vida</h1>
-          </div>
+      <MobileTopBar />
+
+      <div className="max-w-lg mx-auto px-4 pt-6 space-y-5">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            onClick={() => navigate("/perfil")}
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+            style={{ background: "rgba(200,165,107,0.08)", color: "#c8a56b" }}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
           <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.3)" }}>
             {anoAtual}
           </span>
         </div>
-      </div>
-
-      <div className="max-w-lg mx-auto px-4 pt-6 space-y-5">
+        <PageIntroHeader eyebrow="Dossiê de Vida" titulo="Quem sou eu" subtitulo="Visão integrada da sua jornada" className="mb-2" />
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
