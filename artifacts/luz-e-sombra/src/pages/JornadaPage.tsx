@@ -99,7 +99,6 @@ export default function JornadaPage() {
             eyebrow="Sua Jornada"
             titulo="Cada etapa revela"
             subtitulo="Uma nova versão sua."
-            className="mb-1"
           />
           {progresso && (
             <p className="text-sm mt-3" style={{ color: "rgba(247,242,236,0.45)" }}>

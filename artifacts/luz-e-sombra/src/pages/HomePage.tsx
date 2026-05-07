@@ -110,11 +110,11 @@ export default function HomePage() {
           eyebrow="Início"
           titulo="Sua evolução"
           subtitulo="Um passo de cada vez."
-          className="pt-4 mb-2"
+          className="mb-4"
         />
 
         {/* Saudação */}
-        <div className="pb-5 md:pt-2">
+        <div className="pb-5">
           <div
             className="rounded-3xl p-6"
             style={{
