@@ -146,6 +146,47 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
   }
 });
 
+// GET /api/comunidade/admin/comentarios — list all comments for admin moderation
+router.get("/admin/comentarios", requireAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const rows = await db
+      .select({
+        id: comentariosComunidadeTable.id,
+        publicacaoId: comentariosComunidadeTable.publicacaoId,
+        conteudo: comentariosComunidadeTable.conteudo,
+        criadoEm: comentariosComunidadeTable.criadoEm,
+        autorId: comentariosComunidadeTable.autorId,
+        autorNome: usuariosTable.nome,
+        autorAdmin: usuariosTable.isAdmin,
+        publicacaoTipo: comunidadeTable.tipo,
+        publicacaoConteudo: comunidadeTable.conteudo,
+        publicacaoAutorId: comunidadeTable.autorId,
+      })
+      .from(comentariosComunidadeTable)
+      .innerJoin(comunidadeTable, eq(comunidadeTable.id, comentariosComunidadeTable.publicacaoId))
+      .leftJoin(usuariosTable, eq(usuariosTable.id, comentariosComunidadeTable.autorId))
+      .orderBy(desc(comentariosComunidadeTable.criadoEm));
+
+    return res.json(
+      rows.map((r) => ({
+        id: r.id,
+        publicacaoId: r.publicacaoId,
+        conteudo: r.conteudo,
+        criadoEm: r.criadoEm,
+        autorId: r.autorId,
+        autorNome: r.autorNome ?? "Usuário",
+        autorAdmin: Boolean(r.autorAdmin),
+        publicacaoTipo: r.publicacaoTipo,
+        publicacaoConteudo: r.publicacaoConteudo ?? "",
+        publicacaoAutorId: r.publicacaoAutorId,
+      }))
+    );
+  } catch (err) {
+    req.log.error({ err }, "Erro ao listar comentários admin");
+    return res.status(500).json({ error: "Erro ao listar comentários" });
+  }
+});
+
 // POST /api/comunidade — admin create post
 router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
