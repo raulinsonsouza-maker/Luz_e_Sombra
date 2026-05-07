@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { ArrowRight, FlaskConical, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import MobileTopBar from "@/components/MobileTopBar";
 import {
   gerarOrdemBlocosPerguntas,
   PERGUNTAS,
@@ -244,6 +245,7 @@ export default function TemperamentoPage() {
 
     return (
       <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
+        <MobileTopBar titulo="Temperamento" subtitulo="Resultado da análise" />
         <div className="max-w-lg mx-auto space-y-6">
           <button
             type="button"
@@ -326,6 +328,7 @@ export default function TemperamentoPage() {
   if (fase === "intro") {
     return (
       <div className="min-h-screen pb-28" style={{ background: bg }}>
+        <MobileTopBar titulo="Temperamento" subtitulo="Cinco dimensões, quarenta reflexões" />
         <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
           <button
             type="button"
@@ -411,7 +414,10 @@ export default function TemperamentoPage() {
 
   if (fase === "enviando") {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: bg }}>
+      <div className="min-h-screen relative flex items-center justify-center" style={{ background: bg }}>
+        <div className="absolute top-0 left-0 right-0">
+          <MobileTopBar titulo="Temperamento" subtitulo="A processar..." />
+        </div>
         <Loader2 className="w-10 h-10 animate-spin" style={{ color: "#c8a56b" }} />
       </div>
     );
@@ -430,6 +436,7 @@ export default function TemperamentoPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: bg }}>
+      <MobileTopBar titulo="Temperamento" subtitulo={`${qIndex + 1} de ${TOTAL}`} />
       <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
         <div className="mb-6" style={{ borderBottom: "1px solid rgba(200,165,107,0.12)" }}>
           <div className="flex items-center justify-between gap-2 mb-2">

@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { profilePhotoViewResponseIsImageBody } from "@/lib/profilePhotoView";
+import MobileTopBar from "@/components/MobileTopBar";
+import PageIntroHeader from "@/components/PageIntroHeader";
 import {
   User, Calendar, Lock, CheckCircle, AlertCircle, Zap, Flame, Target,
   Star, Camera, Loader2, Sparkles, ArrowRight, Edit2, X, Save, KeyRound, LogOut,
@@ -197,7 +199,9 @@ export default function MeuPerfilPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}>
+      <MobileTopBar />
       <div className="max-w-lg mx-auto px-4 pt-6">
+        <PageIntroHeader eyebrow="Perfil" titulo="Meu espaço" subtitulo="Dados, progresso e configurações" className="mb-4" />
 
         {/* ── Profile hero ────────────────────────────────────────────────── */}
         <div className="flex flex-col items-center mb-8">

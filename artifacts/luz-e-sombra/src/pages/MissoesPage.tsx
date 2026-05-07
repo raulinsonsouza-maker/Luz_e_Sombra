@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import MobileTopBar from "@/components/MobileTopBar";
+import PageIntroHeader from "@/components/PageIntroHeader";
 import { CheckCircle2, Circle, Flame, Trophy, Star, Zap, Sunrise, Crown, Target, Gem, type LucideIcon } from "lucide-react";
 
 interface Missao {
@@ -99,6 +101,7 @@ export default function MissoesPage() {
       className="min-h-screen pb-28"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
+      <MobileTopBar />
       {/* Level-up modal */}
       {levelUp && (
         <div
@@ -160,16 +163,7 @@ export default function MissoesPage() {
       )}
 
       <div className="max-w-lg mx-auto px-4 pt-6">
-
-        {/* Header */}
-        <div className="mb-6">
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
-            Missões
-          </p>
-          <h1 className="font-tan-mon-cheri text-2xl" style={{ color: "#f7f2ec" }}>
-            Ações que transformam
-          </h1>
-        </div>
+        <PageIntroHeader eyebrow="Missões" titulo="Ações que transformam" subtitulo="Constância diária e conquistas da jornada" />
 
         {/* Tabs */}
         <div

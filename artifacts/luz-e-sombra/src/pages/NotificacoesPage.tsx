@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { Bell, CheckCheck, ChevronRight, MessageSquare, Layers, Info } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
+import MobileTopBar from "@/components/MobileTopBar";
+import PageIntroHeader from "@/components/PageIntroHeader";
 
 type Notificacao = {
   id: number;
@@ -66,10 +68,10 @@ export default function NotificacoesPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: BG }}>
+      <MobileTopBar />
       <div className="px-4 pt-8 pb-6 max-w-2xl mx-auto">
-        <p className="text-xs tracking-[0.25em] uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>Central de</p>
+        <PageIntroHeader eyebrow="Central de" titulo="Notificações" className="mb-3" />
         <div className="flex items-end justify-between flex-wrap gap-3">
-          <h1 className="font-tan-mon-cheri text-3xl md:text-4xl" style={{ color: TEXT }}>Notificações</h1>
           {naoLidas > 0 && (
             <button
               onClick={marcarTodasLidas}
