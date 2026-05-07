@@ -1,16 +1,18 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { Link, useLocation, useSearch } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { Upload, X, Camera, User, ArrowRight, Loader2, AlertCircle, ImageIcon, Plus, Users, Trash2 } from "lucide-react";
+import { X, Camera, User, ArrowRight, Loader2, AlertCircle, ImageIcon, Plus, Users, Trash2, Lock, CheckCircle2 } from "lucide-react";
 import { analyzeTracoDeCarater } from "@/lib/tracoAnalysis";
 import {
   purgeQuestionario20Storage,
   readDiagnosticoEmocional30Fusao,
   storageKeyDiagnostico30,
-  tracoQueryPessoa,
+  isDiagnostico30RespostasCompletas,
+  readDiagnostico30RespostasEntrada,
   parsePessoaIdFromSearch,
 } from "@/lib/tracoFormStorage";
 import MobileTopBar from "@/components/MobileTopBar";
+import Diagnostico30Form from "@/pages/traco/components/Diagnostico30Form";
 import { FOTOS_CONFIG, type EstruturasPct, type TipoFoto } from "@/pages/traco/tracoConfig";
 import { TracoPainelResultado } from "@/pages/traco/components/TracoPainelResultado";
 
@@ -141,6 +143,7 @@ export default function TracodeCaraterPage() {
   const [novaNome, setNovaNome] = useState("");
   const [novaRelacao, setNovaRelacao] = useState("parceiro/a");
   const [addingPessoa, setAddingPessoa] = useState(false);
+  const [diagnosticoCompleto, setDiagnosticoCompleto] = useState(false);
 
   async function carregarDados(pessoaId: number | null) {
     try {
@@ -189,6 +192,8 @@ export default function TracodeCaraterPage() {
     setFotoFiles({});
     setAnalise(null);
     carregarDados(selectedPessoaId);
+    const ent = readDiagnostico30RespostasEntrada(selectedPessoaId);
+    setDiagnosticoCompleto(ent !== null && isDiagnostico30RespostasCompletas(ent));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPessoaId]);
 
@@ -350,8 +355,26 @@ export default function TracodeCaraterPage() {
   }
 
   const fotosCount = Object.keys(fotos).length;
+  const podeAnalisar = diagnosticoCompleto && fotosCount >= 1 && !analisando;
 
   const pessoaSelecionada = selectedPessoaId !== null ? pessoas.find(p => p.id === selectedPessoaId) : null;
+
+  function refazerDiagnostico() {
+    try {
+      localStorage.removeItem(storageKeyDiagnostico30(selectedPessoaId));
+    } catch {
+      /* ignore */
+    }
+    setDiagnosticoCompleto(false);
+  }
+
+  const mensagemStatusAnalise = !diagnosticoCompleto
+    ? "Conclua o diagnóstico emocional para liberar a análise."
+    : fotosCount === 0
+      ? "Envie ao menos uma foto para liberar a análise."
+      : fotosCount < 3
+        ? `${fotosCount}/3 fotos — a análise fica mais precisa com as 3.`
+        : "Tudo pronto — análise completa disponível.";
 
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #1e1812 0%, #2a1f14 50%, #2f251b 100%)" }}>
@@ -382,7 +405,7 @@ export default function TracodeCaraterPage() {
             className="text-xs tracking-widest uppercase mb-3 inline-block px-3 py-1 rounded-full"
             style={{ color: "rgba(109,185,109,0.85)", border: "1px solid rgba(109,185,109,0.35)", background: "rgba(109,185,109,0.08)" }}
           >
-            Fotos + contexto emocional (opcional)
+            Diagnóstico emocional + fotos · 3 etapas
           </p>
           <h1
             className="font-tan-mon-cheri text-4xl md:text-5xl mb-4"
@@ -505,19 +528,97 @@ export default function TracodeCaraterPage() {
           )}
         </div>
 
-        <div
-          className="mb-8 rounded-xl px-4 py-3 text-xs leading-relaxed"
-          style={{ background: "rgba(109,185,109,0.06)", border: "1px solid rgba(109,185,109,0.2)" }}
-        >
-          <span style={{ color: "rgba(247,242,236,0.55)" }}>
-            Diagnóstico emocional (30 perguntas, passado/presente + consciência) entra na fusão com as fotos —{" "}
-          </span>
-          <Link href={`/diagnostico-emocional${tracoQueryPessoa(selectedPessoaId)}`} style={{ color: "#c8a56b" }} className="underline font-medium">
-            preencher para {pessoaSelecionada ? pessoaSelecionada.nome.split(" ")[0] : "mim"}
-          </Link>
-          <span style={{ color: "rgba(247,242,236,0.35)" }}> (guardado por pessoa).</span>
+        {/* ── Stepper (visão geral) ── */}
+        <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8">
+          {[
+            { n: 1, label: "Diagnóstico", done: diagnosticoCompleto },
+            { n: 2, label: "Fotos", done: fotosCount >= 1 },
+            { n: 3, label: "Análise", done: !!analise },
+          ].map((s) => (
+            <div
+              key={s.n}
+              className="rounded-2xl px-3 py-3 text-center"
+              style={{
+                background: s.done ? "rgba(93,185,122,0.08)" : "rgba(255,255,255,0.03)",
+                border: s.done ? "1px solid rgba(93,185,122,0.28)" : "1px solid rgba(200,165,107,0.12)",
+              }}
+            >
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                {s.done ? (
+                  <CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: "#5db97a" }} />
+                ) : (
+                  <span className="text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ color: "#c8a56b", border: "1px solid rgba(200,165,107,0.35)" }}>
+                    {s.n}
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] md:text-xs font-medium leading-tight" style={{ color: s.done ? "rgba(247,242,236,0.85)" : "rgba(247,242,236,0.45)" }}>
+                {s.label}
+              </p>
+            </div>
+          ))}
         </div>
 
+        {/* ── Etapa 1 · Diagnóstico ── */}
+        <div
+          className="rounded-2xl p-5 md:p-6 mb-8"
+          style={{
+            background: "rgba(200,165,107,0.05)",
+            border: "1px solid rgba(200,165,107,0.15)",
+          }}
+        >
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] mb-1" style={{ color: "rgba(200,165,107,0.55)" }}>
+                Etapa 1
+              </p>
+              <h2 className="font-tan-mon-cheri text-xl" style={{ color: "#f7f2ec" }}>
+                Diagnóstico emocional
+              </h2>
+              <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.4)" }}>
+                30 perguntas — contexto emocional antes das fotos (guardado por pessoa)
+              </p>
+            </div>
+            {diagnosticoCompleto && <CheckCircle2 className="w-8 h-8 shrink-0" style={{ color: "#5db97a" }} />}
+          </div>
+          {!diagnosticoCompleto ? (
+            <Diagnostico30Form
+              key={storageKeyDiagnostico30(selectedPessoaId)}
+              pessoaId={selectedPessoaId}
+              variant="embedded"
+              onConcluido={() => setDiagnosticoCompleto(true)}
+            />
+          ) : (
+            <div
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl px-4 py-3"
+              style={{ background: "rgba(93,185,122,0.08)", border: "1px solid rgba(93,185,122,0.25)" }}
+            >
+              <p className="text-sm" style={{ color: "rgba(247,242,236,0.8)" }}>
+                Diagnóstico concluído para{" "}
+                <strong style={{ color: "#c8a56b" }}>{pessoaSelecionada ? pessoaSelecionada.nome.split(" ")[0] : "você"}</strong>.
+              </p>
+              <button
+                type="button"
+                onClick={refazerDiagnostico}
+                className="text-xs font-semibold px-4 py-2 rounded-xl self-start sm:self-auto transition-opacity hover:opacity-90"
+                style={{ border: "1px solid rgba(224,123,57,0.45)", color: "rgba(224,123,57,0.9)" }}
+              >
+                Refazer diagnóstico
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ── Etapa 2 · Fotos (bloqueada até Etapa 1) ── */}
+        <div className="mb-8">
+          <p className="text-xs uppercase tracking-[0.2em] mb-1" style={{ color: "rgba(200,165,107,0.55)" }}>
+            Etapa 2
+          </p>
+          <h2 className="font-tan-mon-cheri text-xl mb-4" style={{ color: "#f7f2ec" }}>
+            Enviar fotos
+          </h2>
+          <div className="relative rounded-2xl overflow-hidden">
+            <div className={!diagnosticoCompleto ? "opacity-45 pointer-events-none select-none" : ""}>
         {/* ── Photo guide ── */}
         <div
           className="rounded-2xl p-6 mb-8"
@@ -708,6 +809,20 @@ export default function TracodeCaraterPage() {
             );
           })}
         </div>
+            </div>
+            {!diagnosticoCompleto && (
+              <div
+                className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center z-10 rounded-2xl"
+                style={{ background: "rgba(14,12,10,0.78)", backdropFilter: "blur(6px)" }}
+              >
+                <Lock className="w-10 h-10 mb-3" style={{ color: "#c8a56b" }} />
+                <p className="text-sm font-medium max-w-xs" style={{ color: "#f7f2ec" }}>
+                  Conclua a Etapa 1 para liberar o envio das fotos
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* ── Error ── */}
         {erro && (
@@ -722,21 +837,29 @@ export default function TracodeCaraterPage() {
           </div>
         )}
 
-        {/* ── Analyze button ── */}
+        {/* ── Etapa 3 · Analisar ── */}
         <div className="flex flex-col items-center gap-3 mb-12">
+          <div className="w-full max-w-lg text-center mb-2">
+            <p className="text-xs uppercase tracking-[0.2em] mb-1" style={{ color: "rgba(200,165,107,0.55)" }}>
+              Etapa 3
+            </p>
+            <h2 className="font-tan-mon-cheri text-xl" style={{ color: "#f7f2ec" }}>
+              Gerar análise
+            </h2>
+          </div>
           <button
             onClick={handleAnalisar}
-            disabled={fotosCount === 0 || analisando}
+            disabled={!podeAnalisar}
             className="flex items-center gap-3 px-10 py-4 rounded-2xl font-medium transition-all text-base"
             style={{
               background:
-                fotosCount === 0
-                  ? "rgba(200,165,107,0.1)"
-                  : "linear-gradient(135deg, #c8a56b 0%, #9c7742 100%)",
-              color: fotosCount === 0 ? "rgba(200,165,107,0.3)" : "#1e1812",
-              cursor: fotosCount === 0 || analisando ? "not-allowed" : "pointer",
+                podeAnalisar
+                  ? "linear-gradient(135deg, #c8a56b 0%, #9c7742 100%)"
+                  : "rgba(200,165,107,0.1)",
+              color: podeAnalisar ? "#1e1812" : "rgba(200,165,107,0.3)",
+              cursor: podeAnalisar ? "pointer" : "not-allowed",
               opacity: analisando ? 0.7 : 1,
-              boxShadow: fotosCount > 0 && !analisando ? "0 4px 20px rgba(200,165,107,0.25)" : "none",
+              boxShadow: podeAnalisar ? "0 4px 20px rgba(200,165,107,0.25)" : "none",
             }}
           >
             {analisando ? (
@@ -751,27 +874,8 @@ export default function TracodeCaraterPage() {
               </>
             )}
           </button>
-          {fotosCount === 0 ? (
-            <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
-              Faça o upload de pelo menos uma foto para iniciar
-            </p>
-          ) : fotosCount < 3 ? (
-            <p className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
-              {fotosCount}/3 foto{fotosCount > 1 ? "s" : ""} — a análise fica mais precisa com as 3 fotos
-            </p>
-          ) : (
-            <p className="text-xs" style={{ color: "rgba(109,185,109,0.6)" }}>
-              ✓ As 3 fotos estão prontas — análise completa disponível
-            </p>
-          )}
-          <p className="text-xs text-center max-w-md px-2" style={{ color: "rgba(109,185,109,0.75)" }}>
-            O diagnóstico emocional (30 perguntas) é opcional e reforça a leitura quando preenchido para esta pessoa.
-          </p>
-          <p className="text-xs text-center max-w-md px-2 mt-1" style={{ color: "rgba(200,165,107,0.45)" }}>
-            <Link href={`/diagnostico-emocional${tracoQueryPessoa(selectedPessoaId)}`} className="underline" style={{ color: "#c8a56b" }}>
-              Abrir diagnóstico emocional (30)
-            </Link>
-            {" "}— ou analise só com as fotos.
+          <p className="text-xs text-center max-w-md px-2" style={{ color: "rgba(247,242,236,0.45)" }}>
+            {mensagemStatusAnalise}
           </p>
         </div>
 
