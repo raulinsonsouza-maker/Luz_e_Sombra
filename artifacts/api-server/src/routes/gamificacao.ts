@@ -13,6 +13,7 @@ import {
 import { eq, and } from "drizzle-orm";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
 import { minicursoCompletoParaUsuario } from "./modulosJornada";
+import { MISSOES_POR_DIA } from "../lib/missoesCuradas";
 
 const router = Router();
 
@@ -28,18 +29,17 @@ function getNivelInfo(xp: number) {
   return [...NIVEIS].reverse().find(n => xp >= n.xpMin) ?? NIVEIS[0];
 }
 
-const MISSAO_POOL = [
-  { titulo: "Reflita sobre um comportamento", xp: 30 },
-  { titulo: "Medite por 5 minutos", xp: 20 },
-  { titulo: "Registre uma emoção que sentiu hoje", xp: 20 },
-  { titulo: "Leia um conteúdo de autoconhecimento", xp: 20 },
-  { titulo: "Faça algo que te aproxima do seu objetivo", xp: 70 },
-  { titulo: "Anote 3 gratidões do dia", xp: 25 },
-  { titulo: "Respire fundo em um momento difícil", xp: 30 },
-  { titulo: "Registre 1 insight no seu diário", xp: 40 },
-  { titulo: "Evite reagir impulsivamente em 1 situação", xp: 50 },
-  { titulo: "Faça uma pausa consciente de 10 minutos", xp: 25 },
-];
+/** Índice 0..59 para MISSOES_POR_DIA (cicla após 60 dias). Base: cadastro do usuário. */
+function diaJornada(criadoEm: Date | string | null | undefined, hoje: Date = new Date()): number {
+  const base =
+    criadoEm instanceof Date
+      ? criadoEm
+      : criadoEm
+        ? new Date(criadoEm)
+        : hoje;
+  const dias = Math.floor((hoje.getTime() - base.getTime()) / 86400000);
+  return ((dias % 60) + 60) % 60;
+}
 
 function getTodayStr() {
   return new Date().toISOString().split("T")[0];
@@ -61,18 +61,18 @@ async function ensureTodayMissions(usuarioId: number, today: string) {
 
   if (existing.length > 0) return existing;
 
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-  );
+  const [u] = await db
+    .select({ criadoEm: usuariosTable.criadoEm })
+    .from(usuariosTable)
+    .where(eq(usuariosTable.id, usuarioId))
+    .limit(1);
 
-  const selected = [];
-  for (let i = 0; i < 4; i++) {
-    selected.push(MISSAO_POOL[(dayOfYear + i) % MISSAO_POOL.length]);
-  }
+  const idx = diaJornada(u?.criadoEm);
+  const missoesDoDia = MISSOES_POR_DIA[idx] ?? MISSOES_POR_DIA[0];
 
   const inserted = await db
     .insert(missoesDiariasTable)
-    .values(selected.map(m => ({ usuarioId, titulo: m.titulo, xpRecompensa: m.xp, dataReferencia: today })))
+    .values(missoesDoDia.map((m) => ({ usuarioId, titulo: m.titulo, xpRecompensa: m.xp, dataReferencia: today })))
     .returning();
 
   return inserted;
