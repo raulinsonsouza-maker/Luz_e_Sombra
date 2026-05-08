@@ -75,6 +75,8 @@ export interface TracoPainelResultadoProps {
   onReanalisar: () => void | Promise<void>;
   analisando: boolean;
   fotosCount: number;
+  pessoaNome?: string | null;
+  criadoEm?: string;
 }
 
 export function TracoPainelResultado({
@@ -82,12 +84,20 @@ export function TracoPainelResultado({
   onReanalisar,
   analisando,
   fotosCount,
+  pessoaNome = null,
+  criadoEm,
 }: TracoPainelResultadoProps) {
   const resultado = analise.resultado;
   const estruturaPrincipal = resultado.estruturaPrincipal;
   const configPrincipal = estruturaPrincipal ? ESTRUTURAS_CONFIG[estruturaPrincipal] : null;
   const [expandedObs, setExpandedObs] = useState(false);
   const [expandedCaract, setExpandedCaract] = useState(false);
+  const dataAnalise = new Date(criadoEm ?? analise.criadoEm).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  const alvoAnalise = pessoaNome?.trim() ? pessoaNome.trim() : "Você";
 
   return (
           <div id="resultado-traco" className="space-y-5">
@@ -125,6 +135,9 @@ export function TracoPainelResultado({
                     </span>
                   )}
                 </div>
+                <p className="text-xs mb-4" style={{ color: "rgba(247,242,236,0.35)" }}>
+                  Resultado de {alvoAnalise} · {dataAnalise}
+                </p>
 
                 {/* Name + % */}
                 <div className="flex items-start justify-between gap-4 mb-3">
@@ -733,11 +746,7 @@ export function TracoPainelResultado({
             <div className="flex items-center justify-between pt-2 pb-4">
               <p className="text-xs" style={{ color: "rgba(247,242,236,0.22)" }}>
                 Análise realizada em{" "}
-                {new Date(analise.criadoEm).toLocaleDateString("pt-BR", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })}
+                {dataAnalise}
               </p>
               <button
                 onClick={() => void onReanalisar()}

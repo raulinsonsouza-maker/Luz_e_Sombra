@@ -70,6 +70,7 @@ export const analiseTracoTable = pgTable("analise_traco", {
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
 }, (table) => ({
   usuarioIdIdx: index("idx_analise_traco_usuario_id").on(table.usuarioId),
+  usuarioPessoaRecenteIdx: index("idx_analise_traco_user_pessoa_recente").on(table.usuarioId, table.pessoaId, table.criadoEm),
 }));
 
 /** Respostas + agregado do Diagnóstico Emocional (30 itens, v1). */

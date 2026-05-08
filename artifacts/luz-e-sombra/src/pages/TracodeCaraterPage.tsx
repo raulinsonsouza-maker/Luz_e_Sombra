@@ -262,6 +262,7 @@ export default function TracodeCaraterPage() {
   }, [fotos]);
 
   const handleAnalisar = async () => {
+    const pessoaIdAtStart = selectedPessoaId;
     const fotosDisponiveis = Object.keys(fotos) as TipoFoto[];
     if (fotosDisponiveis.length === 0) return;
 
@@ -291,13 +292,18 @@ export default function TracodeCaraterPage() {
 
       setAnalisandoEtapa("Gerando análise completa...");
 
+      if (selectedPessoaId !== pessoaIdAtStart) {
+        throw new Error("A pessoa selecionada mudou durante a análise. Tente novamente.");
+      }
+
       // Save computed result to backend
-      const diagnosticoEmocionalPayload = readDiagnosticoEmocional30Fusao(selectedPessoaId);
+      const diagnosticoEmocionalPayload = readDiagnosticoEmocional30Fusao(pessoaIdAtStart);
       const saveRes = await apiFetch("/traco/analisar", {
         method: "POST",
         body: JSON.stringify({
           resultado,
-          pessoaId: selectedPessoaId,
+          pessoaId: pessoaIdAtStart,
+          snapshotPessoaId: pessoaIdAtStart,
           ...(diagnosticoEmocionalPayload ? { diagnosticoEmocional: diagnosticoEmocionalPayload } : {}),
         }),
       });
@@ -886,6 +892,8 @@ export default function TracodeCaraterPage() {
             onReanalisar={handleAnalisar}
             analisando={analisando}
             fotosCount={fotosCount}
+            pessoaNome={pessoaSelecionada?.nome ?? null}
+            criadoEm={analise.criadoEm}
           />
         )}
       </div>

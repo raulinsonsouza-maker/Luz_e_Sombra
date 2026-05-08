@@ -2,7 +2,7 @@ import { Router, Response } from "express";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
 import { db } from "@workspace/db";
 import { fotosTracoTable, analiseTracoTable, pessoasAnaliseTable } from "@workspace/db/schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, desc } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
 import {
   aplicarFusaoTracoDiagnostico,
@@ -324,9 +324,10 @@ router.get("/fotos/:id/view", requireAuth, async (req: AuthRequest, res: Respons
 // ── POST /traco/analisar ───────────────────────────────────────────────────────
 router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const { resultado, pessoaId: pessoaIdRaw, diagnosticoEmocional } = req.body as {
+    const { resultado, pessoaId: pessoaIdRaw, snapshotPessoaId: snapshotPessoaIdRaw, diagnosticoEmocional } = req.body as {
       resultado?: Record<string, unknown>;
       pessoaId?: unknown;
+      snapshotPessoaId?: unknown;
       diagnosticoEmocional?: unknown;
     };
 
@@ -411,6 +412,11 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
     const resultadoComMetadata = resultadoFusao;
 
     const pessoaId = parsePessoaId(pessoaIdRaw);
+    const snapshotPessoaId = parsePessoaId(snapshotPessoaIdRaw);
+
+    if (snapshotPessoaIdRaw !== undefined && snapshotPessoaId !== pessoaId) {
+      return res.status(409).json({ error: "pessoaId divergente do snapshot" });
+    }
 
     if (pessoaId !== null) {
       const [pessoa] = await db.select({ id: pessoasAnaliseTable.id }).from(pessoasAnaliseTable)
@@ -418,27 +424,29 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
       if (!pessoa) return res.status(404).json({ error: "Pessoa não encontrada" });
     }
 
-    const existing = await db
+    const fotosDaPessoa = await db
       .select()
-      .from(analiseTracoTable)
+      .from(fotosTracoTable)
       .where(and(
-        eq(analiseTracoTable.usuarioId, req.user!.id),
-        pessoaId === null ? isNull(analiseTracoTable.pessoaId) : eq(analiseTracoTable.pessoaId, pessoaId),
+        eq(fotosTracoTable.usuarioId, req.user!.id),
+        pessoaId === null ? isNull(fotosTracoTable.pessoaId) : eq(fotosTracoTable.pessoaId, pessoaId),
       ));
 
-    let analise;
-    if (existing.length > 0) {
-      [analise] = await db
-        .update(analiseTracoTable)
-        .set({ resultado: resultadoComMetadata, criadoEm: new Date() })
-        .where(eq(analiseTracoTable.id, existing[0].id))
-        .returning();
-    } else {
-      [analise] = await db
-        .insert(analiseTracoTable)
-        .values({ usuarioId: req.user!.id, pessoaId, resultado: resultadoComMetadata })
-        .returning();
+    if (fotosDaPessoa.length === 0) {
+      return res.status(400).json({ error: "Sem fotos para a pessoa selecionada" });
     }
+
+    const [analise] = await db
+      .insert(analiseTracoTable)
+      .values({ usuarioId: req.user!.id, pessoaId, resultado: resultadoComMetadata })
+      .returning();
+
+    req.log?.info({
+      usuarioId: req.user!.id,
+      pessoaId,
+      fotosCount: fotosDaPessoa.length,
+      estruturaPrincipal: String((resultadoComMetadata as Record<string, unknown>).estruturaPrincipal ?? ""),
+    }, "Análise de traço salva");
 
     return res.json(analise);
   } catch (err) {
@@ -457,7 +465,9 @@ router.get("/analise", requireAuth, async (req: AuthRequest, res: Response) => {
       .where(and(
         eq(analiseTracoTable.usuarioId, req.user!.id),
         pessoaId === null ? isNull(analiseTracoTable.pessoaId) : eq(analiseTracoTable.pessoaId, pessoaId),
-      ));
+      ))
+      .orderBy(desc(analiseTracoTable.criadoEm))
+      .limit(1);
     return res.json(analise ?? null);
   } catch (err) {
     req.log?.error(err);
