@@ -34,10 +34,10 @@ export const ESTRUTURAS_CONFIG: Record<
     corBorder: "rgba(91,155,213,0.3)",
   },
   psicopata: {
-    nome: "Psicopata/Narcisista",
+    nome: "Psicopata",
     descricaoCurta: "Natural na liderança. Estratégico, persuasivo e orientado ao poder.",
     descricaoLonga:
-      "A estrutura Psicopata/Narcisista possui um magnetismo e uma capacidade de influência raros. São líderes natos, estrategistas brilhantes, com uma visão clara do que querem. O desafio está em abrir o coração para a vulnerabilidade e descobrir que a força real não precisa de controle.",
+      "A estrutura Psicopata possui um magnetismo e uma capacidade de influência raros. São líderes natos, estrategistas brilhantes, com uma visão clara do que querem. O desafio está em abrir o coração para a vulnerabilidade e descobrir que a força real não precisa de controle.",
     cor: "#e07b39",
     corBg: "rgba(224,123,57,0.08)",
     corBorder: "rgba(224,123,57,0.3)",

@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
-import { CheckCircle2, Circle, Flame, Trophy, Star, Zap, Sunrise, Crown, Target, Gem, type LucideIcon } from "lucide-react";
+import { CheckCircle2, Circle, Flame, Trophy, Star, Zap, Sunrise, Crown, Target, Gem, Sparkles, Shield, Compass, Mountain, Award, type LucideIcon } from "lucide-react";
 
 interface Missao {
   id: number;
@@ -40,15 +40,33 @@ const NIVEL_NOMES: Record<number, string> = {
 };
 
 interface ConquistaItem {
-  icon: LucideIcon; titulo: string; desc: string; xp: number; desbloqueada: boolean;
+  id: string;
+  icon: LucideIcon;
+  titulo: string;
+  desc: string;
+  xp: number;
+  desbloqueada: boolean;
 }
 const CONQUISTAS: ConquistaItem[] = [
-  { icon: Sunrise, titulo: "Primeiro Passo",  desc: "Complete sua primeira missão",  xp: 50,  desbloqueada: false },
-  { icon: Flame,   titulo: "7 Dias Seguidos", desc: "Mantenha sequência por 7 dias",  xp: 100, desbloqueada: false },
-  { icon: Star,    titulo: "Autoconhecedor",   desc: "Complete 10 missões no total",  xp: 150, desbloqueada: false },
-  { icon: Crown,   titulo: "Traço Revelado",  desc: "Finalize o Traço de Caráter",   xp: 100, desbloqueada: false },
-  { icon: Target,  titulo: "Roda Completa",   desc: "Complete sua Roda da Vida",      xp: 50,  desbloqueada: false },
-  { icon: Gem,     titulo: "Observador",      desc: "Alcance o Nível 2",             xp: 200, desbloqueada: false },
+  { id: "primeiro-passo", icon: Sunrise, titulo: "Primeiro Passo", desc: "Conclua sua primeira missão", xp: 50, desbloqueada: false },
+  { id: "ritmo-inicial", icon: Sparkles, titulo: "Ritmo Inicial", desc: "Conclua 2 missões no mesmo dia", xp: 60, desbloqueada: false },
+  { id: "dia-fechado", icon: Target, titulo: "Dia Fechado", desc: "Conclua as 4 missões do dia", xp: 120, desbloqueada: false },
+  { id: "foco-semanal", icon: Shield, titulo: "Foco Semanal", desc: "Mantenha 3 dias de sequência", xp: 80, desbloqueada: false },
+  { id: "sete-dias", icon: Flame, titulo: "7 Dias Seguidos", desc: "Mantenha sequência por 7 dias", xp: 100, desbloqueada: false },
+  { id: "quinze-dias", icon: Flame, titulo: "Constância de 15 Dias", desc: "Mantenha sequência por 15 dias", xp: 180, desbloqueada: false },
+  { id: "trinta-dias", icon: Flame, titulo: "Constância de 30 Dias", desc: "Mantenha sequência por 30 dias", xp: 300, desbloqueada: false },
+  { id: "xp-100", icon: Zap, titulo: "Energia Inicial", desc: "Alcance 100 XP", xp: 70, desbloqueada: false },
+  { id: "xp-300", icon: Star, titulo: "Autoconhecedor", desc: "Alcance 300 XP", xp: 150, desbloqueada: false },
+  { id: "xp-750", icon: Award, titulo: "Disciplina Viva", desc: "Alcance 750 XP", xp: 220, desbloqueada: false },
+  { id: "xp-1500", icon: Award, titulo: "Mente Forte", desc: "Alcance 1500 XP", xp: 320, desbloqueada: false },
+  { id: "xp-3000", icon: Award, titulo: "Mestre da Prática", desc: "Alcance 3000 XP", xp: 500, desbloqueada: false },
+  { id: "nivel-2", icon: Gem, titulo: "Observador", desc: "Alcance o Nível 2", xp: 200, desbloqueada: false },
+  { id: "nivel-3", icon: Compass, titulo: "Explorador", desc: "Alcance o Nível 3", xp: 260, desbloqueada: false },
+  { id: "nivel-4", icon: Mountain, titulo: "Transformador", desc: "Alcance o Nível 4", xp: 360, desbloqueada: false },
+  { id: "nivel-5", icon: Crown, titulo: "Iluminado", desc: "Alcance o Nível 5", xp: 600, desbloqueada: false },
+  { id: "traco", icon: Crown, titulo: "Traço Revelado", desc: "Finalize o Traço de Caráter", xp: 100, desbloqueada: false },
+  { id: "roda", icon: Target, titulo: "Roda Completa", desc: "Complete sua Roda da Vida", xp: 50, desbloqueada: false },
+  { id: "jornada-integrada", icon: Trophy, titulo: "Jornada Integrada", desc: "Conclua Traço e Roda da Vida", xp: 250, desbloqueada: false },
 ];
 
 export default function MissoesPage() {
@@ -102,12 +120,25 @@ export default function MissoesPage() {
   const conquistasComputadas: ConquistaItem[] = CONQUISTAS.map((c) => {
     let desbloqueada = false;
     if (!progresso) return { ...c, desbloqueada: false };
-    if (c.titulo === "Primeiro Passo") desbloqueada = concluidasHoje >= 1 || progresso.xp > 0;
-    else if (c.titulo === "7 Dias Seguidos") desbloqueada = progresso.streakDias >= 7;
-    else if (c.titulo === "Autoconhecedor") desbloqueada = progresso.xp >= 300;
-    else if (c.titulo === "Traço Revelado") desbloqueada = progresso.jornada?.traco === true;
-    else if (c.titulo === "Roda Completa") desbloqueada = progresso.jornada?.roda === true;
-    else if (c.titulo === "Observador") desbloqueada = progresso.nivel >= 2;
+    if (c.id === "primeiro-passo") desbloqueada = concluidasHoje >= 1 || progresso.xp > 0;
+    else if (c.id === "ritmo-inicial") desbloqueada = concluidasHoje >= 2;
+    else if (c.id === "dia-fechado") desbloqueada = totalHoje > 0 && concluidasHoje >= totalHoje;
+    else if (c.id === "foco-semanal") desbloqueada = progresso.streakDias >= 3 || progresso.melhorStreak >= 3;
+    else if (c.id === "sete-dias") desbloqueada = progresso.streakDias >= 7 || progresso.melhorStreak >= 7;
+    else if (c.id === "quinze-dias") desbloqueada = progresso.streakDias >= 15 || progresso.melhorStreak >= 15;
+    else if (c.id === "trinta-dias") desbloqueada = progresso.streakDias >= 30 || progresso.melhorStreak >= 30;
+    else if (c.id === "xp-100") desbloqueada = progresso.xp >= 100;
+    else if (c.id === "xp-300") desbloqueada = progresso.xp >= 300;
+    else if (c.id === "xp-750") desbloqueada = progresso.xp >= 750;
+    else if (c.id === "xp-1500") desbloqueada = progresso.xp >= 1500;
+    else if (c.id === "xp-3000") desbloqueada = progresso.xp >= 3000;
+    else if (c.id === "nivel-2") desbloqueada = progresso.nivel >= 2;
+    else if (c.id === "nivel-3") desbloqueada = progresso.nivel >= 3;
+    else if (c.id === "nivel-4") desbloqueada = progresso.nivel >= 4;
+    else if (c.id === "nivel-5") desbloqueada = progresso.nivel >= 5;
+    else if (c.id === "traco") desbloqueada = progresso.jornada?.traco === true;
+    else if (c.id === "roda") desbloqueada = progresso.jornada?.roda === true;
+    else if (c.id === "jornada-integrada") desbloqueada = progresso.jornada?.traco === true && progresso.jornada?.roda === true;
     return { ...c, desbloqueada };
   });
 

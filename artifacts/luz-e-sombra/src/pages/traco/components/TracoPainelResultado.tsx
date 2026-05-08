@@ -124,37 +124,6 @@ export function TracoPainelResultado({
                       O {resultado.dominanteApelido}
                     </span>
                   )}
-                  {resultado.confiancaAnalise !== undefined && (
-                    <div className="flex items-center gap-2 ml-auto">
-                      <span className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
-                        Confiança
-                      </span>
-                      <div
-                        className="relative h-1.5 rounded-full overflow-hidden"
-                        style={{ width: 60, background: "rgba(255,255,255,0.08)" }}
-                      >
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${resultado.confiancaAnalise}%`,
-                            background: resultado.confiancaAnalise >= 60
-                              ? "linear-gradient(to right, #6db96d, #4a9e4a)"
-                              : "linear-gradient(to right, #c8a56b, #9c7742)",
-                          }}
-                        />
-                      </div>
-                      <span
-                        className="text-xs font-medium"
-                        style={{
-                          color: resultado.confiancaAnalise >= 60
-                            ? "rgba(109,185,109,0.7)"
-                            : "rgba(200,165,107,0.6)",
-                        }}
-                      >
-                        {resultado.confiancaAnalise}%
-                      </span>
-                    </div>
-                  )}
                 </div>
 
                 {/* Name + % */}
@@ -293,30 +262,6 @@ export function TracoPainelResultado({
                     {resultado.sinteseIntegradaFotosQuestionario}
                   </p>
                 )}
-                {resultado.fusaoDiagnosticoEmocional && (
-                  <div className="flex flex-wrap gap-3 text-xs mb-4">
-                    <span
-                      className="px-3 py-1.5 rounded-full"
-                      style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(200,165,107,0.2)", color: "rgba(247,242,236,0.75)" }}
-                    >
-                      Alinhamento fotos / formulário:{" "}
-                      <strong>{resultado.fusaoDiagnosticoEmocional.alinhamentoFotosFormulario}%</strong>
-                    </span>
-                    <span
-                      className="px-3 py-1.5 rounded-full"
-                      style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(109,185,109,0.25)", color: "rgba(109,185,109,0.9)" }}
-                    >
-                      Assertividade da leitura:{" "}
-                      <strong>{resultado.fusaoDiagnosticoEmocional.assertividadeLeitura}%</strong>
-                    </span>
-                    <span
-                      className="px-3 py-1.5 rounded-full"
-                      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(247,242,236,0.5)" }}
-                    >
-                      Peso do formulário na fusão: {Math.round(resultado.fusaoDiagnosticoEmocional.pesoFormulario * 100)}%
-                    </span>
-                  </div>
-                )}
                 {resultado.fusaoDiagnosticoEmocional?.sinaisConvergentes &&
                   resultado.fusaoDiagnosticoEmocional.sinaisConvergentes.length > 0 && (
                     <ul className="list-disc pl-5 space-y-1.5 text-sm" style={{ color: "rgba(247,242,236,0.58)" }}>
@@ -325,11 +270,6 @@ export function TracoPainelResultado({
                       ))}
                     </ul>
                   )}
-                {resultado.estruturasSomenteFotos && (
-                  <p className="text-xs mt-4" style={{ color: "rgba(200,165,107,0.45)" }}>
-                    As barras abaixo refletem a leitura já integrada; o perfil só-fotos fica guardado nos dados para transparência.
-                  </p>
-                )}
               </div>
             )}
 

@@ -378,7 +378,7 @@ export default function TracodeCaraterPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #1e1812 0%, #2a1f14 50%, #2f251b 100%)" }}>
-      <MobileTopBar titulo="Traço de caráter" subtitulo="Análise corporal e emocional" />
+      <MobileTopBar />
       {/* ── Hero ── */}
       <section
         className="relative overflow-hidden"

@@ -4,7 +4,7 @@ import type { DinamicaFuncional, EstiloComunicacao } from "./types.js";
 const NOMES: Record<keyof EstruturasPct, string> = {
   esquizoide: "Esquizóide",
   oral: "Oral",
-  psicopata: "Psicopata/Narcisista",
+  psicopata: "Psicopata",
   masoquista: "Masoquista",
   rigido: "Rígido",
 };
@@ -168,7 +168,7 @@ const INTERPRETACOES: Record<keyof EstruturasPct, string[]> = {
   ],
   psicopata: [
     "Você chegou ao mundo com uma capacidade de influência que é visível no seu corpo: a parte superior se impõe, os ombros comunicam antes de você falar, a postura comanda o espaço ao redor. Essa não é uma falha de caráter — é uma resposta adaptativa de um ser que precisou controlar o ambiente para sobreviver.",
-    "A estrutura Psicopata/Narcisista nasce de uma traição — de uma vontade que foi violada quando ainda era vulnerável. O corpo aprendeu a se expandir para cima como defesa: quanto maior acima da cintura, menos vulnerável. Funcionou. Você se tornou alguém difícil de controlar. O preço foi a desconexão com a própria fragilidade.",
+    "A estrutura Psicopata nasce de uma traição — de uma vontade que foi violada quando ainda era vulnerável. O corpo aprendeu a se expandir para cima como defesa: quanto maior acima da cintura, menos vulnerável. Funcionou. Você se tornou alguém difícil de controlar. O preço foi a desconexão com a própria fragilidade.",
     "Sua força é real. Seu magnetismo, sua capacidade estratégica, sua visão — são dons genuínos que o mundo reconhece. O que a vida lhe convida a descobrir é que por baixo da armadura existe um coração que também quer ser visto, que também quer descansar, que também quer ser amado sem precisar impressionar.",
     "A transformação para você passa por descer — trazer a energia do peito e dos ombros até o chão, até as pernas, até a pelve. Quando o poder vem do corpo inteiro e não apenas do tórax, ele se torna sustentável, autêntico, enraizado. É aí que o líder se torna sábio e o estrategista se torna humano.",
     "A vulnerabilidade que você evitou com tanto custo é justamente o que completa o que você tem. Líderes que conhecem sua própria fragilidade e a revelam nos momentos certos inspiram lealdade que a força sozinha nunca consegue. Essa é a próxima fronteira do seu poder.",
