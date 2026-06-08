@@ -66,7 +66,12 @@ export interface ResultadoAnalise {
       mediaMassaSuperiorInferior: number;
       varianciaEntreFotos: number;
     };
+    eixosReich?: import("@workspace/traco-imagem-engine").EixosReich;
+    segmentosReich?: import("@workspace/traco-imagem-engine").SegmentosReich;
+    versaoEixos?: string;
   };
+  eixosReich?: import("@workspace/traco-imagem-engine").EixosReich;
+  segmentosReich?: import("@workspace/traco-imagem-engine").SegmentosReich;
   /** Para auditoria no servidor */
   marcadoresPorFoto?: MarcadoresFoto[];
   marcadoresAgregados?: MarcadoresAgregados;

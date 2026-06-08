@@ -15,6 +15,7 @@
 # Variáveis opcionais:
 #   APP_DIR=/caminho/do/clone     (padrão: /opt/luzesombra)
 #   SKIP_DB_PUSH=1                não roda drizzle-kit push (quando não mudou lib/db)
+#   SKIP_TESTS=1                  não roda testes do motor traco antes do build
 #   HEALTHCHECK_RETRIES=25        tentativas do curl ao healthz (padrão: 25)
 #   HEALTHCHECK_SLEEP=1           segundos entre tentativas (padrão: 1)
 #
@@ -61,6 +62,7 @@ export PATH="$(dirname "$PNPM"):${PATH:-/usr/local/bin:/usr/bin}"
 
 APP_DIR="${APP_DIR:-/opt/luzesombra}"
 SKIP_DB_PUSH="${SKIP_DB_PUSH:-0}"
+SKIP_TESTS="${SKIP_TESTS:-0}"
 HEALTHCHECK_RETRIES="${HEALTHCHECK_RETRIES:-25}"
 HEALTHCHECK_SLEEP="${HEALTHCHECK_SLEEP:-1}"
 
@@ -86,6 +88,12 @@ echo "==> pnpm install ($PNPM)"
 if ! "$PNPM" install --frozen-lockfile; then
   echo "Aviso: --frozen-lockfile falhou; tentando sem travar o lockfile..."
   "$PNPM" install --no-frozen-lockfile
+fi
+
+if [[ "$SKIP_TESTS" != "1" ]]; then
+  echo ""
+  echo "==> testes motor traco (@workspace/traco-imagem-engine)"
+  "$PNPM" --filter @workspace/traco-imagem-engine test
 fi
 
 if [[ "$SKIP_DB_PUSH" == "1" ]]; then
@@ -137,7 +145,14 @@ if [[ "$ok" -eq 1 ]]; then
   curl -s http://127.0.0.1:8080/api/healthz
   echo ""
   echo ""
+  echo "==> artefatos compilados (datas devem ser de hoje)"
+  ls -la artifacts/api-server/dist/index.mjs 2>/dev/null || true
+  ls -la artifacts/luz-e-sombra/dist/public/index.html 2>/dev/null || true
+  echo ""
+  systemctl status luzesombra-api --no-pager -l | head -8 || true
+  echo ""
   echo "Concluído com sucesso."
+  echo "No browser: hard refresh (Ctrl+Shift+R) e Reanalisar no Traço para carregar traco-mediapipe-v3."
 else
   echo ""
   echo "Erro: healthcheck não respondeu após ${HEALTHCHECK_RETRIES} tentativas."

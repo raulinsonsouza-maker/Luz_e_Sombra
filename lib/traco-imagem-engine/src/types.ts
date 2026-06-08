@@ -40,8 +40,33 @@ export interface MarcadoresFoto {
   ombrosAdiantados: number | null;
   /** Colapso torácico: razão tórax superior/inferior na frente (maior = mais colapso). */
   colapsoToracico: number | null;
+  /** Simetria facial (rosto). */
+  simetriaFacial: number | null;
+  /** Proxy tensão mandíbula (rosto). */
+  tensaoMandibula: number | null;
+  /** Rigidez cervical nariz–ombro (rosto/perfil). */
+  rigidezCervical: number | null;
   /** Mensagem quando o processamento desta foto falhou. */
   erroProcessamento?: string;
+}
+
+/** Índices Reich/Lowen (0–1) derivados dos marcadores. */
+export interface EixosReich {
+  indiceExpansao: number;
+  indiceRetracao: number;
+  indiceContencao: number;
+  indiceCompressao: number;
+  indiceFragmentacao: number;
+}
+
+export interface SegmentosReich {
+  ocular: number;
+  oral: number;
+  cervical: number;
+  toracico: number;
+  diafragmatico: number;
+  abdominal: number;
+  pelvico: number;
 }
 
 /** Agregado sobre todas as fotos válidas. */
@@ -57,7 +82,12 @@ export interface MarcadoresAgregados {
   projecaoCranianaMedia: number | null;
   ombrosAdiantadosMedio: number | null;
   colapsoToracicoMedio: number | null;
+  simetriaFacialMedia: number | null;
+  tensaoMandibulaMedia: number | null;
+  rigidezCervicalMedia: number | null;
   fotosComPoseCorpo: number;
+  eixosReich?: EixosReich;
+  segmentosReich?: SegmentosReich;
 }
 
 /** Resultado completo da análise por imagem (antes da narrativa textual). */
@@ -85,5 +115,8 @@ export interface ResultadoImagemEngine {
       mediaMassaSuperiorInferior: number;
       varianciaEntreFotos: number;
     };
+    eixosReich?: EixosReich;
+    segmentosReich?: SegmentosReich;
+    versaoEixos?: string;
   };
 }

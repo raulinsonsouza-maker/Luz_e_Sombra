@@ -50,7 +50,10 @@ export async function analyzeTracoDeCarater(
         estruturasSomenteFotos,
         parsed.data,
         engine.confiancaAnalise,
-        { varianciaEntreFotos: variancia }
+        {
+          varianciaEntreFotos: variancia,
+          indiceContencaoFotos: engine.marcadoresAgregados.eixosReich?.indiceContencao,
+        }
       );
       fusaoMetadata = fusao.metadata;
       engineForNarrativa = {

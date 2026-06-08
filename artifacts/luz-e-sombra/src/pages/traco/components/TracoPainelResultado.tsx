@@ -76,7 +76,20 @@ interface ResultadoAnalise {
     erroProcessamento?: string;
   }>;
   marcadoresAgregados?: Record<string, number | null>;
-  metadata?: { analysisVersion?: string };
+  eixosReich?: {
+    indiceExpansao: number;
+    indiceRetracao: number;
+    indiceContencao: number;
+    indiceCompressao: number;
+    indiceFragmentacao: number;
+  };
+  segmentosReich?: Record<string, number>;
+  metadata?: {
+    analysisVersion?: string;
+    eixosReich?: ResultadoAnalise["eixosReich"];
+    segmentosReich?: Record<string, number>;
+    versaoEixos?: string;
+  };
 }
 
 interface AnaliseTraco {
@@ -107,7 +120,6 @@ export function TracoPainelResultado({
   const configPrincipal = estruturaPrincipal ? ESTRUTURAS_CONFIG[estruturaPrincipal] : null;
   const [expandedObs, setExpandedObs] = useState(false);
   const [expandedCaract, setExpandedCaract] = useState(false);
-  const [expandedAuditoria, setExpandedAuditoria] = useState(false);
   const dataAnalise = new Date(criadoEm ?? analise.criadoEm).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "long",
@@ -124,6 +136,13 @@ export function TracoPainelResultado({
     somenteFotos &&
     principalSomenteFotos &&
     principalSomenteFotos !== estruturaPrincipal;
+  const alinhamento = resultado.fusaoDiagnosticoEmocional?.alinhamentoFotosFormulario;
+  const baixaConcordancia = alinhamento != null && alinhamento < 65;
+  const [expandedAuditoria, setExpandedAuditoria] = useState(
+    () => !!(principalDiverge || baixaConcordancia)
+  );
+  const eixos = resultado.eixosReich ?? resultado.metadata?.eixosReich;
+  const segmentos = resultado.segmentosReich ?? resultado.metadata?.segmentosReich;
 
   return (
           <div id="resultado-traco" className="space-y-5">
@@ -329,6 +348,69 @@ export function TracoPainelResultado({
                       ))}
                     </ul>
                   )}
+              </div>
+            )}
+
+            {/* ── Só fotos vs integrado (sempre visível quando há fusão) ── */}
+            {temFusao && somenteFotos && (
+              <div
+                className="rounded-2xl p-5"
+                style={{
+                  background: principalDiverge || baixaConcordancia
+                    ? "rgba(224,123,57,0.06)"
+                    : "rgba(30,24,18,0.5)",
+                  border: principalDiverge || baixaConcordancia
+                    ? "1px solid rgba(224,123,57,0.25)"
+                    : "1px solid rgba(200,165,107,0.12)",
+                }}
+              >
+                <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
+                  Fotos vs resultado integrado
+                </p>
+                {(principalDiverge || baixaConcordancia) && (
+                  <p className="text-xs mb-3 px-3 py-2 rounded-lg" style={{ color: "rgba(224,123,57,0.9)", background: "rgba(224,123,57,0.08)" }}>
+                    Leitura exploratória — fotos e questionário divergem em parte.
+                    {alinhamento != null ? ` Alinhamento: ${alinhamento}%.` : ""}
+                  </p>
+                )}
+                <div className="grid md:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <p className="mb-2 font-medium" style={{ color: "rgba(247,242,236,0.55)" }}>
+                      Só fotos (motor Reich)
+                    </p>
+                    {(Object.entries(somenteFotos) as [keyof EstruturasPct, number][])
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([k, v]) => (
+                        <p key={k} style={{ color: "rgba(247,242,236,0.45)" }}>
+                          {ESTRUTURAS_CONFIG[k].nome}: {v}%
+                        </p>
+                      ))}
+                  </div>
+                  <div>
+                    <p className="mb-2 font-medium" style={{ color: "rgba(247,242,236,0.55)" }}>
+                      Integrado (fotos + questionário)
+                    </p>
+                    {(Object.entries(resultado.estruturas) as [keyof EstruturasPct, number][])
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([k, v]) => (
+                        <p key={k} style={{ color: "rgba(247,242,236,0.45)" }}>
+                          {ESTRUTURAS_CONFIG[k].nome}: {v}%
+                        </p>
+                      ))}
+                  </div>
+                </div>
+                {eixos && (
+                  <div className="mt-4 pt-3" style={{ borderTop: "1px solid rgba(200,165,107,0.1)" }}>
+                    <p className="text-xs mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
+                      Eixos Reich/Lowen (0–1)
+                    </p>
+                    <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.42)" }}>
+                      Expansão {eixos.indiceExpansao.toFixed(2)} · Retração {eixos.indiceRetracao.toFixed(2)} ·
+                      Contenção {eixos.indiceContencao.toFixed(2)} · Compressão {eixos.indiceCompressao.toFixed(2)} ·
+                      Fragmentação {eixos.indiceFragmentacao.toFixed(2)}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -788,6 +870,18 @@ export function TracoPainelResultado({
                             {m.erroProcessamento ? ` · ⚠ ${m.erroProcessamento}` : ""}
                           </div>
                         ))}
+                      </div>
+                    )}
+                    {segmentos && (
+                      <div>
+                        <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.45)" }}>
+                          Segmentos Reich (couraça)
+                        </p>
+                        <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
+                          {Object.entries(segmentos)
+                            .map(([k, v]) => `${k}: ${(v as number).toFixed(2)}`)
+                            .join(" · ")}
+                        </p>
                       </div>
                     )}
                     {resultado.evidenciasMotor && resultado.evidenciasMotor.length > 0 && (

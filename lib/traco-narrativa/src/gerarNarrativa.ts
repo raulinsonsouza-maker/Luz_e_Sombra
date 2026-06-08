@@ -2,6 +2,7 @@ import type {
   ResultadoImagemEngine,
   EstruturaTraco,
   EstruturasPct,
+  EixosReich,
   MarcadoresAgregados,
   MarcadoresFoto,
   TipoFoto,
@@ -115,7 +116,13 @@ function construirInterpretacao(
 
   blocos.push(ip[r] ?? ip[0]);
   blocos.push(ip[(r + 1) % 5] ?? ip[1]);
-  blocos.push(pctS >= 18 ? isec[(r + 2) % 5] ?? isec[0] : ip[(r + 2) % 5] ?? ip[2]);
+  if (pctS >= 18 && secundaria !== "psicopata") {
+    blocos.push(isec[(r + 2) % 5] ?? isec[0]);
+  } else if (secundaria !== "psicopata") {
+    blocos.push(ip[(r + 2) % 5] ?? ip[2]);
+  } else {
+    blocos.push(ip[(r + 2) % 5] ?? ip[2]);
+  }
   blocos.push(ip[(r + 3) % 5] ?? ip[3]);
 
   const comboKey = `${principal}-${secundaria}`;
@@ -227,6 +234,45 @@ function estiloComunicacaoModulado(
   };
 }
 
+const PADRAO_CONTENCAO_RIGIDA =
+  "O corpo apresenta organização e simetria notáveis, com contenção emocional perceptível — não é colapso buscando sustentação, mas couraça funcional que mantém tudo no lugar. Há tensão discreta na cintura e região dorsal, sugerindo compressão crônica mais do que flacidez oral.";
+
+function resolverPadraoPostural(
+  principal: EstruturaTraco,
+  secundaria: EstruturaTraco,
+  pctS: number,
+  margemEstreita: boolean,
+  eixos?: EixosReich
+): string {
+  const contencaoAlta = (eixos?.indiceContencao ?? 0) > 0.5;
+  const retracaoAlta = (eixos?.indiceRetracao ?? 0) > 0.5;
+  const compressaoAlta = (eixos?.indiceCompressao ?? 0) > 0.45;
+
+  if (principal === "oral" && contencaoAlta && retracaoAlta) {
+    const base = PADRAO_CONTENCAO_RIGIDA;
+    if (compressaoAlta) {
+      return `${base} A compressão dorsal reforça leitura masoquista como traço secundário.`;
+    }
+    return base;
+  }
+
+  if (principal === "rigido" || (contencaoAlta && principal !== "psicopata")) {
+    let base = T.PADROES_POSTURAIS[principal === "oral" && contencaoAlta ? "rigido" : principal];
+    if (compressaoAlta && principal !== "masoquista") {
+      base += " Há também sinais de compressão vertical na cintura e dorsal.";
+    }
+    if (margemEstreita) {
+      return `${base} Há também coloração de ${T.NOMES[secundaria]} (${pctS}%): ${T.PADROES_POSTURAIS[secundaria]}`;
+    }
+    return base;
+  }
+
+  if (margemEstreita) {
+    return `${T.PADROES_POSTURAIS[principal]} Há também coloração de ${T.NOMES[secundaria]} (${pctS}%): ${T.PADROES_POSTURAIS[secundaria]}`;
+  }
+  return T.PADROES_POSTURAIS[principal];
+}
+
 function dinamicaModulada(
   principal: EstruturaTraco,
   secundaria: EstruturaTraco,
@@ -286,9 +332,12 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
   const pontosAtencao = [...paP, ...paS];
 
   const recP = rotacionarLista(T.RECOMENDACOES[principal], rot).slice(0, 3);
-  const recS = rotacionarLista(T.RECOMENDACOES[secundaria], rot + 1)
-    .filter((r) => !recP.includes(r))
-    .slice(0, 2);
+  const recS =
+    secundaria !== "psicopata" || principal === "psicopata"
+      ? rotacionarLista(T.RECOMENDACOES[secundaria], rot + 1)
+          .filter((r) => !recP.includes(r))
+          .slice(0, 2)
+      : [];
   const recomendacoesPraticas = [...recP, ...recS];
 
   const comboKey = `${principal}-${secundaria}`;
@@ -301,9 +350,13 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
     estruturaPrincipal: principal,
     estruturaSecundaria: secundaria,
     observacoesPorFoto: obs,
-    padraoPostural: margemEstreita
-      ? `${T.PADROES_POSTURAIS[principal]} Há também coloração de ${T.NOMES[secundaria]} (${pctS}%): ${T.PADROES_POSTURAIS[secundaria]}`
-      : T.PADROES_POSTURAIS[principal],
+    padraoPostural: resolverPadraoPostural(
+      principal,
+      secundaria,
+      pctS,
+      margemEstreita,
+      marcadoresAgregados.eixosReich ?? metadata?.eixosReich
+    ),
     caracteristicasFisicasObservadas: caract,
     interpretacao,
     centroEnergetico: T.CENTROS[principal],
@@ -325,5 +378,7 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
     marcadoresPorFoto,
     marcadoresAgregados,
     evidenciasMotor: evidencias,
+    eixosReich: marcadoresAgregados.eixosReich ?? metadata?.eixosReich,
+    segmentosReich: marcadoresAgregados.segmentosReich ?? metadata?.segmentosReich,
   };
 }

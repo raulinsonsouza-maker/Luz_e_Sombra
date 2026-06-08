@@ -71,4 +71,14 @@ export const INDICES_POR_PADRAO = {
   desconexao: [14, 18, 22, 23, 24],
 } as const;
 
+/** Índices Reich/Lowen (economia libidinal) mapeados às perguntas existentes. */
+export const INDICES_LIBIDINAL_REICH = {
+  /** Prazer bloqueado / humilhação da vontade → retenção + masoquista */
+  prazerBloqueado: [7, 16, 20],
+  /** Dificuldade de relaxar / entregar → controle + rígido */
+  rendicaoBloqueada: [1, 12, 21],
+  /** Dissociação corpo-emoção → desconexão + esquizóide */
+  dissociacaoSomática: [14, 18, 22],
+} as const;
+
 export type PadraoInterno = keyof typeof INDICES_POR_PADRAO;

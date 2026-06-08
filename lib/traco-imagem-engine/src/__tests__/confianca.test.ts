@@ -20,6 +20,9 @@ test("fotosComPoseCorpo 0 quando nenhuma foto de corpo tem pose completa", () =>
       projecaoCraniana: null,
       ombrosAdiantados: null,
       colapsoToracico: null,
+      simetriaFacial: 0.9,
+      tensaoMandibula: 0.2,
+      rigidezCervical: null,
     },
     {
       tipo: "corpo-frente",
@@ -36,6 +39,9 @@ test("fotosComPoseCorpo 0 quando nenhuma foto de corpo tem pose completa", () =>
       projecaoCraniana: null,
       ombrosAdiantados: null,
       colapsoToracico: null,
+      simetriaFacial: null,
+      tensaoMandibula: null,
+      rigidezCervical: null,
     },
   ];
   const ag = agregarMarcadores(fotos);

@@ -3,7 +3,7 @@ import {
   type PadraoEmocional,
   PADROES_EMOCIONAIS,
 } from "@workspace/traco-diagnostico-fusion";
-import { INDICES_POR_PADRAO } from "./perguntas";
+import { INDICES_LIBIDINAL_REICH, INDICES_POR_PADRAO } from "./perguntas";
 import { z } from "zod";
 
 export const VERSAO_DIAGNOSTICO30 = "diagnostico30_v1";
@@ -66,6 +66,25 @@ export function computarDiagnostico30(entrada: EntradaDiagnostico30): Diagnostic
   const adjusted: Record<PadraoEmocional, number> = {} as Record<PadraoEmocional, number>;
   for (const p of PADROES_EMOCIONAIS) {
     adjusted[p] = Math.max(0.02, m + (raw[p] - m) * shrink);
+  }
+
+  const meanPresente = (indices: readonly number[]) =>
+    indices.reduce((s, i) => s + (presente[i] ?? 0), 0) / indices.length;
+
+  const libPrazer = meanPresente(INDICES_LIBIDINAL_REICH.prazerBloqueado);
+  const libRendicao = meanPresente(INDICES_LIBIDINAL_REICH.rendicaoBloqueada);
+  const libDissoc = meanPresente(INDICES_LIBIDINAL_REICH.dissociacaoSomática);
+
+  if (libPrazer >= 3.2) {
+    adjusted.retencao *= 1.08;
+    adjusted.controle *= 1.03;
+  }
+  if (libRendicao >= 3.2) {
+    adjusted.controle *= 1.1;
+    adjusted.retencao *= 1.04;
+  }
+  if (libDissoc >= 3.2) {
+    adjusted.desconexao *= 1.12;
   }
 
   const padroesPct = normalizarPercentuaisInteiros(adjusted);

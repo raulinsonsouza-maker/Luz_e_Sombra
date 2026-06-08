@@ -12,5 +12,6 @@ export {
   ESCALA_PRESENTE_LABELS,
   ESCALA_CONSCIENCIA_LABELS,
   INDICES_POR_PADRAO,
+  INDICES_LIBIDINAL_REICH,
   type PadraoInterno,
 } from "./perguntas";

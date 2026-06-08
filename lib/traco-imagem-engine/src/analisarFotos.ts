@@ -2,9 +2,10 @@ import type { TipoFoto } from "./types.js";
 import type { ResultadoImagemEngine } from "./types.js";
 import { extrairMarcadoresFoto, agregarMarcadores } from "./marcadores.js";
 import { detectarPoseNaImagem } from "./mediapipeRunner.js";
+import { calcularEixosReich, calcularSegmentosReich, VERSAO_EIXOS_REICH } from "./eixosReich.js";
 import { rankingPrincipalSecundaria, scoreEstruturas } from "./scoreEstruturas.js";
 
-const ANALYSIS_VERSION = "traco-mediapipe-v2";
+const ANALYSIS_VERSION = "traco-mediapipe-v3";
 
 function variance(vals: number[]): number {
   if (vals.length <= 1) return 0;
@@ -90,13 +91,22 @@ export async function analisarFotos(
         projecaoCraniana: null,
         ombrosAdiantados: null,
         colapsoToracico: null,
+        simetriaFacial: null,
+        tensaoMandibula: null,
+        rigidezCervical: null,
         erroProcessamento: msg,
       });
     }
   }
 
   const ag = agregarMarcadores(marcadoresPorFoto);
-  const scored = scoreEstruturas({ ag, numFotos: marcadoresPorFoto.length });
+  const fotoRosto = marcadoresPorFoto.find((f) => f.tipo === "rosto") ?? null;
+  const eixosReich = calcularEixosReich(ag, fotoRosto);
+  const segmentosReich = calcularSegmentosReich(ag, eixosReich, fotoRosto);
+  ag.eixosReich = eixosReich;
+  ag.segmentosReich = segmentosReich;
+
+  const scored = scoreEstruturas({ ag, numFotos: marcadoresPorFoto.length, fotoRosto });
   const { principal, secundaria } = rankingPrincipalSecundaria(scored.estruturas);
 
   const shrVals = marcadoresPorFoto.map((f) => f.shr).filter((v): v is number => v !== null);
@@ -152,6 +162,9 @@ export async function analisarFotos(
         mediaMassaSuperiorInferior: Math.round((ag.ulrMedio ?? 0) * 100) / 100,
         varianciaEntreFotos: Math.round(Math.sqrt(varianciaShr) * 100) / 100,
       },
+      eixosReich,
+      segmentosReich,
+      versaoEixos: VERSAO_EIXOS_REICH,
     },
   };
 }

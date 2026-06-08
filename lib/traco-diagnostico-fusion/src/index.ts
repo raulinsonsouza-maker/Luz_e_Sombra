@@ -29,13 +29,14 @@ const ALPHA_MAX_FOTOS_FRACAS = 0.62;
  * Matriz padrão emocional → leitura esperada nas estruturas de traço (linhas somam 1).
  * Versionada para auditoria; alterar `VERSAO_MATRIZ` ao calibrar com clínica/produto.
  */
-export const VERSAO_MATRIZ = "fusao_v1";
+export const VERSAO_MATRIZ = "fusao_v2";
 
+/** Reich/Lowen: controle→Rígido; vínculo menos Oral-puro; retenção→Masoquista. */
 const MATRIZ_PADRAO_ESTRUTURA: Record<PadraoEmocional, Record<EstruturaTraco, number>> = {
-  vinculo: { esquizoide: 0.22, oral: 0.48, psicopata: 0.08, masoquista: 0.14, rigido: 0.08 },
-  controle: { esquizoide: 0.06, oral: 0.1, psicopata: 0.28, masoquista: 0.12, rigido: 0.44 },
-  estrategia: { esquizoide: 0.12, oral: 0.18, psicopata: 0.38, masoquista: 0.08, rigido: 0.24 },
-  retencao: { esquizoide: 0.1, oral: 0.22, psicopata: 0.12, masoquista: 0.32, rigido: 0.24 },
+  vinculo: { esquizoide: 0.18, oral: 0.35, psicopata: 0.08, masoquista: 0.14, rigido: 0.25 },
+  controle: { esquizoide: 0.05, oral: 0.08, psicopata: 0.22, masoquista: 0.1, rigido: 0.55 },
+  estrategia: { esquizoide: 0.1, oral: 0.15, psicopata: 0.35, masoquista: 0.08, rigido: 0.32 },
+  retencao: { esquizoide: 0.08, oral: 0.18, psicopata: 0.1, masoquista: 0.35, rigido: 0.29 },
   desconexao: { esquizoide: 0.42, oral: 0.08, psicopata: 0.1, masoquista: 0.2, rigido: 0.2 },
 };
 
@@ -207,6 +208,8 @@ export interface AplicarFusaoResult {
 export interface FusaoTracoOpcoes {
   /** Variância entre fotos (0–1+), ex. metadata.featureSummary.varianciaEntreFotos */
   varianciaEntreFotos?: number;
+  /** Índice contenção Reich (0–1) das fotos — reforça peso do formulário em controle. */
+  indiceContencaoFotos?: number;
 }
 
 export function aplicarFusaoTracoDiagnostico(
@@ -235,19 +238,41 @@ export function aplicarFusaoTracoDiagnostico(
   let alpha = ALPHA_BASE + ((mc - 1) / 4) * ALPHA_CONSCIENCIA;
   if (parsed.tagEvolucao === "integrado") alpha += 0.04;
   if (fotosFracas) alpha += 0.06;
-  alpha = clamp(alpha, ALPHA_BASE, alphaMax);
 
   const fotoArr = ESTRUTURAS_TRACO.map((e) => vFoto[e]);
   const formArr = ESTRUTURAS_TRACO.map((e) => vForm[e]);
   const alinhamento = Math.round(100 * cosineSimilarity(fotoArr, formArr));
+
+  if (alinhamento < 65) {
+    alpha = Math.min(alpha, 0.3);
+  }
+
+  const contencao = opcoes?.indiceContencaoFotos ?? 0;
+  const padControle = padProp.controle ?? 0;
+  if (contencao > 0.5 && padControle > 0.18) {
+    alpha = Math.min(alphaMax, alpha + 0.04);
+  }
+
+  alpha = clamp(alpha, ALPHA_BASE, alphaMax);
 
   const fusedProp = {} as Record<EstruturaTraco, number>;
   for (const e of ESTRUTURAS_TRACO) {
     fusedProp[e] = (1 - alpha) * vFoto[e] + alpha * vForm[e];
   }
 
-  // Pequeno “sharpening” quando há forte convergência (reforça leitura assertiva sem inventar estrutura nova).
-  if (alinhamento >= 82) {
+  const principalFoto = ESTRUTURAS_TRACO.reduce(
+    (best, e) => (vFoto[e] > vFoto[best] ? e : best),
+    ESTRUTURAS_TRACO[0]
+  );
+  const principalForm = ESTRUTURAS_TRACO.reduce(
+    (best, e) => (vForm[e] > vForm[best] ? e : best),
+    ESTRUTURAS_TRACO[0]
+  );
+  const gapFotoPrincipal = vFoto[principalFoto] - vFoto[ESTRUTURAS_TRACO.filter((e) => e !== principalFoto).sort((a, b) => vFoto[b] - vFoto[a])[0]!];
+  const divergenciaPrincipal = principalFoto !== principalForm && gapFotoPrincipal > 0.15;
+
+  // Sharpening só com alta convergência e sem divergência fotos/formulário.
+  if (alinhamento >= 82 && !divergenciaPrincipal) {
     const top = ESTRUTURAS_TRACO.reduce((best, e) => (fusedProp[e] > fusedProp[best] ? e : best), ESTRUTURAS_TRACO[0]);
     const factor = 1.06;
     fusedProp[top] *= factor;

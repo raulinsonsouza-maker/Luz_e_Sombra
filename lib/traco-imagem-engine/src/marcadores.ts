@@ -197,6 +197,7 @@ export function extrairMarcadoresFoto(input: ExtrairMarcadoresInput): Marcadores
   const lms = landmarks;
 
   if (!lms || lms.length < 29) {
+    const defBorda = definicaoMascara(segmentationMask, maskWidth, maskHeight);
     return {
       tipo,
       poseDetectada: false,
@@ -206,12 +207,15 @@ export function extrairMarcadoresFoto(input: ExtrairMarcadoresInput): Marcadores
       ulr: null,
       simetria: null,
       densidadeCorpo: densidadeMascara(segmentationMask, maskWidth, maskHeight),
-      definicaoBorda: definicaoMascara(segmentationMask, maskWidth, maskHeight),
+      definicaoBorda: defBorda,
       inclinacaoAnterior: null,
       projecaoPeito: null,
       projecaoCraniana: null,
       ombrosAdiantados: null,
       colapsoToracico: null,
+      simetriaFacial: tipo === "rosto" ? simetriaLandmarks(lms ?? []) : null,
+      tensaoMandibula: tipo === "rosto" ? defBorda : null,
+      rigidezCervical: null,
     };
   }
 
@@ -283,6 +287,21 @@ export function extrairMarcadoresFoto(input: ExtrairMarcadoresInput): Marcadores
       ? visOk(lms[LM.NOSE], 0.2) && (shouldersOk || simetria !== null)
       : shouldersOk && hipsOk;
 
+  let simetriaFacial: number | null = null;
+  let tensaoMandibula: number | null = null;
+  let rigidezCervical: number | null = null;
+
+  if (tipo === "rosto") {
+    simetriaFacial = simetria;
+    tensaoMandibula = definicaoBorda;
+    const nose = lms[LM.NOSE];
+    if (visOk(nose, 0.25) && shouldersOk) {
+      const shoulderY = (ls!.y + rs!.y) / 2;
+      const noseY = nose!.y;
+      rigidezCervical = clamp(Math.abs(shoulderY - noseY) / 0.25, 0, 1);
+    }
+  }
+
   return {
     tipo,
     poseDetectada,
@@ -298,11 +317,15 @@ export function extrairMarcadoresFoto(input: ExtrairMarcadoresInput): Marcadores
     projecaoCraniana,
     ombrosAdiantados,
     colapsoToracico,
+    simetriaFacial,
+    tensaoMandibula,
+    rigidezCervical,
   };
 }
 
 export function agregarMarcadores(fotos: MarcadoresFoto[]): import("./types.js").MarcadoresAgregados {
   const bodyShots = fotos.filter((f) => f.tipo !== "rosto");
+  const rostoShots = fotos.filter((f) => f.tipo === "rosto");
   const used = bodyShots.length > 0 ? bodyShots : fotos;
   const ladoShots = bodyShots.filter((f) => f.tipo === "corpo-lado");
   const frenteShots = bodyShots.filter((f) => f.tipo === "corpo-frente");
@@ -345,6 +368,15 @@ export function agregarMarcadores(fotos: MarcadoresFoto[]): import("./types.js")
       ...frenteShots.map((f) => ({ val: f.colapsoToracico, weight: 2 })),
       ...ladoShots.map((f) => ({ val: f.colapsoToracico, weight: 0.5 })),
     ]),
+    simetriaFacialMedia: weightedMean(
+      rostoShots.map((f) => ({ val: f.simetriaFacial ?? f.simetria, weight: f.qualidadeFoto || 1 }))
+    ),
+    tensaoMandibulaMedia: weightedMean(
+      rostoShots.map((f) => ({ val: f.tensaoMandibula, weight: f.qualidadeFoto || 1 }))
+    ),
+    rigidezCervicalMedia: weightedMean(
+      rostoShots.map((f) => ({ val: f.rigidezCervical, weight: f.qualidadeFoto || 1 }))
+    ),
     fotosComPoseCorpo,
   };
 }
