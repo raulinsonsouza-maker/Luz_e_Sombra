@@ -89,8 +89,8 @@ export default function Diagnostico30Form({
         }
         return;
       }
-      if (pessoaId !== null) return;
-      const res = await apiFetch("/diagnostico-emocional/ultimo");
+      const q = pessoaId !== null ? `?pessoaId=${pessoaId}` : "";
+      const res = await apiFetch(`/diagnostico-emocional/ultimo${q}`);
       if (!res.ok) return;
       const row = (await res.json()) as { respostas?: unknown } | null;
       if (!row?.respostas) return;
@@ -156,7 +156,7 @@ export default function Diagnostico30Form({
     }
     void apiFetch("/diagnostico-emocional", {
       method: "POST",
-      body: JSON.stringify(parsed.data),
+      body: JSON.stringify({ ...parsed.data, pessoaId }),
     }).catch(() => {});
 
     if (variant === "embedded") {

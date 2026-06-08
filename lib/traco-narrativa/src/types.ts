@@ -71,4 +71,9 @@ export interface ResultadoAnalise {
   marcadoresPorFoto?: MarcadoresFoto[];
   marcadoresAgregados?: MarcadoresAgregados;
   evidenciasMotor?: EvidenciaItem[];
+  estruturasSomenteFotos?: EstruturasPct;
+  sinteseIntegradaFotosQuestionario?: string;
+  fusaoDiagnosticoEmocional?: Record<string, unknown>;
+  pessoaId?: number | null;
+  pessoaNome?: string | null;
 }

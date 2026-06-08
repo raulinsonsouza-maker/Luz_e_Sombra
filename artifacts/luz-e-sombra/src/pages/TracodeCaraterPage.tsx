@@ -137,6 +137,21 @@ export default function TracodeCaraterPage() {
   const [erro, setErro] = useState<string | null>(null);
   const fileInputs = useRef<Partial<Record<TipoFoto, HTMLInputElement | null>>>({});
   const cameraInputs = useRef<Partial<Record<TipoFoto, HTMLInputElement | null>>>({});
+  const loadGenRef = useRef(0);
+  const selectedPessoaIdRef = useRef(selectedPessoaId);
+  selectedPessoaIdRef.current = selectedPessoaId;
+
+  const revokePreviewUrls = useCallback((urls: Partial<Record<TipoFoto, string>>) => {
+    for (const url of Object.values(urls)) {
+      if (url?.startsWith("blob:")) {
+        try {
+          URL.revokeObjectURL(url);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+  }, []);
 
   const [pessoas, setPessoas] = useState<Pessoa[]>([]);
   const [showAddPessoa, setShowAddPessoa] = useState(false);
@@ -146,39 +161,58 @@ export default function TracodeCaraterPage() {
   const [diagnosticoCompleto, setDiagnosticoCompleto] = useState(false);
 
   async function carregarDados(pessoaId: number | null) {
+    const gen = ++loadGenRef.current;
     try {
       const q = pessoaId !== null ? `?pessoaId=${pessoaId}` : "";
       const [fotosRes, analiseRes] = await Promise.all([
         apiFetch(`/traco/fotos${q}`),
         apiFetch(`/traco/analise${q}`),
       ]);
+      if (gen !== loadGenRef.current) return;
+
       if (fotosRes.ok) {
         const lista: FotoTraco[] = await fotosRes.json();
         const map: Partial<Record<TipoFoto, FotoTraco>> = {};
         const prevMap: Partial<Record<TipoFoto, string>> = {};
         const token = localStorage.getItem("luz_e_sombra_token") ?? "";
-        await Promise.all(lista.map(async (f) => {
-          map[f.tipo as TipoFoto] = f;
-          try {
-            const imgRes = await fetch(`${API_BASE}/api/traco/fotos/${f.id}/view`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            if (imgRes.ok) {
-              const blob = await imgRes.blob();
-              prevMap[f.tipo as TipoFoto] = URL.createObjectURL(blob);
+        await Promise.all(
+          lista.map(async (f) => {
+            map[f.tipo as TipoFoto] = f;
+            try {
+              const imgRes = await fetch(`${API_BASE}/api/traco/fotos/${f.id}/view`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              if (imgRes.ok) {
+                const blob = await imgRes.blob();
+                prevMap[f.tipo as TipoFoto] = URL.createObjectURL(blob);
+              }
+            } catch {
+              /* keep no preview */
             }
-          } catch { /* keep no preview */ }
-        }));
+          })
+        );
+        if (gen !== loadGenRef.current) {
+          revokePreviewUrls(prevMap);
+          return;
+        }
         setFotos(map);
         setPreviews(prevMap);
+      } else if (gen === loadGenRef.current) {
+        setFotos({});
+        setPreviews({});
       }
+
+      if (gen !== loadGenRef.current) return;
+
       if (analiseRes.ok) {
         const data = await analiseRes.json();
-        setAnalise(data);
-      } else {
+        if (gen === loadGenRef.current) setAnalise(data);
+      } else if (gen === loadGenRef.current) {
         setAnalise(null);
       }
-    } catch { /* silently ignore */ }
+    } catch {
+      /* silently ignore */
+    }
   }
 
   useEffect(() => {
@@ -187,10 +221,18 @@ export default function TracodeCaraterPage() {
   }, []);
 
   useEffect(() => {
+    loadGenRef.current += 1;
+    setPreviews((prev) => {
+      revokePreviewUrls(prev);
+      return {};
+    });
     setFotos({});
-    setPreviews({});
     setFotoFiles({});
     setAnalise(null);
+    setErro(null);
+    setUploading({});
+    setAnalisando(false);
+    setAnalisandoEtapa("");
     carregarDados(selectedPessoaId);
     const ent = readDiagnostico30RespostasEntrada(selectedPessoaId);
     setDiagnosticoCompleto(ent !== null && isDiagnostico30RespostasCompletas(ent));
@@ -199,13 +241,17 @@ export default function TracodeCaraterPage() {
 
   const handleFileSelect = useCallback(
     async (tipo: TipoFoto, file: File) => {
-      // Show local preview immediately
+      const pessoaNoUpload = selectedPessoaIdRef.current;
+      const stillSamePessoa = () => selectedPessoaIdRef.current === pessoaNoUpload;
+
       const localURL = URL.createObjectURL(file);
+      if (!stillSamePessoa()) {
+        URL.revokeObjectURL(localURL);
+        return;
+      }
       setPreviews((p) => ({ ...p, [tipo]: localURL }));
       setUploading((u) => ({ ...u, [tipo]: true }));
       setErro(null);
-
-      // Store file locally for analysis (no API credits needed)
       setFotoFiles((ff) => ({ ...ff, [tipo]: file }));
 
       try {
@@ -228,24 +274,36 @@ export default function TracodeCaraterPage() {
         // 3. Save metadata
         const saveRes = await apiFetch("/traco/fotos", {
           method: "POST",
-          body: JSON.stringify({ tipo, objectPath, pessoaId: selectedPessoaId }),
+          body: JSON.stringify({ tipo, objectPath, pessoaId: pessoaNoUpload }),
         });
         if (!saveRes.ok) throw new Error("Erro ao salvar foto");
         const savedFoto: FotoTraco = await saveRes.json();
 
+        if (!stillSamePessoa()) return;
+
         setFotos((f) => ({ ...f, [tipo]: savedFoto }));
-        // Keep local preview (avoids auth-gated reload)
         setPreviews((p) => ({ ...p, [tipo]: localURL }));
       } catch (e: unknown) {
+        if (!stillSamePessoa()) return;
         setErro(e instanceof Error ? e.message : "Erro ao fazer upload da foto");
         setPreviews((p) => ({ ...p, [tipo]: undefined }));
-        setFotos((f) => { const n = { ...f }; delete n[tipo]; return n; });
-        setFotoFiles((ff) => { const n = { ...ff }; delete n[tipo]; return n; });
+        setFotos((f) => {
+          const n = { ...f };
+          delete n[tipo];
+          return n;
+        });
+        setFotoFiles((ff) => {
+          const n = { ...ff };
+          delete n[tipo];
+          return n;
+        });
       } finally {
-        setUploading((u) => ({ ...u, [tipo]: false }));
+        if (stillSamePessoa()) {
+          setUploading((u) => ({ ...u, [tipo]: false }));
+        }
       }
     },
-    [selectedPessoaId]
+    []
   );
 
   const handleDelete = useCallback(async (tipo: TipoFoto) => {
@@ -288,7 +346,31 @@ export default function TracodeCaraterPage() {
       }
 
       setAnalisandoEtapa("Calculando estruturas biomecânicas...");
-      const resultado = await analyzeTracoDeCarater(photoSources, token);
+      const diagnosticoEmocionalPayload = readDiagnosticoEmocional30Fusao(pessoaIdAtStart);
+      const nomePessoa =
+        pessoaIdAtStart === null
+          ? user?.nome?.split(" ")[0] ?? "Você"
+          : pessoas.find((p) => p.id === pessoaIdAtStart)?.nome ?? null;
+
+      const resultado = await analyzeTracoDeCarater(photoSources, {
+        token,
+        pessoaId: pessoaIdAtStart,
+        pessoaNome: nomePessoa,
+        ...(diagnosticoEmocionalPayload ? { diagnosticoEmocional: diagnosticoEmocionalPayload } : {}),
+      });
+
+      const fotosComCorpo = resultado.marcadoresAgregados?.fotosComPoseCorpo ?? 0;
+      const conf = resultado.confiancaAnalise ?? 0;
+      if (fotosComCorpo === 0) {
+        throw new Error(
+          "Não foi possível detectar ombros e quadril em nenhuma foto de corpo. Refaça as fotos de corpo (frente e lado) com pose clara e fundo neutro."
+        );
+      }
+      if (conf < 40) {
+        throw new Error(
+          `Confiança da análise muito baixa (${conf}%). Melhore o enquadramento, iluminação e pose antes de gerar o resultado.`
+        );
+      }
 
       setAnalisandoEtapa("Gerando análise completa...");
 
@@ -296,14 +378,13 @@ export default function TracodeCaraterPage() {
         throw new Error("A pessoa selecionada mudou durante a análise. Tente novamente.");
       }
 
-      // Save computed result to backend
-      const diagnosticoEmocionalPayload = readDiagnosticoEmocional30Fusao(pessoaIdAtStart);
       const saveRes = await apiFetch("/traco/analisar", {
         method: "POST",
         body: JSON.stringify({
           resultado,
           pessoaId: pessoaIdAtStart,
           snapshotPessoaId: pessoaIdAtStart,
+          pessoaNome: nomePessoa,
           ...(diagnosticoEmocionalPayload ? { diagnosticoEmocional: diagnosticoEmocionalPayload } : {}),
         }),
       });
@@ -434,8 +515,15 @@ export default function TracodeCaraterPage() {
 
         {/* ── Seletor de pessoas ── */}
         <div className="mb-8">
-          <p className="text-xs tracking-[0.2em] uppercase mb-3 flex items-center gap-2" style={{ color: "rgba(200,165,107,0.5)" }}>
+          <p className="text-xs tracking-[0.2em] uppercase mb-1 flex items-center gap-2" style={{ color: "rgba(200,165,107,0.5)" }}>
             <Users className="w-3.5 h-3.5" /> Analisando
+          </p>
+          <p className="text-sm mb-3" style={{ color: "rgba(247,242,236,0.55)" }}>
+            Perfil ativo:{" "}
+            <span style={{ color: "#c8a56b" }}>
+              {pessoaSelecionada ? pessoaSelecionada.nome : "Você"}
+            </span>
+            <span className="text-xs ml-2 opacity-60">(dados isolados por pessoa)</span>
           </p>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {/* Me */}

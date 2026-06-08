@@ -4,8 +4,10 @@ import {
   type EntradaDiagnostico30,
 } from "@workspace/traco-diagnostico-emocional";
 import { diagnosticoEmocionalFusaoSchema } from "@workspace/traco-diagnostico-fusion";
+import { getStoredUser } from "@/lib/auth";
 
 export const LEGACY_STORAGE_DIAGNOSTICO_30 = "luz_diagnostico_emocional_30_v1";
+const DIAG_PREFIX = "luz_diagnostico_emocional_30_v1";
 
 /** Remove resíduos do antigo questionário de 20 (evita confusão com o diagnóstico de 30). */
 export function purgeQuestionario20Storage(): void {
@@ -19,12 +21,78 @@ export function purgeQuestionario20Storage(): void {
   }
 }
 
+/** Remove dados locais do Traço (diagnóstico por pessoa) — chamar no logout. */
+export function clearTracoSessionStorage(): void {
+  try {
+    purgeQuestionario20Storage();
+    for (const k of Object.keys(localStorage)) {
+      if (k === LEGACY_STORAGE_DIAGNOSTICO_30 || k.startsWith(`${DIAG_PREFIX}_`)) {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 export function storageSuffixForPessoa(pessoaId: number | null): "eu" | `p${number}` {
   return pessoaId === null ? "eu" : `p${pessoaId}`;
 }
 
-export function storageKeyDiagnostico30(pessoaId: number | null): string {
-  return `luz_diagnostico_emocional_30_v1_${storageSuffixForPessoa(pessoaId)}`;
+function resolveUserId(userId?: number | null): number | null {
+  if (userId !== undefined && userId !== null) return userId;
+  return getStoredUser()?.id ?? null;
+}
+
+export function storageKeyDiagnostico30(pessoaId: number | null, userId?: number | null): string {
+  const suffix = storageSuffixForPessoa(pessoaId);
+  const uid = resolveUserId(userId);
+  if (uid != null) return `${DIAG_PREFIX}_u${uid}_${suffix}`;
+  return `${DIAG_PREFIX}_${suffix}`;
+}
+
+/** Chave legada sem userId (pré-isolamento por conta). */
+function legacyStorageKeyDiagnostico30(pessoaId: number | null): string {
+  return `${DIAG_PREFIX}_${storageSuffixForPessoa(pessoaId)}`;
+}
+
+/** Migra chave antiga para formato com userId, se existir. */
+function migrateDiagnosticoKeyIfNeeded(pessoaId: number | null, userId: number): string {
+  const newKey = storageKeyDiagnostico30(pessoaId, userId);
+  if (localStorage.getItem(newKey)?.trim()) return newKey;
+
+  const oldKey = legacyStorageKeyDiagnostico30(pessoaId);
+  const oldRaw = localStorage.getItem(oldKey);
+  if (oldRaw?.trim()) {
+    try {
+      localStorage.setItem(newKey, oldRaw);
+      localStorage.removeItem(oldKey);
+      return newKey;
+    } catch {
+      return oldKey;
+    }
+  }
+
+  if (pessoaId === null) {
+    const leg = localStorage.getItem(LEGACY_STORAGE_DIAGNOSTICO_30);
+    if (leg?.trim()) {
+      try {
+        localStorage.setItem(newKey, leg);
+        localStorage.removeItem(LEGACY_STORAGE_DIAGNOSTICO_30);
+        return newKey;
+      } catch {
+        return LEGACY_STORAGE_DIAGNOSTICO_30;
+      }
+    }
+  }
+
+  return newKey;
+}
+
+function resolveStorageKey(pessoaId: number | null): string {
+  const uid = resolveUserId();
+  if (uid != null) return migrateDiagnosticoKeyIfNeeded(pessoaId, uid);
+  return legacyStorageKeyDiagnostico30(pessoaId);
 }
 
 /** Query para ancorar formulários e análise à mesma pessoa (`null` = Eu). */
@@ -45,23 +113,11 @@ export function parsePessoaIdFromSearch(search: string): number | null {
   return n;
 }
 
-/** Respostas brutas guardadas no localStorage (por pessoa). */
+/** Respostas brutas guardadas no localStorage (por conta + pessoa). */
 export function readDiagnostico30RespostasEntrada(pessoaId: number | null): EntradaDiagnostico30 | null {
   try {
-    const key = storageKeyDiagnostico30(pessoaId);
-    let raw = localStorage.getItem(key);
-    if (!raw?.trim() && pessoaId === null) {
-      const leg = localStorage.getItem(LEGACY_STORAGE_DIAGNOSTICO_30);
-      if (leg?.trim()) {
-        try {
-          localStorage.setItem(key, leg);
-          localStorage.removeItem(LEGACY_STORAGE_DIAGNOSTICO_30);
-          raw = localStorage.getItem(key);
-        } catch {
-          /* ignore */
-        }
-      }
-    }
+    const key = resolveStorageKey(pessoaId);
+    const raw = localStorage.getItem(key);
     if (!raw?.trim()) return null;
     const o = JSON.parse(raw) as { respostas?: unknown };
     const r = entradaDiagnostico30Schema.safeParse(o.respostas);
@@ -97,24 +153,11 @@ function parseDiagnostico30StoredJson(raw: string): Record<string, unknown> | un
 
 export function readDiagnosticoEmocional30Fusao(pessoaId: number | null): Record<string, unknown> | undefined {
   try {
-    const key = storageKeyDiagnostico30(pessoaId);
-    let raw = localStorage.getItem(key);
-    if (!raw?.trim() && pessoaId === null) {
-      const leg = localStorage.getItem(LEGACY_STORAGE_DIAGNOSTICO_30);
-      if (leg?.trim()) {
-        try {
-          localStorage.setItem(key, leg);
-          localStorage.removeItem(LEGACY_STORAGE_DIAGNOSTICO_30);
-          raw = localStorage.getItem(key);
-        } catch {
-          /* ignore */
-        }
-      }
-    }
+    const key = resolveStorageKey(pessoaId);
+    const raw = localStorage.getItem(key);
     if (!raw?.trim()) return undefined;
     return parseDiagnostico30StoredJson(raw);
   } catch {
     return undefined;
   }
 }
-

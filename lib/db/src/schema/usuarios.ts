@@ -77,12 +77,19 @@ export const analiseTracoTable = pgTable("analise_traco", {
 export const diagnosticoEmocional30Table = pgTable("diagnostico_emocional_30", {
   id: serial("id").primaryKey(),
   usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  /** null = Eu (próprio utilizador); caso contrário pessoa em pessoas_analise. */
+  pessoaId: integer("pessoa_id").references(() => pessoasAnaliseTable.id, { onDelete: "cascade" }),
   respostas: jsonb("respostas").notNull(),
   resultado: jsonb("resultado").notNull(),
   versao: text("versao").notNull().default("diagnostico30_v1"),
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
 }, (table) => ({
   usuarioIdx: index("idx_diagnostico_emocional_30_usuario").on(table.usuarioId),
+  usuarioPessoaRecenteIdx: index("idx_diagnostico_emocional_30_user_pessoa_recente").on(
+    table.usuarioId,
+    table.pessoaId,
+    table.criadoEm
+  ),
 }));
 
 /** Respostas + resultado do questionário de temperamento (40 itens, v1). */

@@ -124,6 +124,66 @@ export function definicaoMascara(mask: Uint8Array | null, width: number, height:
   return n > 0 ? clamp(sum / n / 400, 0, 1) : null;
 }
 
+/** Nariz adiantado em relação à pelve no perfil (normalizado pela largura do quadril). */
+export function projecaoCranianaLandmarks(lms: NormalizedLandmark[], hipW: number | null): number | null {
+  const nose = lms[LM.NOSE];
+  const lh = lms[LM.LEFT_HIP];
+  const rh = lms[LM.RIGHT_HIP];
+  if (!visOk(nose, 0.25) || !visOk(lh, 0.3) || !visOk(rh, 0.3)) return null;
+  const midHx = (lh!.x + rh!.x) / 2;
+  const scale = Math.max(hipW ?? dist(lh!, rh!), 0.04);
+  return (nose!.x - midHx) / scale;
+}
+
+/** Ombros adiantados vs pelve no eixo sagital (normalizado). */
+export function ombrosAdiantadosLandmarks(
+  lms: NormalizedLandmark[],
+  hipW: number | null
+): number | null {
+  const ls = lms[LM.LEFT_SHOULDER];
+  const rs = lms[LM.RIGHT_SHOULDER];
+  const lh = lms[LM.LEFT_HIP];
+  const rh = lms[LM.RIGHT_HIP];
+  if (!visOk(ls, 0.3) || !visOk(rs, 0.3) || !visOk(lh, 0.3) || !visOk(rh, 0.3)) return null;
+  const midSx = (ls!.x + rs!.x) / 2;
+  const midHx = (lh!.x + rh!.x) / 2;
+  const scale = Math.max(hipW ?? dist(lh!, rh!), 0.04);
+  return (midSx - midHx) / scale;
+}
+
+/** Colapso torácico: tórax superior curto em relação ao inferior (frente). */
+export function colapsoToracicoLandmarks(lms: NormalizedLandmark[]): number | null {
+  const ls = lms[LM.LEFT_SHOULDER];
+  const rs = lms[LM.RIGHT_SHOULDER];
+  const lh = lms[LM.LEFT_HIP];
+  const rh = lms[LM.RIGHT_HIP];
+  const la = lms[LM.LEFT_ANKLE];
+  const ra = lms[LM.RIGHT_ANKLE];
+  if (!visOk(ls, 0.3) || !visOk(rs, 0.3) || !visOk(lh, 0.3) || !visOk(rh, 0.3)) return null;
+  const shoulderY = (ls!.y + rs!.y) / 2;
+  const hipY = (lh!.y + rh!.y) / 2;
+  const upper = Math.abs(hipY - shoulderY) + 1e-6;
+  if (visOk(la, 0.25) && visOk(ra, 0.25)) {
+    const ankleY = (la!.y + ra!.y) / 2;
+    const lower = Math.abs(ankleY - hipY) + 1e-6;
+    const ratio = upper / (upper + lower);
+    return clamp(1 - ratio * 2.2, 0, 1);
+  }
+  const nose = lms[LM.NOSE];
+  if (visOk(nose, 0.2)) {
+    const headToShoulder = Math.abs(shoulderY - nose!.y) + 1e-6;
+    return clamp(1 - headToShoulder / (upper * 3), 0, 1);
+  }
+  return null;
+}
+
+function weightedMean(items: { val: number | null; weight: number }[]): number | null {
+  const valid = items.filter((i) => i.val !== null && Number.isFinite(i.val!) && i.weight > 0);
+  if (valid.length === 0) return null;
+  const wSum = valid.reduce((s, i) => s + i.weight, 0);
+  return valid.reduce((s, i) => s + i.val! * i.weight, 0) / wSum;
+}
+
 export interface ExtrairMarcadoresInput {
   tipo: TipoFoto;
   landmarks: NormalizedLandmark[] | null;
@@ -149,6 +209,9 @@ export function extrairMarcadoresFoto(input: ExtrairMarcadoresInput): Marcadores
       definicaoBorda: definicaoMascara(segmentationMask, maskWidth, maskHeight),
       inclinacaoAnterior: null,
       projecaoPeito: null,
+      projecaoCraniana: null,
+      ombrosAdiantados: null,
+      colapsoToracico: null,
     };
   }
 
@@ -193,6 +256,21 @@ export function extrairMarcadoresFoto(input: ExtrairMarcadoresInput): Marcadores
     projecaoPeito = Math.max(0, shoulderW - hipW);
   }
 
+  let projecaoCraniana: number | null = null;
+  let ombrosAdiantados: number | null = null;
+  let colapsoToracico: number | null = null;
+
+  if (tipo === "corpo-lado" && shouldersOk && hipsOk) {
+    projecaoCraniana = projecaoCranianaLandmarks(lms, hipW);
+    ombrosAdiantados = ombrosAdiantadosLandmarks(lms, hipW);
+  }
+  if (tipo === "corpo-frente" && shouldersOk && hipsOk) {
+    colapsoToracico = colapsoToracicoLandmarks(lms);
+    if (ombrosAdiantados === null) {
+      ombrosAdiantados = ombrosAdiantadosLandmarks(lms, hipW);
+    }
+  }
+
   let qualidadeFoto = 0;
   if (shouldersOk && hipsOk) qualidadeFoto += 0.55;
   else if (shouldersOk || hipsOk) qualidadeFoto += 0.25;
@@ -217,12 +295,17 @@ export function extrairMarcadoresFoto(input: ExtrairMarcadoresInput): Marcadores
     definicaoBorda,
     inclinacaoAnterior,
     projecaoPeito,
+    projecaoCraniana,
+    ombrosAdiantados,
+    colapsoToracico,
   };
 }
 
 export function agregarMarcadores(fotos: MarcadoresFoto[]): import("./types.js").MarcadoresAgregados {
   const bodyShots = fotos.filter((f) => f.tipo !== "rosto");
   const used = bodyShots.length > 0 ? bodyShots : fotos;
+  const ladoShots = bodyShots.filter((f) => f.tipo === "corpo-lado");
+  const frenteShots = bodyShots.filter((f) => f.tipo === "corpo-frente");
 
   const meanOrNull = (vals: (number | null)[]): number | null => {
     const xs = vals.filter((v): v is number => v !== null && Number.isFinite(v));
@@ -232,6 +315,15 @@ export function agregarMarcadores(fotos: MarcadoresFoto[]): import("./types.js")
 
   const fotosComPoseCorpo = bodyShots.filter((f) => f.poseDetectada).length;
 
+  const pesoTipo = (tipo: TipoFoto, alvo: "oral" | "geral"): number => {
+    if (alvo === "oral") {
+      if (tipo === "corpo-lado") return 2;
+      if (tipo === "corpo-frente") return 1;
+      return 0;
+    }
+    return 1;
+  };
+
   return {
     shrMedio: meanOrNull(used.map((f) => f.shr)),
     wsrMedio: meanOrNull(used.map((f) => f.wsr)),
@@ -239,8 +331,20 @@ export function agregarMarcadores(fotos: MarcadoresFoto[]): import("./types.js")
     simetriaMedia: meanOrNull(used.map((f) => f.simetria)),
     densidadeMedia: meanOrNull(used.map((f) => f.densidadeCorpo)),
     definicaoMedia: meanOrNull(used.map((f) => f.definicaoBorda)),
-    inclinacaoMedia: meanOrNull(used.map((f) => f.inclinacaoAnterior)),
+    inclinacaoMedia: meanOrNull(
+      (ladoShots.length > 0 ? ladoShots : used).map((f) => f.inclinacaoAnterior)
+    ),
     projecaoPeitoMedia: meanOrNull(used.map((f) => f.projecaoPeito)),
+    projecaoCranianaMedia: weightedMean(
+      bodyShots.map((f) => ({ val: f.projecaoCraniana, weight: pesoTipo(f.tipo, "oral") }))
+    ),
+    ombrosAdiantadosMedio: weightedMean(
+      bodyShots.map((f) => ({ val: f.ombrosAdiantados, weight: pesoTipo(f.tipo, "oral") }))
+    ),
+    colapsoToracicoMedio: weightedMean([
+      ...frenteShots.map((f) => ({ val: f.colapsoToracico, weight: 2 })),
+      ...ladoShots.map((f) => ({ val: f.colapsoToracico, weight: 0.5 })),
+    ]),
     fotosComPoseCorpo,
   };
 }

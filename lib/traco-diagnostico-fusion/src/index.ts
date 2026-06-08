@@ -23,6 +23,7 @@ export type PadraoEmocional = (typeof PADROES_EMOCIONAIS)[number];
 const ALPHA_BASE = 0.26;
 const ALPHA_CONSCIENCIA = 0.22; // somado ao base conforme média 1–5
 const ALPHA_MAX = 0.52;
+const ALPHA_MAX_FOTOS_FRACAS = 0.62;
 
 /**
  * Matriz padrão emocional → leitura esperada nas estruturas de traço (linhas somam 1).
@@ -203,10 +204,16 @@ export interface AplicarFusaoResult {
  * Combina percentuais das **fotos** com o perfil declarado no **formulário** (padrões emocionais internos já agregados).
  * Produz percentuais finais, principal/secundária recalculados e metadados de assertividade para a API persistir.
  */
+export interface FusaoTracoOpcoes {
+  /** Variância entre fotos (0–1+), ex. metadata.featureSummary.varianciaEntreFotos */
+  varianciaEntreFotos?: number;
+}
+
 export function aplicarFusaoTracoDiagnostico(
   estruturasSomenteFotos: Record<EstruturaTraco, number>,
   diagnostico: DiagnosticoEmocionalFusaoInput,
-  confiancaAnaliseFotos: number
+  confiancaAnaliseFotos: number,
+  opcoes?: FusaoTracoOpcoes
 ): AplicarFusaoResult {
   const parsed = diagnosticoEmocionalFusaoSchema.parse(diagnostico);
   const padNorm = normalizarPercentuaisInteiros(parsed.padroesPct);
@@ -221,9 +228,14 @@ export function aplicarFusaoTracoDiagnostico(
   );
 
   const mc = parsed.mediaConsciencia;
+  const variancia = opcoes?.varianciaEntreFotos ?? 0;
+  const fotosFracas = confiancaAnaliseFotos < 55 || variancia > 0.15;
+  const alphaMax = fotosFracas ? ALPHA_MAX_FOTOS_FRACAS : ALPHA_MAX;
+
   let alpha = ALPHA_BASE + ((mc - 1) / 4) * ALPHA_CONSCIENCIA;
   if (parsed.tagEvolucao === "integrado") alpha += 0.04;
-  alpha = clamp(alpha, ALPHA_BASE, ALPHA_MAX);
+  if (fotosFracas) alpha += 0.06;
+  alpha = clamp(alpha, ALPHA_BASE, alphaMax);
 
   const fotoArr = ESTRUTURAS_TRACO.map((e) => vFoto[e]);
   const formArr = ESTRUTURAS_TRACO.map((e) => vForm[e]);

@@ -2,7 +2,7 @@ import type { MPMask, NormalizedLandmark, PoseLandmarker } from "@mediapipe/task
 
 const TASKS_VISION_VERSION = "0.10.35";
 const POSE_MODEL =
-  "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task";
+  "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/latest/pose_landmarker_heavy.task";
 
 let posePromise: Promise<PoseLandmarker> | null = null;
 
@@ -19,9 +19,9 @@ async function createPoseLandmarker(): Promise<PoseLandmarker> {
       },
       runningMode: "IMAGE",
       numPoses: 1,
-      minPoseDetectionConfidence: 0.25,
-      minPosePresenceConfidence: 0.25,
-      minTrackingConfidence: 0.25,
+      minPoseDetectionConfidence: 0.35,
+      minPosePresenceConfidence: 0.35,
+      minTrackingConfidence: 0.35,
       outputSegmentationMasks: true,
     });
 

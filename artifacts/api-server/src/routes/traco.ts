@@ -40,6 +40,19 @@ function parsePessoaId(raw: unknown): number | null {
   return isNaN(n) ? null : n;
 }
 
+async function assertPessoaDoUsuario(
+  usuarioId: number,
+  pessoaId: number | null
+): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
+  if (pessoaId === null) return { ok: true };
+  const [pessoa] = await db
+    .select({ id: pessoasAnaliseTable.id, nome: pessoasAnaliseTable.nome })
+    .from(pessoasAnaliseTable)
+    .where(and(eq(pessoasAnaliseTable.id, pessoaId), eq(pessoasAnaliseTable.usuarioId, usuarioId)));
+  if (!pessoa) return { ok: false, status: 404, error: "Pessoa não encontrada" };
+  return { ok: true };
+}
+
 function toSafeNumber(value: unknown, fallback = 0): number {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
@@ -97,6 +110,9 @@ function parseMarcadoresAgregados(raw: unknown): boolean {
     "definicaoMedia",
     "inclinacaoMedia",
     "projecaoPeitoMedia",
+    "projecaoCranianaMedia",
+    "ombrosAdiantadosMedio",
+    "colapsoToracicoMedio",
   ];
   for (const k of nums) {
     const v = o[k];
@@ -215,6 +231,8 @@ router.delete("/pessoas/:id", requireAuth, async (req: AuthRequest, res: Respons
 router.get("/fotos", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const pessoaId = parsePessoaId(req.query.pessoaId);
+    const owned = await assertPessoaDoUsuario(req.user!.id, pessoaId);
+    if (!owned.ok) return res.status(owned.status).json({ error: owned.error });
     const fotos = await db
       .select()
       .from(fotosTracoTable)
@@ -324,10 +342,17 @@ router.get("/fotos/:id/view", requireAuth, async (req: AuthRequest, res: Respons
 // ── POST /traco/analisar ───────────────────────────────────────────────────────
 router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const { resultado, pessoaId: pessoaIdRaw, snapshotPessoaId: snapshotPessoaIdRaw, diagnosticoEmocional } = req.body as {
+    const {
+      resultado,
+      pessoaId: pessoaIdRaw,
+      snapshotPessoaId: snapshotPessoaIdRaw,
+      pessoaNome: pessoaNomeRaw,
+      diagnosticoEmocional,
+    } = req.body as {
       resultado?: Record<string, unknown>;
       pessoaId?: unknown;
       snapshotPessoaId?: unknown;
+      pessoaNome?: unknown;
       diagnosticoEmocional?: unknown;
     };
 
@@ -367,12 +392,15 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
 
     const metadata = normalizeMetadata(r.metadata, toSafeNumber(r.confiancaAnalise, 50));
 
-    const estruturasSomenteFotos = { ...estParsed };
+    const somenteFotosParsed = parseEstruturasTraco(r.estruturasSomenteFotos);
+    const estruturasSomenteFotos = somenteFotosParsed ?? { ...estParsed };
+    const jaFusionadoNoCliente = !!r.fusaoDiagnosticoEmocional;
+
     let resultadoFusao = { ...r, metadata } as Record<string, unknown>;
     resultadoFusao.estruturasSomenteFotos = { ...estruturasSomenteFotos };
 
-    // Diagnóstico emocional (30 itens → 5 padrões): funde com **sempre** as estruturas só-fotos.
-    if (diagnosticoEmocional !== undefined && diagnosticoEmocional !== null) {
+    // Fusão no servidor só se o cliente ainda não enviou resultado integrado (retrocompat).
+    if (diagnosticoEmocional !== undefined && diagnosticoEmocional !== null && !jaFusionadoNoCliente) {
       const diagParsed = diagnosticoEmocionalFusaoSchema.safeParse(diagnosticoEmocional);
       if (!diagParsed.success) {
         const msg = diagParsed.error.issues.map((issue) => issue.message).join(" ");
@@ -384,7 +412,11 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
 
       try {
         const confFotos = toSafeNumber(r.confiancaAnalise, 50);
-        const fusao = aplicarFusaoTracoDiagnostico(estruturasSomenteFotos, diagParsed.data, confFotos);
+        const metaFs = (metadata.featureSummary ?? {}) as Record<string, unknown>;
+        const varianciaFotos = toSafeNumber(metaFs.varianciaEntreFotos, 0);
+        const fusao = aplicarFusaoTracoDiagnostico(estruturasSomenteFotos, diagParsed.data, confFotos, {
+          varianciaEntreFotos: varianciaFotos,
+        });
         resultadoFusao = {
           ...resultadoFusao,
           estruturas: fusao.estruturasFusionadas,
@@ -409,8 +441,6 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
       }
     }
 
-    const resultadoComMetadata = resultadoFusao;
-
     const pessoaId = parsePessoaId(pessoaIdRaw);
     const snapshotPessoaId = parsePessoaId(snapshotPessoaIdRaw);
 
@@ -418,11 +448,22 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
       return res.status(409).json({ error: "pessoaId divergente do snapshot" });
     }
 
-    if (pessoaId !== null) {
-      const [pessoa] = await db.select({ id: pessoasAnaliseTable.id }).from(pessoasAnaliseTable)
+    const owned = await assertPessoaDoUsuario(req.user!.id, pessoaId);
+    if (!owned.ok) return res.status(owned.status).json({ error: owned.error });
+
+    let pessoaNomeSnapshot: string | null =
+      typeof pessoaNomeRaw === "string" && pessoaNomeRaw.trim() ? pessoaNomeRaw.trim().slice(0, 120) : null;
+    if (pessoaId !== null && !pessoaNomeSnapshot) {
+      const [pessoaRow] = await db
+        .select({ nome: pessoasAnaliseTable.nome })
+        .from(pessoasAnaliseTable)
         .where(and(eq(pessoasAnaliseTable.id, pessoaId), eq(pessoasAnaliseTable.usuarioId, req.user!.id)));
-      if (!pessoa) return res.status(404).json({ error: "Pessoa não encontrada" });
+      pessoaNomeSnapshot = pessoaRow?.nome ?? null;
     }
+
+    resultadoFusao.pessoaId = pessoaId;
+    resultadoFusao.pessoaNome = pessoaNomeSnapshot;
+    const resultadoComMetadata = resultadoFusao;
 
     const fotosDaPessoa = await db
       .select()
@@ -459,6 +500,8 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
 router.get("/analise", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const pessoaId = parsePessoaId(req.query.pessoaId);
+    const owned = await assertPessoaDoUsuario(req.user!.id, pessoaId);
+    if (!owned.ok) return res.status(owned.status).json({ error: owned.error });
     const [analise] = await db
       .select()
       .from(analiseTracoTable)

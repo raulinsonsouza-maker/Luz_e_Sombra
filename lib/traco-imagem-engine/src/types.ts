@@ -34,6 +34,14 @@ export interface MarcadoresFoto {
   definicaoBorda: number | null;
   inclinacaoAnterior: number | null;
   projecaoPeito: number | null;
+  /** Nariz adiantado vs. pelve no perfil (normalizado, >0 = craniana). */
+  projecaoCraniana: number | null;
+  /** Ombros adiantados vs. pelve no eixo sagital (normalizado). */
+  ombrosAdiantados: number | null;
+  /** Colapso torácico: razão tórax superior/inferior na frente (maior = mais colapso). */
+  colapsoToracico: number | null;
+  /** Mensagem quando o processamento desta foto falhou. */
+  erroProcessamento?: string;
 }
 
 /** Agregado sobre todas as fotos válidas. */
@@ -46,6 +54,9 @@ export interface MarcadoresAgregados {
   definicaoMedia: number | null;
   inclinacaoMedia: number | null;
   projecaoPeitoMedia: number | null;
+  projecaoCranianaMedia: number | null;
+  ombrosAdiantadosMedio: number | null;
+  colapsoToracicoMedio: number | null;
   fotosComPoseCorpo: number;
 }
 

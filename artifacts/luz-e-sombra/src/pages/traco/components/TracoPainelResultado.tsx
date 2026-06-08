@@ -62,6 +62,21 @@ interface ResultadoAnalise {
   estiloComunicacao?: EstiloComunicacao;
   perfilUnico?: string;
   dinamicaFuncional?: DinamicaFuncional;
+  evidenciasMotor?: Array<{ estrutura: string; peso: number; descricao: string }>;
+  marcadoresPorFoto?: Array<{
+    tipo: string;
+    poseDetectada: boolean;
+    qualidadeFoto: number;
+    shr: number | null;
+    ulr: number | null;
+    simetria: number | null;
+    projecaoCraniana?: number | null;
+    ombrosAdiantados?: number | null;
+    colapsoToracico?: number | null;
+    erroProcessamento?: string;
+  }>;
+  marcadoresAgregados?: Record<string, number | null>;
+  metadata?: { analysisVersion?: string };
 }
 
 interface AnaliseTraco {
@@ -92,12 +107,23 @@ export function TracoPainelResultado({
   const configPrincipal = estruturaPrincipal ? ESTRUTURAS_CONFIG[estruturaPrincipal] : null;
   const [expandedObs, setExpandedObs] = useState(false);
   const [expandedCaract, setExpandedCaract] = useState(false);
+  const [expandedAuditoria, setExpandedAuditoria] = useState(false);
   const dataAnalise = new Date(criadoEm ?? analise.criadoEm).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "long",
     year: "numeric",
   });
   const alvoAnalise = pessoaNome?.trim() ? pessoaNome.trim() : "Você";
+  const temFusao = !!resultado.fusaoDiagnosticoEmocional;
+  const somenteFotos = resultado.estruturasSomenteFotos;
+  const principalSomenteFotos = somenteFotos
+    ? (Object.entries(somenteFotos).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null)
+    : null;
+  const principalDiverge =
+    temFusao &&
+    somenteFotos &&
+    principalSomenteFotos &&
+    principalSomenteFotos !== estruturaPrincipal;
 
   return (
           <div id="resultado-traco" className="space-y-5">
@@ -135,15 +161,35 @@ export function TracoPainelResultado({
                     </span>
                   )}
                 </div>
-                <p className="text-xs mb-4" style={{ color: "rgba(247,242,236,0.35)" }}>
+                <p className="text-xs mb-2" style={{ color: "rgba(247,242,236,0.35)" }}>
                   Resultado de {alvoAnalise} · {dataAnalise}
                 </p>
+                {temFusao && (
+                  <p
+                    className="text-xs mb-4 px-3 py-2 rounded-lg"
+                    style={{
+                      color: "rgba(200,165,107,0.85)",
+                      background: "rgba(200,165,107,0.08)",
+                      border: "1px solid rgba(200,165,107,0.2)",
+                    }}
+                  >
+                    Resultado integrado (fotos + questionário emocional)
+                    {principalDiverge && somenteFotos && principalSomenteFotos && (
+                      <span className="block mt-1 opacity-80">
+                        Só pelas fotos, a principal seria{" "}
+                        {ESTRUTURAS_CONFIG[principalSomenteFotos as keyof EstruturasPct]?.nome ??
+                          principalSomenteFotos}{" "}
+                        ({somenteFotos[principalSomenteFotos as keyof EstruturasPct]}%).
+                      </span>
+                    )}
+                  </p>
+                )}
 
                 {/* Name + % */}
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
                     <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>
-                      Estrutura Principal
+                      {temFusao ? "Estrutura Principal (integrada)" : "Estrutura Principal"}
                     </p>
                     <h2
                       className="font-tan-mon-cheri text-3xl md:text-4xl"
@@ -686,6 +732,81 @@ export function TracoPainelResultado({
                         </span>
                       ))}
                     </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Auditoria do motor — collapsible ── */}
+            {(resultado.evidenciasMotor?.length || resultado.marcadoresPorFoto?.length) && (
+              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.1)" }}>
+                <button
+                  onClick={() => setExpandedAuditoria((v) => !v)}
+                  className="w-full flex items-center justify-between px-6 py-4"
+                  style={{ background: "rgba(30,24,18,0.5)", color: "rgba(247,242,236,0.65)" }}
+                >
+                  <span className="text-sm font-medium">Como chegamos neste resultado</span>
+                  {expandedAuditoria ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+                {expandedAuditoria && (
+                  <div
+                    className="px-6 py-5 space-y-5"
+                    style={{ background: "rgba(30,24,18,0.3)", borderTop: "1px solid rgba(200,165,107,0.08)" }}
+                  >
+                    {resultado.metadata?.analysisVersion && (
+                      <p className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
+                        Motor: {resultado.metadata.analysisVersion}
+                        {resultado.confiancaAnalise != null ? ` · Confiança ${resultado.confiancaAnalise}%` : ""}
+                      </p>
+                    )}
+                    {resultado.estruturasSomenteFotos && (
+                      <div>
+                        <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.45)" }}>
+                          Só fotos (antes da fusão)
+                        </p>
+                        <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
+                          {Object.entries(resultado.estruturasSomenteFotos)
+                            .map(([k, v]) => `${k}: ${v}%`)
+                            .join(" · ")}
+                        </p>
+                      </div>
+                    )}
+                    {resultado.marcadoresPorFoto && resultado.marcadoresPorFoto.length > 0 && (
+                      <div className="space-y-3">
+                        <p className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
+                          Marcadores por foto
+                        </p>
+                        {resultado.marcadoresPorFoto.map((m) => (
+                          <div key={m.tipo} className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
+                            <span style={{ color: "rgba(200,165,107,0.6)" }}>{m.tipo}</span>
+                            {m.shr != null ? ` · OMR ${m.shr.toFixed(2)}` : ""}
+                            {m.ulr != null ? ` · ULR ${m.ulr.toFixed(2)}` : ""}
+                            {m.simetria != null ? ` · sim ${m.simetria.toFixed(2)}` : ""}
+                            {m.projecaoCraniana != null ? ` · cran ${m.projecaoCraniana.toFixed(2)}` : ""}
+                            {m.ombrosAdiantados != null ? ` · omb ${m.ombrosAdiantados.toFixed(2)}` : ""}
+                            {m.colapsoToracico != null ? ` · col ${m.colapsoToracico.toFixed(2)}` : ""}
+                            {m.erroProcessamento ? ` · ⚠ ${m.erroProcessamento}` : ""}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {resultado.evidenciasMotor && resultado.evidenciasMotor.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
+                          Regras acionadas
+                        </p>
+                        {resultado.evidenciasMotor.map((ev, i) => (
+                          <p key={i} className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
+                            <span style={{ color: "rgba(200,165,107,0.55)" }}>
+                              {ev.estrutura} ({ev.peso > 0 ? "+" : ""}
+                              {ev.peso.toFixed(2)})
+                            </span>
+                            {" — "}
+                            {ev.descricao}
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

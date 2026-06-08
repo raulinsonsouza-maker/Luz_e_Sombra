@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { User, getStoredUser, getToken, clearAuth, setAuth, apiFetch } from "@/lib/auth";
+import { clearTracoSessionStorage } from "@/lib/tracoFormStorage";
 
 interface AuthContextType {
   user: User | null;
@@ -73,6 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    clearTracoSessionStorage();
     clearAuth();
     setUser(null);
     setStatus("unauthenticated");

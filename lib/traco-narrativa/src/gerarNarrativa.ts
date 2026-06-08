@@ -63,8 +63,17 @@ function observacaoPorFoto(
         : "No perfil, leve recuo ou empilhamento anterior."
     );
   }
-  if (m.densidadeCorpo != null && m.densidadeCorpo > 0.42) {
-    partes.push("Ocupação espacial do corpo na imagem é alta (máscara de segmentação).");
+  if (m.projecaoCraniana != null && m.projecaoCraniana > 0.05) {
+    partes.push(`Projeção craniana perceptível no perfil (~${m.projecaoCraniana.toFixed(2)}).`);
+  }
+  if (m.ombrosAdiantados != null && m.ombrosAdiantados > 0.05) {
+    partes.push(`Ombros adiantados em relação à pelve (~${m.ombrosAdiantados.toFixed(2)}).`);
+  }
+  if (m.colapsoToracico != null && m.colapsoToracico > 0.45) {
+    partes.push(`Sinais de colapso torácico superior (~${m.colapsoToracico.toFixed(2)}).`);
+  }
+  if (m.erroProcessamento) {
+    partes.push(`Atenção: ${m.erroProcessamento}`);
   }
 
   const tecnico = partes.length ? ` ${partes.join(" ")}` : "";
@@ -117,7 +126,7 @@ function construirInterpretacao(
     `A combinação de ${T.NOMES[principal]} (${pctP}%) com ${T.NOMES[secundaria]} (${pctS}%) revela ${combo}`
   );
 
-  if (pctP - pctS < 8) {
+  if (pctP - pctS < 12) {
     blocos.push(
       "Os dois padrões centrais aparecem com intensidade próxima — tendência a respostas mais contextuais e híbridas."
     );
@@ -253,6 +262,7 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
   const pctP = estruturas[principal];
   const pctS = estruturas[secundaria];
   const confZero = confiancaAnalise === 0;
+  const margemEstreita = pctP - pctS < 12;
 
   const obs = montarObservacoesPorFoto(marcadoresPorFoto, principal, pctP);
   const interpretacao = construirInterpretacao(estruturas, principal, secundaria, fusao, confZero);
@@ -291,7 +301,9 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
     estruturaPrincipal: principal,
     estruturaSecundaria: secundaria,
     observacoesPorFoto: obs,
-    padraoPostural: T.PADROES_POSTURAIS[principal],
+    padraoPostural: margemEstreita
+      ? `${T.PADROES_POSTURAIS[principal]} Há também coloração de ${T.NOMES[secundaria]} (${pctS}%): ${T.PADROES_POSTURAIS[secundaria]}`
+      : T.PADROES_POSTURAIS[principal],
     caracteristicasFisicasObservadas: caract,
     interpretacao,
     centroEnergetico: T.CENTROS[principal],

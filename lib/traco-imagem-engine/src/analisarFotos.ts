@@ -4,7 +4,7 @@ import { extrairMarcadoresFoto, agregarMarcadores } from "./marcadores.js";
 import { detectarPoseNaImagem } from "./mediapipeRunner.js";
 import { rankingPrincipalSecundaria, scoreEstruturas } from "./scoreEstruturas.js";
 
-const ANALYSIS_VERSION = "traco-mediapipe-v1";
+const ANALYSIS_VERSION = "traco-mediapipe-v2";
 
 function variance(vals: number[]): number {
   if (vals.length <= 1) return 0;
@@ -73,7 +73,8 @@ export async function analisarFotos(
         maskHeight: det.maskHeight || img.naturalHeight,
       });
       marcadoresPorFoto.push(mf);
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Falha ao processar foto";
       marcadoresPorFoto.push({
         tipo,
         poseDetectada: false,
@@ -86,6 +87,10 @@ export async function analisarFotos(
         definicaoBorda: null,
         inclinacaoAnterior: null,
         projecaoPeito: null,
+        projecaoCraniana: null,
+        ombrosAdiantados: null,
+        colapsoToracico: null,
+        erroProcessamento: msg,
       });
     }
   }
