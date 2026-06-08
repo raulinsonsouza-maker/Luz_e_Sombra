@@ -1,0 +1,116 @@
+import {
+  extrairPerguntaCrescimento,
+  montarDimensoesLegiveis,
+  montarNarrativaV2,
+  montarSinteseHumana,
+  type RelatorioSecao,
+} from "@workspace/temperamento-v1";
+import type { Dimensao, TemperamentoCodigo, TipoPerfil } from "@workspace/temperamento-v1";
+
+export type ResultadoTemperamentoUi = Record<string, unknown> & {
+  versaoNarrativa?: string;
+  perfil?: {
+    tipo?: TipoPerfil;
+    primario?: TemperamentoCodigo;
+    secundario?: TemperamentoCodigo;
+    arquetipo?: string;
+    frase_sintese?: string;
+  };
+  scores?: {
+    dimensoes?: Record<Dimensao, { bruto: number; normalizado: number }>;
+    temperamentos_percentuais?: Record<TemperamentoCodigo, number>;
+  };
+  confiabilidade?: number;
+  empateProximo?: boolean;
+  sinteseHumana?: string;
+  dimensoesLegiveis?: { dimensao: Dimensao; label: string; pct: number; insight?: string }[];
+  perguntaCrescimento?: string;
+  insightsDimensao?: string[];
+  combo?: { forca: string; tensao: string; contexto: string };
+  relatorioInterno?: {
+    titulo?: string;
+    secoes?: RelatorioSecao[];
+  };
+};
+
+function secao(
+  rel: ResultadoTemperamentoUi["relatorioInterno"],
+  id: string,
+): RelatorioSecao | undefined {
+  return rel?.secoes?.find((s) => s.id === id);
+}
+
+function parseCombo(paragrafos: string[]): { forca: string; tensao: string; contexto: string } | undefined {
+  if (paragrafos.length === 0) return undefined;
+  const forca = paragrafos.find((p) => p.startsWith("Força central:"))?.replace("Força central:", "").trim();
+  const tensao = paragrafos.find((p) => p.startsWith("Tensão interna:"))?.replace("Tensão interna:", "").trim();
+  const contexto = paragrafos.find((p) => p.startsWith("Contextos ideais:"))?.replace("Contextos ideais:", "").trim();
+  if (!forca && !tensao && !contexto) return undefined;
+  return {
+    forca: forca ?? "",
+    tensao: tensao ?? "",
+    contexto: contexto ?? "",
+  };
+}
+
+export function enriquecerResultadoTemperamento(raw: ResultadoTemperamentoUi): ResultadoTemperamentoUi {
+  const perfil = raw.perfil;
+  const primario = perfil?.primario;
+  const secundario = perfil?.secundario;
+  const pct = raw.scores?.temperamentos_percentuais;
+  const norm = raw.scores?.dimensoes
+    ? ({
+        ENG: raw.scores.dimensoes.ENG?.normalizado ?? 0,
+        SOC: raw.scores.dimensoes.SOC?.normalizado ?? 0,
+        DOM: raw.scores.dimensoes.DOM?.normalizado ?? 0,
+        EST: raw.scores.dimensoes.EST?.normalizado ?? 0,
+        PRO: raw.scores.dimensoes.PRO?.normalizado ?? 0,
+      } as Record<Dimensao, number>)
+    : undefined;
+
+  if (raw.versaoNarrativa === "temperamento_v2" && raw.sinteseHumana) {
+    return raw;
+  }
+
+  if (primario && secundario && pct && norm && perfil?.tipo && perfil.frase_sintese) {
+    const narrativa = montarNarrativaV2({
+      tipo: perfil.tipo,
+      primario,
+      secundario,
+      temperamentos_percentuais: pct,
+      norm,
+      empateProximo: Boolean(raw.empateProximo),
+      frase_sintese: perfil.frase_sintese,
+    });
+    return { ...raw, ...narrativa };
+  }
+
+  const passo = secao(raw.relatorioInterno, "passo");
+  const combinacao = secao(raw.relatorioInterno, "combinacao");
+  const passoTexto = passo?.paragrafos[0] ?? "";
+
+  return {
+    ...raw,
+    sinteseHumana:
+      raw.sinteseHumana ??
+      (perfil?.frase_sintese && primario && secundario && pct && perfil.tipo
+        ? montarSinteseHumana({
+            tipo: perfil.tipo,
+            primario,
+            secundario,
+            temperamentos_percentuais: pct,
+            empateProximo: Boolean(raw.empateProximo),
+            frase_sintese: perfil.frase_sintese,
+          })
+        : perfil?.frase_sintese),
+    dimensoesLegiveis:
+      raw.dimensoesLegiveis ??
+      (norm && primario ? montarDimensoesLegiveis(norm, primario) : undefined),
+    perguntaCrescimento: raw.perguntaCrescimento ?? extrairPerguntaCrescimento(passoTexto),
+    combo: raw.combo ?? (combinacao ? parseCombo(combinacao.paragrafos) : undefined),
+  };
+}
+
+export function textoSecao(raw: ResultadoTemperamentoUi, id: string): string | undefined {
+  return secao(raw.relatorioInterno, id)?.paragrafos.join("\n\n");
+}

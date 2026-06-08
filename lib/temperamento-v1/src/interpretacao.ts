@@ -187,6 +187,108 @@ function afinacoesDimensao(norm: Record<Dimensao, number>, prim: TemperamentoCod
   return extra;
 }
 
+export const NOME_TEMPERAMENTO: Record<TemperamentoCodigo, string> = {
+  COLERICO: "Colérico",
+  SANGUINEO: "Sanguíneo",
+  MELANCOLICO: "Melancólico",
+  FLEUMATICO: "Fleumático",
+};
+
+const LABEL_DIMENSAO: Record<Dimensao, string> = {
+  ENG: "Energia e ritmo",
+  SOC: "Sociabilidade",
+  DOM: "Liderança e controlo",
+  EST: "Estabilidade emocional",
+  PRO: "Profundidade analítica",
+};
+
+export function extrairPerguntaCrescimento(texto: string): string {
+  const m = texto.match(/Pergunta prática:\s*«([^»]+)»/);
+  return m?.[1] ?? "";
+}
+
+export function montarSinteseHumana(opts: {
+  tipo: TipoPerfil;
+  primario: TemperamentoCodigo;
+  secundario: TemperamentoCodigo;
+  temperamentos_percentuais: Record<TemperamentoCodigo, number>;
+  empateProximo: boolean;
+  frase_sintese: string;
+}): string {
+  const { tipo, primario, secundario, temperamentos_percentuais, empateProximo, frase_sintese } = opts;
+  const np = NOME_TEMPERAMENTO[primario];
+  const ns = NOME_TEMPERAMENTO[secundario];
+  const pp = temperamentos_percentuais[primario];
+  const ps = temperamentos_percentuais[secundario];
+
+  if (empateProximo) {
+    return `${frase_sintese} O teu perfil está numa zona de transição entre ${np} e ${ns} — usa o resultado como bússola, não como rótulo fechado.`;
+  }
+  if (tipo === "DUPLO") {
+    return `${frase_sintese} Combinações ${np} + ${ns} (${pp}% / ${ps}%) criam uma personalidade com duas forças visíveis: execução e relação, ação e expressão.`;
+  }
+  if (tipo === "DOMINANTE" || tipo === "ATIPICO") {
+    return `${frase_sintese} O ${np} lidera o teu mapa (${pp}%) — os outros temperamentos aparecem como matiz, não como concorrência.`;
+  }
+  return `${frase_sintese} És principalmente ${np} (${pp}%), com ${ns} (${ps}%) a colorir o dia a dia.`;
+}
+
+export function montarDimensoesLegiveis(
+  norm: Record<Dimensao, number>,
+  primario: TemperamentoCodigo,
+): { dimensao: Dimensao; label: string; pct: number; insight?: string }[] {
+  const insights = afinacoesDimensao(norm, primario);
+  return (["ENG", "SOC", "DOM", "EST", "PRO"] as const).map((d) => ({
+    dimensao: d,
+    label: LABEL_DIMENSAO[d],
+    pct: Math.round(norm[d] * 100),
+    insight: insights.find((i) => i.toLowerCase().includes(LABEL_DIMENSAO[d].split(" ")[0]!.toLowerCase())),
+  }));
+}
+
+export interface NarrativaTemperamentoV2 {
+  versaoNarrativa: "temperamento_v2";
+  sinteseHumana: string;
+  dimensoesLegiveis: ReturnType<typeof montarDimensoesLegiveis>;
+  perguntaCrescimento: string;
+  insightsDimensao: string[];
+  combo?: { forca: string; tensao: string; contexto: string };
+}
+
+export function montarNarrativaV2(opts: {
+  tipo: TipoPerfil;
+  primario: TemperamentoCodigo;
+  secundario: TemperamentoCodigo;
+  temperamentos_percentuais: Record<TemperamentoCodigo, number>;
+  norm: Record<Dimensao, number>;
+  empateProximo: boolean;
+  frase_sintese: string;
+}): NarrativaTemperamentoV2 {
+  const { tipo, primario, secundario, norm, empateProximo, frase_sintese, temperamentos_percentuais } = opts;
+  const d = DADOS[primario];
+  const insights = afinacoesDimensao(norm, primario);
+  let combo: NarrativaTemperamentoV2["combo"];
+  if (tipo === "DUPLO") {
+    const c = COMBO[chaveCombo(primario, secundario)];
+    if (c) combo = { forca: c.forca, tensao: c.tensao, contexto: c.contexto };
+  }
+  return {
+    versaoNarrativa: "temperamento_v2",
+    sinteseHumana: montarSinteseHumana({
+      tipo,
+      primario,
+      secundario,
+      temperamentos_percentuais,
+      empateProximo,
+      frase_sintese,
+    }),
+    dimensoesLegiveis: montarDimensoesLegiveis(norm, primario),
+    perguntaCrescimento: extrairPerguntaCrescimento(d.caminhoCrescimento),
+    insightsDimensao: insights,
+    combo,
+  };
+}
+
 export function montarRelatorioInterno(opts: {
   tipo: TipoPerfil;
   primario: TemperamentoCodigo;
@@ -200,26 +302,12 @@ export function montarRelatorioInterno(opts: {
   const { tipo, primario, secundario, temperamentos_percentuais, norm, empateProximo, arquetipo, frase_sintese } =
     opts;
   const d = DADOS[primario];
-
-  const pctLines = (["COLERICO", "SANGUINEO", "MELANCOLICO", "FLEUMATICO"] as const)
-    .map((t) => `${t}: ${temperamentos_percentuais[t]}%`)
-    .join(" · ");
-
-  const retrato: string[] = [
-    `${d.arquetipoTitulo} — ${frase_sintese}`,
-    `Perfil classificado como ${tipo}, com temperamento primário ${primario} (${temperamentos_percentuais[primario]}%) e secundário ${secundario} (${temperamentos_percentuais[secundario]}%).`,
-    `Nos eixos medidos: Energia ${(norm.ENG * 100).toFixed(0)}%, Sociabilidade ${(norm.SOC * 100).toFixed(0)}%, Dominância ${(norm.DOM * 100).toFixed(0)}%, Estabilidade ${(norm.EST * 100).toFixed(0)}%, Profundidade ${(norm.PRO * 100).toFixed(0)}% (normalizados 0–1 no modelo).`,
-    ...afinacoesDimensao(norm, primario),
-  ];
-  if (empateProximo) {
-    retrato.push(
-      "Os dois temperamentos de topo estão muito próximos em percentagem: trata o resultado como uma zona de transição entre perfis, não como rótulo fechado.",
-    );
-  }
+  void temperamentos_percentuais;
+  void norm;
+  void empateProximo;
+  void frase_sintese;
 
   const secoes: RelatorioSecao[] = [
-    { id: "percentuais", titulo: "Distribuição dos temperamentos", paragrafos: [pctLines] },
-    { id: "retrato", titulo: "Retrato central", paragrafos: retrato },
     { id: "motor", titulo: "Motor interno", paragrafos: [d.motorInterno] },
     { id: "pensa", titulo: "Como pensas", paragrafos: [d.padraoPensamento] },
     { id: "acao", titulo: "Como ages", paragrafos: [d.padraoAcao] },
@@ -245,7 +333,7 @@ export function montarRelatorioInterno(opts: {
   }
 
   return {
-    titulo: `${arquetipo} — ${frase_sintese}`,
+    titulo: arquetipo,
     secoes,
   };
 }

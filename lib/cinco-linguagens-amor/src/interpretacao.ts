@@ -34,5 +34,7 @@ export function textoParPrincipalSecundaria(
   if (principal === secundaria) {
     return textoDominante(principal);
   }
-  return `Seu perfil combina ${LABEL_LINGUAGEM[principal]} com forte influência de ${LABEL_LINGUAGEM[secundaria]}. Na prática: expresse amor em ${LABEL_LINGUAGEM[principal].toLowerCase()} e confirme também em ${LABEL_LINGUAGEM[secundaria].toLowerCase()} — relações duradouras costumam nutrir as duas pontuações mais altas.`;
+  const lp = LABEL_LINGUAGEM[principal].toLowerCase();
+  const ls = LABEL_LINGUAGEM[secundaria].toLowerCase();
+  return `Seu coração fala duas línguas com força: ${lp} na frente e ${ls} logo atrás. Não escolha entre elas — relações que duram costumam nutrir as duas, não só a primeira da lista.`;
 }

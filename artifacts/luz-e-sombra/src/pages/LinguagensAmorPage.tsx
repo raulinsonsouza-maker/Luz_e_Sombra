@@ -4,6 +4,7 @@ import { ArrowRight, Heart, Loader2, RotateCcw } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import MobileTopBar from "@/components/MobileTopBar";
+import PageIntroHeader from "@/components/PageIntroHeader";
 import {
   PARES_RECEBER,
   PARES_EXPRESSAR,
@@ -269,27 +270,44 @@ export default function LinguagensAmorPage() {
   const bg = "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)";
 
   if (fase === "resultado" && resultadoApi) {
+    const subtituloResultado = nomeResultado
+      ? `Perfil de ${nomeResultado}`
+      : "Seu mapa de receber e expressar amor";
     return (
-      <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
-        <MobileTopBar titulo="Linguagens do amor" subtitulo="Seu perfil" />
-        <div className="max-w-lg mx-auto space-y-5">
+      <div className="min-h-screen pb-28 md:pb-12 px-4 pt-6" style={{ background: bg }}>
+        <MobileTopBar titulo="Linguagens do amor" subtitulo={subtituloResultado} />
+        <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
           <button
             type="button"
             onClick={() => navigate("/jornada/linguagens-amor")}
-            className="text-sm opacity-70 hover:opacity-100"
+            className="text-xs tracking-wide opacity-70 hover:opacity-100 transition-opacity"
             style={{ color: "#c8a56b" }}
           >
-            Voltar ao módulo
+            ← Voltar ao módulo
           </button>
 
-          <LinguagensPainelResultado resultado={resultadoApi} nomePessoa={nomeResultado} />
+          <PageIntroHeader
+            className="hidden md:block mb-2"
+            eyebrow="5 Linguagens do Amor"
+            titulo="Seu perfil afetivo"
+            subtitulo={subtituloResultado}
+          />
 
-          <div className="flex flex-col gap-2">
+          <LinguagensPainelResultado
+            resultado={resultadoApi}
+            nomePessoa={nomeResultado}
+            onRefazer={refazer}
+          />
+
+          <div
+            className="rounded-2xl p-4 flex flex-col sm:flex-row gap-2"
+            style={{ background: "rgba(30,24,18,0.45)", border: "1px solid rgba(200,165,107,0.12)" }}
+          >
             <button
               type="button"
               onClick={refazer}
-              className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-              style={{ background: "rgba(200,165,107,0.12)", color: "#c8a56b", border: "1px solid rgba(200,165,107,0.25)" }}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+              style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
             >
               <RotateCcw className="w-4 h-4" />
               Refazer questionário
@@ -298,8 +316,8 @@ export default function LinguagensAmorPage() {
               <button
                 type="button"
                 onClick={() => setShowCruzamento((s) => !s)}
-                className="w-full py-3 rounded-xl text-sm font-semibold"
-                style={{ background: "rgba(255,255,255,0.04)", color: "rgba(247,242,236,0.7)", border: "1px solid rgba(200,165,107,0.15)" }}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold"
+                style={{ background: "rgba(255,255,255,0.04)", color: "rgba(247,242,236,0.75)", border: "1px solid rgba(200,165,107,0.18)" }}
               >
                 {showCruzamento ? "Ocultar cruzamento" : "Cruzar com alguém"}
               </button>

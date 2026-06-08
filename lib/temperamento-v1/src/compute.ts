@@ -2,8 +2,12 @@ import { perguntasPorDimensao, type ItemPergunta } from "./perguntas";
 import type { Dimensao, TemperamentoCodigo, TipoPerfil, QualityFlag, StatusResultado } from "./types";
 import { TEMPERAMENTOS, DIMENSOES } from "./types";
 import { desvioPadrao, proporcaoRespostas3, calcularAlertas, calcularConfiabilidade } from "./qualidade";
-import { montarRelatorioInterno, arquetipoFrasePorTemperamento } from "./interpretacao";
-import type { RelatorioInterno } from "./interpretacao";
+import {
+  montarRelatorioInterno,
+  montarNarrativaV2,
+  arquetipoFrasePorTemperamento,
+} from "./interpretacao";
+import type { RelatorioInterno, NarrativaTemperamentoV2 } from "./interpretacao";
 import type { EntradaTemperamento } from "./schemas";
 
 const SOMA_PESOS_DIMENSAO = 3 * 1.2 + 5 * 1.0; // 8.6
@@ -142,6 +146,12 @@ export interface ResultadoTemperamentoComputado {
   };
   relatorio_vars: Record<string, string | number>;
   relatorioInterno: RelatorioInterno;
+  versaoNarrativa: "temperamento_v2";
+  sinteseHumana: string;
+  dimensoesLegiveis: NarrativaTemperamentoV2["dimensoesLegiveis"];
+  perguntaCrescimento: string;
+  insightsDimensao: string[];
+  combo?: NarrativaTemperamentoV2["combo"];
 }
 
 export function computarTemperamento(entrada: EntradaTemperamento): ResultadoTemperamentoComputado {
@@ -206,6 +216,16 @@ export function computarTemperamento(entrada: EntradaTemperamento): ResultadoTem
     frase_sintese,
   });
 
+  const narrativa = montarNarrativaV2({
+    tipo,
+    primario,
+    secundario,
+    temperamentos_percentuais,
+    norm,
+    empateProximo,
+    frase_sintese,
+  });
+
   return {
     status,
     quality_flag,
@@ -226,5 +246,11 @@ export function computarTemperamento(entrada: EntradaTemperamento): ResultadoTem
     },
     relatorio_vars,
     relatorioInterno,
+    versaoNarrativa: narrativa.versaoNarrativa,
+    sinteseHumana: narrativa.sinteseHumana,
+    dimensoesLegiveis: narrativa.dimensoesLegiveis,
+    perguntaCrescimento: narrativa.perguntaCrescimento,
+    insightsDimensao: narrativa.insightsDimensao,
+    combo: narrativa.combo,
   };
 }

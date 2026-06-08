@@ -4,6 +4,9 @@ import { ArrowRight, FlaskConical, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import MobileTopBar from "@/components/MobileTopBar";
+import PageIntroHeader from "@/components/PageIntroHeader";
+import TemperamentoPainelResultado from "@/pages/temperamento/TemperamentoPainelResultado";
+import type { ResultadoTemperamentoUi } from "@/pages/temperamento/enriquecerResultado";
 import {
   gerarOrdemBlocosPerguntas,
   PERGUNTAS,
@@ -75,7 +78,7 @@ export default function TemperamentoPage() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [startedAt, setStartedAt] = useState<number>(() => Date.now());
   const [erro, setErro] = useState<string | null>(null);
-  const [resultadoApi, setResultadoApi] = useState<Record<string, unknown> | null>(null);
+  const [resultadoApi, setResultadoApi] = useState<ResultadoTemperamentoUi | null>(null);
   const [carregandoUltimo, setCarregandoUltimo] = useState(false);
   const [msgIntro, setMsgIntro] = useState<string | null>(null);
 
@@ -142,7 +145,7 @@ export default function TemperamentoPage() {
         setMsgIntro("Não foi possível carregar agora. Tenta de novo daqui a pouco.");
         return;
       }
-      const row = (await res.json()) as { resultado?: Record<string, unknown> } | null;
+      const row = (await res.json()) as { resultado?: ResultadoTemperamentoUi } | null;
       if (row?.resultado?.perfil) {
         setResultadoApi(row.resultado);
         setFase("resultado");
@@ -202,7 +205,7 @@ export default function TemperamentoPage() {
         return;
       }
       localStorage.removeItem(STORAGE_KEY);
-      setResultadoApi(data as Record<string, unknown>);
+      setResultadoApi(data as ResultadoTemperamentoUi);
       setFase("resultado");
     } catch {
       setErro("Falha de rede.");
@@ -230,61 +233,29 @@ export default function TemperamentoPage() {
   const bg = "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)";
 
   if (fase === "resultado" && resultadoApi) {
-    const perfil = resultadoApi.perfil as
-      | { tipo?: string; primario?: string; secundario?: string; arquetipo?: string; frase_sintese?: string }
-      | undefined;
-    const pct = resultadoApi.scores as
-      | { temperamentos_percentuais?: Record<string, number> }
-      | undefined;
-    const rel = resultadoApi.relatorioInterno as
-      | { titulo?: string; secoes?: { id: string; titulo: string; paragrafos: string[] }[] }
-      | undefined;
-    const conf = typeof resultadoApi.confiabilidade === "number" ? resultadoApi.confiabilidade : null;
     const qf = resultadoApi.quality_flag as string | undefined;
     const alertas = (resultadoApi.alertas as string[] | undefined) ?? [];
 
     return (
-      <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
-        <MobileTopBar titulo="Temperamento" subtitulo="Resultado da análise" />
-        <div className="max-w-lg mx-auto space-y-6">
+      <div className="min-h-screen pb-28 md:pb-12 px-4 pt-6" style={{ background: bg }}>
+        <MobileTopBar titulo="Temperamento" subtitulo="O teu mapa temperamental" />
+        <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
           <button
             type="button"
-            className="text-sm opacity-70 hover:opacity-100"
+            className="text-xs tracking-wide opacity-70 hover:opacity-100 transition-opacity"
             style={{ color: "#c8a56b" }}
             onClick={() => navigate("/jornada")}
           >
-            Voltar à jornada
+            ← Voltar à jornada
           </button>
-          <h1 className="font-tan-mon-cheri text-2xl" style={{ color: "#f7f2ec" }}>
-            {rel?.titulo ?? perfil?.arquetipo ?? "O teu temperamento"}
-          </h1>
-          {perfil?.frase_sintese && (
-            <p className="text-sm italic opacity-90" style={{ color: "rgba(247,242,236,0.75)" }}>
-              {perfil.frase_sintese}
-            </p>
-          )}
-          <div className="rounded-2xl p-4 space-y-2" style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.25)" }}>
-            <p className="text-xs uppercase tracking-widest" style={{ color: "rgba(200,165,107,0.7)" }}>
-              Percentuais
-            </p>
-            {pct?.temperamentos_percentuais &&
-              Object.entries(pct.temperamentos_percentuais).map(([k, v]) => (
-                <div key={k} className="flex justify-between text-sm" style={{ color: "#f7f2ec" }}>
-                  <span>{k}</span>
-                  <span className="font-semibold">{v}%</span>
-                </div>
-              ))}
-            {perfil?.tipo && (
-              <p className="text-sm mt-2" style={{ color: "rgba(247,242,236,0.65)" }}>
-                Tipo de perfil: <strong>{perfil.tipo}</strong> · Primário {perfil.primario} · Secundário {perfil.secundario}
-              </p>
-            )}
-          </div>
-          {conf !== null && (
-            <p className="text-sm" style={{ color: "rgba(247,242,236,0.55)" }}>
-              Índice de confiabilidade: <strong>{conf}</strong>/100
-            </p>
-          )}
+
+          <PageIntroHeader
+            className="hidden md:block mb-2"
+            eyebrow="Análise de temperamento"
+            titulo="O teu perfil"
+            subtitulo="Colérico, Sanguíneo, Melancólico e Fleumático"
+          />
+
           {(qf && qf !== "OK") || alertas.length > 0 ? (
             <div className="rounded-xl p-3 text-sm" style={{ background: "rgba(180,80,80,0.12)", color: "#f0d0d0" }}>
               {qf && qf !== "OK" && <p>Qualidade das respostas: {qf}</p>}
@@ -293,24 +264,13 @@ export default function TemperamentoPage() {
               ))}
             </div>
           ) : null}
-          <div className="space-y-6 pt-2">
-            {rel?.secoes?.map((sec) => (
-              <section key={sec.id}>
-                <h2 className="text-sm font-bold tracking-wide mb-2" style={{ color: "#c8a56b" }}>
-                  {sec.titulo}
-                </h2>
-                <div className="space-y-2 text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.82)" }}>
-                  {sec.paragrafos.map((p, i) => (
-                    <p key={i}>{p}</p>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
+
+          <TemperamentoPainelResultado resultado={resultadoApi} />
+
           <button
             type="button"
-            className="w-full py-3 rounded-xl font-medium"
-            style={{ background: "#c8a56b", color: "#1e1812" }}
+            className="w-full py-3.5 rounded-xl font-semibold"
+            style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
             onClick={() => {
               setResultadoApi(null);
               setFase("intro");

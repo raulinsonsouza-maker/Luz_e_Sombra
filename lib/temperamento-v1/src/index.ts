@@ -6,4 +6,11 @@ export { computarTemperamento, type ResultadoTemperamentoComputado } from "./com
 export { gerarOrdemBlocosPerguntas } from "./shuffle";
 export { desvioPadrao, proporcaoRespostas3, calcularConfiabilidade, calcularAlertas } from "./qualidade";
 export type { AlertaQualidade } from "./qualidade";
-export type { RelatorioInterno, RelatorioSecao } from "./interpretacao";
+export type { RelatorioInterno, RelatorioSecao, NarrativaTemperamentoV2 } from "./interpretacao";
+export {
+  NOME_TEMPERAMENTO,
+  montarNarrativaV2,
+  montarSinteseHumana,
+  montarDimensoesLegiveis,
+  extrairPerguntaCrescimento,
+} from "./interpretacao";

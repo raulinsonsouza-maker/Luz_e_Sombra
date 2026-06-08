@@ -15,6 +15,16 @@ import {
 } from "@/lib/numerologia-utils";
 import { NUMEROS_DE_VIDA, ANOS_PESSOAIS } from "@/lib/numerologia-data";
 import {
+  gerarDossieIntegrado,
+  parseTemperamentoFromApi,
+  parseLinguagensFromApi,
+  parseDiagnosticoEmocional,
+  type AvaliacaoDossie,
+  type TracoDossie,
+  type TemperamentoDossie,
+  type LinguagensDossie,
+} from "@/lib/dossieIntegrado";
+import {
   Loader2, ChevronLeft, Sparkles, Heart, Star, Compass,
   Zap, Shield, Brain, Eye, Target, TrendingUp, AlertCircle,
   CheckCircle2, Clock, Activity, Flame, Anchor, User,
@@ -22,44 +32,13 @@ import {
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-interface TracoResultado {
-  estruturaPrincipal: string;
+type TracoResultado = TracoDossie & {
   estruturaSecundaria: string;
-  estruturas: Record<string, number>;
-  mensagemTerapeutica?: string;
-  fraseIdentidade?: string;
-  pontosFortes?: string[];
   interpretacao?: string;
   centroEnergetico?: string;
-}
+};
 
-interface Avaliacao {
-  plenitudeFelicidade: number;
-  espiritualidade: number;
-  saudeDisposicao: number;
-  desenvolvimentoIntelectual: number;
-  equilibrioEmocional: number;
-  familia: number;
-  desenvolvimentoAmoroso: number;
-  vidaSocial: number;
-  realizacaoProposito: number;
-  recursosFinanceiros: number;
-  contribuicaoSocial: number;
-  criatividadeHobbyDiversao: number;
-}
-
-interface DiagnosticoEmocionalFase1 {
-  faixaEtaria: "4-7" | "8-11" | "12-14" | "15+";
-  modoColeta: string;
-  passado: number;
-  presente: number;
-  consciencia: number;
-  nivelAtual: "baixo" | "medio" | "alto";
-  evolucao: "baixo" | "medio" | "alto";
-  tag: "inconsciente" | "em_processo" | "integrado" | "em_desenvolvimento";
-  resumo: string;
-  proximosPassos: string[];
-}
+type Avaliacao = AvaliacaoDossie;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -264,220 +243,6 @@ const ANO_AREAS_CONEXAO: Record<number, Record<string, string>> = {
   },
 };
 
-// ── Intelligent Synthesis Engine ──────────────────────────────────────────────
-
-function gerarInsightsCruzados(params: {
-  vidaNum: number | null;
-  anoPessoal: number | null;
-  estrutura: string | null;
-  bottomAreas: { key: keyof Avaliacao; val: number }[];
-  topAreas: { key: keyof Avaliacao; val: number }[];
-  primeiroNome: string;
-}): { titulo: string; corpo: string; icone: string }[] {
-  const { vidaNum, anoPessoal, estrutura, bottomAreas, topAreas, primeiroNome } = params;
-  const insights: { titulo: string; corpo: string; icone: string }[] = [];
-
-  // Cross: Vida × Traço
-  if (vidaNum && estrutura) {
-    const combos: Record<string, Record<string, string>> = {
-      esquizoide: {
-        "1": `${primeiroNome} é um Pioneiro (Caminho ${vidaNum}) habitando uma estrutura de pensamento profundo. Isso cria uma tensão criativa: você tem a visão e o impulso de liderar, mas sua energia natural vai para dentro. O desafio é traduzir a profundidade interior em ação visível no mundo — e quando isso acontece, o resultado é extraordinário.`,
-        "2": `Caminho ${vidaNum} no Diplomata encontra na estrutura Esquizóide uma combinação única: você sente o outro profundamente, mas do lado de fora. Sua intuição sobre as pessoas é precisa — o que falta é a disposição de entrar na dança relacional de corpo inteiro.`,
-        "7": `Dois sistemas de profundidade se encontram aqui: o Caminho do Sábio e a estrutura do Pensador. Você tem acesso a dimensões de compreensão que são raras. O risco é ficar tão dentro da sua mente que o mundo real se torna secundário. Sua missão é trazer essa profundidade de volta à vida concreta.`,
-        "default": `Caminho ${vidaNum} com estrutura Esquizóide cria alguém que processa o mundo com profundidade incomum. Sua inteligência é um dom real — mas ela precisa de pontes para o mundo tangível para criar impacto.`,
-      },
-      oral: {
-        "2": `Caminho ${vidaNum} no Diplomata com estrutura Oral cria um campo magnético de cuidado. Você nasceu para criar conexões e harmonia — mas o risco é confundir cuidar dos outros com cuidar de si. Aprenda a receber com a mesma generosidade com que dá.`,
-        "6": `Caminho ${vidaNum} no Guardião com estrutura Oral: você carrega dois sistemas de cuidado sobrepostos. Isso é um dom imenso — e uma carga pesada. A pergunta central da sua vida é: quem cuida de você enquanto você cuida do mundo?`,
-        "9": `Caminho ${vidaNum} Humanista com estrutura Oral: você foi feito(a) para servir. Mas serviço vazio de si mesmo não sustenta ninguém. Preencha-se antes de distribuir — é a única forma de dar sem drenar.`,
-        "default": `Caminho ${vidaNum} com estrutura Oral: conexão é sua linguagem primária. Você cria vínculos com genuinidade rara. O desafio é garantir que esses vínculos sejam recíprocos — não apenas um canal de dar.`,
-      },
-      psicopata: {
-        "1": `Caminho ${vidaNum} Pioneiro com estrutura Estratégica: combinação de liderança pura. Você tem o instinto, o magnetismo e a visão. O que separa o potencial da realização plena é a disposição de ser vulnerável — de liderar não apenas com força, mas com humanidade.`,
-        "8": `Dois sistemas de poder convergem: Caminho ${vidaNum} Realizador com estrutura Estratégica. Quando alinhados, a capacidade de impacto é extraordinária. Quando não, o poder pode se tornar um escudo contra a intimidade genuína. A pergunta é: o que você está construindo serve a quem além de você?`,
-        "default": `Caminho ${vidaNum} com estrutura Estratégica: você move o mundo com competência e presença. O desafio é integrar o coração à estratégia — porque os resultados mais duradouros vêm de poder que carrega propósito.`,
-      },
-      masoquista: {
-        "4": `Caminho ${vidaNum} Construtor com estrutura de Sustentação: você constrói com uma persistência que beira o sobre-humano. O perigo está na fronteira entre construir com propósito e suportar o que não deveria ser suportado. Aprenda a distinguir.`,
-        "6": `Caminho ${vidaNum} Guardião com estrutura de Sustentação: você carrega os outros com uma lealdade impressionante. Mas quem carrega o portador? Sua jornada mais importante é descobrir que você pode pedir suporte sem perder a identidade.`,
-        "default": `Caminho ${vidaNum} com estrutura de Sustentação: sua força silenciosa é real e impressionante. Mas ela foi construída como resposta a um mundo que nem sempre honrou sua voz. Agora é a hora de descobrir o que acontece quando você fala.`,
-      },
-      rigido: {
-        "1": `Dois sistemas de liderança e excelência: Caminho ${vidaNum} Pioneiro com estrutura de Sustentação. Você tem padrões altos e a capacidade de entregá-los. O que pode estar faltando é a permissão para ser imperfeito(a) no processo — porque a perfeição como requisito pode paralisar até o mais corajoso dos pioneiros.`,
-        "8": `Caminho ${vidaNum} Realizador com estrutura de Sustentação: poucos têm essa combinação de poder e integridade. O desafio mais profundo é a flexibilidade — porque nem toda grande construção precisa ser perfeita, e nem toda grande conquista exige sacrifício total.`,
-        "default": `Caminho ${vidaNum} com estrutura de Sustentação: você entrega com qualidade e confiabilidade. Sua palavra vale. O convite é para descobrir que você também pode ser real, com falhas, com incertezas — e ainda assim ser digno(a) de amor e respeito.`,
-      },
-    };
-
-    const estruturaCombos = combos[estrutura] || {};
-    const texto = estruturaCombos[String(vidaNum)] || estruturaCombos["default"] || "";
-    if (texto) {
-      insights.push({
-        titulo: "Seu Padrão Mais Profundo",
-        corpo: texto,
-        icone: "brain",
-      });
-    }
-  }
-
-  // Cross: Ano Pessoal × Áreas baixas
-  if (anoPessoal && bottomAreas.length > 0) {
-    const areaChave = bottomAreas[0].key;
-    const anoConexoes = ANO_AREAS_CONEXAO[anoPessoal] || {};
-    const conexao = anoConexoes[areaChave as string];
-
-    if (conexao) {
-      insights.push({
-        titulo: `Ano ${anoPessoal} × ${AREAS_LABELS[areaChave]}`,
-        corpo: conexao,
-        icone: "target",
-      });
-    } else {
-      insights.push({
-        titulo: `O que seu Ano ${anoPessoal} diz sobre sua vida agora`,
-        corpo: `A área de ${AREAS_LABELS[areaChave]} está chamando atenção justamente num ano em que a energia universal aponta para transformação. Isso não é coincidência — é o momento certo para agir.`,
-        icone: "target",
-      });
-    }
-  }
-
-  // Cross: Traço × bottom emotional areas
-  if (estrutura && bottomAreas.some(a => ["equilibrioEmocional", "plenitudeFelicidade", "desenvolvimentoAmoroso"].includes(a.key as string))) {
-    const estruturaInfo = ESTRUTURAS[estrutura];
-    if (estruturaInfo) {
-      insights.push({
-        titulo: "O que sua Estrutura Revela sobre esse Momento",
-        corpo: `Sua estrutura ${estruturaInfo.nome} tem um padrão específico neste tipo de situação: ${estruturaInfo.sombra} Isso não é diagnóstico — é um mapa. Saber onde sua estrutura vai automaticamente pode ser a diferença entre repetir o ciclo e transformá-lo.`,
-        icone: "eye",
-      });
-    }
-  }
-
-  // Cross: Ano × vida num
-  if (anoPessoal && vidaNum) {
-    const anoPessoalInfo = ANOS_PESSOAIS[anoPessoal];
-    const vidaInfo = NUMEROS_DE_VIDA[vidaNum];
-    if (anoPessoalInfo && vidaInfo) {
-      const harmonia = anoPessoal === vidaNum;
-      const tensao = Math.abs(anoPessoal - vidaNum) >= 4;
-      if (harmonia) {
-        insights.push({
-          titulo: `Ano de Ressonância — Caminho ${vidaNum} encontra Ano ${anoPessoal}`,
-          corpo: `Quando o Ano Pessoal ressoa com o seu Caminho de Vida, a energia se amplifica. Você está num momento em que sua essência mais profunda e a energia do ciclo estão alinhadas. Use isso — é mais raro do que parece.`,
-          icone: "spark",
-        });
-      } else if (tensao) {
-        insights.push({
-          titulo: `Tensão Produtiva — Caminho ${vidaNum} no contexto do Ano ${anoPessoal}`,
-          corpo: `Sua essência de Caminho ${vidaNum} (${vidaInfo.arquetipo}) está navegando num Ano ${anoPessoal} (${anoPessoalInfo.titulo.split("—")[1]?.trim() || ""}). Essa tensão não é obstáculo — é a fricção que produz crescimento. Os maiores saltos acontecem exatamente quando quem você é precisa se expandir para além do que é confortável.`,
-          icone: "flame",
-        });
-      }
-    }
-  }
-
-  return insights.slice(0, 3);
-}
-
-function gerarOrientacaoPrecisa(params: {
-  vidaNum: number | null;
-  anoPessoal: number | null;
-  estrutura: string | null;
-  bottomAreas: { key: keyof Avaliacao; val: number }[];
-  topAreas: { key: keyof Avaliacao; val: number }[];
-}): string[] {
-  const { vidaNum, anoPessoal, estrutura, bottomAreas } = params;
-  const orientacoes: string[] = [];
-
-  if (anoPessoal && ANOS_PESSOAIS[anoPessoal]) {
-    const ap = ANOS_PESSOAIS[anoPessoal];
-    const pratEscolhida = ap.praticasSugeridas?.[0];
-    if (pratEscolhida) orientacoes.push(pratEscolhida);
-  }
-
-  if (bottomAreas.length > 0) {
-    const primeiraArea = bottomAreas[0];
-    const interpretacao = AREAS_INTERPRETACAO[primeiraArea.key];
-    if (interpretacao) {
-      if (primeiraArea.val < 4) {
-        orientacoes.push(`Tornar ${AREAS_LABELS[primeiraArea.key]} uma prioridade deliberada — não apenas uma intenção. Defina uma ação concreta para esta semana.`);
-      }
-    }
-  }
-
-  if (estrutura) {
-    const est = ESTRUTURAS[estrutura];
-    if (est) {
-      orientacoes.push(`Trabalhar a sombra da estrutura ${est.nome}: ${est.sombra.split(".")[0].replace("Tende a", "Observar onde você tende a").replace("O medo", "Investigar o medo")}.`);
-    }
-  }
-
-  if (vidaNum && NUMEROS_DE_VIDA[vidaNum]) {
-    const desafio = NUMEROS_DE_VIDA[vidaNum].desafios[0];
-    if (desafio) orientacoes.push(`Desafio central do Caminho ${vidaNum}: ${desafio.toLowerCase()}.`);
-  }
-
-  return orientacoes.slice(0, 3);
-}
-
-function calcularDiagnosticoEmocionalFase1(params: {
-  idade: number | null;
-  traco: TracoResultado | null;
-  avaliacao: Avaliacao | null;
-}): DiagnosticoEmocionalFase1 | null {
-  const { idade, traco, avaliacao } = params;
-  if (!idade || !traco || !avaliacao) return null;
-
-  const faixaEtaria: DiagnosticoEmocionalFase1["faixaEtaria"] =
-    idade <= 7 ? "4-7" :
-    idade <= 11 ? "8-11" :
-    idade <= 14 ? "12-14" : "15+";
-
-  const modoColeta =
-    faixaEtaria === "4-7" ? "observacao_dos_pais" :
-    faixaEtaria === "8-11" ? "hibrido_crianca_responsavel" :
-    "autoavaliacao";
-
-  const dominante = Math.max(...Object.values(traco.estruturas || { a: 0 }));
-  const passado = Math.round(Math.min(100, dominante * 1.15));
-  const estresseAtual = (10 - avaliacao.equilibrioEmocional) * 10;
-  const relacionalAtual = (10 - avaliacao.desenvolvimentoAmoroso) * 7;
-  const presente = Math.round(Math.min(100, Math.max(0, estresseAtual * 0.65 + relacionalAtual * 0.35)));
-  const conscienciaBase = (avaliacao.equilibrioEmocional + avaliacao.desenvolvimentoIntelectual + avaliacao.espiritualidade) / 30;
-  const consciencia = Math.round(Math.min(100, conscienciaBase * 100));
-
-  const nivelAtual: DiagnosticoEmocionalFase1["nivelAtual"] =
-    presente < 34 ? "baixo" : presente < 67 ? "medio" : "alto";
-  const evolucao: DiagnosticoEmocionalFase1["evolucao"] =
-    consciencia < 40 ? "baixo" : consciencia < 70 ? "medio" : "alto";
-
-  const tag: DiagnosticoEmocionalFase1["tag"] =
-    faixaEtaria === "4-7" ? "em_desenvolvimento" :
-    consciencia >= 70 && presente < 45 ? "integrado" :
-    consciencia < 40 ? "inconsciente" : "em_processo";
-
-  const resumo =
-    `Seu eixo passado-presente indica ativação ${nivelAtual} neste momento, com consciência ${evolucao}. ` +
-    `A leitura aponta maior sensibilidade em situações relacionais e de controle emocional, com potencial real de evolução quando há prática consistente.`;
-
-  return {
-    faixaEtaria,
-    modoColeta,
-    passado,
-    presente,
-    consciencia,
-    nivelAtual,
-    evolucao,
-    tag,
-    resumo,
-    proximosPassos: [
-      "Registrar gatilhos emocionais por 7 dias e observar repetição de padrão",
-      "Praticar expressão emocional segura em 1 conversa importante por semana",
-      "Reavaliar após 30 dias para medir deslocamento de presente e consciência",
-    ],
-  };
-}
-
 // ── Section Component ─────────────────────────────────────────────────────────
 
 function SecaoCard({ titulo, subtitulo, icone: Icone, children }: {
@@ -534,7 +299,10 @@ export default function QuemSouEuPage() {
 
   const [loading, setLoading] = useState(true);
   const [traco, setTraco] = useState<TracoResultado | null>(null);
+  const [temperamento, setTemperamento] = useState<TemperamentoDossie | null>(null);
+  const [linguagens, setLinguagens] = useState<LinguagensDossie | null>(null);
   const [avaliacao, setAvaliacao] = useState<Avaliacao | null>(null);
+  const [diagRow, setDiagRow] = useState<{ resultado?: unknown } | null>(null);
   const [fotoUrl, setFotoUrl] = useState<string | null>(null);
 
   const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -547,20 +315,36 @@ export default function QuemSouEuPage() {
   async function buscarDados() {
     setLoading(true);
     try {
-      const [tracoRes, avaliacaoRes, fotoRes] = await Promise.all([
+      const [tracoRes, tempRes, lingRes, diagRes, avaliacaoRes, fotoRes] = await Promise.all([
         apiFetch("/traco/analise"),
+        apiFetch("/temperamento/ultimo"),
+        apiFetch("/linguagens-amor/ultimo"),
+        apiFetch("/diagnostico-emocional/ultimo"),
         apiFetch("/avaliacoes"),
         fetch(`${API_BASE}/api/usuarios/me/foto-perfil/view`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("luz_e_sombra_token") ?? ""}` },
         }),
       ]);
+      let tracoParsed: TracoResultado | null = null;
       if (tracoRes.ok) {
         const data = await tracoRes.json();
-        if (data) setTraco(data.resultado as TracoResultado);
+        if (data) tracoParsed = data.resultado as TracoResultado;
+        setTraco(tracoParsed);
+      }
+      if (tempRes.ok) {
+        const data = await tempRes.json();
+        setTemperamento(parseTemperamentoFromApi(data));
+      }
+      if (lingRes.ok) {
+        const data = await lingRes.json();
+        setLinguagens(parseLinguagensFromApi(data));
       }
       if (avaliacaoRes.ok) {
         const lista = await avaliacaoRes.json();
         if (lista.length > 0) setAvaliacao(lista[0] as Avaliacao);
+      }
+      if (diagRes.ok) {
+        setDiagRow(await diagRes.json());
       }
       if (profilePhotoViewResponseIsImageBody(fotoRes)) {
         const blob = await fotoRes.blob();
@@ -618,29 +402,26 @@ export default function QuemSouEuPage() {
   const topAreas = areasSorted.slice(0, 3);
 
   const estrutura = traco?.estruturaPrincipal ? ESTRUTURAS[traco.estruturaPrincipal] : null;
-  const semDados = !traco && !avaliacao && !vidaNum;
+  const semDados = !traco && !avaliacao && !vidaNum && !temperamento && !linguagens;
 
-  const insights = gerarInsightsCruzados({
-    vidaNum,
-    anoPessoal: anoPessoalNum,
-    estrutura: traco?.estruturaPrincipal ?? null,
-    bottomAreas: bottomAreas as { key: keyof Avaliacao; val: number }[],
-    topAreas: topAreas as { key: keyof Avaliacao; val: number }[],
+  const dossie = gerarDossieIntegrado({
     primeiroNome,
+    vidaNum,
+    expressaoNum,
+    almaNum,
+    personalidadeNum,
+    anoPessoalNum,
+    traco,
+    temperamento,
+    linguagens,
+    avaliacao,
+    diagnosticoEmocional: parseDiagnosticoEmocional(traco, diagRow),
+    idade,
   });
 
-  const orientacoes = gerarOrientacaoPrecisa({
-    vidaNum,
-    anoPessoal: anoPessoalNum,
-    estrutura: traco?.estruturaPrincipal ?? null,
-    bottomAreas: bottomAreas as { key: keyof Avaliacao; val: number }[],
-    topAreas: topAreas as { key: keyof Avaliacao; val: number }[],
-  });
-  const diagnosticoEmocional = calcularDiagnosticoEmocionalFase1({
-    idade,
-    traco,
-    avaliacao,
-  });
+  const insights = dossie.cruzamentos;
+  const orientacoes = dossie.acoesPrioritarias;
+  const diagnosticoEmocional = dossie.diagnosticoEmocional;
 
   const INSIGHT_ICONS: Record<string, React.ElementType> = {
     brain: Brain,
@@ -648,7 +429,12 @@ export default function QuemSouEuPage() {
     eye: Eye,
     spark: Sparkles,
     flame: Flame,
+    heart: Heart,
+    shield: Shield,
+    zap: Zap,
   };
+
+  const fontesFaltando = dossie.matrizFontes.filter((f) => !f.disponivel);
 
   return (
     <div
@@ -735,19 +521,46 @@ export default function QuemSouEuPage() {
                           </span>
                         </>
                       )}
+                      {temperamento?.arquetipo && (
+                        <>
+                          <span style={{ color: "rgba(200,165,107,0.25)" }}>·</span>
+                          <span className="text-[11px]" style={{ color: "rgba(200,165,107,0.6)" }}>
+                            {temperamento.arquetipo}
+                          </span>
+                        </>
+                      )}
                     </div>
-                    {traco?.fraseIdentidade && (
+                    {(dossie.assinaturaIntegrada || traco?.fraseIdentidade) && (
                       <p className="text-xs italic mt-2" style={{ color: "rgba(247,242,236,0.4)" }}>
-                        "{traco.fraseIdentidade}"
+                        "{dossie.assinaturaIntegrada ?? traco?.fraseIdentidade}"
                       </p>
                     )}
                   </div>
                 </div>
 
                 {/* Numerology strip */}
+                <div
+                  className="flex flex-wrap gap-1.5 mt-5 pt-4"
+                  style={{ borderTop: "1px solid rgba(200,165,107,0.1)" }}
+                >
+                  {dossie.matrizFontes.map((fonte) => (
+                    <span
+                      key={fonte.id}
+                      className="text-[10px] px-2.5 py-1 rounded-full"
+                      style={{
+                        background: fonte.disponivel ? "rgba(93,185,122,0.1)" : "rgba(255,255,255,0.03)",
+                        color: fonte.disponivel ? "rgba(93,185,122,0.75)" : "rgba(247,242,236,0.25)",
+                        border: fonte.disponivel ? "1px solid rgba(93,185,122,0.2)" : "1px solid rgba(200,165,107,0.08)",
+                      }}
+                    >
+                      {fonte.disponivel ? "✓" : "○"} {fonte.label}
+                    </span>
+                  ))}
+                </div>
+
                 {(vidaNum || expressaoNum || almaNum || personalidadeNum) && (
                   <div
-                    className="grid grid-cols-4 gap-2 mt-6 pt-5"
+                    className="grid grid-cols-4 gap-2 mt-4 pt-4"
                     style={{ borderTop: "1px solid rgba(200,165,107,0.1)" }}
                   >
                     {[
@@ -766,6 +579,21 @@ export default function QuemSouEuPage() {
               </div>
             </div>
 
+            {/* ── ANÁLISES PENDENTES ── */}
+            {fontesFaltando.length > 0 && !semDados && (
+              <div
+                className="rounded-2xl p-4"
+                style={{ background: "rgba(224,123,57,0.05)", border: "1px solid rgba(224,123,57,0.15)" }}
+              >
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase mb-2" style={{ color: "rgba(224,123,57,0.7)" }}>
+                  Para cruzamento completo
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
+                  Complete: {fontesFaltando.map((f) => f.label).join(", ")}. Cada análise adiciona uma camada ao seu dossiê integrado.
+                </p>
+              </div>
+            )}
+
             {/* ── SEM DADOS ── */}
             {semDados && (
               <div
@@ -777,7 +605,7 @@ export default function QuemSouEuPage() {
                   Seu dossiê está sendo construído
                 </p>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.3)" }}>
-                  Complete sua data de nascimento, realize a análise do Traço de Caráter e preencha sua Roda da Vida para que seu dossiê completo seja gerado com precisão.
+                  Complete sua data de nascimento, Traço de Caráter, Temperamento, Linguagens do Amor, Roda da Vida e Diagnóstico Emocional para o cruzamento integrado completo.
                 </p>
               </div>
             )}
@@ -867,12 +695,12 @@ export default function QuemSouEuPage() {
             )}
 
             {/* ── IDENTIDADE NUCLEAR ── */}
-            {(vidaNum || estrutura) && (
+            {(vidaNum || estrutura || temperamento || linguagens) && (
               <SecaoCard titulo="Quem Você É na Essência" subtitulo="Identidade e estrutura de caráter" icone={Compass}>
                 <DossieLabel num="II" label="Sua Natureza Fundamental" />
 
-                {/* Vida + Traço combinados */}
-                {vidaNum && vidaInfo && estrutura && (
+                {/* Síntese integrada */}
+                {dossie.sinteseIdentidade && (
                   <div
                     className="rounded-2xl p-5 mb-5"
                     style={{
@@ -884,8 +712,13 @@ export default function QuemSouEuPage() {
                       Síntese de Identidade
                     </p>
                     <p className="text-sm leading-relaxed mb-0" style={{ color: "rgba(247,242,236,0.75)" }}>
-                      {primeiroNome} é {vidaInfo.arquetipo} (Caminho {vidaNum}) — {vidaInfo.essencia?.toLowerCase().replace(/^você /, "alguém que ")} Operando através da estrutura {estrutura.nome}, {estrutura.padraoProfundo.toLowerCase().replace(/^você /, "")}
+                      {dossie.sinteseIdentidade}
                     </p>
+                    {dossie.perguntaCentral && (
+                      <p className="text-xs italic mt-3 pt-3" style={{ color: "rgba(200,165,107,0.65)", borderTop: "1px solid rgba(200,165,107,0.1)" }}>
+                        {dossie.perguntaCentral}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -952,7 +785,9 @@ export default function QuemSouEuPage() {
                       <Shield className="w-5 h-5 shrink-0" style={{ color: `${estrutura.cor}50` }} />
                     </div>
                     <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.65)" }}>
-                      {estrutura.padraoProfundo}
+                      {traco.interpretacao
+                        ? traco.interpretacao.slice(0, 420) + (traco.interpretacao.length > 420 ? "…" : "")
+                        : estrutura.sombra}
                     </p>
                     <p className="text-[10px] font-bold tracking-[0.25em] uppercase mb-2" style={{ color: `${estrutura.cor}70` }}>
                       Dominâncias comportamentais
@@ -987,6 +822,52 @@ export default function QuemSouEuPage() {
                           "{traco.mensagemTerapeutica}"
                         </p>
                       </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Temperamento */}
+                {temperamento && (
+                  <div
+                    className="rounded-2xl p-5 mt-5"
+                    style={{ background: "rgba(91,155,213,0.06)", border: "1px solid rgba(91,155,213,0.15)" }}
+                  >
+                    <p className="text-[10px] tracking-widest uppercase mb-0.5" style={{ color: "rgba(91,155,213,0.6)" }}>
+                      Temperamento
+                    </p>
+                    <p className="font-tan-mon-cheri text-lg mb-2" style={{ color: "#5b9bd5" }}>
+                      {temperamento.arquetipo ?? temperamento.primario}
+                    </p>
+                    {temperamento.sinteseHumana && (
+                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
+                        {temperamento.sinteseHumana}
+                      </p>
+                    )}
+                    {temperamento.combo && (
+                      <p className="text-xs mt-3 italic" style={{ color: "rgba(91,155,213,0.55)" }}>
+                        {temperamento.combo.forca}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Linguagens do Amor */}
+                {linguagens && (
+                  <div
+                    className="rounded-2xl p-5 mt-5"
+                    style={{ background: "rgba(224,123,57,0.05)", border: "1px solid rgba(224,123,57,0.12)" }}
+                  >
+                    <p className="text-[10px] tracking-widest uppercase mb-0.5" style={{ color: "rgba(224,123,57,0.6)" }}>
+                      Linguagens do Amor
+                    </p>
+                    {linguagens.sinteseHumana ? (
+                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
+                        {linguagens.sinteseHumana}
+                      </p>
+                    ) : (
+                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
+                        Receber: {linguagens.receberPrincipal} · Expressar: {linguagens.expressarPrincipal}
+                      </p>
                     )}
                   </div>
                 )}
@@ -1170,6 +1051,8 @@ export default function QuemSouEuPage() {
                 >
                   <p className="text-xs mb-2" style={{ color: "rgba(200,165,107,0.65)" }}>
                     Faixa etária: {diagnosticoEmocional.faixaEtaria} · Coleta: {diagnosticoEmocional.modoColeta.replaceAll("_", " ")}
+                    {diagnosticoEmocional.fonte === "fusao" && " · Fusão Traço + formulário"}
+                    {diagnosticoEmocional.fonte === "heuristica" && " · Estimativa (complete o diagnóstico)"}
                   </p>
                   <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)" }}>
                     {diagnosticoEmocional.resumo}
@@ -1264,7 +1147,7 @@ export default function QuemSouEuPage() {
                   "Conhecer-se é o começo de toda sabedoria."
                 </p>
                 <p className="text-[10px] mt-1" style={{ color: "rgba(247,242,236,0.15)" }}>
-                  Dossiê gerado com base em Numerologia, Bioenergética e Psicologia do Desenvolvimento
+                  Dossiê integrado: Numerologia · Traço de Caráter · Temperamento · Linguagens do Amor · Roda da Vida · Diagnóstico Emocional
                 </p>
               </div>
             )}
