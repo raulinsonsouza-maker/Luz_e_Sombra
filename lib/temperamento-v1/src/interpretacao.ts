@@ -27,99 +27,115 @@ const DADOS: Record<TemperamentoCodigo, CamadasTemperamento> = {
     arquetipoTitulo: "O Executor",
     fraseSintese: "Enquanto outros pensam, eu já terminei.",
     motorInterno:
-      "O Colérico é movido por uma necessidade profunda de impacto e controle. Não é ambição superficial — é uma aversão visceral à impotência. Quando não está construindo, liderando ou resolvendo, sente que está desperdiçando existência. O tempo parado é fisicamente insuportável.",
+      "Você precisa sentir que está avançando. Quando fica parado por muito tempo, algo dentro de você protesta — não por birra, mas porque sua natureza é construir, resolver e liderar. Com um objetivo claro na frente, você é imparável.",
     padraoPensamento:
-      "Orientado a solução, não a análise. Identifica o problema, escolhe uma direção (nem sempre a melhor, mas sempre uma direção) e avança. Prefere errar em movimento a acertar parado. O raciocínio é sequencial e prático: «O que precisa ser feito? Quem vai fazer? Quando acaba?». Armadilha cognitiva: confunde velocidade de decisão com qualidade de decisão.",
+      "Você pensa para agir, não para ficar analisando eternamente. Vê o problema, escolhe um caminho e parte. Prefere corrigir no caminho a esperar a solução perfeita. Na sua cabeça a pergunta é sempre: o que precisa ser feito agora?",
     padraoAcao:
-      "Assume comando em situações de crise automaticamente. Define prioridades com brutalidade — descarta o não essencial sem cerimónia. Trabalha bem sob pressão extrema; deteriora sob burocracia e morosidade. Comunica-se de forma direta, às vezes percebida como agressiva. Tolera mal explicações longas — quer o resumo e a ação.",
+      "Em crise ou caos, você naturalmente assume a frente. Corta o que não importa, foca no essencial e empurra as coisas para frente. Fala direto, decide rápido e funciona muito bem sob pressão — mas sofre com burocracia, lentidão e reuniões que não levam a lugar nenhum.",
     pontoForte:
-      "A capacidade de transformar intenção em resultado em contextos onde outros paralisam. Em situações de crise, ambiguidade ou paralisia organizacional, o Colérico funciona como catalisador de execução. Esta habilidade é rara e extremamente valiosa.",
+      "Você transforma intenção em resultado. Onde outros travam, você destrava. Essa capacidade de fazer acontecer — especialmente quando tudo parece difícil — é um dos seus maiores dons.",
     falhaEstrutural:
-      "Atropela processos e pessoas não por crueldade, mas por impaciência estrutural. A velocidade que é a sua maior força torna-se sabotagem quando o contexto exige cuidado, construção gradual ou consenso. Pode destruir relações importantes por não reconhecer que «ter razão» e «conseguir o que quer» são problemas diferentes.",
+      "Sua velocidade pode atropelar pessoas e processos que precisam de tempo. Quando tudo vira urgência, você pode ganhar a batalha e perder a relação. Ter razão nem sempre é o mesmo que conseguir o que realmente importa.",
     caminhoCrescimento:
-      "O próximo nível não é fazer mais — é fazer com mais precisão. Desenvolver tolerância a processos lentos como ferramenta estratégica (não como fraqueza), e aprender a distinguir urgência real de urgência percebida. Pergunta prática: «O que eu deixo de conquistar por agir rápido demais?»",
+      "Seu próximo passo não é fazer mais — é fazer melhor. Aprenda a distinguir o que é urgente de verdade do que só parece urgente. Pergunta prática: «O que eu perco quando ajo rápido demais?»",
   },
   SANGUINEO: {
     arquetipoTitulo: "O Catalisador",
     fraseSintese: "Onde eu estou, as coisas acontecem.",
     motorInterno:
-      "O Sanguíneo é movido por estimulação e conexão. A solidão não é apenas desconfortável — é desorientadora. Precisa do reflexo das pessoas para se sentir real. A energia sobe exponencialmente em ambientes dinâmicos e cai dramaticamente em isolamento ou rotina.",
+      "Você ganha vida com pessoas, movimento e novidade. Sozinho por muito tempo ou preso na mesma rotina, você murcha. Quando o ambiente pulsa, sua energia sobe — e você levanta quem está ao redor junto.",
     padraoPensamento:
-      "Intuitivo, associativo e contextual. Conecta ideias de forma não linear e encontra oportunidades que analistas perdem porque olham demais para os dados e de menos para as pessoas. O pensamento é rápido, criativo e socialmente inteligente — mas tende à superficialidade quando o tema exige profundidade.",
+      "Você conecta ideias de um jeito criativo e vê oportunidades que quem só olha números perde. Pensa rápido, lê bem o clima das pessoas e encontra caminhos por intuição. O desafio é ir fundo quando o assunto exige paciência e detalhe.",
     padraoAcao:
-      "Cria engajamento e entusiasmo com facilidade excepcional. Começa muitos projetos com energia intensa; perde interesse na fase de execução. Influencia pelo carisma e pela narrativa, não pela autoridade formal. Adapta-se rapidamente a novas situações e pessoas. Sensível à atmosfera emocional do grupo — absorve e amplifica humores.",
+      "Você contagia entusiasmo, começa com força total e se adapta fácil a gente nova e situações novas. Influencia pelo carisma, não pelo cargo. A parte difícil é sustentar o interesse quando a empolgação inicial passa e começa o trabalho repetido.",
     pontoForte:
-      "Capacidade de criar movimento, engajamento e momentum social em contextos onde outros não conseguem gerar tração. Excelente em vendas, liderança de cultura, comunicação de marca e qualquer contexto onde energia humana é o ativo principal.",
+      "Você cria movimento. Onde há desânimo ou estagnação, você traz ânimo e faz as pessoas quererem participar. Esse dom de mobilizar pelo afeto e pela energia é raro e valioso.",
     falhaEstrutural:
-      "Baixa tolerância à fase árida de qualquer projeto. Quando o entusiasmo inicial evapora e começa o trabalho repetitivo de execução, o Sanguíneo desengaja — às vezes abandonando projetos 80% concluídos por algo «mais interessante». Este padrão é invisível para ele mesmo e devastador para as suas equipas.",
+      "Quando a fase emocionante acaba, você pode abandonar antes de terminar — trocando por algo mais estimulante. Muitas vezes nem percebe o quanto isso frustra quem depende de você para fechar o que começou.",
     caminhoCrescimento:
-      "Desenvolver sistemas externos de comprometimento (não depender de motivação interna para fases de execução). Identificar os projetos onde a fase árida vale a pena e ser brutal com os demais. Pergunta prática: «Quantas coisas eu abandonei a 80% e o que isso me custou?»",
+      "Escolha menos projetos e termine o que importa. Crie rotinas simples para a fase chata — ela faz parte de qualquer conquista real. Pergunta prática: «O que eu deixei incompleto que ainda me pesa?»",
   },
   MELANCOLICO: {
     arquetipoTitulo: "O Analista",
     fraseSintese: "Eu vejo o que ninguém vê — e isso é um fardo tanto quanto um dom.",
     motorInterno:
-      "O Melancólico é movido por um padrão profundo de busca de sentido e precisão. A imperfeição não é apenas incómoda — é moralmente perturbadora. Existe uma exigência interna de que as coisas sejam feitas do jeito certo, mesmo quando o contexto não exige. Este padrão gera excelência e, simultaneamente, paralisia.",
+      "Você busca fazer as coisas direito — não por perfeccionismo vazio, mas porque sente que o mundo merece mais cuidado. Quando algo está mal feito ou superficial, incomoda de verdade. Essa exigência te torna excelente; também pode te paralisar.",
     padraoPensamento:
-      "Profundo, estruturado e crítico. Não aceita respostas superficiais — explora problemas em múltiplas camadas antes de concluir. Esta profundidade é a maior vantagem e também a fonte do maior obstáculo: o overthinking que paralisa a ação.",
+      "Você não aceita resposta rasa. Explora o assunto por camadas antes de fechar qualquer conclusão. Vê riscos, padrões e detalhes que passam batido. O lado difícil é quando a análise vira desculpa para não agir.",
     padraoAcao:
-      "Produz trabalho de qualidade excepcionalmente alta quando o contexto permite tempo adequado. Prefere trabalhar sozinho ou em pequenos grupos de alta confiança. Sensível a críticas — processa-as profundamente, às vezes em excesso. Tende a rever e refinar indefinidamente sem critério claro de conclusão. Excelente em diagnóstico de problemas, planos de longo prazo e trabalho técnico complexo.",
+      "Quando tem tempo e espaço, entrega trabalho de altíssima qualidade. Prefere poucas pessoas de confiança a grandes grupos. Critica e se autocritica com intensidade — às vezes demais. Brilha em diagnóstico, planejamento e problemas complexos.",
     pontoForte:
-      "Capacidade de ver padrões, riscos e oportunidades que outros não enxergam por falta de profundidade analítica. Em contextos de alta complexidade, estratégia ou qualidade crítica, o Melancólico entrega o que nenhum outro perfil consegue.",
+      "Você enxerga o que outros não veem. Em situações difíceis ou cheias de nuance, sua profundidade vira vantagem decisiva — ninguém analisa como você.",
     falhaEstrutural:
-      "Paralisa por excesso de análise em momentos que exigem ação imperfeita e rápida. A busca por certeza — que nunca chegará completamente — pode custar oportunidades que existem apenas por janelas temporais curtas. Tende também a ruminar fracassos com uma intensidade desproporcional ao tamanho real do erro.",
+      "Esperar certeza demais pode fazer você perder janelas que só abrem uma vez. E quando erra, pode remoer por muito tempo — mais do que o tamanho real do erro pediria.",
     caminhoCrescimento:
-      "Desenvolver critérios explícitos de suficiência: «este trabalho está bom o suficiente quando X». Praticar ação deliberada com informação incompleta em contextos de baixo risco como treinamento. Pergunta prática: «Quantas oportunidades eu perdi esperando ter certeza suficiente?»",
+      "Defina o que é «bom o suficiente» antes de começar. Pratique agir com informação incompleta em coisas de baixo risco. Pergunta prática: «O que eu deixei de tentar por medo de errar?»",
   },
   FLEUMATICO: {
     arquetipoTitulo: "O Sustentador",
     fraseSintese: "Eu sou a razão pela qual as coisas continuam funcionando quando ninguém está a olhar.",
     motorInterno:
-      "O Fleumático é movido por uma necessidade profunda de estabilidade e harmonia. O conflito não é apenas desconfortável — é percebido como uma falha do sistema que precisa ser resolvida. A força é a consistência; a limitação é que essa consistência pode tornar-se resistência ao crescimento quando este exige desconforto.",
+      "Você precisa de paz, previsibilidade e relações em ordem. Conflito desgasta — não porque seja fraco, mas porque seu sistema interno funciona melhor com harmonia. Sua força está em sustentar; o desafio é não confundir calma com ficar parado quando precisa mudar.",
     padraoPensamento:
-      "Pragmático, cauteloso e orientado à harmonia sistémica. Considera o impacto humano de decisões com uma profundidade que outros perfis ignoram. Bom mediador natural. Tende a ver múltiplas perspectivas simultaneamente — o que gera empatia e, às vezes, dificuldade de decidir.",
+      "Você pensa nas pessoas envolvidas antes de decidir. Vê vários lados ao mesmo tempo, o que te torna um bom mediador — mas às vezes dificulta fechar uma escolha.",
     padraoAcao:
-      "Executa com consistência notável ao longo do tempo — não em explosões de energia. Funciona como cola social em equipas — reduz atrito e mantém coesão. Resiste à mudança mesmo quando necessária — especialmente se houver conflito associado. Tende a postergar decisões que gerarão desconforto ou conflito. Altamente confiável e previsível.",
+      "Você é constante. Não explode de energia, mas não desiste no meio. Mantém equipes unidas, reduz atrito e cumpre o que promete. Pode adiar conversas difíceis até que o problema fique grande demais para ignorar.",
     pontoForte:
-      "Consistência de longo prazo e capacidade de manter sistemas funcionando sob pressão sem desgaste aparente. Em contextos onde outros perfis se esgotam ou criam conflito, o Fleumático sustém. Também possui inteligência interpessoal sofisticada que frequentemente passa despercebida.",
+      "Você segura o que importa quando todo mundo está exausto. Sua presença estável e sua inteligência emocional silenciosa são pilares que muita gente só percebe quando você não está.",
     falhaEstrutural:
-      "Evita o crescimento quando este exige conflito, confronto ou saída da zona de conforto. A busca por harmonia pode tornar-se passividade disfarçada de diplomacia. Tende a acumular insatisfações sem expressá-las até ao ponto de ruptura — o que surpreende pessoas à volta que assumiam que estava «tudo bem».",
+      "Evitar desconforto pode virar evitar crescimento. Guardar mágoas para «não criar clima» costuma terminar em explosão ou distanciamento — e surpreende quem achava que estava tudo bem.",
     caminhoCrescimento:
-      "Diferenciar harmonia genuína de evitação de conflito. Desenvolver tolerância ao desconforto temporário como preço do crescimento permanente. Pergunta prática: «O que eu nunca disse mas precisava ter dito, e o que isso me custou?»",
+      "Aprenda a dizer o que precisa ser dito antes que vire ressentimento. Conflito pontual às vezes é o preço de uma relação mais honesta. Pergunta prática: «O que eu nunca disse e ainda me pesa?»",
   },
 };
 
 const COMBO: Record<string, { forca: string; tensao: string; contexto: string }> = {
   COLERICO_SANGUINEO: {
-    forca: "Execução com carisma. Liderança magnética.",
-    tensao: "Impulsividade amplificada. Pouca reflexão.",
-    contexto: "Vendas, startups, liderança de equipas.",
+    forca: "Você faz acontecer e leva as pessoas junto — liderança com energia e calor humano.",
+    tensao: "Pode decidir rápido demais e falar antes de ouvir quando está empolgado ou pressionado.",
+    contexto: "Liderança de equipes, vendas, empreendedorismo, qualquer lugar que precise de ação e entusiasmo.",
   },
   COLERICO_MELANCOLICO: {
-    forca: "Estratégia + execução. Combinação rara e poderosa.",
-    tensao: "Guerra interna entre agir e analisar.",
-    contexto: "Fundadores técnicos, consultores sénior.",
+    forca: "Você une visão profunda com capacidade de executar — raro e poderoso.",
+    tensao: "Uma parte sua quer agir agora; outra quer analisar até ter certeza. Isso cansa por dentro.",
+    contexto: "Projetos complexos, consultoria, fundação de negócios, papéis que exigem estratégia e entrega.",
   },
   COLERICO_FLEUMATICO: {
-    forca: "Decisão + estabilidade. Liderança consistente.",
-    tensao: "Conflito entre urgência e paciência.",
-    contexto: "Gestão operacional, liderança em crise.",
+    forca: "Você decide com firmeza e sustenta no longo prazo — líder confiável em tempos difíceis.",
+    tensao: "A urgência de agir pode bater de frente com a vontade de manter tudo calmo e estável.",
+    contexto: "Gestão, operações, liderança em crise, papéis que pedem constância e direção.",
   },
   MELANCOLICO_SANGUINEO: {
-    forca: "Criatividade com profundidade. Comunicação rica.",
-    tensao: "Oscilação entre extroversão e recolhimento.",
-    contexto: "Marketing, ensino, criação de conteúdo.",
+    forca: "Você comunica com profundidade e charme — ideias ricas que chegam nas pessoas.",
+    tensao: "Alterna entre querer estar com todos e precisar se recolher — e nem sempre avisa.",
+    contexto: "Criação, ensino, marketing, qualquer trabalho que misture conteúdo e conexão humana.",
   },
   FLEUMATICO_SANGUINEO: {
-    forca: "Conexão humana profunda. Alta empatia.",
-    tensao: "Dificuldade de confronto e baixa proatividade.",
-    contexto: "RH, suporte, facilitação.",
+    forca: "Você acolhe, escuta e cria vínculo — as pessoas se sentem seguras com você.",
+    tensao: "Evita conflito e pode deixar problemas crescerem para não magoar ninguém.",
+    contexto: "Cuidado, facilitação, suporte, relações que pedem paciência e empatia.",
   },
   FLEUMATICO_MELANCOLICO: {
-    forca: "Análise + estabilidade. Qualidade consistente.",
-    tensao: "Paralisia por análise amplificada. Evitação.",
-    contexto: "Pesquisa, gestão de qualidade, auditoria.",
+    forca: "Você entrega qualidade com calma — trabalho bem feito, sem pressa desnecessária.",
+    tensao: "Pode pensar demais e adiar decisões ou mudanças que já são necessárias.",
+    contexto: "Pesquisa, planejamento, qualidade, trabalhos que exigem precisão e consistência.",
   },
+};
+
+/** Narrativa longa por combinação — foco em quem a pessoa é. */
+const COMBO_NARRATIVA: Record<string, string> = {
+  COLERICO_SANGUINEO:
+    "Você é uma pessoa de ação com calor humano. Não só resolve — você mobiliza. Enquanto outros ainda estão alinhando o plano, você já está fazendo e contagia confiança de que vai dar certo. As pessoas te seguem porque sentem energia, clareza e vontade de vencer. Na prática, você lidera pelo exemplo: fala direto, decide rápido e anima o ambiente. Seu temperamento mistura a força de quem executa com o dom de quem conecta — por isso você brilha quando precisa tomar a frente e trazer gente junto.",
+  COLERICO_MELANCOLICO:
+    "Você tem mente estratégica e mãos que executam. Pensa profundo, mas não fica só no pensamento — quando acredita no caminho, vai com tudo. Essa combinação é rara: muita gente analisa ou age; você consegue os dois, ainda que por dentro às vezes sinta um puxão entre «já vai» e «espera, deixa eu ver direito».",
+  COLERICO_FLEUMATICO:
+    "Você é firme e confiável. Decide, sustenta e não abandona no meio. As pessoas contam com você quando a situação exige alguém estável na liderança. Por dentro, pode haver tensão entre a pressa de resolver e a vontade de não quebrar a harmonia — mas quando equilibrado, você é uma referência.",
+  MELANCOLICO_SANGUINEO:
+    "Você é profundo e expressivo ao mesmo tempo. Tem ideias ricas e sabe comunicá-las de um jeito que envolve. Pode oscilar entre querer estar no centro e precisar de silêncio — mas quando está bem, sua presença educa, inspira e humaniza.",
+  FLEUMATICO_SANGUINEO:
+    "Você é acolhedor, empático e presente. As pessoas se abrem com você porque sentem que você ouve de verdade. Seu desafio é não absorver tudo dos outros nem evitar conversas difíceis só para manter a paz.",
+  FLEUMATICO_MELANCOLICO:
+    "Você é cuidadoso, consistente e profundo. Prefere fazer bem feito a fazer rápido. Sua calma esconde uma mente analítica que enxerga detalhes — e às vezes precisa de um empurrão gentil para agir antes da hora perfeita.",
 };
 
 function chaveCombo(a: TemperamentoCodigo, b: TemperamentoCodigo): string {
@@ -135,56 +151,36 @@ export function arquetipoFrasePorTemperamento(t: TemperamentoCodigo): {
 }
 
 function afinacoesDimensao(norm: Record<Dimensao, number>, prim: TemperamentoCodigo): string[] {
-  const extra: string[] = [];
-  if (norm.DOM > 0.75) {
-    extra.push(
-      "O teu score elevado em Dominância/Controle sugere forte orientação para liderança e necessidade de influenciar o rumo das coisas — integra isso no retrato das tuas decisões quotidianas.",
-    );
+  const tracos: string[] = [];
+
+  if (norm.ENG >= 0.65) tracos.push("Você funciona melhor quando há movimento — ficar parado demais te incomoda.");
+  else if (norm.ENG <= 0.35) tracos.push("Seu ritmo é mais calmo e constante — você prefere profundidade a correria.");
+
+  if (norm.SOC >= 0.65) tracos.push("Pessoas te energizam; você lê bem o clima e se move melhor em grupo.");
+  else if (norm.SOC <= 0.35) tracos.push("Você precisa de tempo sozinho para recarregar — não é antisocial, é seu jeito de se organizar.");
+
+  if (norm.DOM >= 0.65) tracos.push("Você naturalmente assume a liderança — mesmo quando ninguém pediu formalmente.");
+  else if (norm.DOM <= 0.35) tracos.push("Você prefere influenciar com presença e exemplo a impor controle.");
+
+  if (norm.EST <= 0.35) tracos.push("Sob pressão, você pode reagir antes de processar — vale respirar antes de responder.");
+  else if (norm.EST >= 0.65) tracos.push("Você mantém a calma quando outros entram em pânico — isso é um trunfo real.");
+
+  if (norm.PRO >= 0.65) tracos.push("Você pensa profundo e não se contenta com respostas rasas.");
+  else if (norm.PRO <= 0.35) tracos.push("Você prefere agir e ajustar no caminho a ficar analisando por horas.");
+
+  if (prim === "COLERICO" && norm.EST <= 0.35) {
+    tracos.push("Sua força de ação é grande — o cuidado emocional é o ponto a cultivar com intenção.");
   }
-  if (norm.EST < 0.35) {
-    extra.push(
-      "Estabilidade emocional mais baixa no perfil medido: há tensão interna entre impulso e regulação — útil antecipar isto em momentos de pressão.",
-    );
-  }
-  if (norm.PRO > 0.8) {
-    extra.push(
-      "Profundidade/análise muito alta: o teu padrão cognitivo tende a multiplicar camadas de revisão antes de fechar qualquer conclusão.",
-    );
+  if (prim === "SANGUINEO" && norm.PRO <= 0.35) {
+    tracos.push("Seu entusiasmo abre portas; fechar o que começou é o hábito que mais te transforma.");
   }
 
-  if (prim === "COLERICO") {
-    if (norm.DOM > 0.7)
-      extra.push("Ênfase adicional em controle e liderança no teu padrão Colérico medido.");
-    if (norm.ENG > 0.8)
-      extra.push("Urgência física e intolerância à inatividade marcam fortemente o perfil.");
-    if (norm.EST < 0.3)
-      extra.push("Combinação de força de ação com regulação emocional mais frágil: cuidado com impulsividade sob pressão.");
-  }
-  if (prim === "SANGUINEO") {
-    if (norm.SOC > 0.8)
-      extra.push("Alta sociabilidade medida: atenção à dependência de validação social e medo de rejeição.");
-    if (norm.PRO < 0.3)
-      extra.push("Profundidade analítica mais baixa: possível dificuldade com compromissos de longo prazo que exijam fase árida.");
-    if (norm.ENG > 0.7)
-      extra.push("Energia de grupo elevada: capacidade real de criar entusiasmo em contextos colectivos.");
-  }
-  if (prim === "MELANCOLICO") {
-    if (norm.PRO > 0.85)
-      extra.push("Perfeccionismo e análise muito intensos: risco de paralisia e isolamento intelectual.");
-    if (norm.EST > 0.6)
-      extra.push("Combinação rara de profundidade com estabilidade emocional medida.");
-    if (norm.ENG < 0.3)
-      extra.push("Energia/ritmo mais baixos: tensão entre capacidade analítica e arranque de execução.");
-  }
-  if (prim === "FLEUMATICO") {
-    if (norm.EST > 0.85)
-      extra.push("Estabilidade muito alta: atenção ao risco de confundir calma com evitação de mudança necessária.");
-    if (norm.DOM < 0.2)
-      extra.push("Dominância baixa: pode custar afirmar limites e necessidades próprias.");
-    if (norm.PRO > 0.6)
-      extra.push("Estabilidade aliada à análise: força de planeamento e consistência.");
-  }
-  return extra;
+  const vistos = new Set<string>();
+  return tracos.filter((t) => {
+    if (vistos.has(t)) return false;
+    vistos.add(t);
+    return true;
+  }).slice(0, 4);
 }
 
 export const NOME_TEMPERAMENTO: Record<TemperamentoCodigo, string> = {
@@ -195,17 +191,32 @@ export const NOME_TEMPERAMENTO: Record<TemperamentoCodigo, string> = {
 };
 
 const LABEL_DIMENSAO: Record<Dimensao, string> = {
-  ENG: "Energia e ritmo",
-  SOC: "Sociabilidade",
-  DOM: "Liderança e controlo",
-  EST: "Estabilidade emocional",
-  PRO: "Profundidade analítica",
+  ENG: "Energia no dia a dia",
+  SOC: "Vontade de estar com pessoas",
+  DOM: "Vontade de liderar",
+  EST: "Calma sob pressão",
+  PRO: "Profundidade de pensamento",
 };
 
 export function extrairPerguntaCrescimento(texto: string): string {
   const m = texto.match(/Pergunta prática:\s*«([^»]+)»/);
   return m?.[1] ?? "";
 }
+
+const SINTESE_DUPLO: Partial<Record<string, string>> = {
+  COLERICO_SANGUINEO:
+    "Você é o tipo de pessoa que faz acontecer e contagia confiança ao redor. Colérico e Sanguíneo juntos formam alguém que lidera com ação e calor humano — não espera o momento perfeito, cria o movimento.",
+  COLERICO_MELANCOLICO:
+    "Você une profundidade com execução. Pensa bem e age forte — uma combinação poderosa quando aprende a equilibrar análise e movimento.",
+  COLERICO_FLEUMATICO:
+    "Você é firme na decisão e estável na entrega. Lidera com consistência — as pessoas sabem que podem contar com você.",
+  MELANCOLICO_SANGUINEO:
+    "Você é profundo e expressivo. Tem conteúdo de sobra e sabe comunicar de um jeito que envolve.",
+  FLEUMATICO_SANGUINEO:
+    "Você acolhe e conecta. As pessoas se sentem vistas com você — seu dom está nas relações.",
+  FLEUMATICO_MELANCOLICO:
+    "Você é cuidadoso e profundo. Prefere qualidade e calma a barulho e pressa.",
+};
 
 export function montarSinteseHumana(opts: {
   tipo: TipoPerfil;
@@ -218,19 +229,39 @@ export function montarSinteseHumana(opts: {
   const { tipo, primario, secundario, temperamentos_percentuais, empateProximo, frase_sintese } = opts;
   const np = NOME_TEMPERAMENTO[primario];
   const ns = NOME_TEMPERAMENTO[secundario];
-  const pp = temperamentos_percentuais[primario];
-  const ps = temperamentos_percentuais[secundario];
 
   if (empateProximo) {
-    return `${frase_sintese} O teu perfil está numa zona de transição entre ${np} e ${ns} — usa o resultado como bússola, não como rótulo fechado.`;
+    return `${frase_sintese} Seu perfil equilibra ${np} e ${ns} quase na mesma medida — você alterna entre essas duas forças conforme o contexto.`;
   }
   if (tipo === "DUPLO") {
-    return `${frase_sintese} Combinações ${np} + ${ns} (${pp}% / ${ps}%) criam uma personalidade com duas forças visíveis: execução e relação, ação e expressão.`;
+    const chave = chaveCombo(primario, secundario);
+    return SINTESE_DUPLO[chave] ?? `${frase_sintese} Você combina ${np} e ${ns} — ação e expressão andam juntas no seu jeito de ser.`;
   }
   if (tipo === "DOMINANTE" || tipo === "ATIPICO") {
-    return `${frase_sintese} O ${np} lidera o teu mapa (${pp}%) — os outros temperamentos aparecem como matiz, não como concorrência.`;
+    return `${frase_sintese} Seu jeito de ser é claramente ${np} — os outros temperamentos aparecem como matiz, não como concorrência.`;
   }
-  return `${frase_sintese} És principalmente ${np} (${pp}%), com ${ns} (${ps}%) a colorir o dia a dia.`;
+  return `${frase_sintese} Você é principalmente ${np}, com ${ns} colorindo seu dia a dia.`;
+}
+
+function montarPortraitIdentidade(opts: {
+  primario: TemperamentoCodigo;
+  secundario: TemperamentoCodigo;
+  tipo: TipoPerfil;
+}): string {
+  const d = DADOS[opts.primario];
+  const np = NOME_TEMPERAMENTO[opts.primario];
+  const ns = NOME_TEMPERAMENTO[opts.secundario];
+
+  if (opts.tipo === "DUPLO") {
+    const narrativa = COMBO_NARRATIVA[chaveCombo(opts.primario, opts.secundario)];
+    if (narrativa) return narrativa;
+  }
+
+  return `${d.motorInterno} Como ${np}${opts.tipo === "DUPLO" ? ` com forte presença de ${ns}` : ""}, isso define bastante como você se move no mundo — o que te energiza, o que te frustra e o que as pessoas mais sentem em você.`;
+}
+
+function extrairPassoPratico(texto: string): string {
+  return texto.replace(/Pergunta prática:\s*«[^»]+»\.?\s*/g, "").trim();
 }
 
 export function montarDimensoesLegiveis(
@@ -253,6 +284,70 @@ export interface NarrativaTemperamentoV2 {
   perguntaCrescimento: string;
   insightsDimensao: string[];
   combo?: { forca: string; tensao: string; contexto: string };
+}
+
+export interface NarrativaTemperamentoV3 {
+  versaoNarrativa: "temperamento_v3";
+  sinteseHumana: string;
+  portraitIdentidade: string;
+  noDiaADia: string;
+  seuDom: string;
+  pontoCego: string;
+  comboNarrativa?: string;
+  tracosMarcantes: string[];
+  perguntaCrescimento: string;
+  passoPratico: string;
+  /** Mantido para compatibilidade; não exibir como foco principal na UI v3. */
+  dimensoesLegiveis: ReturnType<typeof montarDimensoesLegiveis>;
+  insightsDimensao: string[];
+  combo?: { forca: string; tensao: string; contexto: string };
+}
+
+export function montarNarrativaV3(opts: {
+  tipo: TipoPerfil;
+  primario: TemperamentoCodigo;
+  secundario: TemperamentoCodigo;
+  temperamentos_percentuais: Record<TemperamentoCodigo, number>;
+  norm: Record<Dimensao, number>;
+  empateProximo: boolean;
+  frase_sintese: string;
+}): NarrativaTemperamentoV3 {
+  const { tipo, primario, secundario, norm, empateProximo, frase_sintese, temperamentos_percentuais } = opts;
+  const d = DADOS[primario];
+  const tracos = afinacoesDimensao(norm, primario);
+
+  let combo: NarrativaTemperamentoV3["combo"];
+  let comboNarrativa: string | undefined;
+  if (tipo === "DUPLO") {
+    const c = COMBO[chaveCombo(primario, secundario)];
+    if (c) combo = { forca: c.forca, tensao: c.tensao, contexto: c.contexto };
+    comboNarrativa = COMBO_NARRATIVA[chaveCombo(primario, secundario)];
+  }
+
+  const sinteseHumana = montarSinteseHumana({
+    tipo,
+    primario,
+    secundario,
+    temperamentos_percentuais,
+    empateProximo,
+    frase_sintese,
+  });
+
+  return {
+    versaoNarrativa: "temperamento_v3",
+    sinteseHumana,
+    portraitIdentidade: montarPortraitIdentidade({ primario, secundario, tipo }),
+    noDiaADia: `${d.padraoPensamento} ${d.padraoAcao}`.trim(),
+    seuDom: d.pontoForte,
+    pontoCego: d.falhaEstrutural,
+    comboNarrativa,
+    tracosMarcantes: tracos,
+    perguntaCrescimento: extrairPerguntaCrescimento(d.caminhoCrescimento),
+    passoPratico: extrairPassoPratico(d.caminhoCrescimento),
+    dimensoesLegiveis: montarDimensoesLegiveis(norm, primario),
+    insightsDimensao: tracos,
+    combo,
+  };
 }
 
 export function montarNarrativaV2(opts: {

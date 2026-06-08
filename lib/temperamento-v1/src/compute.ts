@@ -4,10 +4,10 @@ import { TEMPERAMENTOS, DIMENSOES } from "./types";
 import { desvioPadrao, proporcaoRespostas3, calcularAlertas, calcularConfiabilidade } from "./qualidade";
 import {
   montarRelatorioInterno,
-  montarNarrativaV2,
+  montarNarrativaV3,
   arquetipoFrasePorTemperamento,
 } from "./interpretacao";
-import type { RelatorioInterno, NarrativaTemperamentoV2 } from "./interpretacao";
+import type { RelatorioInterno, NarrativaTemperamentoV3 } from "./interpretacao";
 import type { EntradaTemperamento } from "./schemas";
 
 const SOMA_PESOS_DIMENSAO = 3 * 1.2 + 5 * 1.0; // 8.6
@@ -146,12 +146,19 @@ export interface ResultadoTemperamentoComputado {
   };
   relatorio_vars: Record<string, string | number>;
   relatorioInterno: RelatorioInterno;
-  versaoNarrativa: "temperamento_v2";
+  versaoNarrativa: "temperamento_v3";
   sinteseHumana: string;
-  dimensoesLegiveis: NarrativaTemperamentoV2["dimensoesLegiveis"];
+  portraitIdentidade: string;
+  noDiaADia: string;
+  seuDom: string;
+  pontoCego: string;
+  comboNarrativa?: string;
+  tracosMarcantes: string[];
+  passoPratico: string;
+  dimensoesLegiveis: NarrativaTemperamentoV3["dimensoesLegiveis"];
   perguntaCrescimento: string;
   insightsDimensao: string[];
-  combo?: NarrativaTemperamentoV2["combo"];
+  combo?: NarrativaTemperamentoV3["combo"];
 }
 
 export function computarTemperamento(entrada: EntradaTemperamento): ResultadoTemperamentoComputado {
@@ -216,7 +223,7 @@ export function computarTemperamento(entrada: EntradaTemperamento): ResultadoTem
     frase_sintese,
   });
 
-  const narrativa = montarNarrativaV2({
+  const narrativa = montarNarrativaV3({
     tipo,
     primario,
     secundario,
@@ -248,6 +255,13 @@ export function computarTemperamento(entrada: EntradaTemperamento): ResultadoTem
     relatorioInterno,
     versaoNarrativa: narrativa.versaoNarrativa,
     sinteseHumana: narrativa.sinteseHumana,
+    portraitIdentidade: narrativa.portraitIdentidade,
+    noDiaADia: narrativa.noDiaADia,
+    seuDom: narrativa.seuDom,
+    pontoCego: narrativa.pontoCego,
+    comboNarrativa: narrativa.comboNarrativa,
+    tracosMarcantes: narrativa.tracosMarcantes,
+    passoPratico: narrativa.passoPratico,
     dimensoesLegiveis: narrativa.dimensoesLegiveis,
     perguntaCrescimento: narrativa.perguntaCrescimento,
     insightsDimensao: narrativa.insightsDimensao,

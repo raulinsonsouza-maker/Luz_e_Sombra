@@ -1,8 +1,6 @@
 import {
   extrairPerguntaCrescimento,
-  montarDimensoesLegiveis,
-  montarNarrativaV2,
-  montarSinteseHumana,
+  montarNarrativaV3,
   type RelatorioSecao,
 } from "@workspace/temperamento-v1";
 import type { Dimensao, TemperamentoCodigo, TipoPerfil } from "@workspace/temperamento-v1";
@@ -23,6 +21,13 @@ export type ResultadoTemperamentoUi = Record<string, unknown> & {
   confiabilidade?: number;
   empateProximo?: boolean;
   sinteseHumana?: string;
+  portraitIdentidade?: string;
+  noDiaADia?: string;
+  seuDom?: string;
+  pontoCego?: string;
+  comboNarrativa?: string;
+  tracosMarcantes?: string[];
+  passoPratico?: string;
   dimensoesLegiveis?: { dimensao: Dimensao; label: string; pct: number; insight?: string }[];
   perguntaCrescimento?: string;
   insightsDimensao?: string[];
@@ -40,40 +45,30 @@ function secao(
   return rel?.secoes?.find((s) => s.id === id);
 }
 
-function parseCombo(paragrafos: string[]): { forca: string; tensao: string; contexto: string } | undefined {
-  if (paragrafos.length === 0) return undefined;
-  const forca = paragrafos.find((p) => p.startsWith("Força central:"))?.replace("Força central:", "").trim();
-  const tensao = paragrafos.find((p) => p.startsWith("Tensão interna:"))?.replace("Tensão interna:", "").trim();
-  const contexto = paragrafos.find((p) => p.startsWith("Contextos ideais:"))?.replace("Contextos ideais:", "").trim();
-  if (!forca && !tensao && !contexto) return undefined;
+function normFromScores(raw: ResultadoTemperamentoUi): Record<Dimensao, number> | undefined {
+  if (!raw.scores?.dimensoes) return undefined;
   return {
-    forca: forca ?? "",
-    tensao: tensao ?? "",
-    contexto: contexto ?? "",
+    ENG: raw.scores.dimensoes.ENG?.normalizado ?? 0,
+    SOC: raw.scores.dimensoes.SOC?.normalizado ?? 0,
+    DOM: raw.scores.dimensoes.DOM?.normalizado ?? 0,
+    EST: raw.scores.dimensoes.EST?.normalizado ?? 0,
+    PRO: raw.scores.dimensoes.PRO?.normalizado ?? 0,
   };
 }
 
 export function enriquecerResultadoTemperamento(raw: ResultadoTemperamentoUi): ResultadoTemperamentoUi {
+  if (raw.versaoNarrativa === "temperamento_v3" && raw.portraitIdentidade) {
+    return raw;
+  }
+
   const perfil = raw.perfil;
   const primario = perfil?.primario;
   const secundario = perfil?.secundario;
   const pct = raw.scores?.temperamentos_percentuais;
-  const norm = raw.scores?.dimensoes
-    ? ({
-        ENG: raw.scores.dimensoes.ENG?.normalizado ?? 0,
-        SOC: raw.scores.dimensoes.SOC?.normalizado ?? 0,
-        DOM: raw.scores.dimensoes.DOM?.normalizado ?? 0,
-        EST: raw.scores.dimensoes.EST?.normalizado ?? 0,
-        PRO: raw.scores.dimensoes.PRO?.normalizado ?? 0,
-      } as Record<Dimensao, number>)
-    : undefined;
-
-  if (raw.versaoNarrativa === "temperamento_v2" && raw.sinteseHumana) {
-    return raw;
-  }
+  const norm = normFromScores(raw);
 
   if (primario && secundario && pct && norm && perfil?.tipo && perfil.frase_sintese) {
-    const narrativa = montarNarrativaV2({
+    const narrativa = montarNarrativaV3({
       tipo: perfil.tipo,
       primario,
       secundario,
@@ -86,28 +81,11 @@ export function enriquecerResultadoTemperamento(raw: ResultadoTemperamentoUi): R
   }
 
   const passo = secao(raw.relatorioInterno, "passo");
-  const combinacao = secao(raw.relatorioInterno, "combinacao");
   const passoTexto = passo?.paragrafos[0] ?? "";
 
   return {
     ...raw,
-    sinteseHumana:
-      raw.sinteseHumana ??
-      (perfil?.frase_sintese && primario && secundario && pct && perfil.tipo
-        ? montarSinteseHumana({
-            tipo: perfil.tipo,
-            primario,
-            secundario,
-            temperamentos_percentuais: pct,
-            empateProximo: Boolean(raw.empateProximo),
-            frase_sintese: perfil.frase_sintese,
-          })
-        : perfil?.frase_sintese),
-    dimensoesLegiveis:
-      raw.dimensoesLegiveis ??
-      (norm && primario ? montarDimensoesLegiveis(norm, primario) : undefined),
     perguntaCrescimento: raw.perguntaCrescimento ?? extrairPerguntaCrescimento(passoTexto),
-    combo: raw.combo ?? (combinacao ? parseCombo(combinacao.paragrafos) : undefined),
   };
 }
 

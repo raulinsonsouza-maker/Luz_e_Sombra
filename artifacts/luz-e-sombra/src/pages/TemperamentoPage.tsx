@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { ArrowRight, FlaskConical, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
@@ -71,6 +71,7 @@ function migrarQIndex(d: DraftPersist, flat: ItemPergunta[]): number {
 
 export default function TemperamentoPage() {
   const [, navigate] = useLocation();
+  const search = useSearch();
   const { status } = useAuth();
   const [fase, setFase] = useState<Fase>("intro");
   const [blocos, setBlocos] = useState<ItemPergunta[][]>([]);
@@ -160,6 +161,28 @@ export default function TemperamentoPage() {
   }, []);
 
   useEffect(() => {
+    if (status !== "authenticated") return;
+    const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+    if (params.get("ver") === "resultado") {
+      void carregarUltimoServidor();
+      return;
+    }
+    if (params.get("nova") === "1") {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        /* ignore */
+      }
+      const novo = gerarOrdemBlocosPerguntas();
+      setBlocos(novo);
+      setAnswers({});
+      setQIndex(0);
+      setStartedAt(Date.now());
+      setFase("perguntas");
+    }
+  }, [status, search, carregarUltimoServidor]);
+
+  useEffect(() => {
     if (fase !== "perguntas" || blocos.length === 0) return;
     const draft: DraftPersist = {
       blocosCodes: codesFromBlocos(blocos),
@@ -238,7 +261,7 @@ export default function TemperamentoPage() {
 
     return (
       <div className="min-h-screen pb-28 md:pb-12 px-4 pt-6" style={{ background: bg }}>
-        <MobileTopBar titulo="Temperamento" subtitulo="O teu mapa temperamental" />
+        <MobileTopBar titulo="Temperamento" subtitulo="Seu mapa temperamental" />
         <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
           <button
             type="button"
@@ -252,8 +275,8 @@ export default function TemperamentoPage() {
           <PageIntroHeader
             className="hidden md:block mb-2"
             eyebrow="Análise de temperamento"
-            titulo="O teu perfil"
-            subtitulo="Colérico, Sanguíneo, Melancólico e Fleumático"
+            titulo="Seu perfil"
+            subtitulo="Quem você é por dentro"
           />
 
           {(qf && qf !== "OK") || alertas.length > 0 ? (

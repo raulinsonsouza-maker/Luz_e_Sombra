@@ -52,14 +52,14 @@ export const DIMENSAO_LABEL: Record<string, string> = {
 export function labelTipoPerfil(tipo: TipoPerfil | string | undefined): string {
   switch (tipo) {
     case "DUPLO":
-      return "Perfil duplo";
+      return "Duas forças principais";
     case "DOMINANTE":
-      return "Perfil dominante";
+      return "Um temperamento claro";
     case "MISTO":
-      return "Perfil misto";
+      return "Perfil equilibrado";
     case "ATIPICO":
-      return "Perfil atípico";
+      return "Temperamento muito marcado";
     default:
-      return "Perfil temperamental";
+      return "Seu mapa";
   }
 }

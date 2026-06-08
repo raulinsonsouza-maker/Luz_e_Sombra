@@ -76,17 +76,17 @@ async function temAnalise(usuarioId: number, slug: string): Promise<boolean> {
   }
 }
 
-/** Curso sem aulas ou sem curso vinculado conta como minicurso concluído. */
+/** Curso vinculado com aulas: exige conclusão. Sem curso ou sem aulas: não bloqueia a jornada. */
 export async function minicursoCompletoParaUsuario(
   usuarioId: number,
   cursoVinculadoId: number | null,
 ): Promise<boolean> {
-  if (cursoVinculadoId == null) return true;
+  if (cursoVinculadoId == null) return false;
   const aulas = await db
     .select({ id: aulasTable.id })
     .from(aulasTable)
     .where(eq(aulasTable.cursoId, cursoVinculadoId));
-  if (aulas.length === 0) return true;
+  if (aulas.length === 0) return false;
   const ids = aulas.map((a) => a.id);
   const prog = await db
     .select({ aulaId: progressoCursosTable.aulaId })
@@ -97,12 +97,22 @@ export async function minicursoCompletoParaUsuario(
   return prog.length >= ids.length;
 }
 
+export function minicursoEstaDisponivel(
+  cursoVinculadoId: number | null,
+  totalAulas: number,
+): boolean {
+  return cursoVinculadoId != null && totalAulas > 0;
+}
+
 export async function moduloInicianteCompleto(
   usuarioId: number,
   slug: string,
   cursoVinculadoId: number | null,
+  totalAulas = 0,
 ): Promise<boolean> {
   const analise = await temAnalise(usuarioId, slug);
+  const miniDisponivel = minicursoEstaDisponivel(cursoVinculadoId, totalAulas);
+  if (!miniDisponivel) return analise;
   const mini = await minicursoCompletoParaUsuario(usuarioId, cursoVinculadoId);
   return analise && mini;
 }
@@ -145,8 +155,11 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
           );
         concluidas = prog.length;
       }
-      const miniOk = await minicursoCompletoParaUsuario(usuarioId, c.cursoVinculadoId);
-      const completo = analiseOk && miniOk;
+      const miniDisponivel = minicursoEstaDisponivel(c.cursoVinculadoId, totalAulas);
+      const miniOk = miniDisponivel
+        ? await minicursoCompletoParaUsuario(usuarioId, c.cursoVinculadoId)
+        : false;
+      const completo = analiseOk && (!miniDisponivel || miniOk);
 
       let status: "done" | "active" | "locked";
       if (completo) {
@@ -170,6 +183,7 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
         hrefAnalise: hrefAnalise(c.slug),
         hubHref: `/jornada/${c.slug}`,
         analiseConcluida: analiseOk,
+        minicursoDisponivel: miniDisponivel,
         minicursoConcluido: miniOk,
         minicursoProgresso:
           c.cursoVinculadoId != null && totalAulas > 0

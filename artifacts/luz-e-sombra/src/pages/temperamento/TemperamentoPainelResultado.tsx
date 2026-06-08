@@ -2,18 +2,16 @@ import { useMemo, useState, type ReactNode } from "react";
 import {
   ChevronDown,
   ChevronUp,
-  AlertTriangle,
+  Heart,
+  Sparkles,
   Target,
   TrendingUp,
-  Zap,
+  AlertCircle,
+  User,
 } from "lucide-react";
 import type { TemperamentoCodigo } from "@workspace/temperamento-v1";
 import { labelTipoPerfil, TEMPERAMENTO_VISUAL } from "./temperamentoConfig";
-import {
-  enriquecerResultadoTemperamento,
-  textoSecao,
-  type ResultadoTemperamentoUi,
-} from "./enriquecerResultado";
+import { enriquecerResultadoTemperamento, type ResultadoTemperamentoUi } from "./enriquecerResultado";
 
 const GOLD = "#c8a56b";
 
@@ -66,50 +64,6 @@ function Capitulo({
   );
 }
 
-function BarrasTemperamentos({
-  pct,
-  primario,
-  secundario,
-}: {
-  pct: Record<string, number>;
-  primario: TemperamentoCodigo;
-  secundario: TemperamentoCodigo;
-}) {
-  const ordem = (Object.entries(pct) as [TemperamentoCodigo, number][])
-    .sort((a, b) => b[1] - a[1])
-    .filter(([, v]) => v > 0);
-
-  return (
-    <ul className="space-y-3">
-      {ordem.map(([cod, val]) => {
-        const vis = TEMPERAMENTO_VISUAL[cod];
-        const destaque = cod === primario || cod === secundario;
-        return (
-          <li key={cod}>
-            <div className="flex justify-between text-xs mb-1">
-              <span style={{ color: destaque ? vis.cor : "rgba(247,242,236,0.45)" }}>{vis.nome}</span>
-              <span className="tabular-nums" style={{ color: destaque ? vis.cor : "rgba(247,242,236,0.4)" }}>
-                {val}%
-              </span>
-            </div>
-            <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${val}%`,
-                  background: destaque
-                    ? `linear-gradient(90deg, ${vis.cor}88, ${vis.cor})`
-                    : "rgba(200,165,107,0.28)",
-                }}
-              />
-            </div>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
 export default function TemperamentoPainelResultado({
   resultado: raw,
 }: {
@@ -124,18 +78,12 @@ export default function TemperamentoPainelResultado({
   const visS = secundario ? TEMPERAMENTO_VISUAL[secundario] : null;
   const IconP = visP?.icon;
 
-  const motor = textoSecao(r, "motor");
-  const pensa = textoSecao(r, "pensa");
-  const acao = textoSecao(r, "acao");
-  const forca = textoSecao(r, "forca");
-  const sabotagem = textoSecao(r, "sabotagem");
-  const passo = textoSecao(r, "passo");
-  const conf = typeof r.confiabilidade === "number" ? r.confiabilidade : null;
+  const [detalhesAbertos, setDetalhesAbertos] = useState(false);
 
   return (
     <div className="space-y-5">
-      {/* Capítulo 1 — Hero */}
-      <Capitulo numero={1} titulo="O teu temperamento" subtitulo="Arquétipo e distribuição">
+      {/* Capítulo 1 — Quem você é */}
+      <Capitulo numero={1} titulo="Quem você é" subtitulo="Sua essência temperamental">
         {visP && IconP && perfil && (
           <div
             className="rounded-2xl p-6 relative overflow-hidden"
@@ -148,148 +96,116 @@ export default function TemperamentoPainelResultado({
               className="absolute -top-10 -right-10 w-36 h-36 rounded-full opacity-20 blur-2xl pointer-events-none"
               style={{ background: visP.cor }}
             />
-            <div className="flex flex-wrap items-start justify-between gap-4 mb-4 relative">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center"
-                  style={{ background: visP.corBg, border: `1px solid ${visP.corBorder}` }}
-                >
-                  <IconP className="w-6 h-6" style={{ color: visP.cor }} />
-                </div>
-                <div>
-                  <p className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
-                    {labelTipoPerfil(perfil.tipo)}
-                  </p>
-                  <h1 className="font-tan-mon-cheri text-xl md:text-2xl" style={{ color: "#f7f2ec" }}>
-                    {perfil.arquetipo}
-                  </h1>
-                </div>
+            <div className="flex items-start gap-3 mb-4 relative">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: visP.corBg, border: `1px solid ${visP.corBorder}` }}
+              >
+                <IconP className="w-6 h-6" style={{ color: visP.cor }} />
               </div>
-              {conf != null && (
-                <span
-                  className="text-xs px-3 py-1 rounded-full tabular-nums"
-                  style={{
-                    background: conf >= 80 ? "rgba(109,185,109,0.12)" : "rgba(224,123,57,0.1)",
-                    color: conf >= 80 ? "rgba(109,185,109,0.85)" : "rgba(224,123,57,0.85)",
-                    border: conf >= 80 ? "1px solid rgba(109,185,109,0.25)" : "1px solid rgba(224,123,57,0.25)",
-                  }}
-                >
-                  {conf}% confiança
-                </span>
-              )}
+              <div>
+                <p className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
+                  {labelTipoPerfil(perfil.tipo)}
+                </p>
+                <h1 className="font-tan-mon-cheri text-xl md:text-2xl" style={{ color: "#f7f2ec" }}>
+                  {perfil.arquetipo}
+                </h1>
+                {primario && secundario && visS && pct && primario !== secundario && (
+                  <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.45)" }}>
+                    {visP.nome} + {visS.nome}
+                  </p>
+                )}
+              </div>
             </div>
 
             {perfil.frase_sintese && (
-              <p className="text-base italic font-tan-mon-cheri mb-4 relative" style={{ color: "rgba(247,242,236,0.82)" }}>
+              <p className="text-base italic font-tan-mon-cheri mb-4 relative" style={{ color: "rgba(247,242,236,0.85)" }}>
                 «{perfil.frase_sintese}»
               </p>
             )}
 
-            {primario && secundario && visS && pct && (
-              <div className="flex flex-wrap gap-2 mb-4 relative">
-                <span
-                  className="text-xs px-3 py-1.5 rounded-full font-medium"
-                  style={{ color: visP.cor, background: visP.corBg, border: `1px solid ${visP.corBorder}` }}
-                >
-                  {visP.nome} · {pct[primario]}%
-                </span>
-                {primario !== secundario && (
-                  <span
-                    className="text-xs px-3 py-1.5 rounded-full font-medium"
-                    style={{ color: visS.cor, background: visS.corBg, border: `1px solid ${visS.corBorder}` }}
-                  >
-                    {visS.nome} · {pct[secundario]}%
-                  </span>
-                )}
-              </div>
+            {r.sinteseHumana && (
+              <p className="text-sm leading-relaxed mb-4 relative font-medium" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.85 }}>
+                {r.sinteseHumana}
+              </p>
             )}
 
-            {r.sinteseHumana && (
-              <p className="text-sm leading-relaxed relative" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
-                {r.sinteseHumana}
+            {r.portraitIdentidade && (
+              <p className="text-sm leading-relaxed relative" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.9 }}>
+                {r.portraitIdentidade}
               </p>
             )}
           </div>
         )}
 
-        {pct && primario && secundario && (
-          <BarrasTemperamentos pct={pct} primario={primario} secundario={secundario} />
+        {(r.tracosMarcantes?.length ?? 0) > 0 && (
+          <div>
+            <p className="text-[10px] tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.45)" }}>
+              O que mais te define
+            </p>
+            <ul className="space-y-2">
+              {r.tracosMarcantes!.map((t) => (
+                <li
+                  key={t}
+                  className="flex gap-2 text-sm leading-relaxed rounded-xl px-4 py-3"
+                  style={{ background: "rgba(255,255,255,0.03)", color: "rgba(247,242,236,0.65)" }}
+                >
+                  <Sparkles className="w-4 h-4 shrink-0 mt-0.5" style={{ color: visP?.cor ?? GOLD }} />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         {r.empateProximo && (
           <p className="text-xs px-3 py-2 rounded-lg" style={{ color: "rgba(155,143,222,0.85)", background: "rgba(155,143,222,0.08)" }}>
-            Os dois temperamentos de topo estão muito próximos — trata isto como zona de transição, não rótulo fixo.
+            Seus dois temperamentos principais estão bem próximos — você alterna entre essas forças conforme a situação.
           </p>
         )}
       </Capitulo>
 
-      {/* Capítulo 2 — Motor */}
-      {motor && (
-        <Capitulo numero={2} titulo="O que te move por dentro" defaultOpen>
+      {/* Capítulo 2 — No dia a dia */}
+      {r.noDiaADia && (
+        <Capitulo numero={2} titulo="Como você funciona no dia a dia" subtitulo="Pensamento e ação">
           <div className="flex gap-3">
-            <Zap className="w-5 h-5 shrink-0 mt-0.5" style={{ color: visP?.cor ?? GOLD }} />
-            <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.7)", lineHeight: 1.85 }}>
-              {motor}
+            <User className="w-5 h-5 shrink-0 mt-0.5" style={{ color: visP?.cor ?? GOLD }} />
+            <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.9 }}>
+              {r.noDiaADia}
             </p>
           </div>
         </Capitulo>
       )}
 
-      {/* Capítulo 3 — Mente e ação */}
-      {(pensa || acao) && (
-        <Capitulo numero={3} titulo="Como pensas e como ages" defaultOpen={false}>
-          {pensa && (
-            <div>
-              <p className="text-[10px] tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.45)" }}>
-                Padrão de pensamento
-              </p>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)", lineHeight: 1.85 }}>
-                {pensa}
-              </p>
-            </div>
-          )}
-          {acao && (
-            <div>
-              <p className="text-[10px] tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.45)" }}>
-                Padrão de ação
-              </p>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)", lineHeight: 1.85 }}>
-                {acao}
-              </p>
-            </div>
-          )}
-        </Capitulo>
-      )}
-
-      {/* Capítulo 4 — Força e sabotagem */}
-      {(forca || sabotagem) && (
-        <Capitulo numero={4} titulo="Força e padrão de sabotagem" defaultOpen>
+      {/* Capítulo 3 — Dom e ponto cego */}
+      {(r.seuDom || r.pontoCego) && (
+        <Capitulo numero={3} titulo="Seu dom e seu ponto cego" defaultOpen>
           <div className="grid md:grid-cols-2 gap-3">
-            {forca && (
+            {r.seuDom && (
               <div
                 className="rounded-xl p-4"
                 style={{ background: "rgba(109,185,109,0.06)", border: "1px solid rgba(109,185,109,0.2)" }}
               >
                 <p className="text-[10px] tracking-widest uppercase mb-2 flex items-center gap-1.5" style={{ color: "rgba(109,185,109,0.65)" }}>
                   <TrendingUp className="w-3.5 h-3.5" />
-                  Força real
+                  Seu dom
                 </p>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
-                  {forca}
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
+                  {r.seuDom}
                 </p>
               </div>
             )}
-            {sabotagem && (
+            {r.pontoCego && (
               <div
                 className="rounded-xl p-4"
                 style={{ background: "rgba(224,123,57,0.06)", border: "1px solid rgba(224,123,57,0.2)" }}
               >
                 <p className="text-[10px] tracking-widest uppercase mb-2 flex items-center gap-1.5" style={{ color: "rgba(224,123,57,0.65)" }}>
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  Onde te sabotas
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  Onde você pode tropeçar
                 </p>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
-                  {sabotagem}
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
+                  {r.pontoCego}
                 </p>
               </div>
             )}
@@ -297,73 +213,48 @@ export default function TemperamentoPainelResultado({
         </Capitulo>
       )}
 
-      {/* Capítulo 5 — Combo duplo */}
-      {r.combo && (
-        <Capitulo numero={5} titulo="A dupla dinâmica" subtitulo={`${visP?.nome} + ${visS?.nome}`} defaultOpen>
+      {/* Capítulo 4 — Combinação (duplo) */}
+      {r.combo && (r.comboNarrativa || r.combo.forca) && (
+        <Capitulo
+          numero={4}
+          titulo="Sua combinação única"
+          subtitulo={visP && visS ? `${visP.nome} + ${visS.nome}` : undefined}
+          defaultOpen
+        >
+          {r.comboNarrativa && (
+            <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.9 }}>
+              {r.comboNarrativa}
+            </p>
+          )}
           <div className="space-y-3">
             <div className="rounded-xl p-4" style={{ background: "rgba(109,185,109,0.05)", border: "1px solid rgba(109,185,109,0.15)" }}>
               <p className="text-[10px] uppercase tracking-wide mb-1" style={{ color: "rgba(109,185,109,0.6)" }}>
-                Força central
+                O que isso te dá de força
               </p>
-              <p className="text-sm" style={{ color: "rgba(247,242,236,0.68)" }}>{r.combo.forca}</p>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.68)" }}>{r.combo.forca}</p>
             </div>
             <div className="rounded-xl p-4" style={{ background: "rgba(224,123,57,0.05)", border: "1px solid rgba(224,123,57,0.15)" }}>
               <p className="text-[10px] uppercase tracking-wide mb-1" style={{ color: "rgba(224,123,57,0.6)" }}>
-                Tensão interna
+                O que pede atenção
               </p>
-              <p className="text-sm" style={{ color: "rgba(247,242,236,0.68)" }}>{r.combo.tensao}</p>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.68)" }}>{r.combo.tensao}</p>
             </div>
             <div className="rounded-xl p-4" style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.12)" }}>
               <p className="text-[10px] uppercase tracking-wide mb-1" style={{ color: "rgba(200,165,107,0.55)" }}>
-                Onde brilhas
+                Onde você brilha
               </p>
-              <p className="text-sm" style={{ color: "rgba(247,242,236,0.68)" }}>{r.combo.contexto}</p>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.68)" }}>{r.combo.contexto}</p>
             </div>
           </div>
         </Capitulo>
       )}
 
-      {/* Capítulo 6 — Eixos */}
-      {r.dimensoesLegiveis && r.dimensoesLegiveis.length > 0 && (
-        <Capitulo numero={r.combo ? 6 : 5} titulo="Os teus cinco eixos" defaultOpen={false}>
-          <ul className="space-y-3">
-            {r.dimensoesLegiveis.map((d) => (
-              <li key={d.dimensao}>
-                <div className="flex justify-between text-xs mb-1">
-                  <span style={{ color: "rgba(247,242,236,0.55)" }}>{d.label}</span>
-                  <span className="tabular-nums" style={{ color: GOLD }}>{d.pct}%</span>
-                </div>
-                <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: "rgba(255,255,255,0.06)" }}>
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${d.pct}%`,
-                      background: d.pct >= 70 ? `linear-gradient(90deg, ${GOLD}66, ${GOLD})` : "rgba(200,165,107,0.35)",
-                    }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-          {(r.insightsDimensao?.length ?? 0) > 0 && (
-            <ul className="mt-3 space-y-2">
-              {r.insightsDimensao!.map((ins) => (
-                <li key={ins} className="text-xs leading-relaxed flex gap-2" style={{ color: "rgba(247,242,236,0.48)" }}>
-                  <span style={{ color: GOLD }}>·</span>
-                  {ins}
-                </li>
-              ))}
-            </ul>
-          )}
-        </Capitulo>
-      )}
-
-      {/* Capítulo 7 — Próximo passo */}
-      {(passo || r.perguntaCrescimento) && (
-        <Capitulo numero={r.combo ? 7 : 6} titulo="Próximo passo" defaultOpen>
-          {passo && (
-            <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)", lineHeight: 1.85 }}>
-              {passo.replace(/Pergunta prática:\s*«[^»]+»\.?\s*/g, "").trim()}
+      {/* Capítulo 5 — Crescimento */}
+      {(r.passoPratico || r.perguntaCrescimento) && (
+        <Capitulo numero={r.combo ? 5 : 4} titulo="Para crescer a partir daqui" defaultOpen>
+          {r.passoPratico && (
+            <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
+              {r.passoPratico}
             </p>
           )}
           {r.perguntaCrescimento && (
@@ -376,14 +267,62 @@ export default function TemperamentoPainelResultado({
             >
               <Target className="w-4 h-4" style={{ color: GOLD }} />
               <p className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
-                Pergunta de crescimento
+                Pergunta para refletir
               </p>
-              <p className="text-sm italic font-tan-mon-cheri" style={{ color: "rgba(247,242,236,0.78)" }}>
+              <p className="text-sm italic font-tan-mon-cheri" style={{ color: "rgba(247,242,236,0.82)" }}>
                 {r.perguntaCrescimento}
               </p>
             </div>
           )}
         </Capitulo>
+      )}
+
+      {/* Detalhes opcionais — percentuais */}
+      {pct && primario && (
+        <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.1)" }}>
+          <button
+            type="button"
+            onClick={() => setDetalhesAbertos((v) => !v)}
+            className="w-full flex items-center justify-between px-5 py-3 text-left text-xs"
+            style={{ background: "rgba(30,24,18,0.4)", color: "rgba(247,242,236,0.4)" }}
+          >
+            <span>Ver distribuição detalhada dos temperamentos</span>
+            {detalhesAbertos ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+          {detalhesAbertos && (
+            <div className="px-5 py-4 space-y-3" style={{ borderTop: "1px solid rgba(200,165,107,0.08)" }}>
+              {(Object.entries(pct) as [TemperamentoCodigo, number][])
+                .sort((a, b) => b[1] - a[1])
+                .map(([cod, val]) => {
+                  const vis = TEMPERAMENTO_VISUAL[cod];
+                  const destaque = cod === primario || cod === secundario;
+                  return (
+                    <div key={cod}>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span style={{ color: destaque ? vis.cor : "rgba(247,242,236,0.4)" }}>{vis.nome}</span>
+                        <span className="tabular-nums" style={{ color: destaque ? vis.cor : "rgba(247,242,236,0.35)" }}>
+                          {val}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${val}%`,
+                            background: destaque ? vis.cor : "rgba(200,165,107,0.25)",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              <p className="text-[10px] pt-2 flex items-center gap-1.5" style={{ color: "rgba(247,242,236,0.3)" }}>
+                <Heart className="w-3 h-3" />
+                Os percentuais apoiam a leitura — o foco está em quem você é, não nos números.
+              </p>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

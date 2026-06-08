@@ -2,11 +2,26 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useLocation, useParams } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { ChevronLeft, Lock, Loader2, CheckCircle2, Sparkles } from "lucide-react";
+import {
+  ChevronLeft,
+  Lock,
+  Loader2,
+  CheckCircle2,
+  Sparkles,
+  Plus,
+  Eye,
+  PlayCircle,
+  Clock,
+} from "lucide-react";
 import { LABEL_LINGUAGEM, type LinguagemAmor } from "@workspace/cinco-linguagens-amor";
 import MobileTopBar from "@/components/MobileTopBar";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 import { MinicursoEmbedido } from "@/components/MinicursoEmbedido";
+import {
+  JORNADA_HUB_COPY,
+  hrefNovaAnalise,
+  hrefVerResultado,
+} from "@/lib/jornadaHubConfig";
 
 interface ModuloApi {
   slug: string;
@@ -18,9 +33,138 @@ interface ModuloApi {
   hrefAnalise: string;
   hubHref: string;
   analiseConcluida: boolean;
+  minicursoDisponivel?: boolean;
   minicursoConcluido: boolean;
   minicursoProgresso: { total: number; concluidas: number } | null;
   status: "done" | "active" | "locked";
+}
+
+interface PreviewAnalise {
+  titulo: string;
+  linha?: string;
+  badge?: string;
+  chips?: { label: string; valor: string }[];
+}
+
+const NOME_ESTRUTURA: Record<string, string> = {
+  esquizoide: "Esquizóide",
+  oral: "Oral",
+  psicopata: "Estratégico",
+  masoquista: "Masoquista",
+  rigido: "Sustentador",
+};
+
+async function carregarPreviewAnalise(slug: string): Promise<PreviewAnalise | null> {
+  try {
+    switch (slug) {
+      case "temperamento": {
+        const res = await apiFetch("/temperamento/ultimo");
+        if (!res.ok) return null;
+        const row = await res.json();
+        const p = row?.resultado?.perfil;
+        if (!p?.arquetipo) return null;
+        return {
+          titulo: p.arquetipo as string,
+          linha: p.frase_sintese as string | undefined,
+          badge: p.primario ? String(p.primario).replace("_", " ") : undefined,
+        };
+      }
+      case "traco": {
+        const res = await apiFetch("/traco/analise");
+        if (!res.ok) return null;
+        const row = await res.json();
+        const r = row?.resultado;
+        if (!r?.estruturaPrincipal) return null;
+        const nome = NOME_ESTRUTURA[r.estruturaPrincipal] ?? r.estruturaPrincipal;
+        return {
+          titulo: r.dominanteApelido ?? nome,
+          linha: r.fraseIdentidade ?? r.mensagemTerapeutica,
+          badge: `${nome} · ${r.estruturas?.[r.estruturaPrincipal] ?? ""}%`.replace(" · %", ""),
+        };
+      }
+      case "linguagens-amor": {
+        const res = await apiFetch("/linguagens-amor/ultimo");
+        if (!res.ok) return null;
+        const row = await res.json();
+        const resultado = row?.resultado as {
+          receber?: { principal?: LinguagemAmor };
+          expressar?: { principal?: LinguagemAmor };
+          principal?: LinguagemAmor;
+          combinacao?: string;
+          sinteseHumana?: string;
+          desalinhamento?: { ativo?: boolean };
+        } | undefined;
+        const receber = resultado?.receber?.principal ?? resultado?.principal;
+        const expressar = resultado?.expressar?.principal ?? receber;
+        if (!receber) return null;
+        return {
+          titulo: "Seu mapa afetivo",
+          linha:
+            resultado?.combinacao?.slice(0, 150) ??
+            resultado?.sinteseHumana?.slice(0, 150),
+          badge: resultado?.desalinhamento?.ativo ? "Receber e expressar diferem" : undefined,
+          chips: [
+            { label: "Você recebe amor por", valor: LABEL_LINGUAGEM[receber] ?? receber },
+            ...(expressar
+              ? [{ label: "Você expressa amor por", valor: LABEL_LINGUAGEM[expressar] ?? expressar }]
+              : []),
+          ],
+        };
+      }
+      case "roda": {
+        const res = await apiFetch("/avaliacoes");
+        if (!res.ok) return null;
+        const lista = await res.json();
+        if (!Array.isArray(lista) || lista.length === 0) return null;
+        const a = lista[0] as Record<string, number>;
+        const vals = Object.values(a).filter((v) => typeof v === "number") as number[];
+        const media = vals.length ? Math.round(vals.reduce((s, v) => s + v, 0) / vals.length) : 0;
+        return {
+          titulo: "Roda da Vida",
+          linha: `Média geral ${media}/10 nas 12 áreas da sua última avaliação.`,
+          badge: "12 dimensões",
+        };
+      }
+      default:
+        return null;
+    }
+  } catch {
+    return null;
+  }
+}
+
+function PassoBadge({
+  numero,
+  titulo,
+  concluido,
+  bloqueado,
+}: {
+  numero: number;
+  titulo: string;
+  concluido?: boolean;
+  bloqueado?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <span
+        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+        style={{
+          background: concluido
+            ? "rgba(93,185,122,0.15)"
+            : bloqueado
+              ? "rgba(255,255,255,0.04)"
+              : "rgba(200,165,107,0.15)",
+          color: concluido ? "#5db97a" : bloqueado ? "rgba(247,242,236,0.25)" : "#c8a56b",
+          border: `1px solid ${concluido ? "rgba(93,185,122,0.3)" : bloqueado ? "rgba(255,255,255,0.06)" : "rgba(200,165,107,0.25)"}`,
+        }}
+      >
+        {concluido ? <CheckCircle2 className="w-4 h-4" /> : bloqueado ? <Lock className="w-3.5 h-3.5" /> : numero}
+      </span>
+      <h2 className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.65)" }}>
+        {titulo}
+      </h2>
+    </div>
+  );
 }
 
 export default function JornadaHubPage() {
@@ -29,7 +173,8 @@ export default function JornadaHubPage() {
   const { status } = useAuth();
   const [lista, setLista] = useState<ModuloApi[]>([]);
   const [loading, setLoading] = useState(true);
-  const [previewLinguagens, setPreviewLinguagens] = useState<string | null>(null);
+  const [preview, setPreview] = useState<PreviewAnalise | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const buscar = useCallback(async () => {
     setLoading(true);
@@ -50,21 +195,20 @@ export default function JornadaHubPage() {
     void buscar();
   }, [buscar]);
 
+  const modulo = useMemo(() => lista.find((m) => m.slug === slug), [lista, slug]);
+  const copy = slug ? JORNADA_HUB_COPY[slug] : undefined;
+
   useEffect(() => {
-    if (slug !== "linguagens-amor") {
-      setPreviewLinguagens(null);
+    if (!modulo?.analiseConcluida || !slug) {
+      setPreview(null);
       return;
     }
-    apiFetch("/linguagens-amor/ultimo")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((row: { resultado?: { principal?: string; receber?: { principal?: string } } } | null) => {
-        const lang = (row?.resultado?.receber?.principal ?? row?.resultado?.principal) as LinguagemAmor | undefined;
-        setPreviewLinguagens(lang ? LABEL_LINGUAGEM[lang] ?? lang : null);
-      })
-      .catch(() => setPreviewLinguagens(null));
-  }, [slug]);
-
-  const modulo = useMemo(() => lista.find((m) => m.slug === slug), [lista, slug]);
+    setPreviewLoading(true);
+    void carregarPreviewAnalise(slug).then((p) => {
+      setPreview(p);
+      setPreviewLoading(false);
+    });
+  }, [slug, modulo?.analiseConcluida]);
 
   const proximoHub = useMemo(() => {
     if (!modulo || lista.length === 0) return null;
@@ -74,8 +218,15 @@ export default function JornadaHubPage() {
     return ordenados[i + 1].hubHref;
   }, [lista, modulo]);
 
-  const moduloCompleto =
-    modulo && modulo.analiseConcluida && modulo.minicursoConcluido;
+  const minicursoDisponivel =
+    modulo?.minicursoDisponivel ??
+    (modulo?.cursoVinculadoId != null && (modulo?.minicursoProgresso?.total ?? 0) > 0);
+
+  const moduloTotalmenteConcluido =
+    modulo?.analiseConcluida && minicursoDisponivel && modulo.minicursoConcluido;
+
+  const podeSeguirJornada =
+    modulo?.analiseConcluida && (!minicursoDisponivel || modulo.minicursoConcluido);
 
   const embedIntro = modulo?.videoIntroUrl ? getVideoEmbedUrl(modulo.videoIntroUrl) : null;
 
@@ -95,12 +246,7 @@ export default function JornadaHubPage() {
           <p className="text-sm mb-4" style={{ color: "rgba(247,242,236,0.5)" }}>
             Módulo não encontrado.
           </p>
-          <button
-            type="button"
-            onClick={() => navigate("/jornada")}
-            className="text-sm underline"
-            style={{ color: "#c8a56b" }}
-          >
+          <button type="button" onClick={() => navigate("/jornada")} className="text-sm underline" style={{ color: "#c8a56b" }}>
             Voltar à jornada
           </button>
         </div>
@@ -131,7 +277,7 @@ export default function JornadaHubPage() {
               Módulo bloqueado
             </h1>
             <p className="text-sm" style={{ color: "rgba(247,242,236,0.45)" }}>
-              Complete o passo anterior na jornada (análise + minicurso) para desbloquear este módulo.
+              Complete o módulo anterior na jornada para desbloquear este passo.
             </p>
           </div>
         </div>
@@ -154,24 +300,19 @@ export default function JornadaHubPage() {
         </button>
 
         <div className="mb-8">
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-2 hidden md:block" style={{ color: "rgba(200,165,107,0.5)" }}>
-            Módulo
-          </p>
           <h1 className="font-tan-mon-cheri text-2xl mb-2 hidden md:block" style={{ color: "#f7f2ec" }}>
             {modulo.tituloIntro}
           </h1>
-          <p className="text-sm leading-relaxed mt-1 md:mt-0" style={{ color: "rgba(247,242,236,0.5)" }}>
-            {modulo.descricaoIntro}
+          <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
+            {copy?.introFallback ?? modulo.descricaoIntro}
           </p>
         </div>
 
-        {/* 1 — Vídeo intro */}
+        {/* 1 — Introdução */}
         <section className="mb-8">
-          <h2 className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
-            1 · Introdução
-          </h2>
+          <PassoBadge numero={1} titulo="Introdução" concluido={!!embedIntro} />
           {embedIntro ? (
-            <div className="aspect-video w-full rounded-xl overflow-hidden bg-black mb-3">
+            <div className="aspect-video w-full rounded-xl overflow-hidden bg-black">
               <iframe
                 src={embedIntro}
                 className="w-full h-full"
@@ -182,89 +323,203 @@ export default function JornadaHubPage() {
             </div>
           ) : (
             <div
-              className="rounded-xl p-6 text-center text-sm"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.1)", color: "rgba(247,242,236,0.35)" }}
+              className="rounded-xl p-5 flex gap-3 items-start"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.1)" }}
             >
-              Vídeo de introdução será configurado pelo administrador.
+              <PlayCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "rgba(200,165,107,0.4)" }} />
+              <div>
+                <p className="text-sm font-medium mb-1" style={{ color: "rgba(247,242,236,0.65)" }}>
+                  Vídeo em breve
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.38)" }}>
+                  {copy?.introFallback ??
+                    "Enquanto o vídeo não é publicado, você já pode fazer a análise abaixo e ver seu resultado."}
+                </p>
+              </div>
             </div>
           )}
         </section>
 
         {/* 2 — Análise */}
         <section className="mb-8">
-          <h2 className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
-            2 · Análise
-          </h2>
+          <PassoBadge numero={2} titulo="Sua análise" concluido={modulo.analiseConcluida} />
           <div
             className="rounded-2xl p-5"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.14)" }}
+            style={{
+              background: modulo.analiseConcluida
+                ? "linear-gradient(135deg, rgba(93,185,122,0.06) 0%, rgba(30,24,18,0.5) 100%)"
+                : "rgba(255,255,255,0.04)",
+              border: `1px solid ${modulo.analiseConcluida ? "rgba(93,185,122,0.2)" : "rgba(200,165,107,0.14)"}`,
+            }}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold text-sm mb-1" style={{ color: "#f7f2ec" }}>
-                  Questionário / análise do módulo
+            <p className="font-semibold text-sm mb-1" style={{ color: "#f7f2ec" }}>
+              {copy?.analiseTitulo ?? "Questionário / análise"}
+            </p>
+
+            {modulo.analiseConcluida ? (
+              <>
+                {previewLoading ? (
+                  <div className="flex items-center gap-2 py-4">
+                    <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#c8a56b" }} />
+                    <span className="text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>
+                      Carregando seu resultado…
+                    </span>
+                  </div>
+                ) : preview ? (
+                  <div
+                    className="rounded-xl p-4 my-4"
+                    style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(200,165,107,0.12)" }}
+                  >
+                    {preview.badge && (
+                      <span
+                        className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full inline-block mb-2"
+                        style={{ background: "rgba(200,165,107,0.12)", color: "rgba(200,165,107,0.75)" }}
+                      >
+                        {preview.badge}
+                      </span>
+                    )}
+                    <p className="font-tan-mon-cheri text-lg mb-1" style={{ color: "#f7f2ec" }}>
+                      {preview.titulo}
+                    </p>
+                    {preview.chips && preview.chips.length > 0 && (
+                      <div className="grid gap-2 mb-2">
+                        {preview.chips.map((c) => (
+                          <div
+                            key={c.label}
+                            className="rounded-lg px-3 py-2"
+                            style={{ background: "rgba(224,123,57,0.06)", border: "1px solid rgba(224,123,57,0.12)" }}
+                          >
+                            <p className="text-[10px] uppercase tracking-wider mb-0.5" style={{ color: "rgba(224,123,57,0.55)" }}>
+                              {c.label}
+                            </p>
+                            <p className="text-sm font-medium" style={{ color: "rgba(247,242,236,0.78)" }}>
+                              {c.valor}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {preview.linha && (
+                      <p className="text-xs leading-relaxed italic" style={{ color: "rgba(247,242,236,0.5)" }}>
+                        {preview.linha.length > 160 ? `${preview.linha.slice(0, 160)}…` : preview.linha}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs my-3" style={{ color: "rgba(247,242,236,0.45)" }}>
+                    {copy?.analiseDescricaoCom ?? "Análise concluída na sua conta."}
+                  </p>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => navigate(hrefVerResultado(modulo.slug, modulo.hrefAnalise))}
+                    className="flex-1 py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                    style={{
+                      background: "linear-gradient(135deg, #c8a56b, #9c7742)",
+                      color: "#1a1208",
+                    }}
+                  >
+                    <Eye className="w-4 h-4" />
+                    {copy?.verResultadoLabel ?? "Ver meu resultado"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate(hrefNovaAnalise(modulo.slug, modulo.hrefAnalise))}
+                    className="py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                    style={{
+                      background: "rgba(200,165,107,0.1)",
+                      color: "#c8a56b",
+                      border: "1px solid rgba(200,165,107,0.25)",
+                    }}
+                    title={copy?.novaAnaliseLabel ?? "Nova análise"}
+                  >
+                    <Plus className="w-4 h-4" />
+                    {copy?.novaAnaliseLabel ?? "Nova análise"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-xs mb-4" style={{ color: "rgba(247,242,236,0.45)" }}>
+                  {copy?.analiseDescricaoSem ??
+                    "Reserve alguns minutos em um lugar calmo. Ao terminar, seu resultado fica guardado aqui."}
                 </p>
-                <p className="text-xs" style={{ color: "rgba(247,242,236,0.45)" }}>
-                  {modulo.analiseConcluida
-                    ? previewLinguagens && slug === "linguagens-amor"
-                      ? `Sua linguagem principal: ${previewLinguagens}.`
-                      : "Análise registada na sua conta."
-                    : "Reserve alguns minutos num lugar calmo. Depois, desbloqueia o minicurso."}
-                </p>
-              </div>
-              {modulo.analiseConcluida ? (
-                <CheckCircle2 className="w-6 h-6 shrink-0" style={{ color: "#5db97a" }} />
-              ) : null}
-            </div>
-            <button
-              type="button"
-              onClick={() => navigate(modulo.hrefAnalise)}
-              className="mt-4 w-full py-3 rounded-xl text-sm font-semibold"
-              style={{
-                background: modulo.analiseConcluida
-                  ? "rgba(200,165,107,0.12)"
-                  : "linear-gradient(135deg, #c8a56b, #9c7742)",
-                color: modulo.analiseConcluida ? "#c8a56b" : "#1a1208",
-                border: modulo.analiseConcluida ? "1px solid rgba(200,165,107,0.25)" : "none",
-              }}
-            >
-              {modulo.analiseConcluida ? "Rever / refazer análise" : "Iniciar análise"}
-            </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(modulo.hrefAnalise)}
+                  className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                  style={{
+                    background: "linear-gradient(135deg, #c8a56b, #9c7742)",
+                    color: "#1a1208",
+                  }}
+                >
+                  Iniciar análise
+                </button>
+              </>
+            )}
           </div>
         </section>
 
         {/* 3 — Minicurso */}
         <section className="mb-8">
-          <h2 className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
-            3 · Minicurso
-          </h2>
+          <PassoBadge
+            numero={3}
+            titulo="Minicurso"
+            concluido={minicursoDisponivel && modulo.minicursoConcluido}
+            bloqueado={!modulo.analiseConcluida || !minicursoDisponivel}
+          />
           {!modulo.analiseConcluida ? (
             <div
               className="rounded-2xl p-6 flex flex-col items-center text-center gap-3"
               style={{ background: "rgba(0,0,0,0.2)", border: "1px dashed rgba(200,165,107,0.2)" }}
             >
-              <Lock className="w-8 h-8 opacity-40" style={{ color: "#c8a56b" }} />
-              <p className="text-sm" style={{ color: "rgba(247,242,236,0.45)" }}>
-                Conclua primeiro a análise para desbloquear o minicurso e aprofundar os resultados.
+              <Lock className="w-8 h-8 opacity-50" style={{ color: "#c8a56b" }} />
+              <p className="text-sm font-medium" style={{ color: "rgba(247,242,236,0.55)" }}>
+                Complete a análise primeiro
+              </p>
+              <p className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
+                O minicurso aprofunda o que você descobriu no questionário.
               </p>
             </div>
-          ) : !modulo.cursoVinculadoId ? (
+          ) : !minicursoDisponivel ? (
             <div
-              className="rounded-xl p-5 text-sm text-center"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.1)", color: "rgba(247,242,236,0.45)" }}
+              className="rounded-2xl p-6 flex flex-col items-center text-center gap-3"
+              style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(200,165,107,0.12)" }}
             >
-              O minicurso será associado aqui pelo administrador (curso publicado na área de gestão).
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.2)" }}
+              >
+                <Lock className="w-6 h-6" style={{ color: "rgba(200,165,107,0.55)" }} />
+              </div>
+              <p className="text-sm font-medium" style={{ color: "rgba(247,242,236,0.6)" }}>
+                Minicurso em breve
+              </p>
+              <p className="text-xs leading-relaxed max-w-xs" style={{ color: "rgba(247,242,236,0.38)" }}>
+                Estamos preparando um percurso guiado para aprofundar este módulo. Sua análise já está pronta — volte
+                aqui quando o curso for liberado.
+              </p>
+              <span
+                className="text-[10px] uppercase tracking-widest flex items-center gap-1.5 mt-1"
+                style={{ color: "rgba(200,165,107,0.45)" }}
+              >
+                <Clock className="w-3 h-3" />
+                Em desenvolvimento
+              </span>
             </div>
           ) : (
             <MinicursoEmbedido
-              cursoId={modulo.cursoVinculadoId}
-              tituloExtra="Aprofunde os resultados com este percurso guiado."
+              cursoId={modulo.cursoVinculadoId!}
+              tituloExtra="Aprofunde o que você descobriu neste módulo."
               onTodasAulasConcluidas={buscar}
             />
           )}
         </section>
 
-        {moduloCompleto && proximoHub && (
+        {/* Próximo passo — só quando faz sentido */}
+        {moduloTotalmenteConcluido && proximoHub && (
           <div
             className="rounded-2xl p-5 flex flex-col gap-3"
             style={{
@@ -275,11 +530,11 @@ export default function JornadaHubPage() {
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5" style={{ color: "#c8a56b" }} />
               <p className="font-semibold text-sm" style={{ color: "#f7f2ec" }}>
-                Parabéns! Módulo concluído.
+                Módulo concluído — análise e minicurso feitos.
               </p>
             </div>
             <p className="text-xs" style={{ color: "rgba(247,242,236,0.55)" }}>
-              Segue para o próximo passo da tua jornada quando estiveres pronto(a).
+              Quando quiser, siga para o próximo passo da sua jornada.
             </p>
             <button
               type="button"
@@ -292,16 +547,38 @@ export default function JornadaHubPage() {
           </div>
         )}
 
-        {moduloCompleto && !proximoHub && (
+        {podeSeguirJornada && !moduloTotalmenteConcluido && proximoHub && modulo.analiseConcluida && (
+          <div
+            className="rounded-2xl p-5 flex flex-col gap-3"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}
+          >
+            <p className="text-sm" style={{ color: "rgba(247,242,236,0.6)" }}>
+              Sua análise está pronta
+              {!minicursoDisponivel ? " — o minicurso será liberado em breve." : " — falta concluir o minicurso acima."}
+            </p>
+            {!minicursoDisponivel && (
+              <button
+                type="button"
+                onClick={() => navigate(proximoHub)}
+                className="py-2.5 rounded-xl text-sm font-medium"
+                style={{ color: "#c8a56b", border: "1px solid rgba(200,165,107,0.25)" }}
+              >
+                Continuar jornada →
+              </button>
+            )}
+          </div>
+        )}
+
+        {moduloTotalmenteConcluido && !proximoHub && (
           <div
             className="rounded-2xl p-5 text-center"
             style={{ background: "rgba(93,185,122,0.08)", border: "1px solid rgba(93,185,122,0.25)" }}
           >
             <p className="font-semibold text-sm mb-1" style={{ color: "#6ecf8f" }}>
-              Nível Iniciante completo neste módulo.
+              Você concluiu este módulo da jornada iniciante.
             </p>
             <p className="text-xs" style={{ color: "rgba(247,242,236,0.5)" }}>
-              Volta à Jornada para veres o quadro geral ou explora a comunidade e os cursos.
+              Volte à Jornada para ver o quadro geral ou explore a comunidade e os cursos.
             </p>
           </div>
         )}

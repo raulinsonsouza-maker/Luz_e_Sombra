@@ -34,6 +34,22 @@ describe("temperamento-v1", () => {
     }
   });
 
+  it("narrativa v3 inclui retrato de identidade claro", () => {
+    const ans = answersAll(3);
+    for (const c of CODIGOS_PERGUNTA) {
+      if (c.startsWith("ENG") || c.startsWith("DOM") || c.startsWith("SOC")) ans[c] = 5;
+    }
+    const raw = entradaTemperamentoSchema.parse({
+      answers: ans,
+      metadata: { tempo_total_segundos: 300 },
+    });
+    const r = computarTemperamento(raw);
+    assert.equal(r.versaoNarrativa, "temperamento_v3");
+    assert.ok(r.portraitIdentidade.length > 40);
+    assert.ok(r.tracosMarcantes.length >= 1);
+    assert.ok(r.sinteseHumana.includes("Você") || r.sinteseHumana.length > 10);
+  });
+
   it("respostas extremas altas aumentam ENG/DOM e devolvem perfil coerente", () => {
     const ans = answersAll(1);
     for (const c of CODIGOS_PERGUNTA) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { ArrowRight, Heart, Loader2, RotateCcw } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
@@ -36,6 +36,7 @@ function draftKey(pessoaId: number | null): string {
 
 export default function LinguagensAmorPage() {
   const [, navigate] = useLocation();
+  const search = useSearch();
   const { status } = useAuth();
   const [fase, setFase] = useState<Fase>("intro");
   const [bloco, setBloco] = useState<0 | 1>(0);
@@ -159,6 +160,24 @@ export default function LinguagensAmorPage() {
     setShowCruzamento(false);
     iniciarOuRecuperar();
   }, [selectedPessoaId, iniciarOuRecuperar]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+    if (params.get("ver") === "resultado") {
+      void carregarUltimoServidor();
+      return;
+    }
+    if (params.get("nova") === "1") {
+      localStorage.removeItem(draftKey(selectedPessoaId));
+      setResultadoApi(null);
+      setAnswers({});
+      setBloco(0);
+      setQIndex(0);
+      setStartedAt(Date.now());
+      setFase("perguntas");
+    }
+  }, [status, search, selectedPessoaId, carregarUltimoServidor]);
 
   useEffect(() => {
     if (fase !== "perguntas") return;
