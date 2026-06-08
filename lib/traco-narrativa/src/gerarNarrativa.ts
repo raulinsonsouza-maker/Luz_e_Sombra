@@ -10,6 +10,13 @@ import type {
 import type { FusaoDiagnosticoEmocionalMetadata } from "@workspace/traco-diagnostico-fusion";
 import type { DinamicaFuncional, EstiloComunicacao, ResultadoAnalise } from "./types.js";
 import * as T from "./tabelas.js";
+import { VERSAO_NARRATIVA } from "./constants.js";
+import {
+  montarContrasteFotosFormulario,
+  montarCouracaCorporal,
+  montarLeituraEmocionalDeclarada,
+  montarPontosCuidadoPrioritarios,
+} from "./cruzamentos.js";
 
 function bandaPct(pct: number): string {
   if (pct < 24) return "discreta";
@@ -160,51 +167,41 @@ function construirInterpretacao(
   estruturas: EstruturasPct,
   principal: EstruturaTraco,
   secundaria: EstruturaTraco,
-  confiancaZero: boolean
-): string {
+  confiancaZero: boolean,
+): { texto: string; perguntaTransformacao: string } {
   const pctP = estruturas[principal];
   const pctS = estruturas[secundaria];
   const ip = T.INTERPRETACOES[principal];
-  const isec = T.INTERPRETACOES[secundaria];
-  const r = indiceRotacao(pctP);
+  const ferida = T.FERIDAS[principal];
+  const fraseInterp = (ip[1] ?? ip[0]).split(/(?<=[.!?])\s+/)[0] ?? ip[0];
 
   const blocos: string[] = [];
-  blocos.push(ip[r] ?? ip[0]);
-  blocos.push(ip[(r + 1) % 5] ?? ip[1]);
+  blocos.push(`${ferida} ${fraseInterp}`);
 
-  const incluirSecundariaNoMiolo =
-    pctS >= 18 &&
+  const comboRedundanteComPerfilUnico =
+    principal === "rigido" && secundaria === "oral";
+  const incluirTensao =
+    pctS >= 20 &&
+    secundaria !== principal &&
     secundaria !== "psicopata" &&
+    !comboRedundanteComPerfilUnico &&
     !(principal === "rigido" && secundaria === "oral" && pctS < 26);
 
-  if (incluirSecundariaNoMiolo) {
-    blocos.push(isec[(r + 2) % 5] ?? isec[0]);
-  } else {
-    blocos.push(ip[(r + 2) % 5] ?? ip[2]);
-  }
-  blocos.push(ip[(r + 3) % 5] ?? ip[3]);
-
-  const comboKey = `${principal}-${secundaria}`;
-  const combo =
-    T.COMBOS[comboKey] ??
-    "uma singularidade que pede tempo de observação: dois polos convivem e pedem integração consciente.";
-  blocos.push(
-    `A combinação de ${T.NOMES[principal]} (${pctP}%) com ${T.NOMES[secundaria]} (${pctS}%) revela ${combo}`
-  );
-
-  if (pctP - pctS < 12) {
+  if (incluirTensao) {
     blocos.push(
-      "Os dois padrões centrais aparecem com intensidade próxima, com tendência a respostas mais contextuais e híbridas."
+      `Entre ${T.NOMES[principal]} e ${T.NOMES[secundaria]} há uma tensão viva no cotidiano — não um defeito, mas um convite à integração.`,
     );
-  } else {
-    blocos.push(ip[(r + 4) % 5] ?? ip[4]);
+  } else if (pctP - pctS < 12) {
+    blocos.push(
+      "Os dois padrões centrais aparecem com intensidade próxima — respostas mais contextuais e híbridas.",
+    );
   }
 
-  const texto = blocos.filter(Boolean).join("\n\n");
+  let texto = blocos.slice(0, 3).join("\n\n");
   if (confiancaZero) {
-    return `Não foi possível validar ombros e quadril nesta sessão. Refaça com poses claras e fundo neutro para uma leitura mais completa.\n\n${texto}`;
+    texto = `Não foi possível validar ombros e quadril nesta sessão. Refaça com poses claras e fundo neutro para uma leitura mais completa.\n\n${texto}`;
   }
-  return texto;
+  return { texto, perguntaTransformacao: T.PERGUNTAS_TRANSFORMACAO[principal] };
 }
 
 function construirPerfilFisicoHumano(
@@ -274,7 +271,7 @@ function estiloComunicacaoModulado(
   if (pctS < 26) return { ...base };
   return {
     ...base,
-    descricao: `${base.descricao} Nota-se também colorido de ${T.NOMES[secundaria]} (${pctS}%) na forma como você organiza frases e ritmo.`,
+    descricao: `${base.descricao} Nota-se também colorido de ${T.NOMES[secundaria]} na forma como você organiza frases e ritmo.`,
   };
 }
 
@@ -317,7 +314,8 @@ function resolverPadraoPostural(
       if (secundaria === "oral" && pctS < 25) {
         return `${base} ${T.COMBO_POSTURAL_LEVE_ORAL}`;
       }
-      return `${base} Há também coloração de ${T.NOMES[secundaria]} (${pctS}%): ${T.PADROES_POSTURAIS[secundaria]}`;
+      const ponte = T.PONTE_POSTURAL_SECUNDARIA[secundaria];
+      return ponte ? `${base} ${ponte}` : base;
     }
     return base;
   }
@@ -326,7 +324,10 @@ function resolverPadraoPostural(
     if (secundaria === "oral" && pctS < 25) {
       return `${T.PADROES_POSTURAIS[principal]} ${T.COMBO_POSTURAL_LEVE_ORAL}`;
     }
-    return `${T.PADROES_POSTURAIS[principal]} Há também coloração de ${T.NOMES[secundaria]} (${pctS}%): ${T.PADROES_POSTURAIS[secundaria]}`;
+    const ponte = T.PONTE_POSTURAL_SECUNDARIA[secundaria];
+    return ponte
+      ? `${T.PADROES_POSTURAIS[principal]} ${ponte}`
+      : T.PADROES_POSTURAIS[principal];
   }
   return T.PADROES_POSTURAIS[principal];
 }
@@ -340,7 +341,7 @@ function dinamicaModulada(
   if (pctS < 26) return { ...base };
   return {
     ...base,
-    trabalho: `${base.trabalho} Com frequência, ${T.NOMES[secundaria]} (${pctS}%) puxa dilemas de ritmo e prioridade no trabalho.`,
+    trabalho: `${base.trabalho} Com frequência, ${T.NOMES[secundaria]} puxa dilemas de ritmo e prioridade no trabalho.`,
   };
 }
 
@@ -348,10 +349,12 @@ export interface GerarNarrativaInput {
   engine: ResultadoImagemEngine;
   /** Opcional: só quando reidratar texto após fusão no servidor. */
   fusao?: FusaoDiagnosticoEmocionalMetadata;
+  /** Percentuais só das fotos (antes da fusão), para contraste. */
+  estruturasSomenteFotos?: EstruturasPct;
 }
 
 export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
-  const { engine, fusao } = input;
+  const { engine, fusao, estruturasSomenteFotos } = input;
   const {
     estruturas,
     estruturaPrincipal: principal,
@@ -370,7 +373,12 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
 
   const obsHumano = montarObservacoesPorFoto(marcadoresPorFoto, principal, pctP, true);
   const obsTecnico = montarObservacoesPorFoto(marcadoresPorFoto, principal, pctP, false);
-  const interpretacao = construirInterpretacao(estruturas, principal, secundaria, confZero);
+  const { texto: interpretacao, perguntaTransformacao } = construirInterpretacao(
+    estruturas,
+    principal,
+    secundaria,
+    confZero,
+  );
 
   const rot = indiceRotacao(pctP);
   const caract = montarCaracteristicas(principal, secundaria, pctP, pctS);
@@ -405,11 +413,19 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
   const comboKey = `${principal}-${secundaria}`;
   const perfilUnico =
     T.PERFIS_UNICOS[comboKey] ??
-    `A combinação de ${T.NOMES[principal]} (${pctP}%) com ${T.NOMES[secundaria]} (${pctS}%) cria um perfil próprio. Observe como estes percentuais convivem na sua história, não só no rótulo.`;
+    `A combinação de ${T.NOMES[principal]} com ${T.NOMES[secundaria]} cria um perfil próprio. Observe como estes padrões convivem na sua história, não só no rótulo.`;
 
   const sinteseHumana = construirSinteseHumana(principal, secundaria, pctS, fusao);
+  const eixos = marcadoresAgregados.eixosReich ?? metadata?.eixosReich;
+  const pontosCuidadoPrioritarios = montarPontosCuidadoPrioritarios(
+    principal,
+    secundaria,
+    pontosAtencao,
+    comboKey,
+  );
 
   return {
+    versaoNarrativa: VERSAO_NARRATIVA,
     estruturas,
     estruturaPrincipal: principal,
     estruturaSecundaria: secundaria,
@@ -433,6 +449,16 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
     pontosFortes,
     pontosAtencao,
     ferida: T.FERIDAS[principal],
+    dorLivro: T.DORES_LIVRO[principal],
+    perguntaTransformacao,
+    leituraEmocionalDeclarada: montarLeituraEmocionalDeclarada(principal, secundaria, fusao),
+    contrasteFotosFormulario: montarContrasteFotosFormulario(
+      estruturas,
+      estruturasSomenteFotos,
+      fusao,
+    ),
+    couracaCorporal: montarCouracaCorporal(principal, eixos),
+    pontosCuidadoPrioritarios,
     recurso: T.RECURSOS[principal],
     recomendacoesPraticas,
     confiancaAnalise,
@@ -449,7 +475,8 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
     marcadoresPorFoto,
     marcadoresAgregados,
     evidenciasMotor: evidencias,
-    eixosReich: marcadoresAgregados.eixosReich ?? metadata?.eixosReich,
+    eixosReich: eixos,
     segmentosReich: marcadoresAgregados.segmentosReich ?? metadata?.segmentosReich,
+    estruturasSomenteFotos,
   };
 }

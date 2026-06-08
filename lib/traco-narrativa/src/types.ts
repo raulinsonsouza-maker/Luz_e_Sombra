@@ -85,4 +85,11 @@ export interface ResultadoAnalise {
   fusaoDiagnosticoEmocional?: Record<string, unknown>;
   pessoaId?: number | null;
   pessoaNome?: string | null;
+  versaoNarrativa?: string;
+  perguntaTransformacao?: string;
+  dorLivro?: string;
+  leituraEmocionalDeclarada?: string;
+  contrasteFotosFormulario?: string;
+  couracaCorporal?: string;
+  pontosCuidadoPrioritarios?: string[];
 }

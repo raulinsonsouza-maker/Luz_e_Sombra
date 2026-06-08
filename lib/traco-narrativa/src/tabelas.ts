@@ -421,6 +421,49 @@ const DINAMICAS_FUNCIONAIS: Record<keyof EstruturasPct, DinamicaFuncional> = {
   },
 };
 
+/** Origem Reich/Lowen em linguagem acessível (1 parágrafo por estrutura). */
+const DORES_LIVRO: Record<keyof EstruturasPct, string> = {
+  esquizoide:
+    "Na origem, o corpo aprendeu que existir era arriscado demais. A couraça não é frieza — é proteção contra um mundo que parecia grande demais. O sintoma relacional costuma ser distância: afastar-se antes de ser invadido.",
+  oral:
+    "A ferida nasce do abandono ou do suporte inconsistente na infância. O corpo colapsa para buscar apoio externo. Na relação, aparece como dar demais, pedir pouco e sentir que nunca é sustentado o suficiente.",
+  psicopata:
+    "Quando a vulnerabilidade foi punida cedo, o corpo expandiu-se para cima como defesa. Na relação, pode parecer forte e distante — o desafio é permitir que o coração apareça sem perder presença.",
+  masoquista:
+    "A humilhação repetida ensinou que expressar a vontade custava caro. O corpo comprime e aguenta. Na relação, surge como lealdade excessiva, dificuldade em dizer não e ressentimento silencioso.",
+  rigido:
+    "Quando amar foi punido ou não correspondido, o corpo organizou-se em couraça funcional. Na relação, parece confiável e competente — mas o coração pede espaço para sentir sem gerenciar cada emoção.",
+};
+
+const PERGUNTAS_TRANSFORMACAO: Record<keyof EstruturasPct, string> = {
+  esquizoide:
+    "O que mudaria na sua vida se você soubesse, no corpo, que é seguro estar aqui — sem precisar recuar para a mente?",
+  oral:
+    "E você, quem te sustenta quando você sustenta todo mundo? O que pediria hoje, sem culpa?",
+  psicopata:
+    "Quando ninguém está olhando, o que você sente — e o que permitiria sentir se não precisasse impressionar?",
+  masoquista:
+    "O que você engoliu por tanto tempo que o corpo ainda carrega? O que seria dizer não uma vez, com gentileza?",
+  rigido:
+    "E você, o que sente quando ninguém está olhando, quando não há nada a realizar, quando não há papel a cumprir?",
+};
+
+const PONTE_POSTURAL_SECUNDARIA: Partial<Record<keyof EstruturasPct, string>> = {
+  oral: "Por baixo da organização, também há desejo de vínculo e acolhimento.",
+  esquizoide: "Há também uma riqueza interior que pede presença no corpo.",
+  masoquista: "Por baixo da postura ereta, o corpo ainda guarda pressão não dita.",
+  psicopata: "A postura firme também comunica presença e comando.",
+  rigido: "A organização corporal reflete contenção emocional cuidadosa.",
+};
+
+const CUIDADOS_FERIDA: Record<keyof EstruturasPct, string> = {
+  esquizoide: "Pratique estar no corpo antes de recuar para a mente em momentos de pressão.",
+  oral: "Observe onde você dá mais do que recebe — e pratique pedir algo concreto esta semana.",
+  psicopata: "Permita um momento de vulnerabilidade com alguém de confiança, sem estratégia.",
+  masoquista: "Diga não a uma pequena cobrança que você costumaria aceitar em silêncio.",
+  rigido: "Deixe uma emoção aparecer sem corrigi-la ou organizá-la imediatamente.",
+};
+
 export {
   NOMES,
   APELIDOSS,
@@ -428,6 +471,10 @@ export {
   PONTOS_FORTES,
   PONTOS_ATENCAO,
   FERIDAS,
+  DORES_LIVRO,
+  PERGUNTAS_TRANSFORMACAO,
+  PONTE_POSTURAL_SECUNDARIA,
+  CUIDADOS_FERIDA,
   RECURSOS,
   RECOMENDACOES,
   OBS_ROSTO,

@@ -331,3 +331,97 @@ test("perfil físico humano sem números", () => {
   assert.ok(!r.perfilFisicoNarrado.includes("OMR"));
   assert.ok(!r.perfilFisicoNarrado.includes("máscara"));
 });
+
+test("narrativa v3 — interpretação enxuta sem COMBOS nem perfilUnico", () => {
+  const r = gerarNarrativa({
+    engine: mkEngine({
+      rigido: 31,
+      oral: 24,
+      masoquista: 20,
+      psicopata: 14,
+      esquizoide: 11,
+    }),
+    fusao: {
+      versaoMatriz: "fusao_v2",
+      alinhamentoFotosFormulario: 96,
+      assertividadeLeitura: 80,
+      pesoFormulario: 0.25,
+      padroesEmocionaisNormalizados: { vinculo: 0.4, controle: 0.35 },
+      vetorFormularioEstruturas: {},
+      sinaisConvergentes: [],
+      sinteseIntegrada: "técnico",
+    },
+  });
+
+  const paragrafos = r.interpretacao.split(/\n\n+/).filter(Boolean);
+  assert.ok(paragrafos.length <= 3, `esperado ≤3 parágrafos, obteve ${paragrafos.length}`);
+  assert.equal(r.versaoNarrativa, "traco_narrativa_v3");
+  assert.ok(r.perguntaTransformacao && r.perguntaTransformacao.length > 10);
+  assert.ok(!r.interpretacao.includes(r.perguntaTransformacao));
+  if (r.perfilUnico) {
+    assert.ok(!r.interpretacao.includes(r.perfilUnico.slice(0, 40)));
+  }
+  const comboRigidoOral = "o coração que controla o coração que anseia";
+  assert.ok(!r.interpretacao.toLowerCase().includes(comboRigidoOral.slice(0, 30)));
+});
+
+test("rigido+oral — leituraEmocionalDeclarada com vínculo e controle", () => {
+  const r = gerarNarrativa({
+    engine: mkEngine(
+      { rigido: 31, oral: 23, masoquista: 20, psicopata: 14, esquizoide: 12 },
+      { estruturaPrincipal: "rigido", estruturaSecundaria: "oral" },
+    ),
+    fusao: {
+      versaoMatriz: "fusao_v2",
+      alinhamentoFotosFormulario: 96,
+      assertividadeLeitura: 80,
+      pesoFormulario: 0.25,
+      padroesEmocionaisNormalizados: { vinculo: 0.42, controle: 0.38, estrategia: 0.1 },
+      vetorFormularioEstruturas: {},
+      sinaisConvergentes: [],
+      sinteseIntegrada: "",
+    },
+  });
+
+  assert.ok(r.leituraEmocionalDeclarada?.includes("vínculo"));
+  assert.ok(r.leituraEmocionalDeclarada?.includes("controle"));
+});
+
+test("adaptarVozNarrativa Leticia — sem você nos campos principais", async () => {
+  const { adaptarVozNarrativa } = await import("../voz.js");
+  const r = gerarNarrativa({
+    engine: mkEngine(
+      { rigido: 31, oral: 23, masoquista: 20, psicopata: 14, esquizoide: 12 },
+      { estruturaPrincipal: "rigido", estruturaSecundaria: "oral" },
+    ),
+  });
+  const t = adaptarVozNarrativa(r, "Leticia");
+  const campos = [
+    t.interpretacao,
+    t.sinteseHumana,
+    t.perfilUnico,
+    t.ferida,
+    t.mensagemTerapeutica,
+    t.fraseIdentidade,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  assert.ok(!/\bvocê\b/i.test(campos), "ainda contém 'você'");
+  assert.ok(campos.includes("ela") || campos.includes("Leticia"));
+});
+
+test("sanitizarResultadoLegado limpa interpretação antiga", async () => {
+  const { sanitizarResultadoLegado } = await import("../legado.js");
+  const r = gerarNarrativa({
+    engine: mkEngine({ rigido: 40, oral: 25, masoquista: 15, psicopata: 10, esquizoide: 10 }),
+  });
+  const legado = {
+    ...r,
+    versaoNarrativa: undefined,
+    interpretacao: `Integração fotos + questionário: Leitura integrada com 96%.\n\nSinais convergentes: sinal A.\n\n${r.interpretacao}`,
+  };
+  const limpo = sanitizarResultadoLegado(legado);
+  assert.ok(!limpo.interpretacao.includes("Integração fotos"));
+  assert.ok(!limpo.interpretacao.includes("Sinais convergentes"));
+  assert.ok(limpo.interpretacao.includes("ferida") || limpo.interpretacao.length > 20);
+});

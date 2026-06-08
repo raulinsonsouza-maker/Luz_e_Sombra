@@ -5,7 +5,7 @@
 import type { TipoFoto } from "@workspace/traco-imagem-engine";
 import type { ResultadoAnalise } from "@workspace/traco-narrativa";
 import { analisarFotos } from "@workspace/traco-imagem-engine";
-import { gerarNarrativa } from "@workspace/traco-narrativa";
+import { adaptarVozNarrativa, gerarNarrativa } from "@workspace/traco-narrativa";
 import {
   aplicarFusaoTracoDiagnostico,
   diagnosticoEmocionalFusaoSchema,
@@ -66,10 +66,15 @@ export async function analyzeTracoDeCarater(
     }
   }
 
-  const resultado = gerarNarrativa({
+  let resultado = gerarNarrativa({
     engine: engineForNarrativa,
     fusao: fusaoMetadata,
+    estruturasSomenteFotos,
   });
+
+  if (opts.pessoaNome?.trim()) {
+    resultado = adaptarVozNarrativa(resultado, opts.pessoaNome.trim());
+  }
 
   return {
     ...resultado,
