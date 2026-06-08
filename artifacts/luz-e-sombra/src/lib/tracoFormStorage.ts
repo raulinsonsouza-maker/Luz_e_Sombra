@@ -8,12 +8,18 @@ import { getStoredUser } from "@/lib/auth";
 
 export const LEGACY_STORAGE_DIAGNOSTICO_30 = "luz_diagnostico_emocional_30_v1";
 const DIAG_PREFIX = "luz_diagnostico_emocional_30_v1";
+const LINGUAGENS_DRAFT_PREFIX = "luz_linguagens_amor_v2_draft";
 
 /** Remove resíduos do antigo questionário de 20 (evita confusão com o diagnóstico de 30). */
 export function purgeQuestionario20Storage(): void {
   try {
     const legacy = "luz_questionario_20_respostas";
-    for (const k of Object.keys(localStorage)) {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k) keys.push(k);
+    }
+    for (const k of keys) {
       if (k === legacy || k.startsWith(`${legacy}_`)) localStorage.removeItem(k);
     }
   } catch {
@@ -25,8 +31,18 @@ export function purgeQuestionario20Storage(): void {
 export function clearTracoSessionStorage(): void {
   try {
     purgeQuestionario20Storage();
-    for (const k of Object.keys(localStorage)) {
-      if (k === LEGACY_STORAGE_DIAGNOSTICO_30 || k.startsWith(`${DIAG_PREFIX}_`)) {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k) keys.push(k);
+    }
+    for (const k of keys) {
+      if (
+        k === LEGACY_STORAGE_DIAGNOSTICO_30 ||
+        k.startsWith(`${DIAG_PREFIX}_`) ||
+        k === LINGUAGENS_DRAFT_PREFIX ||
+        k.startsWith(`${LINGUAGENS_DRAFT_PREFIX}_`)
+      ) {
         localStorage.removeItem(k);
       }
     }
@@ -49,6 +65,24 @@ export function storageKeyDiagnostico30(pessoaId: number | null, userId?: number
   const uid = resolveUserId(userId);
   if (uid != null) return `${DIAG_PREFIX}_u${uid}_${suffix}`;
   return `${DIAG_PREFIX}_${suffix}`;
+}
+
+export function storageKeyLinguagensAmorDraft(pessoaId: number | null, userId?: number | null): string {
+  const suffix = storageSuffixForPessoa(pessoaId);
+  const uid = resolveUserId(userId);
+  if (uid != null) return `${LINGUAGENS_DRAFT_PREFIX}_u${uid}_${suffix}`;
+  return pessoaId === null ? LINGUAGENS_DRAFT_PREFIX : `${LINGUAGENS_DRAFT_PREFIX}_${pessoaId}`;
+}
+
+/** Remove rascunhos locais de uma pessoa (diagnóstico + linguagens). */
+export function clearPessoaLocalStorage(pessoaId: number, userId?: number | null): void {
+  try {
+    localStorage.removeItem(storageKeyDiagnostico30(pessoaId, userId));
+    localStorage.removeItem(storageKeyLinguagensAmorDraft(pessoaId, userId));
+    localStorage.removeItem(`${LINGUAGENS_DRAFT_PREFIX}_${pessoaId}`);
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Chave legada sem userId (pré-isolamento por conta). */

@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useLocation, useSearch } from "wouter";
 import { ArrowRight, Heart, Loader2, RotateCcw } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import { storageKeyLinguagensAmorDraft, parsePessoaIdFromSearch } from "@/lib/tracoFormStorage";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import {
@@ -16,7 +17,6 @@ import LinguagensPainelResultado, { type ResultadoLinguagensUi } from "./linguag
 import LinguagensSeletorPessoa, { type PessoaAnalise } from "./linguagens-amor/LinguagensSeletorPessoa";
 import LinguagensCruzamento from "./linguagens-amor/LinguagensCruzamento";
 
-const STORAGE_KEY = "luz_linguagens_amor_v2_draft";
 const TOTAL = 30;
 const BLOCO1 = 15;
 
@@ -30,14 +30,19 @@ type DraftPersist = {
   startedAt: number;
 };
 
-function draftKey(pessoaId: number | null): string {
-  return pessoaId === null ? STORAGE_KEY : `${STORAGE_KEY}_${pessoaId}`;
+function resetEstadoPerfil(): {
+  answers: Record<string, "a" | "b">;
+  bloco: 0 | 1;
+  qIndex: number;
+  startedAt: number;
+} {
+  return { answers: {}, bloco: 0, qIndex: 0, startedAt: Date.now() };
 }
 
 export default function LinguagensAmorPage() {
   const [, navigate] = useLocation();
   const search = useSearch();
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const [fase, setFase] = useState<Fase>("intro");
   const [bloco, setBloco] = useState<0 | 1>(0);
   const [qIndex, setQIndex] = useState(0);
@@ -57,6 +62,43 @@ export default function LinguagensAmorPage() {
   const [addErro, setAddErro] = useState<string | null>(null);
   const [historicoIds, setHistoricoIds] = useState<Set<number>>(new Set());
   const [showCruzamento, setShowCruzamento] = useState(false);
+  const pessoaSwitchGenRef = useRef(0);
+
+  const draftKey = useCallback(
+    (pessoaId: number | null) => storageKeyLinguagensAmorDraft(pessoaId, user?.id),
+    [user?.id],
+  );
+
+  const resetPerfilAtivo = useCallback(() => {
+    const next = resetEstadoPerfil();
+    setResultadoApi(null);
+    setNomeResultado(null);
+    setShowCruzamento(false);
+    setErro(null);
+    setMsgIntro(null);
+    setAnswers(next.answers);
+    setBloco(next.bloco);
+    setQIndex(next.qIndex);
+    setStartedAt(next.startedAt);
+    setFase("intro");
+  }, []);
+
+  const handleSelectPessoa = useCallback(
+    (id: number | null) => {
+      pessoaSwitchGenRef.current += 1;
+      resetPerfilAtivo();
+      setSelectedPessoaId(id);
+    },
+    [resetPerfilAtivo],
+  );
+
+  const pessoaIdFromUrl = useMemo(() => parsePessoaIdFromSearch(search), [search]);
+
+  useEffect(() => {
+    pessoaSwitchGenRef.current += 1;
+    resetPerfilAtivo();
+    setSelectedPessoaId(pessoaIdFromUrl);
+  }, [pessoaIdFromUrl, resetPerfilAtivo]);
 
   const paresBloco: ParForcado[] = bloco === 0 ? PARES_RECEBER : PARES_EXPRESSAR;
   const parAtual = paresBloco[qIndex];
@@ -93,16 +135,19 @@ export default function LinguagensAmorPage() {
   }, [carregarPessoas, carregarHistorico]);
 
   const carregarUltimoServidor = useCallback(async () => {
+    const gen = pessoaSwitchGenRef.current;
     setMsgIntro(null);
     setCarregandoUltimo(true);
     try {
       const qs = selectedPessoaId !== null ? `?pessoaId=${selectedPessoaId}` : "";
       const res = await apiFetch(`/linguagens-amor/ultimo${qs}`);
+      if (gen !== pessoaSwitchGenRef.current) return;
       if (!res.ok) {
         setMsgIntro("Não foi possível carregar agora. Tente de novo daqui a pouco.");
         return;
       }
       const row = (await res.json()) as { resultado?: ResultadoLinguagensUi; pessoaId?: number | null } | null;
+      if (gen !== pessoaSwitchGenRef.current) return;
       if (row?.resultado) {
         const nome =
           selectedPessoaId !== null
@@ -115,9 +160,13 @@ export default function LinguagensAmorPage() {
       }
       setMsgIntro("Ainda não há resultado guardado para este perfil. Complete o questionário uma vez.");
     } catch {
-      setMsgIntro("Não foi possível carregar. Verifique a ligação à internet.");
+      if (gen === pessoaSwitchGenRef.current) {
+        setMsgIntro("Não foi possível carregar. Verifique a ligação à internet.");
+      }
     } finally {
-      setCarregandoUltimo(false);
+      if (gen === pessoaSwitchGenRef.current) {
+        setCarregandoUltimo(false);
+      }
     }
   }, [selectedPessoaId, pessoas]);
 
@@ -126,7 +175,7 @@ export default function LinguagensAmorPage() {
       const raw = localStorage.getItem(draftKey(selectedPessoaId));
       if (raw) {
         const d = JSON.parse(raw) as DraftPersist;
-        if (d.answers && typeof d.qIndex === "number") {
+        if (d.pessoaId === selectedPessoaId && d.answers && typeof d.qIndex === "number") {
           setAnswers(typeof d.answers === "object" ? d.answers : {});
           setBloco(d.bloco === 1 ? 1 : 0);
           setQIndex(Math.min(BLOCO1 - 1, Math.max(0, d.qIndex)));
@@ -152,14 +201,14 @@ export default function LinguagensAmorPage() {
       /* ignore */
     }
     setFase("perguntas");
-  }, [selectedPessoaId]);
+  }, [selectedPessoaId, draftKey]);
 
   const refazer = useCallback(() => {
     localStorage.removeItem(draftKey(selectedPessoaId));
     setResultadoApi(null);
     setShowCruzamento(false);
     iniciarOuRecuperar();
-  }, [selectedPessoaId, iniciarOuRecuperar]);
+  }, [selectedPessoaId, draftKey, iniciarOuRecuperar]);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -170,14 +219,15 @@ export default function LinguagensAmorPage() {
     }
     if (params.get("nova") === "1") {
       localStorage.removeItem(draftKey(selectedPessoaId));
+      const next = resetEstadoPerfil();
       setResultadoApi(null);
-      setAnswers({});
-      setBloco(0);
-      setQIndex(0);
-      setStartedAt(Date.now());
+      setAnswers(next.answers);
+      setBloco(next.bloco);
+      setQIndex(next.qIndex);
+      setStartedAt(next.startedAt);
       setFase("perguntas");
     }
-  }, [status, search, selectedPessoaId, carregarUltimoServidor]);
+  }, [status, search, selectedPessoaId, draftKey, carregarUltimoServidor]);
 
   useEffect(() => {
     if (fase !== "perguntas") return;
@@ -187,7 +237,7 @@ export default function LinguagensAmorPage() {
     } catch {
       /* ignore */
     }
-  }, [fase, selectedPessoaId, bloco, qIndex, answers, startedAt]);
+  }, [fase, selectedPessoaId, bloco, qIndex, answers, startedAt, draftKey]);
 
   function escolher(lado: "a" | "b") {
     if (!parAtual) return;
@@ -207,6 +257,7 @@ export default function LinguagensAmorPage() {
   }
 
   async function enviar(ans: Record<string, "a" | "b">) {
+    const pessoaIdAtStart = selectedPessoaId;
     const parsed = entradaLinguagensAmorSchema.safeParse({
       answers: ans,
       metadata: {
@@ -224,26 +275,33 @@ export default function LinguagensAmorPage() {
     try {
       const res = await apiFetch("/linguagens-amor", {
         method: "POST",
-        body: JSON.stringify({ ...parsed.data, pessoaId: selectedPessoaId }),
+        body: JSON.stringify({ ...parsed.data, pessoaId: pessoaIdAtStart }),
       });
       const data = await res.json().catch(() => ({}));
+      if (selectedPessoaId !== pessoaIdAtStart) {
+        setErro("A pessoa selecionada mudou durante o envio. Tente novamente.");
+        setFase("perguntas");
+        return;
+      }
       if (!res.ok) {
         setErro((data as { error?: string }).error ?? "Erro ao enviar.");
         setFase("perguntas");
         return;
       }
-      localStorage.removeItem(draftKey(selectedPessoaId));
+      localStorage.removeItem(draftKey(pessoaIdAtStart));
       const nome =
-        selectedPessoaId !== null
-          ? pessoas.find((p) => p.id === selectedPessoaId)?.nome ?? null
+        pessoaIdAtStart !== null
+          ? pessoas.find((p) => p.id === pessoaIdAtStart)?.nome ?? null
           : null;
       setNomeResultado(nome);
       setResultadoApi(data as ResultadoLinguagensUi);
       setFase("resultado");
       carregarHistorico();
     } catch {
-      setErro("Falha de rede.");
-      setFase("perguntas");
+      if (selectedPessoaId === pessoaIdAtStart) {
+        setErro("Falha de rede.");
+        setFase("perguntas");
+      }
     }
   }
 
@@ -278,7 +336,7 @@ export default function LinguagensAmorPage() {
     setAddNome("");
     setShowAdd(false);
     carregarPessoas();
-    setSelectedPessoaId((data as PessoaAnalise).id);
+    handleSelectPessoa((data as PessoaAnalise).id);
   }
 
   const subtituloPerguntas = useMemo(() => {
@@ -382,7 +440,7 @@ export default function LinguagensAmorPage() {
           <LinguagensSeletorPessoa
             pessoas={pessoas}
             selectedPessoaId={selectedPessoaId}
-            onSelect={setSelectedPessoaId}
+            onSelect={handleSelectPessoa}
             showAdd={showAdd}
             onToggleAdd={() => setShowAdd((s) => !s)}
             addNome={addNome}

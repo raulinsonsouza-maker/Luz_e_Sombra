@@ -120,7 +120,12 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
     const [analise] = await db
       .select({ id: analiseTracoTable.id })
       .from(analiseTracoTable)
-      .where(eq(analiseTracoTable.usuarioId, userId))
+      .where(
+        and(
+          eq(analiseTracoTable.usuarioId, userId),
+          isNull(analiseTracoTable.pessoaId)
+        )
+      )
       .limit(1);
 
     const [temperamento] = await db

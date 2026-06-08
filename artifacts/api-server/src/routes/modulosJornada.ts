@@ -3,14 +3,11 @@ import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
 import {
   db,
   configuracoesModulosTable,
-  analiseTracoTable,
-  analiseTemperamento40Table,
-  analiseLinguagensAmorTable,
-  avaliacoesTable,
   aulasTable,
   progressoCursosTable,
 } from "@workspace/db";
-import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
+import { temAnalise } from "../lib/temAnaliseJornada";
 
 const router = Router();
 
@@ -29,50 +26,6 @@ function hrefAnalise(slug: string): string {
       return "/avaliacao";
     default:
       return "/jornada";
-  }
-}
-
-async function temAnalise(usuarioId: number, slug: string): Promise<boolean> {
-  switch (slug) {
-    case "traco": {
-      const [r] = await db
-        .select({ id: analiseTracoTable.id })
-        .from(analiseTracoTable)
-        .where(eq(analiseTracoTable.usuarioId, usuarioId))
-        .limit(1);
-      return !!r;
-    }
-    case "temperamento": {
-      const [r] = await db
-        .select({ id: analiseTemperamento40Table.id })
-        .from(analiseTemperamento40Table)
-        .where(eq(analiseTemperamento40Table.usuarioId, usuarioId))
-        .limit(1);
-      return !!r;
-    }
-    case "linguagens-amor": {
-      const [r] = await db
-        .select({ id: analiseLinguagensAmorTable.id })
-        .from(analiseLinguagensAmorTable)
-        .where(
-          and(
-            eq(analiseLinguagensAmorTable.usuarioId, usuarioId),
-            isNull(analiseLinguagensAmorTable.pessoaId)
-          )
-        )
-        .limit(1);
-      return !!r;
-    }
-    case "roda": {
-      const [r] = await db
-        .select({ id: avaliacoesTable.id })
-        .from(avaliacoesTable)
-        .where(eq(avaliacoesTable.usuarioId, usuarioId))
-        .limit(1);
-      return !!r;
-    }
-    default:
-      return false;
   }
 }
 

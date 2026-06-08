@@ -49,12 +49,46 @@ export const JORNADA_HUB_COPY: Record<
   },
 };
 
-export function hrefVerResultado(slug: string, hrefAnalise: string): string {
-  if (slug === "roda") return hrefAnalise;
-  return `${hrefAnalise}?ver=resultado`;
+export function hrefComPessoa(hrefAnalise: string, pessoaId: number | null | undefined): string {
+  if (pessoaId == null) return hrefAnalise;
+  const sep = hrefAnalise.includes("?") ? "&" : "?";
+  return `${hrefAnalise}${sep}pessoaId=${pessoaId}`;
 }
 
-export function hrefNovaAnalise(slug: string, hrefAnalise: string): string {
-  if (slug === "roda") return `${hrefAnalise}?nova=1`;
-  return `${hrefAnalise}?nova=1`;
+export function hrefVerResultado(
+  slug: string,
+  hrefAnalise: string,
+  pessoaId?: number | null,
+): string {
+  const base =
+    slug === "traco" || slug === "linguagens-amor"
+      ? hrefComPessoa(hrefAnalise, pessoaId ?? null)
+      : hrefAnalise;
+  if (slug === "roda") return base.split("?")[0] ?? hrefAnalise;
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}ver=resultado`;
+}
+
+export function hrefNovaAnalise(
+  slug: string,
+  hrefAnalise: string,
+  pessoaId?: number | null,
+): string {
+  const base =
+    slug === "traco" || slug === "linguagens-amor"
+      ? hrefComPessoa(hrefAnalise, pessoaId ?? null)
+      : hrefAnalise;
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}nova=1`;
+}
+
+export function hrefIniciarAnalise(
+  slug: string,
+  hrefAnalise: string,
+  pessoaId?: number | null,
+): string {
+  if (slug === "traco" || slug === "linguagens-amor") {
+    return hrefComPessoa(hrefAnalise, pessoaId ?? null);
+  }
+  return hrefAnalise;
 }

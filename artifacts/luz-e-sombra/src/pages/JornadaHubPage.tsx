@@ -21,7 +21,11 @@ import {
   JORNADA_HUB_COPY,
   hrefNovaAnalise,
   hrefVerResultado,
+  hrefIniciarAnalise,
 } from "@/lib/jornadaHubConfig";
+import SeletorPessoaAnalise, { type PessoaAnalise } from "@/components/SeletorPessoaAnalise";
+
+const MODULOS_MULTI_PESSOA = new Set(["traco", "linguagens-amor"]);
 
 interface ModuloApi {
   slug: string;
@@ -54,8 +58,13 @@ const NOME_ESTRUTURA: Record<string, string> = {
   rigido: "Sustentador",
 };
 
-async function carregarPreviewAnalise(slug: string): Promise<PreviewAnalise | null> {
+async function carregarPreviewAnalise(
+  slug: string,
+  pessoaId: number | null,
+  nomePessoa?: string | null,
+): Promise<PreviewAnalise | null> {
   try {
+    const qs = pessoaId !== null ? `?pessoaId=${pessoaId}` : "";
     switch (slug) {
       case "temperamento": {
         const res = await apiFetch("/temperamento/ultimo");
@@ -70,7 +79,7 @@ async function carregarPreviewAnalise(slug: string): Promise<PreviewAnalise | nu
         };
       }
       case "traco": {
-        const res = await apiFetch("/traco/analise");
+        const res = await apiFetch(`/traco/analise${qs}`);
         if (!res.ok) return null;
         const row = await res.json();
         const r = row?.resultado;
@@ -83,7 +92,7 @@ async function carregarPreviewAnalise(slug: string): Promise<PreviewAnalise | nu
         };
       }
       case "linguagens-amor": {
-        const res = await apiFetch("/linguagens-amor/ultimo");
+        const res = await apiFetch(`/linguagens-amor/ultimo${qs}`);
         if (!res.ok) return null;
         const row = await res.json();
         const resultado = row?.resultado as {
@@ -97,16 +106,25 @@ async function carregarPreviewAnalise(slug: string): Promise<PreviewAnalise | nu
         const receber = resultado?.receber?.principal ?? resultado?.principal;
         const expressar = resultado?.expressar?.principal ?? receber;
         if (!receber) return null;
+        const primeiroNome = nomePessoa?.split(" ")[0];
         return {
-          titulo: "Seu mapa afetivo",
+          titulo: primeiroNome ? `Perfil de ${primeiroNome}` : "Seu mapa afetivo",
           linha:
             resultado?.combinacao?.slice(0, 150) ??
             resultado?.sinteseHumana?.slice(0, 150),
           badge: resultado?.desalinhamento?.ativo ? "Receber e expressar diferem" : undefined,
           chips: [
-            { label: "Você recebe amor por", valor: LABEL_LINGUAGEM[receber] ?? receber },
+            {
+              label: pessoaId ? `${primeiroNome ?? "Esta pessoa"} recebe amor por` : "Você recebe amor por",
+              valor: LABEL_LINGUAGEM[receber] ?? receber,
+            },
             ...(expressar
-              ? [{ label: "Você expressa amor por", valor: LABEL_LINGUAGEM[expressar] ?? expressar }]
+              ? [
+                  {
+                    label: pessoaId ? `${primeiroNome ?? "Esta pessoa"} expressa amor por` : "Você expressa amor por",
+                    valor: LABEL_LINGUAGEM[expressar] ?? expressar,
+                  },
+                ]
               : []),
           ],
         };
@@ -175,6 +193,25 @@ export default function JornadaHubPage() {
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState<PreviewAnalise | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [pessoas, setPessoas] = useState<PessoaAnalise[]>([]);
+  const [selectedPessoaId, setSelectedPessoaId] = useState<number | null>(null);
+  const [showAddPessoa, setShowAddPessoa] = useState(false);
+  const [addNome, setAddNome] = useState("");
+  const [addRelacao, setAddRelacao] = useState("cônjuge");
+  const [addErro, setAddErro] = useState<string | null>(null);
+
+  const multiPessoa = slug ? MODULOS_MULTI_PESSOA.has(slug) : false;
+  const pessoaAtiva = useMemo(
+    () => (selectedPessoaId !== null ? pessoas.find((p) => p.id === selectedPessoaId) : null),
+    [pessoas, selectedPessoaId],
+  );
+
+  const carregarPessoas = useCallback(() => {
+    apiFetch("/traco/pessoas")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list: PessoaAnalise[]) => setPessoas(Array.isArray(list) ? list : []))
+      .catch(() => {});
+  }, []);
 
   const buscar = useCallback(async () => {
     setLoading(true);
@@ -195,20 +232,50 @@ export default function JornadaHubPage() {
     void buscar();
   }, [buscar]);
 
+  useEffect(() => {
+    if (multiPessoa) carregarPessoas();
+  }, [multiPessoa, carregarPessoas]);
+
   const modulo = useMemo(() => lista.find((m) => m.slug === slug), [lista, slug]);
   const copy = slug ? JORNADA_HUB_COPY[slug] : undefined;
 
   useEffect(() => {
-    if (!modulo?.analiseConcluida || !slug) {
+    if (!slug) {
+      setPreview(null);
+      return;
+    }
+    const deveCarregar = multiPessoa || modulo?.analiseConcluida;
+    if (!deveCarregar) {
       setPreview(null);
       return;
     }
     setPreviewLoading(true);
-    void carregarPreviewAnalise(slug).then((p) => {
+    void carregarPreviewAnalise(slug, multiPessoa ? selectedPessoaId : null, pessoaAtiva?.nome).then((p) => {
       setPreview(p);
       setPreviewLoading(false);
     });
-  }, [slug, modulo?.analiseConcluida]);
+  }, [slug, modulo?.analiseConcluida, multiPessoa, selectedPessoaId, pessoaAtiva?.nome]);
+
+  async function adicionarPessoa() {
+    setAddErro(null);
+    if (!addNome.trim()) {
+      setAddErro("Nome é obrigatório.");
+      return;
+    }
+    const res = await apiFetch("/traco/pessoas", {
+      method: "POST",
+      body: JSON.stringify({ nome: addNome.trim(), relacao: addRelacao }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setAddErro((data as { error?: string }).error ?? "Erro ao adicionar.");
+      return;
+    }
+    setAddNome("");
+    setShowAddPessoa(false);
+    carregarPessoas();
+    setSelectedPessoaId((data as PessoaAnalise).id);
+  }
 
   const proximoHub = useMemo(() => {
     if (!modulo || lista.length === 0) return null;
@@ -229,6 +296,15 @@ export default function JornadaHubPage() {
     modulo?.analiseConcluida && (!minicursoDisponivel || modulo.minicursoConcluido);
 
   const embedIntro = modulo?.videoIntroUrl ? getVideoEmbedUrl(modulo.videoIntroUrl) : null;
+
+  const perfilTemPreview = !!preview && !previewLoading;
+  const verResultadoLabel = pessoaAtiva
+    ? `Ver análise de ${pessoaAtiva.nome.split(" ")[0]}`
+    : (copy?.verResultadoLabel ?? "Ver meu resultado");
+  const descricaoSemPerfil = pessoaAtiva
+    ? `Ainda não há análise guardada para ${pessoaAtiva.nome.split(" ")[0]}. Inicie o questionário para este perfil.`
+    : (copy?.analiseDescricaoSem ??
+      "Reserve alguns minutos em um lugar calmo. Ao terminar, seu resultado fica guardado aqui.");
 
   if (loading) {
     return (
@@ -346,28 +422,45 @@ export default function JornadaHubPage() {
           <div
             className="rounded-2xl p-5"
             style={{
-              background: modulo.analiseConcluida
+              background: perfilTemPreview
                 ? "linear-gradient(135deg, rgba(93,185,122,0.06) 0%, rgba(30,24,18,0.5) 100%)"
                 : "rgba(255,255,255,0.04)",
-              border: `1px solid ${modulo.analiseConcluida ? "rgba(93,185,122,0.2)" : "rgba(200,165,107,0.14)"}`,
+              border: `1px solid ${perfilTemPreview ? "rgba(93,185,122,0.2)" : "rgba(200,165,107,0.14)"}`,
             }}
           >
             <p className="font-semibold text-sm mb-1" style={{ color: "#f7f2ec" }}>
               {copy?.analiseTitulo ?? "Questionário / análise"}
             </p>
 
-            {modulo.analiseConcluida ? (
+            {multiPessoa && (
+              <SeletorPessoaAnalise
+                className="mt-4 mb-4"
+                pessoas={pessoas}
+                selectedPessoaId={selectedPessoaId}
+                onSelect={setSelectedPessoaId}
+                showAdd={showAddPessoa}
+                onToggleAdd={() => setShowAddPessoa((s) => !s)}
+                addNome={addNome}
+                onAddNome={setAddNome}
+                addRelacao={addRelacao}
+                onAddRelacao={setAddRelacao}
+                onAdd={() => void adicionarPessoa()}
+                addErro={addErro}
+              />
+            )}
+
+            {multiPessoa || modulo.analiseConcluida ? (
               <>
                 {previewLoading ? (
                   <div className="flex items-center gap-2 py-4">
                     <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#c8a56b" }} />
                     <span className="text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>
-                      Carregando seu resultado…
+                      Carregando resultado…
                     </span>
                   </div>
                 ) : preview ? (
                   <div
-                    className="rounded-xl p-4 my-4"
+                    className="rounded-xl p-4 my-2"
                     style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(200,165,107,0.12)" }}
                   >
                     {preview.badge && (
@@ -407,44 +500,65 @@ export default function JornadaHubPage() {
                   </div>
                 ) : (
                   <p className="text-xs my-3" style={{ color: "rgba(247,242,236,0.45)" }}>
-                    {copy?.analiseDescricaoCom ?? "Análise concluída na sua conta."}
+                    {multiPessoa
+                      ? descricaoSemPerfil
+                      : (copy?.analiseDescricaoCom ?? "Análise concluída na sua conta.")}
                   </p>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                {preview ? (
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(hrefVerResultado(modulo.slug, modulo.hrefAnalise, selectedPessoaId))
+                      }
+                      className="flex-1 py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                      style={{
+                        background: "linear-gradient(135deg, #c8a56b, #9c7742)",
+                        color: "#1a1208",
+                      }}
+                    >
+                      <Eye className="w-4 h-4" />
+                      {verResultadoLabel}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(hrefNovaAnalise(modulo.slug, modulo.hrefAnalise, selectedPessoaId))
+                      }
+                      className="py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                      style={{
+                        background: "rgba(200,165,107,0.1)",
+                        color: "#c8a56b",
+                        border: "1px solid rgba(200,165,107,0.25)",
+                      }}
+                      title={copy?.novaAnaliseLabel ?? "Nova análise"}
+                    >
+                      <Plus className="w-4 h-4" />
+                      {copy?.novaAnaliseLabel ?? "Nova análise"}
+                    </button>
+                  </div>
+                ) : (
                   <button
                     type="button"
-                    onClick={() => navigate(hrefVerResultado(modulo.slug, modulo.hrefAnalise))}
-                    className="flex-1 py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                    onClick={() =>
+                      navigate(hrefIniciarAnalise(modulo.slug, modulo.hrefAnalise, selectedPessoaId))
+                    }
+                    className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mt-4"
                     style={{
                       background: "linear-gradient(135deg, #c8a56b, #9c7742)",
                       color: "#1a1208",
                     }}
                   >
-                    <Eye className="w-4 h-4" />
-                    {copy?.verResultadoLabel ?? "Ver meu resultado"}
+                    {pessoaAtiva ? `Iniciar análise de ${pessoaAtiva.nome.split(" ")[0]}` : "Iniciar análise"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate(hrefNovaAnalise(modulo.slug, modulo.hrefAnalise))}
-                    className="py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-                    style={{
-                      background: "rgba(200,165,107,0.1)",
-                      color: "#c8a56b",
-                      border: "1px solid rgba(200,165,107,0.25)",
-                    }}
-                    title={copy?.novaAnaliseLabel ?? "Nova análise"}
-                  >
-                    <Plus className="w-4 h-4" />
-                    {copy?.novaAnaliseLabel ?? "Nova análise"}
-                  </button>
-                </div>
+                )}
               </>
             ) : (
               <>
                 <p className="text-xs mb-4" style={{ color: "rgba(247,242,236,0.45)" }}>
-                  {copy?.analiseDescricaoSem ??
-                    "Reserve alguns minutos em um lugar calmo. Ao terminar, seu resultado fica guardado aqui."}
+                  {descricaoSemPerfil}
                 </p>
                 <button
                   type="button"

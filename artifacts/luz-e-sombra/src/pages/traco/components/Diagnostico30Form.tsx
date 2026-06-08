@@ -117,6 +117,9 @@ export default function Diagnostico30Form({
     setFase("intro");
     setIdx(0);
     setComputado(null);
+    setPassado(Array(25).fill(0));
+    setPresente(Array(25).fill(0));
+    setConsciencia(Array(5).fill(0));
     void carregarPersistido();
   }, [storageKey, carregarPersistido]);
 

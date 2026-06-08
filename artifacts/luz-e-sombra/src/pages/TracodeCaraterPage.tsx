@@ -7,6 +7,7 @@ import {
   purgeQuestionario20Storage,
   readDiagnosticoEmocional30Fusao,
   storageKeyDiagnostico30,
+  clearPessoaLocalStorage,
   isDiagnostico30RespostasCompletas,
   readDiagnostico30RespostasEntrada,
   parsePessoaIdFromSearch,
@@ -113,7 +114,7 @@ interface Pessoa {
 
 // ── Main Page ──────────────────────────────────────────────────────────────────
 export default function TracodeCaraterPage() {
-  const { user } = useAuth();
+  const { user, status } = useAuth();
   const [, setLocation] = useLocation();
   const search = useSearch();
   const selectedPessoaId = useMemo(() => parsePessoaIdFromSearch(search), [search]);
@@ -238,6 +239,28 @@ export default function TracodeCaraterPage() {
     setDiagnosticoCompleto(ent !== null && isDiagnostico30RespostasCompletas(ent));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPessoaId]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+    if (params.get("ver") === "resultado" && analise) {
+      requestAnimationFrame(() => {
+        document.getElementById("resultado-traco")?.scrollIntoView({ behavior: "smooth" });
+      });
+    }
+  }, [status, search, analise]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+    if (params.get("nova") !== "1") return;
+    try {
+      localStorage.removeItem(storageKeyDiagnostico30(selectedPessoaId, user?.id));
+    } catch {
+      /* ignore */
+    }
+    setDiagnosticoCompleto(false);
+  }, [status, search, selectedPessoaId, user?.id]);
 
   const handleFileSelect = useCallback(
     async (tipo: TipoFoto, file: File) => {
@@ -432,7 +455,7 @@ export default function TracodeCaraterPage() {
       if (res.ok) {
         setPessoas(prev => prev.filter(p => p.id !== id));
         try {
-          localStorage.removeItem(storageKeyDiagnostico30(id));
+          clearPessoaLocalStorage(id, user?.id);
         } catch {
           /* ignore */
         }
