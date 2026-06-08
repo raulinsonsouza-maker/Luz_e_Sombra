@@ -21,6 +21,44 @@
 
 set -e
 
+# sudo costuma limpar o PATH; pnpm fica em /usr/local/bin ou no npm global do root.
+resolve_pnpm() {
+  if command -v pnpm >/dev/null 2>&1; then
+    command -v pnpm
+    return 0
+  fi
+  local candidate
+  for candidate in \
+    /usr/local/bin/pnpm \
+    /usr/bin/pnpm \
+    /root/.local/share/pnpm/pnpm \
+    /root/.npm-global/bin/pnpm; do
+    if [[ -x "$candidate" ]]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+  if command -v corepack >/dev/null 2>&1; then
+    corepack enable >/dev/null 2>&1 || true
+    corepack prepare pnpm@9 --activate >/dev/null 2>&1 || true
+    if command -v pnpm >/dev/null 2>&1; then
+      command -v pnpm
+      return 0
+    fi
+  fi
+  if command -v npm >/dev/null 2>&1; then
+    echo "pnpm não encontrado; instalando globalmente com npm…" >&2
+    npm install -g pnpm
+    command -v pnpm
+    return 0
+  fi
+  echo "Erro: pnpm não encontrado. Instale com: npm install -g pnpm" >&2
+  return 1
+}
+
+PNPM="$(resolve_pnpm)"
+export PATH="$(dirname "$PNPM"):${PATH:-/usr/local/bin:/usr/bin}"
+
 APP_DIR="${APP_DIR:-/opt/luzesombra}"
 SKIP_DB_PUSH="${SKIP_DB_PUSH:-0}"
 HEALTHCHECK_RETRIES="${HEALTHCHECK_RETRIES:-25}"
@@ -44,10 +82,10 @@ echo "==> git pull"
 git pull
 
 echo ""
-echo "==> pnpm install"
-if ! pnpm install --frozen-lockfile; then
+echo "==> pnpm install ($PNPM)"
+if ! "$PNPM" install --frozen-lockfile; then
   echo "Aviso: --frozen-lockfile falhou; tentando sem travar o lockfile..."
-  pnpm install --no-frozen-lockfile
+  "$PNPM" install --no-frozen-lockfile
 fi
 
 if [[ "$SKIP_DB_PUSH" == "1" ]]; then
@@ -64,16 +102,16 @@ else
   # shellcheck disable=SC1091
   source ./.env
   set +a
-  pnpm --filter @workspace/db push
+  "$PNPM" --filter @workspace/db push
 fi
 
 echo ""
 echo "==> build frontend (@workspace/luz-e-sombra)"
-pnpm --filter @workspace/luz-e-sombra build
+"$PNPM" --filter @workspace/luz-e-sombra build
 
 echo ""
 echo "==> build API (@workspace/api-server)"
-pnpm --filter @workspace/api-server build
+"$PNPM" --filter @workspace/api-server build
 
 echo ""
 echo "==> systemctl restart luzesombra-api + reload nginx"
