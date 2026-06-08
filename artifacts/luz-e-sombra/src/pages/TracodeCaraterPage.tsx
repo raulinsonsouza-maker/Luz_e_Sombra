@@ -504,9 +504,9 @@ export default function TracodeCaraterPage() {
             Olá, <span style={{ color: "#c8a56b" }}>{primeiroNome}</span>.
           </p>
           <p className="text-base leading-relaxed" style={{ color: "rgba(247,242,236,0.55)", maxWidth: 600 }}>
-            Inspirada na Bioenergética de Alexander Lowen e na Análise do Caráter de Wilhelm Reich, esta jornada
-            revela, com gentileza e profundidade, os padrões que seu corpo carrega — e que contam a história de
-            quem você é, de onde você veio, e do quanto você já cresceu.
+            Ao cruzar suas fotos com o que você nos contou, esta jornada revela, com gentileza e profundidade,
+            os padrões que seu corpo expressa e a história de quem você é, de onde você veio e do quanto você já
+            cresceu.
           </p>
         </div>
       </section>
@@ -555,7 +555,7 @@ export default function TracodeCaraterPage() {
             ))}
 
             {/* Add button */}
-            {pessoas.length < 2 && (
+            {pessoas.length < 6 && (
               <button
                 onClick={() => setShowAddPessoa(s => !s)}
                 className="flex-shrink-0 px-4 py-3 rounded-2xl flex flex-col items-center gap-1 min-w-[78px] transition-all"

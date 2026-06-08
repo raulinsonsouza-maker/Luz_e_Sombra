@@ -37,7 +37,7 @@ interface Progresso {
 const XP_POR_SLUG: Record<string, number> = {
   traco: 100,
   temperamento: 60,
-  "linguagens-amor": 55,
+  "linguagens-amor": 60,
   roda: 50,
 };
 

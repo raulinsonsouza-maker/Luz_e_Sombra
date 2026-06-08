@@ -3,6 +3,7 @@ import { useLocation, useParams } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { ChevronLeft, Lock, Loader2, CheckCircle2, Sparkles } from "lucide-react";
+import { LABEL_LINGUAGEM, type LinguagemAmor } from "@workspace/cinco-linguagens-amor";
 import MobileTopBar from "@/components/MobileTopBar";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 import { MinicursoEmbedido } from "@/components/MinicursoEmbedido";
@@ -28,6 +29,7 @@ export default function JornadaHubPage() {
   const { status } = useAuth();
   const [lista, setLista] = useState<ModuloApi[]>([]);
   const [loading, setLoading] = useState(true);
+  const [previewLinguagens, setPreviewLinguagens] = useState<string | null>(null);
 
   const buscar = useCallback(async () => {
     setLoading(true);
@@ -47,6 +49,20 @@ export default function JornadaHubPage() {
   useEffect(() => {
     void buscar();
   }, [buscar]);
+
+  useEffect(() => {
+    if (slug !== "linguagens-amor") {
+      setPreviewLinguagens(null);
+      return;
+    }
+    apiFetch("/linguagens-amor/ultimo")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((row: { resultado?: { principal?: string; receber?: { principal?: string } } } | null) => {
+        const lang = (row?.resultado?.receber?.principal ?? row?.resultado?.principal) as LinguagemAmor | undefined;
+        setPreviewLinguagens(lang ? LABEL_LINGUAGEM[lang] ?? lang : null);
+      })
+      .catch(() => setPreviewLinguagens(null));
+  }, [slug]);
 
   const modulo = useMemo(() => lista.find((m) => m.slug === slug), [lista, slug]);
 
@@ -190,7 +206,9 @@ export default function JornadaHubPage() {
                 </p>
                 <p className="text-xs" style={{ color: "rgba(247,242,236,0.45)" }}>
                   {modulo.analiseConcluida
-                    ? "Análise registada na sua conta."
+                    ? previewLinguagens && slug === "linguagens-amor"
+                      ? `Sua linguagem principal: ${previewLinguagens}.`
+                      : "Análise registada na sua conta."
                     : "Reserve alguns minutos num lugar calmo. Depois, desbloqueia o minicurso."}
                 </p>
               </div>

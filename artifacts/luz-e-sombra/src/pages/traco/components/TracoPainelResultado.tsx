@@ -325,8 +325,8 @@ export function TracoPainelResultado({
                     className="text-xs mb-3 px-3 py-2 rounded-lg"
                     style={{ color: "rgba(224,123,57,0.9)", background: "rgba(224,123,57,0.08)" }}
                   >
-                    Suas fotos e suas respostas contam histórias um pouco diferentes — leia o resultado como uma
-                    orientação, não como rótulo fixo.
+                    Suas fotos e suas respostas apontam em direções diferentes em parte. O resultado integrado
+                    equilibra as duas leituras em uma visão só sua.
                   </p>
                 )}
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)" }}>
@@ -399,9 +399,6 @@ export function TracoPainelResultado({
                     );
                   })}
               </div>
-              <p className="text-xs mt-4 pt-3" style={{ color: "rgba(247,242,236,0.28)", borderTop: "1px solid rgba(200,165,107,0.08)" }}>
-                Percentuais são uma leitura orientativa, não diagnóstico.
-              </p>
             </div>
 
             {/* ── Interpretação ── */}

@@ -10,7 +10,7 @@ import {
   configuracoesModulosTable,
   usuariosTable,
 } from "@workspace/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
 import { minicursoCompletoParaUsuario } from "./modulosJornada";
 import { MISSOES_POR_DIA } from "../lib/missoesCuradas";
@@ -138,7 +138,12 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
     const [linguagensRow] = await db
       .select({ id: analiseLinguagensAmorTable.id })
       .from(analiseLinguagensAmorTable)
-      .where(eq(analiseLinguagensAmorTable.usuarioId, userId))
+      .where(
+        and(
+          eq(analiseLinguagensAmorTable.usuarioId, userId),
+          isNull(analiseLinguagensAmorTable.pessoaId)
+        )
+      )
       .limit(1);
 
     const configsMod = await db.select().from(configuracoesModulosTable);

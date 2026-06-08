@@ -46,7 +46,7 @@ export const ESTRUTURAS_CONFIG: Record<
     nome: "Masoquista",
     descricaoCurta: "Resiliente e leal. Suporta tudo com uma força interna impressionante.",
     descricaoLonga:
-      "A estrutura Masoquista carrega uma lealdade, uma resistência e uma capacidade de suportar que poucos possuem. Estas pessoas são presença certa nas horas difíceis, têm profundidade emocional e uma força que nasce da dor transformada. O caminho é aprender que podem expansão — que a vida não precisa ser apenas resistência.",
+      "A estrutura Masoquista carrega uma lealdade, uma resistência e uma capacidade de suportar que poucos possuem. Estas pessoas são presença certa nas horas difíceis, têm profundidade emocional e uma força que nasce da dor transformada. O caminho é aprender que a vida também pode ser leveza e expansão, não só resistência.",
     cor: "#6db96d",
     corBg: "rgba(109,185,109,0.08)",
     corBorder: "rgba(109,185,109,0.3)",
@@ -55,7 +55,7 @@ export const ESTRUTURAS_CONFIG: Record<
     nome: "Rígido",
     descricaoCurta: "Estruturado e realizador. Busca excelência com disciplina e presença.",
     descricaoLonga:
-      "A estrutura Rígida possui organização, comprometimento e uma capacidade de realizar que inspira. São pessoas confiáveis, prezam a qualidade em tudo que fazem e têm uma presença impactante. O caminho é abrir espaço para o coração — deixar o controle de lado e permitir ser tocado pela vida.",
+      "A estrutura Rígida possui organização, comprometimento e uma capacidade de realizar que inspira. São pessoas confiáveis, prezam a qualidade em tudo que fazem e têm uma presença impactante. O caminho é abrir espaço para o coração, deixar o controle de lado e permitir ser tocado pela vida.",
     cor: "#c8a56b",
     corBg: "rgba(200,165,107,0.08)",
     corBorder: "rgba(200,165,107,0.3)",
@@ -73,18 +73,18 @@ export const FOTOS_CONFIG: Record<TipoFoto, { label: string; instrucoes: string[
     icon: <User className="w-7 h-7" />,
   },
   "corpo-frente": {
-    label: "Corpo — Vista Frontal",
+    label: "Corpo, vista frontal",
     instrucoes: [
       "Em pé, corpo inteiro visível (cabeça a pés)",
       "Roupa justa ou mínima para permitir leitura corporal",
-      "Posição natural — não force postura",
+      "Posição natural, sem forçar postura",
     ],
     icon: <Camera className="w-7 h-7" />,
   },
   "corpo-lado": {
-    label: "Corpo — Vista Lateral",
+    label: "Corpo, vista lateral",
     instrucoes: [
-      "Perfil completo — cabeça até os pés",
+      "Perfil completo, da cabeça aos pés",
       "Posição natural de pé, braços soltos ao lado",
       "Iluminação que destaque contorno e postura",
     ],

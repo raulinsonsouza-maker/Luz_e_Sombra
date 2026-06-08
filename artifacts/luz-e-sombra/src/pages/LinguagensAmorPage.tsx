@@ -1,51 +1,133 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
-import { ArrowRight, Heart, Loader2 } from "lucide-react";
+import { ArrowRight, Heart, Loader2, RotateCcw } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import MobileTopBar from "@/components/MobileTopBar";
 import {
-  PARES_FORCADOS,
+  PARES_RECEBER,
+  PARES_EXPRESSAR,
   entradaLinguagensAmorSchema,
-  LABEL_LINGUAGEM,
+  tituloBloco,
+  type ParForcado,
 } from "@workspace/cinco-linguagens-amor";
+import LinguagensPainelResultado, { type ResultadoLinguagensUi } from "./linguagens-amor/LinguagensPainelResultado";
+import LinguagensSeletorPessoa, { type PessoaAnalise } from "./linguagens-amor/LinguagensSeletorPessoa";
+import LinguagensCruzamento from "./linguagens-amor/LinguagensCruzamento";
 
-const STORAGE_KEY = "luz_linguagens_amor_v1_draft";
+const STORAGE_KEY = "luz_linguagens_amor_v2_draft";
 const TOTAL = 30;
+const BLOCO1 = 15;
 
 type Fase = "intro" | "perguntas" | "enviando" | "resultado";
 
 type DraftPersist = {
-  answers: Record<string, "a" | "b">;
+  pessoaId: number | null;
+  bloco: 0 | 1;
   qIndex: number;
+  answers: Record<string, "a" | "b">;
   startedAt: number;
 };
+
+function draftKey(pessoaId: number | null): string {
+  return pessoaId === null ? STORAGE_KEY : `${STORAGE_KEY}_${pessoaId}`;
+}
 
 export default function LinguagensAmorPage() {
   const [, navigate] = useLocation();
   const { status } = useAuth();
   const [fase, setFase] = useState<Fase>("intro");
+  const [bloco, setBloco] = useState<0 | 1>(0);
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, "a" | "b">>({});
   const [startedAt, setStartedAt] = useState(() => Date.now());
   const [erro, setErro] = useState<string | null>(null);
-  const [resultadoApi, setResultadoApi] = useState<Record<string, unknown> | null>(null);
+  const [msgIntro, setMsgIntro] = useState<string | null>(null);
+  const [carregandoUltimo, setCarregandoUltimo] = useState(false);
+  const [resultadoApi, setResultadoApi] = useState<ResultadoLinguagensUi | null>(null);
+  const [nomeResultado, setNomeResultado] = useState<string | null>(null);
+
+  const [pessoas, setPessoas] = useState<PessoaAnalise[]>([]);
+  const [selectedPessoaId, setSelectedPessoaId] = useState<number | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [addNome, setAddNome] = useState("");
+  const [addRelacao, setAddRelacao] = useState("parceiro/a");
+  const [addErro, setAddErro] = useState<string | null>(null);
+  const [historicoIds, setHistoricoIds] = useState<Set<number>>(new Set());
+  const [showCruzamento, setShowCruzamento] = useState(false);
+
+  const paresBloco: ParForcado[] = bloco === 0 ? PARES_RECEBER : PARES_EXPRESSAR;
+  const parAtual = paresBloco[qIndex];
+  const indiceGlobal = bloco === 0 ? qIndex + 1 : BLOCO1 + qIndex + 1;
+  const progresso = fase === "perguntas" ? indiceGlobal / TOTAL : 0;
 
   useEffect(() => {
     if (status === "unauthenticated") navigate("/login");
   }, [status, navigate]);
 
-  const parAtual = PARES_FORCADOS[qIndex];
-  const progresso = fase === "perguntas" ? (qIndex + 1) / TOTAL : 0;
+  const carregarPessoas = useCallback(() => {
+    apiFetch("/traco/pessoas")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list: PessoaAnalise[]) => setPessoas(Array.isArray(list) ? list : []))
+      .catch(() => {});
+  }, []);
+
+  const carregarHistorico = useCallback(() => {
+    apiFetch("/linguagens-amor/historico")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows: { pessoaId?: number | null }[]) => {
+        const ids = new Set<number>();
+        for (const row of rows) {
+          if (row.pessoaId) ids.add(row.pessoaId);
+        }
+        setHistoricoIds(ids);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    carregarPessoas();
+    carregarHistorico();
+  }, [carregarPessoas, carregarHistorico]);
+
+  const carregarUltimoServidor = useCallback(async () => {
+    setMsgIntro(null);
+    setCarregandoUltimo(true);
+    try {
+      const qs = selectedPessoaId !== null ? `?pessoaId=${selectedPessoaId}` : "";
+      const res = await apiFetch(`/linguagens-amor/ultimo${qs}`);
+      if (!res.ok) {
+        setMsgIntro("Não foi possível carregar agora. Tente de novo daqui a pouco.");
+        return;
+      }
+      const row = (await res.json()) as { resultado?: ResultadoLinguagensUi; pessoaId?: number | null } | null;
+      if (row?.resultado) {
+        const nome =
+          selectedPessoaId !== null
+            ? pessoas.find((p) => p.id === selectedPessoaId)?.nome ?? null
+            : null;
+        setNomeResultado(nome);
+        setResultadoApi(row.resultado);
+        setFase("resultado");
+        return;
+      }
+      setMsgIntro("Ainda não há resultado guardado para este perfil. Complete o questionário uma vez.");
+    } catch {
+      setMsgIntro("Não foi possível carregar. Verifique a ligação à internet.");
+    } finally {
+      setCarregandoUltimo(false);
+    }
+  }, [selectedPessoaId, pessoas]);
 
   const iniciarOuRecuperar = useCallback(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(draftKey(selectedPessoaId));
       if (raw) {
         const d = JSON.parse(raw) as DraftPersist;
         if (d.answers && typeof d.qIndex === "number") {
           setAnswers(typeof d.answers === "object" ? d.answers : {});
-          setQIndex(Math.min(TOTAL - 1, Math.max(0, d.qIndex)));
+          setBloco(d.bloco === 1 ? 1 : 0);
+          setQIndex(Math.min(BLOCO1 - 1, Math.max(0, d.qIndex)));
           setStartedAt(typeof d.startedAt === "number" ? d.startedAt : Date.now());
           setFase("perguntas");
           return;
@@ -56,34 +138,52 @@ export default function LinguagensAmorPage() {
     }
     const t = Date.now();
     setAnswers({});
+    setBloco(0);
     setQIndex(0);
     setStartedAt(t);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: {}, qIndex: 0, startedAt: t } satisfies DraftPersist));
+      localStorage.setItem(
+        draftKey(selectedPessoaId),
+        JSON.stringify({ pessoaId: selectedPessoaId, bloco: 0, qIndex: 0, answers: {}, startedAt: t } satisfies DraftPersist),
+      );
     } catch {
       /* ignore */
     }
     setFase("perguntas");
-  }, []);
+  }, [selectedPessoaId]);
+
+  const refazer = useCallback(() => {
+    localStorage.removeItem(draftKey(selectedPessoaId));
+    setResultadoApi(null);
+    setShowCruzamento(false);
+    iniciarOuRecuperar();
+  }, [selectedPessoaId, iniciarOuRecuperar]);
 
   useEffect(() => {
     if (fase !== "perguntas") return;
-    const draft: DraftPersist = { answers, qIndex, startedAt };
+    const draft: DraftPersist = { pessoaId: selectedPessoaId, bloco, qIndex, answers, startedAt };
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+      localStorage.setItem(draftKey(selectedPessoaId), JSON.stringify(draft));
     } catch {
       /* ignore */
     }
-  }, [fase, answers, qIndex, startedAt]);
+  }, [fase, selectedPessoaId, bloco, qIndex, answers, startedAt]);
 
   function escolher(lado: "a" | "b") {
     if (!parAtual) return;
-    setAnswers((prev) => ({ ...prev, [parAtual.id]: lado }));
-    if (qIndex < TOTAL - 1) {
+    const novas = { ...answers, [parAtual.id]: lado };
+    setAnswers(novas);
+
+    if (qIndex < BLOCO1 - 1) {
       setQIndex((i) => i + 1);
       return;
     }
-    void enviar({ ...answers, [parAtual.id]: lado });
+    if (bloco === 0) {
+      setBloco(1);
+      setQIndex(0);
+      return;
+    }
+    void enviar(novas);
   }
 
   async function enviar(ans: Record<string, "a" | "b">) {
@@ -92,7 +192,7 @@ export default function LinguagensAmorPage() {
       metadata: {
         tempo_total_segundos: Math.max(0, Math.floor((Date.now() - startedAt) / 1000)),
         idioma: "pt-BR",
-        versao_questionario: "1.0",
+        versao_questionario: "2.0",
       },
     });
     if (!parsed.success) {
@@ -104,7 +204,7 @@ export default function LinguagensAmorPage() {
     try {
       const res = await apiFetch("/linguagens-amor", {
         method: "POST",
-        body: JSON.stringify(parsed.data),
+        body: JSON.stringify({ ...parsed.data, pessoaId: selectedPessoaId }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -112,9 +212,15 @@ export default function LinguagensAmorPage() {
         setFase("perguntas");
         return;
       }
-      localStorage.removeItem(STORAGE_KEY);
-      setResultadoApi(data as Record<string, unknown>);
+      localStorage.removeItem(draftKey(selectedPessoaId));
+      const nome =
+        selectedPessoaId !== null
+          ? pessoas.find((p) => p.id === selectedPessoaId)?.nome ?? null
+          : null;
+      setNomeResultado(nome);
+      setResultadoApi(data as ResultadoLinguagensUi);
       setFase("resultado");
+      carregarHistorico();
     } catch {
       setErro("Falha de rede.");
       setFase("perguntas");
@@ -126,56 +232,87 @@ export default function LinguagensAmorPage() {
       setQIndex((i) => i - 1);
       return;
     }
+    if (bloco === 1) {
+      setBloco(0);
+      setQIndex(BLOCO1 - 1);
+      return;
+    }
     setFase("intro");
   }
 
-  const rankingDisplay = useMemo(() => {
-    const r = resultadoApi?.ranking as { linguagem?: string; pontos?: number; pct?: number }[] | undefined;
-    return Array.isArray(r) ? r : [];
-  }, [resultadoApi]);
+  async function adicionarPessoa() {
+    setAddErro(null);
+    if (!addNome.trim()) {
+      setAddErro("Nome é obrigatório.");
+      return;
+    }
+    const res = await apiFetch("/traco/pessoas", {
+      method: "POST",
+      body: JSON.stringify({ nome: addNome.trim(), relacao: addRelacao }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setAddErro((data as { error?: string }).error ?? "Erro ao adicionar.");
+      return;
+    }
+    setAddNome("");
+    setShowAdd(false);
+    carregarPessoas();
+    setSelectedPessoaId((data as PessoaAnalise).id);
+  }
+
+  const subtituloPerguntas = useMemo(() => {
+    const tit = tituloBloco(bloco === 0 ? "receber" : "expressar");
+    return `${indiceGlobal} de ${TOTAL} · ${tit}`;
+  }, [bloco, indiceGlobal]);
 
   const bg = "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)";
 
   if (fase === "resultado" && resultadoApi) {
-    const principal = String(resultadoApi.principal ?? "");
-    const sec = String(resultadoApi.secundaria ?? "");
     return (
       <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
-        <MobileTopBar titulo="Linguagens do amor" subtitulo="As tuas escolhas" />
-        <div className="max-w-lg mx-auto space-y-6">
+        <MobileTopBar titulo="Linguagens do amor" subtitulo="Seu perfil" />
+        <div className="max-w-lg mx-auto space-y-5">
           <button
             type="button"
             onClick={() => navigate("/jornada/linguagens-amor")}
             className="text-sm opacity-70 hover:opacity-100"
             style={{ color: "#c8a56b" }}
           >
-            Voltar ao módulo (intro + minicurso)
+            Voltar ao módulo
           </button>
-          <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
-            <Heart className="w-10 h-10 mb-4" style={{ color: "#c8a56b" }} />
-            <h1 className="font-tan-mon-cheri text-2xl mb-2" style={{ color: "#f7f2ec" }}>
-              As tuas linguagens do amor
-            </h1>
-            <p className="text-sm mb-4" style={{ color: "rgba(247,242,236,0.55)" }}>
-              Principal: <strong style={{ color: "#f7f2ec" }}>{LABEL_LINGUAGEM[principal as keyof typeof LABEL_LINGUAGEM] ?? principal}</strong>
-              {" · "}
-              Secundária:{" "}
-              <strong style={{ color: "#f7f2ec" }}>{LABEL_LINGUAGEM[sec as keyof typeof LABEL_LINGUAGEM] ?? sec}</strong>
-            </p>
-            {rankingDisplay.length > 0 && (
-              <ul className="space-y-2 text-sm" style={{ color: "rgba(247,242,236,0.65)" }}>
-                {rankingDisplay.map((row) => (
-                  <li key={String(row.linguagem)} className="flex justify-between gap-2">
-                    <span>{LABEL_LINGUAGEM[(row.linguagem ?? "") as keyof typeof LABEL_LINGUAGEM] ?? row.linguagem}</span>
-                    <span className="tabular-nums opacity-80">{row.pontos} pts ({row.pct}%)</span>
-                  </li>
-                ))}
-              </ul>
+
+          <LinguagensPainelResultado resultado={resultadoApi} nomePessoa={nomeResultado} />
+
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={refazer}
+              className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+              style={{ background: "rgba(200,165,107,0.12)", color: "#c8a56b", border: "1px solid rgba(200,165,107,0.25)" }}
+            >
+              <RotateCcw className="w-4 h-4" />
+              Refazer questionário
+            </button>
+            {selectedPessoaId === null && (
+              <button
+                type="button"
+                onClick={() => setShowCruzamento((s) => !s)}
+                className="w-full py-3 rounded-xl text-sm font-semibold"
+                style={{ background: "rgba(255,255,255,0.04)", color: "rgba(247,242,236,0.7)", border: "1px solid rgba(200,165,107,0.15)" }}
+              >
+                {showCruzamento ? "Ocultar cruzamento" : "Cruzar com alguém"}
+              </button>
             )}
-            <p className="text-sm mt-5 leading-relaxed whitespace-pre-wrap" style={{ color: "rgba(247,242,236,0.55)" }}>
-              {String(resultadoApi.interpretacaoPar ?? resultadoApi.interpretacaoPrincipal ?? "")}
-            </p>
           </div>
+
+          {showCruzamento && selectedPessoaId === null && (
+            <LinguagensCruzamento
+              pessoas={pessoas}
+              historicoIds={historicoIds}
+              onFechar={() => setShowCruzamento(false)}
+            />
+          )}
         </div>
       </div>
     );
@@ -189,7 +326,7 @@ export default function LinguagensAmorPage() {
         </div>
         <Loader2 className="w-10 h-10 animate-spin mb-4" style={{ color: "#c8a56b" }} />
         <p className="text-sm" style={{ color: "rgba(247,242,236,0.5)" }}>
-          A guardar a tua análise…
+          A guardar sua análise…
         </p>
       </div>
     );
@@ -198,25 +335,64 @@ export default function LinguagensAmorPage() {
   if (fase === "intro") {
     return (
       <div className="min-h-screen pb-28 px-4 pt-8" style={{ background: bg }}>
-        <MobileTopBar titulo="5 Linguagens do Amor" subtitulo="Questionário de pares" />
+        <MobileTopBar titulo="5 Linguagens do Amor" subtitulo="Questionário v2" />
         <div className="max-w-lg mx-auto">
           <Heart className="w-12 h-12 mb-6 hidden md:block" style={{ color: "#c8a56b" }} />
           <h1 className="font-tan-mon-cheri text-3xl mb-4 hidden md:block" style={{ color: "#f7f2ec" }}>
             5 Linguagens do Amor
           </h1>
-          <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(247,242,236,0.55)" }}>
-            Em cada par, escolhe a frase que mais te representa. São {TOTAL} escolhas — não há certo ou errado, apenas o teu
-            jeito de dar e receber afeto.
+
+          <LinguagensSeletorPessoa
+            pessoas={pessoas}
+            selectedPessoaId={selectedPessoaId}
+            onSelect={setSelectedPessoaId}
+            showAdd={showAdd}
+            onToggleAdd={() => setShowAdd((s) => !s)}
+            addNome={addNome}
+            onAddNome={setAddNome}
+            addRelacao={addRelacao}
+            onAddRelacao={setAddRelacao}
+            onAdd={() => void adicionarPessoa()}
+            addErro={addErro}
+          />
+
+          <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.55)" }}>
+            Cada pessoa sente e demonstra amor de um jeito diferente. Em dois blocos de 15 escolhas, você descobre
+            como prefere <strong style={{ color: "rgba(200,165,107,0.8)" }}>receber</strong> e como costuma{" "}
+            <strong style={{ color: "rgba(200,165,107,0.8)" }}>expressar</strong> afeto — o tanque emocional de Gary
+            Chapman.
           </p>
-          <button
-            type="button"
-            onClick={iniciarOuRecuperar}
-            className="w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2"
-            style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
-          >
-            Começar
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(247,242,236,0.45)" }}>
+            Em cada par, escolha a frase que mais combina com você. São {TOTAL} escolhas no total. Não há certo ou
+            errado.
+          </p>
+
+          {msgIntro && (
+            <p className="text-sm mb-4" style={{ color: "rgba(247,242,236,0.55)" }}>
+              {msgIntro}
+            </p>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={iniciarOuRecuperar}
+              className="w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2"
+              style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
+            >
+              Começar
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              disabled={carregandoUltimo}
+              onClick={() => void carregarUltimoServidor()}
+              className="w-full py-3 rounded-xl text-sm font-medium disabled:opacity-50"
+              style={{ background: "rgba(255,255,255,0.04)", color: "#c8a56b", border: "1px solid rgba(200,165,107,0.2)" }}
+            >
+              {carregandoUltimo ? "A carregar…" : "Ver último resultado"}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -224,14 +400,22 @@ export default function LinguagensAmorPage() {
 
   return (
     <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
-      <MobileTopBar titulo="Linguagens do amor" subtitulo={`${qIndex + 1} de ${TOTAL}`} />
+      <MobileTopBar titulo="Linguagens do amor" subtitulo={subtituloPerguntas} />
       <div className="max-w-lg mx-auto">
+        {bloco === 1 && qIndex === 0 && (
+          <div
+            className="mb-4 p-3 rounded-xl text-xs text-center"
+            style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.2)", color: "rgba(247,242,236,0.6)" }}
+          >
+            Bloco 2 de 2 — Agora: como você demonstra amor
+          </div>
+        )}
         <div className="flex items-center justify-between mb-4">
           <button type="button" onClick={voltar} className="text-xs" style={{ color: "rgba(200,165,107,0.65)" }}>
             Voltar
           </button>
           <span className="text-[11px] tabular-nums" style={{ color: "rgba(247,242,236,0.35)" }}>
-            {qIndex + 1} / {TOTAL}
+            {indiceGlobal} / {TOTAL}
           </span>
         </div>
         <div className="h-2 rounded-full mb-8 overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
@@ -244,14 +428,12 @@ export default function LinguagensAmorPage() {
           />
         </div>
 
-        {erro && (
-          <p className="text-sm mb-4 text-red-400/90">{erro}</p>
-        )}
+        {erro && <p className="text-sm mb-4 text-red-400/90">{erro}</p>}
 
         {parAtual && (
           <div className="space-y-6">
             <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
-              O que é mais verdadeiro para ti?
+              O que é mais verdadeiro para você?
             </p>
             <button
               type="button"

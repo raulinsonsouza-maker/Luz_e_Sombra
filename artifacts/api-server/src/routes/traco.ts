@@ -176,8 +176,8 @@ router.post("/pessoas", requireAuth, async (req: AuthRequest, res: Response) => 
       .select({ id: pessoasAnaliseTable.id })
       .from(pessoasAnaliseTable)
       .where(eq(pessoasAnaliseTable.usuarioId, req.user!.id));
-    if (existentes.length >= 2) {
-      return res.status(400).json({ error: "Limite de 2 pessoas adicionais atingido" });
+    if (existentes.length >= 6) {
+      return res.status(400).json({ error: "Limite de 6 pessoas adicionais atingido" });
     }
 
     const [pessoa] = await db

@@ -10,7 +10,7 @@ import {
   aulasTable,
   progressoCursosTable,
 } from "@workspace/db";
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
 const router = Router();
 
@@ -54,7 +54,12 @@ async function temAnalise(usuarioId: number, slug: string): Promise<boolean> {
       const [r] = await db
         .select({ id: analiseLinguagensAmorTable.id })
         .from(analiseLinguagensAmorTable)
-        .where(eq(analiseLinguagensAmorTable.usuarioId, usuarioId))
+        .where(
+          and(
+            eq(analiseLinguagensAmorTable.usuarioId, usuarioId),
+            isNull(analiseLinguagensAmorTable.pessoaId)
+          )
+        )
         .limit(1);
       return !!r;
     }

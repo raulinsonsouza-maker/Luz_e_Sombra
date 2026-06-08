@@ -292,7 +292,7 @@ export function aplicarFusaoTracoDiagnostico(
   const sinaisConvergentes: string[] = [];
   if (alinhamento >= 75) {
     sinaisConvergentes.push(
-      "O que aparece nas imagens e o que você declarou no questionário apontam na mesma direção — leitura mais estável."
+      "O que aparece nas imagens e o que você declarou no questionário apontam na mesma direção."
     );
   } else if (alinhamento >= 55) {
     sinaisConvergentes.push(
@@ -300,7 +300,7 @@ export function aplicarFusaoTracoDiagnostico(
     );
   } else {
     sinaisConvergentes.push(
-      "Fotos e formulário divergem em parte — o resultado integra ambas sem forçar um único extremo."
+      "Fotos e formulário divergem em parte. O resultado integra ambas em uma leitura só sua."
     );
   }
   if (estruturasFusionadas[e1] - estruturasFusionadas[e2] >= 12) {

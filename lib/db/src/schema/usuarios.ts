@@ -267,19 +267,26 @@ export const configuracoesModulosTable = pgTable("configuracoes_modulos", {
   ordemIdx: index("idx_config_modulos_ordem").on(table.ordem),
 }));
 
-/** Resultado do questionário das 5 linguagens do amor (30 escolhas forçadas, v1). */
+/** Resultado do questionário das 5 linguagens do amor (30 escolhas forçadas, v2). */
 export const analiseLinguagensAmorTable = pgTable("analise_linguagens_amor", {
   id: serial("id").primaryKey(),
   usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  /** null = Eu (próprio utilizador); caso contrário pessoa em pessoas_analise. */
+  pessoaId: integer("pessoa_id").references(() => pessoasAnaliseTable.id, { onDelete: "cascade" }),
   respostas: jsonb("respostas").notNull(),
   pontuacoes: jsonb("pontuacoes").notNull(),
   linguagemPrincipal: text("linguagem_principal").notNull(),
   linguagemSecundaria: text("linguagem_secundaria").notNull(),
   resultado: jsonb("resultado").notNull(),
-  versao: text("versao").notNull().default("linguagens_amor_v1"),
+  versao: text("versao").notNull().default("linguagens_amor_v2"),
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
 }, (table) => ({
   usuarioIdx: index("idx_analise_linguagens_amor_usuario").on(table.usuarioId),
+  usuarioPessoaRecenteIdx: index("idx_analise_linguagens_user_pessoa").on(
+    table.usuarioId,
+    table.pessoaId,
+    table.criadoEm
+  ),
 }));
 
 // ── Schemas & types ────────────────────────────────────────────────────────────

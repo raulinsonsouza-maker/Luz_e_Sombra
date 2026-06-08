@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CODIGOS_PAR } from "./perguntas.js";
+import { CODIGOS_PAR } from "./perguntas/index.js";
 
 const lado = z.enum(["a", "b"]);
 
@@ -8,6 +8,9 @@ export const metadataLinguagensSchema = z.object({
   idioma: z.string().optional(),
   versao_questionario: z.string().optional(),
 });
+
+const CODIGOS_V2 = new Set(CODIGOS_PAR as readonly string[]);
+const CODIGOS_V1 = /^P\d{2}$/;
 
 export const entradaLinguagensAmorSchema = z.object({
   answers: z
@@ -22,12 +25,14 @@ export const entradaLinguagensAmorSchema = z.object({
           });
         }
       }
-      const codigos = CODIGOS_PAR as readonly string[];
       for (const k of Object.keys(rec)) {
-        if (!codigos.includes(k)) {
+        if (!CODIGOS_V2.has(k)) {
+          const msg = CODIGOS_V1.test(k)
+            ? `Código v1 obsoleto (${k}). Refaça o questionário com R01–E15.`
+            : `Código desconhecido: ${k}`;
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Código desconhecido: ${k}`,
+            message: msg,
             path: ["answers", k],
           });
         }
@@ -35,5 +40,19 @@ export const entradaLinguagensAmorSchema = z.object({
     }),
   metadata: metadataLinguagensSchema.default({}),
 });
+
+export const linguagemAmorSchema = z.enum(["palavras", "tempo", "presentes", "servicos", "toque"]);
+
+export const entradaCompatibilidadeSchema = z.union([
+  z.object({ pessoaIdOutro: z.number().int().positive() }),
+  z.object({
+    manual: z.object({
+      nome: z.string().min(1),
+      relacao: z.string().optional(),
+      principalExpressar: linguagemAmorSchema,
+      principalReceber: linguagemAmorSchema.optional(),
+    }),
+  }),
+]);
 
 export type EntradaLinguagensAmorParsed = z.infer<typeof entradaLinguagensAmorSchema>;

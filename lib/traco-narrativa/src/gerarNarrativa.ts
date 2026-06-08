@@ -31,7 +31,7 @@ function observacaoPorFotoHumana(m: MarcadoresFoto, principal: EstruturaTraco): 
         : T.OBS_LADO[principal];
 
   if (!m.poseDetectada || m.qualidadeFoto < 0.22) {
-    return "Nesta foto a leitura foi limitada — use as outras tomadas como complemento.";
+    return "Nesta foto a leitura foi limitada. Use as outras tomadas como complemento.";
   }
   return base;
 }
@@ -194,7 +194,7 @@ function construirInterpretacao(
 
   if (pctP - pctS < 12) {
     blocos.push(
-      "Os dois padrões centrais aparecem com intensidade próxima — tendência a respostas mais contextuais e híbridas."
+      "Os dois padrões centrais aparecem com intensidade próxima, com tendência a respostas mais contextuais e híbridas."
     );
   } else {
     blocos.push(ip[(r + 4) % 5] ?? ip[4]);
@@ -202,7 +202,7 @@ function construirInterpretacao(
 
   const texto = blocos.filter(Boolean).join("\n\n");
   if (confiancaZero) {
-    return `Confiança baixa nesta sessão: não foi possível validar ombros e quadril em foto de corpo. Leia como exploração — refaça com poses claras e fundo neutro.\n\n${texto}`;
+    return `Não foi possível validar ombros e quadril nesta sessão. Refaça com poses claras e fundo neutro para uma leitura mais completa.\n\n${texto}`;
   }
   return texto;
 }
@@ -220,7 +220,7 @@ function construirPerfilFisicoHumano(
   if (principal === "rigido" && (eixos?.indiceContencao ?? 0) > 0.38 && frases.length < 4) {
     if (!frases.some((f) => f.includes("contenção"))) {
       frases.push(
-        "A organização corporal sugere alguém que mantém o equilíbrio por dentro — com cuidado e precisão."
+        "A organização corporal sugere alguém que mantém o equilíbrio por dentro, com cuidado e precisão."
       );
     }
   }
@@ -230,7 +230,7 @@ function construirPerfilFisicoHumano(
   }
 
   if (frases.length === 0) {
-    return "As fotos permitem uma leitura orientativa do seu perfil corporal — use as três tomadas juntas para uma visão mais completa.";
+    return "Suas fotos revelam padrões do seu perfil corporal. Use as três tomadas juntas para uma visão mais completa.";
   }
   return frases.join(" ");
 }
@@ -251,10 +251,10 @@ function construirSinteseHumana(
       const toque = T.SINTESE_TOQUE_SECUNDARIO[secundaria];
       return `Suas fotos e seu questionário apontam para alguém ${adj}, com ${toque}.`;
     }
-    return `Suas fotos e seu questionário contam a mesma história — com foco em ${T.SINTESE_FOCO[principal]}.`;
+    return `Suas fotos e seu questionário contam a mesma história, com foco em ${T.SINTESE_FOCO[principal]}.`;
   }
   if (alinhamento >= 55) {
-    return `Suas fotos e suas respostas se complementam — predominando ${T.SINTESE_FOCO[principal]}.`;
+    return `Suas fotos e suas respostas se complementam, predominando ${T.SINTESE_FOCO[principal]}.`;
   }
   return `Suas fotos e suas respostas oferecem leituras diferentes; o resultado integrado destaca ${T.SINTESE_FOCO[principal]}.`;
 }
@@ -279,7 +279,7 @@ function estiloComunicacaoModulado(
 }
 
 const PADRAO_CONTENCAO_RIGIDA =
-  "O corpo apresenta organização e simetria notáveis, com contenção emocional perceptível — não é colapso buscando sustentação, mas couraça funcional que mantém tudo no lugar. Há tensão discreta na cintura e região dorsal, sugerindo compressão crônica mais do que flacidez oral.";
+  "O corpo apresenta organização e simetria notáveis, com contenção emocional perceptível. Não é colapso buscando sustentação, mas couraça funcional que mantém tudo no lugar. Há tensão discreta na cintura e região dorsal, sugerindo compressão crônica mais do que flacidez oral.";
 
 function resolverPadraoPostural(
   principal: EstruturaTraco,
@@ -405,7 +405,7 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
   const comboKey = `${principal}-${secundaria}`;
   const perfilUnico =
     T.PERFIS_UNICOS[comboKey] ??
-    `A combinação de ${T.NOMES[principal]} (${pctP}%) com ${T.NOMES[secundaria]} (${pctS}%) cria um perfil próprio — observe como estes percentuais convivem na sua história, não só no rótulo.`;
+    `A combinação de ${T.NOMES[principal]} (${pctP}%) com ${T.NOMES[secundaria]} (${pctS}%) cria um perfil próprio. Observe como estes percentuais convivem na sua história, não só no rótulo.`;
 
   const sinteseHumana = construirSinteseHumana(principal, secundaria, pctS, fusao);
 
