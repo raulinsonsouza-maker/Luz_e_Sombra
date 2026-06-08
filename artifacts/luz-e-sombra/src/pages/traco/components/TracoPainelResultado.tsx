@@ -57,6 +57,7 @@ interface ResultadoAnalise {
   confiancaAnalise?: number;
   estruturasSomenteFotos?: EstruturasPct;
   sinteseIntegradaFotosQuestionario?: string;
+  sinteseHumana?: string;
   fusaoDiagnosticoEmocional?: FusaoDiagnosticoEmocionalResposta;
   perfilFisicoNarrado?: string;
   estiloComunicacao?: EstiloComunicacao;
@@ -119,7 +120,6 @@ export function TracoPainelResultado({
   const estruturaPrincipal = resultado.estruturaPrincipal;
   const configPrincipal = estruturaPrincipal ? ESTRUTURAS_CONFIG[estruturaPrincipal] : null;
   const [expandedObs, setExpandedObs] = useState(false);
-  const [expandedCaract, setExpandedCaract] = useState(false);
   const dataAnalise = new Date(criadoEm ?? analise.criadoEm).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "long",
@@ -127,22 +127,14 @@ export function TracoPainelResultado({
   });
   const alvoAnalise = pessoaNome?.trim() ? pessoaNome.trim() : "Você";
   const temFusao = !!resultado.fusaoDiagnosticoEmocional;
-  const somenteFotos = resultado.estruturasSomenteFotos;
-  const principalSomenteFotos = somenteFotos
-    ? (Object.entries(somenteFotos).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null)
-    : null;
-  const principalDiverge =
-    temFusao &&
-    somenteFotos &&
-    principalSomenteFotos &&
-    principalSomenteFotos !== estruturaPrincipal;
   const alinhamento = resultado.fusaoDiagnosticoEmocional?.alinhamentoFotosFormulario;
-  const baixaConcordancia = alinhamento != null && alinhamento < 65;
-  const [expandedAuditoria, setExpandedAuditoria] = useState(
-    () => !!(principalDiverge || baixaConcordancia)
-  );
-  const eixos = resultado.eixosReich ?? resultado.metadata?.eixosReich;
+  const baixaConcordancia = alinhamento != null && alinhamento < 55;
+  const showAuditUi =
+    import.meta.env.DEV || import.meta.env.VITE_TRACO_AUDIT_UI === "1";
+  const [expandedAuditoria, setExpandedAuditoria] = useState(false);
   const segmentos = resultado.segmentosReich ?? resultado.metadata?.segmentosReich;
+  const textoIntegrado =
+    resultado.sinteseHumana ?? resultado.sinteseIntegradaFotosQuestionario;
 
   return (
           <div id="resultado-traco" className="space-y-5">
@@ -192,15 +184,7 @@ export function TracoPainelResultado({
                       border: "1px solid rgba(200,165,107,0.2)",
                     }}
                   >
-                    Resultado integrado (fotos + questionário emocional)
-                    {principalDiverge && somenteFotos && principalSomenteFotos && (
-                      <span className="block mt-1 opacity-80">
-                        Só pelas fotos, a principal seria{" "}
-                        {ESTRUTURAS_CONFIG[principalSomenteFotos as keyof EstruturasPct]?.nome ??
-                          principalSomenteFotos}{" "}
-                        ({somenteFotos[principalSomenteFotos as keyof EstruturasPct]}%).
-                      </span>
-                    )}
+                    Com base nas suas fotos e respostas
                   </p>
                 )}
 
@@ -208,7 +192,7 @@ export function TracoPainelResultado({
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
                     <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>
-                      {temFusao ? "Estrutura Principal (integrada)" : "Estrutura Principal"}
+                      Estrutura Principal
                     </p>
                     <h2
                       className="font-tan-mon-cheri text-3xl md:text-4xl"
@@ -320,97 +304,34 @@ export function TracoPainelResultado({
               </div>
             )}
 
-            {/* ── Leitura integrada (API: fotos + questionário) ── */}
-            {(resultado.sinteseIntegradaFotosQuestionario || resultado.fusaoDiagnosticoEmocional) && (
+            {/* ── Leitura integrada (fotos + questionário) ── */}
+            {temFusao && textoIntegrado && (
               <div
                 className="rounded-2xl p-6"
                 style={{
-                  background: "linear-gradient(135deg, rgba(109,185,109,0.06) 0%, rgba(200,165,107,0.05) 100%)",
-                  border: "1px solid rgba(109,185,109,0.22)",
+                  background: baixaConcordancia
+                    ? "rgba(224,123,57,0.05)"
+                    : "linear-gradient(135deg, rgba(109,185,109,0.06) 0%, rgba(200,165,107,0.05) 100%)",
+                  border: baixaConcordancia
+                    ? "1px solid rgba(224,123,57,0.22)"
+                    : "1px solid rgba(109,185,109,0.22)",
                 }}
               >
                 <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(109,185,109,0.65)" }}>
-                  Leitura integrada
+                  Como suas fotos e respostas se encontram
                 </p>
-                <h3 className="font-tan-mon-cheri text-base mb-3" style={{ color: "rgba(247,242,236,0.9)" }}>
-                  Fotos + diagnóstico emocional
-                </h3>
-                {resultado.sinteseIntegradaFotosQuestionario && (
-                  <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.72)" }}>
-                    {resultado.sinteseIntegradaFotosQuestionario}
+                {baixaConcordancia && (
+                  <p
+                    className="text-xs mb-3 px-3 py-2 rounded-lg"
+                    style={{ color: "rgba(224,123,57,0.9)", background: "rgba(224,123,57,0.08)" }}
+                  >
+                    Suas fotos e suas respostas contam histórias um pouco diferentes — leia o resultado como uma
+                    orientação, não como rótulo fixo.
                   </p>
                 )}
-                {resultado.fusaoDiagnosticoEmocional?.sinaisConvergentes &&
-                  resultado.fusaoDiagnosticoEmocional.sinaisConvergentes.length > 0 && (
-                    <ul className="list-disc pl-5 space-y-1.5 text-sm" style={{ color: "rgba(247,242,236,0.58)" }}>
-                      {resultado.fusaoDiagnosticoEmocional.sinaisConvergentes.map((s, i) => (
-                        <li key={i}>{s}</li>
-                      ))}
-                    </ul>
-                  )}
-              </div>
-            )}
-
-            {/* ── Só fotos vs integrado (sempre visível quando há fusão) ── */}
-            {temFusao && somenteFotos && (
-              <div
-                className="rounded-2xl p-5"
-                style={{
-                  background: principalDiverge || baixaConcordancia
-                    ? "rgba(224,123,57,0.06)"
-                    : "rgba(30,24,18,0.5)",
-                  border: principalDiverge || baixaConcordancia
-                    ? "1px solid rgba(224,123,57,0.25)"
-                    : "1px solid rgba(200,165,107,0.12)",
-                }}
-              >
-                <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
-                  Fotos vs resultado integrado
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)" }}>
+                  {textoIntegrado}
                 </p>
-                {(principalDiverge || baixaConcordancia) && (
-                  <p className="text-xs mb-3 px-3 py-2 rounded-lg" style={{ color: "rgba(224,123,57,0.9)", background: "rgba(224,123,57,0.08)" }}>
-                    Leitura exploratória — fotos e questionário divergem em parte.
-                    {alinhamento != null ? ` Alinhamento: ${alinhamento}%.` : ""}
-                  </p>
-                )}
-                <div className="grid md:grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <p className="mb-2 font-medium" style={{ color: "rgba(247,242,236,0.55)" }}>
-                      Só fotos (motor Reich)
-                    </p>
-                    {(Object.entries(somenteFotos) as [keyof EstruturasPct, number][])
-                      .sort((a, b) => b[1] - a[1])
-                      .map(([k, v]) => (
-                        <p key={k} style={{ color: "rgba(247,242,236,0.45)" }}>
-                          {ESTRUTURAS_CONFIG[k].nome}: {v}%
-                        </p>
-                      ))}
-                  </div>
-                  <div>
-                    <p className="mb-2 font-medium" style={{ color: "rgba(247,242,236,0.55)" }}>
-                      Integrado (fotos + questionário)
-                    </p>
-                    {(Object.entries(resultado.estruturas) as [keyof EstruturasPct, number][])
-                      .sort((a, b) => b[1] - a[1])
-                      .map(([k, v]) => (
-                        <p key={k} style={{ color: "rgba(247,242,236,0.45)" }}>
-                          {ESTRUTURAS_CONFIG[k].nome}: {v}%
-                        </p>
-                      ))}
-                  </div>
-                </div>
-                {eixos && (
-                  <div className="mt-4 pt-3" style={{ borderTop: "1px solid rgba(200,165,107,0.1)" }}>
-                    <p className="text-xs mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
-                      Eixos Reich/Lowen (0–1)
-                    </p>
-                    <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.42)" }}>
-                      Expansão {eixos.indiceExpansao.toFixed(2)} · Retração {eixos.indiceRetracao.toFixed(2)} ·
-                      Contenção {eixos.indiceContencao.toFixed(2)} · Compressão {eixos.indiceCompressao.toFixed(2)} ·
-                      Fragmentação {eixos.indiceFragmentacao.toFixed(2)}
-                    </p>
-                  </div>
-                )}
               </div>
             )}
 
@@ -478,6 +399,9 @@ export function TracoPainelResultado({
                     );
                   })}
               </div>
+              <p className="text-xs mt-4 pt-3" style={{ color: "rgba(247,242,236,0.28)", borderTop: "1px solid rgba(200,165,107,0.08)" }}>
+                Percentuais são uma leitura orientativa, não diagnóstico.
+              </p>
             </div>
 
             {/* ── Interpretação ── */}
@@ -778,49 +702,23 @@ export function TracoPainelResultado({
               </div>
             )}
 
-            {/* ── Características Físicas — collapsible ── */}
-            {resultado.caracteristicasFisicasObservadas?.length > 0 && (
-              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.1)" }}>
-                <button
-                  onClick={() => setExpandedCaract((v) => !v)}
-                  className="w-full flex items-center justify-between px-6 py-4"
-                  style={{ background: "rgba(30,24,18,0.5)", color: "rgba(247,242,236,0.65)" }}
-                >
-                  <span className="text-sm font-medium">Marcadores Físicos Identificados</span>
-                  {expandedCaract ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </button>
-                {expandedCaract && (
-                  <div
-                    className="px-6 py-5"
-                    style={{ background: "rgba(30,24,18,0.3)", borderTop: "1px solid rgba(200,165,107,0.08)" }}
-                  >
-                    {resultado.perfilFisicoNarrado && (
-                      <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.5)" }}>
-                        {resultado.perfilFisicoNarrado}
-                      </p>
-                    )}
-                    <div className="flex flex-wrap gap-2">
-                      {resultado.caracteristicasFisicasObservadas.map((c, i) => (
-                        <span
-                          key={i}
-                          className="text-xs px-3 py-1.5 rounded-full"
-                          style={{
-                            background: "rgba(200,165,107,0.06)",
-                            border: "1px solid rgba(200,165,107,0.15)",
-                            color: "rgba(247,242,236,0.5)",
-                          }}
-                        >
-                          {c}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+            {/* ── O que seu corpo comunica ── */}
+            {resultado.perfilFisicoNarrado && (
+              <div
+                className="rounded-2xl p-6"
+                style={{ background: "rgba(30,24,18,0.5)", border: "1px solid rgba(200,165,107,0.1)" }}
+              >
+                <h3 className="font-tan-mon-cheri text-base mb-4" style={{ color: "rgba(247,242,236,0.75)" }}>
+                  O que seu corpo comunica
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)", lineHeight: 1.8 }}>
+                  {resultado.perfilFisicoNarrado}
+                </p>
               </div>
             )}
 
-            {/* ── Auditoria do motor — collapsible ── */}
-            {(resultado.evidenciasMotor?.length || resultado.marcadoresPorFoto?.length) && (
+            {/* ── Auditoria do motor — só dev/calibração ── */}
+            {showAuditUi && (resultado.evidenciasMotor?.length || resultado.marcadoresPorFoto?.length) && (
               <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.1)" }}>
                 <button
                   onClick={() => setExpandedAuditoria((v) => !v)}

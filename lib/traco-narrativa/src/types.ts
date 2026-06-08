@@ -33,6 +33,10 @@ export interface ResultadoAnalise {
   estruturaPrincipal: EstruturaTraco;
   estruturaSecundaria: EstruturaTraco;
   observacoesPorFoto: Partial<Record<TipoFoto, string>>;
+  /** Versão técnica (OMR, landmarks) — só persistência/auditoria, não UI produção. */
+  observacoesPorFotoTecnico?: Partial<Record<TipoFoto, string>>;
+  /** Uma frase amigável sobre fotos + questionário (sem % nem jargão). */
+  sinteseHumana?: string;
   padraoPostural: string;
   caracteristicasFisicasObservadas: string[];
   interpretacao: string;

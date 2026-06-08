@@ -22,6 +22,20 @@ function indiceRotacao(principalPct: number): number {
   return Math.min(4, Math.floor(principalPct / 20));
 }
 
+function observacaoPorFotoHumana(m: MarcadoresFoto, principal: EstruturaTraco): string {
+  const base =
+    m.tipo === "rosto"
+      ? T.OBS_ROSTO[principal]
+      : m.tipo === "corpo-frente"
+        ? T.OBS_FRENTE[principal]
+        : T.OBS_LADO[principal];
+
+  if (!m.poseDetectada || m.qualidadeFoto < 0.22) {
+    return "Nesta foto a leitura foi limitada — use as outras tomadas como complemento.";
+  }
+  return base;
+}
+
 function observacaoPorFoto(
   m: MarcadoresFoto,
   principal: EstruturaTraco,
@@ -84,20 +98,68 @@ function observacaoPorFoto(
 function montarObservacoesPorFoto(
   fotos: MarcadoresFoto[],
   principal: EstruturaTraco,
-  pctPrincipal: number
+  pctPrincipal: number,
+  humano: boolean
 ): Partial<Record<TipoFoto, string>> {
   const out: Partial<Record<TipoFoto, string>> = {};
   for (const m of fotos) {
-    out[m.tipo] = observacaoPorFoto(m, principal, pctPrincipal);
+    out[m.tipo] = humano
+      ? observacaoPorFotoHumana(m, principal)
+      : observacaoPorFoto(m, principal, pctPrincipal);
   }
   return out;
+}
+
+const TAGS_ORAIS_CONFLITAM_RIGIDO = [
+  "Baixo tônus",
+  "Postura curvada",
+  "Peito colapsado",
+  "Pouco enraizamento",
+  "Ombros caídos",
+  "baixo nível de carga energética",
+];
+
+const TAGS_RIGIDOS_CONFLITAM_ORAL = [
+  "Simetria corporal marcante",
+  "Tônus muscular bem distribuído",
+  "Postura ereta",
+  "Alinhamento preciso",
+];
+
+function tagConflita(
+  principal: EstruturaTraco,
+  secundaria: EstruturaTraco,
+  tag: string
+): boolean {
+  if (principal === "rigido" && secundaria === "oral") {
+    return TAGS_ORAIS_CONFLITAM_RIGIDO.some((k) => tag.includes(k));
+  }
+  if (principal === "oral" && secundaria === "rigido") {
+    return TAGS_RIGIDOS_CONFLITAM_ORAL.some((k) => tag.includes(k));
+  }
+  return false;
+}
+
+function montarCaracteristicas(
+  principal: EstruturaTraco,
+  secundaria: EstruturaTraco,
+  pctP: number,
+  pctS: number
+): string[] {
+  const rot = indiceRotacao(pctP);
+  const doPrincipal = rotacionarLista(T.CARACTERISTICAS[principal], rot).slice(0, 4);
+  if (pctS < 22) return doPrincipal;
+
+  const candidata = rotacionarLista(T.CARACTERISTICAS[secundaria], rot).find(
+    (tag) => !doPrincipal.includes(tag) && !tagConflita(principal, secundaria, tag)
+  );
+  return candidata ? [...doPrincipal, candidata] : doPrincipal;
 }
 
 function construirInterpretacao(
   estruturas: EstruturasPct,
   principal: EstruturaTraco,
   secundaria: EstruturaTraco,
-  fusao: FusaoDiagnosticoEmocionalMetadata | undefined,
   confiancaZero: boolean
 ): string {
   const pctP = estruturas[principal];
@@ -107,19 +169,16 @@ function construirInterpretacao(
   const r = indiceRotacao(pctP);
 
   const blocos: string[] = [];
-  if (fusao?.sinteseIntegrada?.trim()) {
-    blocos.push(`Integração fotos + questionário: ${fusao.sinteseIntegrada.trim()}`);
-  }
-  if (fusao?.sinaisConvergentes?.length) {
-    blocos.push(`Sinais convergentes: ${fusao.sinaisConvergentes.slice(0, 4).join(" · ")}`);
-  }
-
   blocos.push(ip[r] ?? ip[0]);
   blocos.push(ip[(r + 1) % 5] ?? ip[1]);
-  if (pctS >= 18 && secundaria !== "psicopata") {
+
+  const incluirSecundariaNoMiolo =
+    pctS >= 18 &&
+    secundaria !== "psicopata" &&
+    !(principal === "rigido" && secundaria === "oral" && pctS < 26);
+
+  if (incluirSecundariaNoMiolo) {
     blocos.push(isec[(r + 2) % 5] ?? isec[0]);
-  } else if (secundaria !== "psicopata") {
-    blocos.push(ip[(r + 2) % 5] ?? ip[2]);
   } else {
     blocos.push(ip[(r + 2) % 5] ?? ip[2]);
   }
@@ -148,74 +207,59 @@ function construirInterpretacao(
   return texto;
 }
 
-function construirPerfilFisico(fotos: MarcadoresFoto[], ag: MarcadoresAgregados): string {
-  const parts: string[] = [];
-  const front = fotos.find((f) => f.tipo === "corpo-frente");
-  const side = fotos.find((f) => f.tipo === "corpo-lado");
-  const face = fotos.find((f) => f.tipo === "rosto");
+function construirPerfilFisicoHumano(
+  principal: EstruturaTraco,
+  secundaria: EstruturaTraco,
+  pctS: number,
+  ag: MarcadoresAgregados
+): string {
+  const rot = indiceRotacao(ag.simetriaMedia != null ? Math.round(ag.simetriaMedia * 100) : 30);
+  const frases = rotacionarLista(T.PERFIL_FISICO_HUMANO[principal], rot).slice(0, 3);
+  const eixos = ag.eixosReich;
 
-  const usarFront = front?.poseDetectada && front.shr != null ? front : null;
-  const shrVal = usarFront?.shr ?? ag.shrMedio;
-
-  if (shrVal != null) {
-    const shr = shrVal;
-    if (shr > 1.35)
-      parts.push(
-        "Os ombros são marcadamente mais largos que os quadris — silhueta em triângulo invertido, ênfase superior."
+  if (principal === "rigido" && (eixos?.indiceContencao ?? 0) > 0.38 && frases.length < 4) {
+    if (!frases.some((f) => f.includes("contenção"))) {
+      frases.push(
+        "A organização corporal sugere alguém que mantém o equilíbrio por dentro — com cuidado e precisão."
       );
-    else if (shr > 1.18)
-      parts.push("Ombros superam os quadris em largura: proporção superior dominante.");
-    else if (shr > 1.06)
-      parts.push("Proporção ombro–quadril levemente favorável ao tórax.");
-    else if (shr > 0.94)
-      parts.push("Ombros e quadril com largura semelhante — silhueta mais retangular/equilibrada.");
-    else if (shr < 0.86)
-      parts.push("Quadris mais largos que ombros — massa visual mais baixa.");
-    else parts.push("Ombros um pouco mais estreitos que o quadril, volume na porção inferior.");
-
-    const ul = usarFront?.ulr ?? ag.ulrMedio;
-    if (ul != null) {
-      if (ul > 1.25)
-        parts.push("Massa/visual mais concentrada na metade superior do corpo.");
-      else if (ul < 0.78)
-        parts.push("Massa/visual mais concentrada na metade inferior.");
-      else parts.push("Distribuição superior/inferior relativamente equilibrada.");
-    }
-
-    const sy = usarFront?.simetria ?? ag.simetriaMedia;
-    if (sy != null) {
-      if (sy > 0.9) parts.push("Alta simetria bilateral nas medidas visíveis.");
-      else if (sy > 0.83) parts.push("Boa simetria bilateral com pequenas diferenças naturais.");
-      else if (sy < 0.76)
-        parts.push("Assimetria bilateral perceptível — organização diferente entre os lados.");
-    }
-
-    const dns = usarFront?.densidadeCorpo ?? ag.densidadeMedia;
-    if (dns != null && dns > 0.01) {
-      if (dns > 0.48) parts.push("Corpo ocupa bastante espaço no quadro (densidade alta na máscara).");
-      else if (dns < 0.15) parts.push("Linha mais esguia no quadro (densidade baixa na máscara).");
     }
   }
 
-  if (side?.poseDetectada && side.inclinacaoAnterior != null) {
-    const fl = side.inclinacaoAnterior;
-    if (fl > 0.03)
-      parts.push("No perfil, leve projeção anterior do tronco em relação à pelve.");
-    else if (fl < -0.03) parts.push("No perfil, leve recuo ou colapso anterior.");
+  if (pctS >= 22 && secundaria !== principal && secundaria === "oral" && principal === "rigido") {
+    frases.push("Por baixo dessa estrutura, também aparece uma abertura emocional e desejo de vínculo.");
   }
 
-  if (face?.poseDetectada && face.simetria != null) {
-    if (face.simetria > 0.9) parts.push("Rosto com alta simetria entre os lados.");
-    else if (face.simetria < 0.76) parts.push("Rosto com assimetria marcada entre os lados.");
+  if (frases.length === 0) {
+    return "As fotos permitem uma leitura orientativa do seu perfil corporal — use as três tomadas juntas para uma visão mais completa.";
   }
-
-  if (parts.length === 0) {
-    return "As fotos permitiram uma leitura orientativa do perfil abaixo; para máxima precisão, use fundo neutro, luz uniforme e corpo inteiro visível nas três tomadas.";
-  }
-  return parts.join(" ");
+  return frases.join(" ");
 }
 
-function rotacionarLista<T>(arr: T[], start: number): T[] {
+function construirSinteseHumana(
+  principal: EstruturaTraco,
+  secundaria: EstruturaTraco,
+  pctS: number,
+  fusao?: FusaoDiagnosticoEmocionalMetadata
+): string | undefined {
+  if (!fusao) return undefined;
+
+  const adj = T.SINTESE_ADJ_PRINCIPAL[principal];
+  const alinhamento = fusao.alinhamentoFotosFormulario;
+
+  if (alinhamento >= 75) {
+    if (pctS >= 22) {
+      const toque = T.SINTESE_TOQUE_SECUNDARIO[secundaria];
+      return `Suas fotos e seu questionário apontam para alguém ${adj}, com ${toque}.`;
+    }
+    return `Suas fotos e seu questionário contam a mesma história — com foco em ${T.SINTESE_FOCO[principal]}.`;
+  }
+  if (alinhamento >= 55) {
+    return `Suas fotos e suas respostas se complementam — predominando ${T.SINTESE_FOCO[principal]}.`;
+  }
+  return `Suas fotos e suas respostas oferecem leituras diferentes; o resultado integrado destaca ${T.SINTESE_FOCO[principal]}.`;
+}
+
+function rotacionarLista<U>(arr: U[], start: number): U[] {
   if (arr.length === 0) return arr;
   const s = ((start % arr.length) + arr.length) % arr.length;
   return [...arr.slice(s), ...arr.slice(0, s)];
@@ -247,6 +291,8 @@ function resolverPadraoPostural(
   const contencaoAlta = (eixos?.indiceContencao ?? 0) > 0.5;
   const retracaoAlta = (eixos?.indiceRetracao ?? 0) > 0.5;
   const compressaoAlta = (eixos?.indiceCompressao ?? 0) > 0.45;
+  const retracao = eixos?.indiceRetracao ?? 0;
+  const compressao = eixos?.indiceCompressao ?? 0;
 
   if (principal === "oral" && contencaoAlta && retracaoAlta) {
     const base = PADRAO_CONTENCAO_RIGIDA;
@@ -262,12 +308,24 @@ function resolverPadraoPostural(
       base += " Há também sinais de compressão vertical na cintura e dorsal.";
     }
     if (margemEstreita) {
+      if (principal === "rigido" && retracao < 0.5 && compressao < 0.4) {
+        if (secundaria === "oral" && pctS < 25) {
+          return `${base} ${T.COMBO_POSTURAL_LEVE_ORAL}`;
+        }
+        return base;
+      }
+      if (secundaria === "oral" && pctS < 25) {
+        return `${base} ${T.COMBO_POSTURAL_LEVE_ORAL}`;
+      }
       return `${base} Há também coloração de ${T.NOMES[secundaria]} (${pctS}%): ${T.PADROES_POSTURAIS[secundaria]}`;
     }
     return base;
   }
 
   if (margemEstreita) {
+    if (secundaria === "oral" && pctS < 25) {
+      return `${T.PADROES_POSTURAIS[principal]} ${T.COMBO_POSTURAL_LEVE_ORAL}`;
+    }
     return `${T.PADROES_POSTURAIS[principal]} Há também coloração de ${T.NOMES[secundaria]} (${pctS}%): ${T.PADROES_POSTURAIS[secundaria]}`;
   }
   return T.PADROES_POSTURAIS[principal];
@@ -310,14 +368,12 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
   const confZero = confiancaAnalise === 0;
   const margemEstreita = pctP - pctS < 12;
 
-  const obs = montarObservacoesPorFoto(marcadoresPorFoto, principal, pctP);
-  const interpretacao = construirInterpretacao(estruturas, principal, secundaria, fusao, confZero);
+  const obsHumano = montarObservacoesPorFoto(marcadoresPorFoto, principal, pctP, true);
+  const obsTecnico = montarObservacoesPorFoto(marcadoresPorFoto, principal, pctP, false);
+  const interpretacao = construirInterpretacao(estruturas, principal, secundaria, confZero);
 
   const rot = indiceRotacao(pctP);
-  const caract = [
-    ...rotacionarLista(T.CARACTERISTICAS[principal], rot).slice(0, 4),
-    ...rotacionarLista(T.CARACTERISTICAS[secundaria], rot).slice(0, 2),
-  ];
+  const caract = montarCaracteristicas(principal, secundaria, pctP, pctS);
 
   const pfP = rotacionarLista(T.PONTOS_FORTES[principal], rot).slice(0, 3);
   const pfS = rotacionarLista(T.PONTOS_FORTES[secundaria], rot + 1)
@@ -332,11 +388,17 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
   const pontosAtencao = [...paP, ...paS];
 
   const recP = rotacionarLista(T.RECOMENDACOES[principal], rot).slice(0, 3);
+  const maxRecSec =
+    secundaria === "oral" && pctS < 25
+      ? 1
+      : secundaria !== "psicopata" || principal === "psicopata"
+        ? 2
+        : 0;
   const recS =
-    secundaria !== "psicopata" || principal === "psicopata"
+    maxRecSec > 0
       ? rotacionarLista(T.RECOMENDACOES[secundaria], rot + 1)
           .filter((r) => !recP.includes(r))
-          .slice(0, 2)
+          .slice(0, maxRecSec)
       : [];
   const recomendacoesPraticas = [...recP, ...recS];
 
@@ -345,11 +407,15 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
     T.PERFIS_UNICOS[comboKey] ??
     `A combinação de ${T.NOMES[principal]} (${pctP}%) com ${T.NOMES[secundaria]} (${pctS}%) cria um perfil próprio — observe como estes percentuais convivem na sua história, não só no rótulo.`;
 
+  const sinteseHumana = construirSinteseHumana(principal, secundaria, pctS, fusao);
+
   return {
     estruturas,
     estruturaPrincipal: principal,
     estruturaSecundaria: secundaria,
-    observacoesPorFoto: obs,
+    observacoesPorFoto: obsHumano,
+    observacoesPorFotoTecnico: obsTecnico,
+    sinteseHumana,
     padraoPostural: resolverPadraoPostural(
       principal,
       secundaria,
@@ -370,7 +436,12 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
     recurso: T.RECURSOS[principal],
     recomendacoesPraticas,
     confiancaAnalise,
-    perfilFisicoNarrado: construirPerfilFisico(marcadoresPorFoto, marcadoresAgregados),
+    perfilFisicoNarrado: construirPerfilFisicoHumano(
+      principal,
+      secundaria,
+      pctS,
+      marcadoresAgregados
+    ),
     estiloComunicacao: estiloComunicacaoModulado(principal, secundaria, pctS),
     perfilUnico,
     dinamicaFuncional: dinamicaModulada(principal, secundaria, pctS),

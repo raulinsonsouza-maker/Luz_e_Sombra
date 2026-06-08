@@ -119,6 +119,57 @@ const OBS_LADO: Record<keyof EstruturasPct, string> = {
   rigido: "O perfil lateral evidencia alinhamento preciso: cabeça, ombros e quadril formam um eixo vertical organizado. O corpo está ereto com uma certa rigidez — a postura perfeita demais revela a armadura invisível que mantém tudo no lugar. O controle postural é real e ao mesmo tempo é símbolo do controle emocional que esta estrutura carrega.",
 };
 
+const COMBO_POSTURAL_LEVE_ORAL =
+  "Há um traço de busca por vínculo no emocional, sem colapso postural dominante nas imagens.";
+
+const PERFIL_FISICO_HUMANO: Record<keyof EstruturasPct, string[]> = {
+  esquizoide: [
+    "O corpo parece ocupar pouco espaço — há uma qualidade de recolhimento que convida à observação antes da ação.",
+    "A energia concentra-se na parte superior, como se a presença física ainda buscasse permissão para descer até os pés.",
+  ],
+  oral: [
+    "O corpo comunica abertura emocional e receptividade — uma postura que busca contato e sustentação.",
+    "Há suavidade nos traços e uma tendência a ceder espaço, como quem espera ser acolhido.",
+  ],
+  psicopata: [
+    "A presença corporal é imediata — o tronco e os ombros organizam o espaço ao redor antes de qualquer palavra.",
+    "A energia sobe e vai para frente, com força visível na metade superior do corpo.",
+  ],
+  masoquista: [
+    "O corpo carrega densidade e peso — uma resistência silenciosa que revela quanto foi suportado por dentro.",
+    "Há compressão perceptível, como se o sistema tivesse aprendido a conter mais do que expandir.",
+  ],
+  rigido: [
+    "Seu corpo comunica organização e equilíbrio — uma presença ereta que mantém tudo no lugar com cuidado.",
+    "Há contenção perceptível: não é rigidez vazia, mas uma forma de se proteger mantendo a compostura.",
+    "As proporções parecem equilibradas e simétricas, sugerindo alguém que aprendeu a funcionar bem no mundo.",
+  ],
+};
+
+const SINTESE_ADJ_PRINCIPAL: Record<keyof EstruturasPct, string> = {
+  esquizoide: "com profundidade interior e necessidade de espaço próprio",
+  oral: "aberto ao vínculo e ao cuidado mútuo",
+  psicopata: "com presença forte e orientação para ação",
+  masoquista: "com resistência silenciosa e lealdade profunda",
+  rigido: "organizado por dentro",
+};
+
+const SINTESE_FOCO: Record<keyof EstruturasPct, string> = {
+  esquizoide: "profundidade interior e necessidade de espaço",
+  oral: "vínculo e cuidado mútuo",
+  psicopata: "presença e orientação para ação",
+  masoquista: "resistência e lealdade silenciosa",
+  rigido: "organização interna e compromisso",
+};
+
+const SINTESE_TOQUE_SECUNDARIO: Record<keyof EstruturasPct, string> = {
+  esquizoide: "também com necessidade de recolhimento e reflexão",
+  oral: "grande capacidade de vínculo e cuidado",
+  psicopata: "traços de liderança e determinação",
+  masoquista: "uma força de suporte que raramente pede ajuda",
+  rigido: "organização e compromisso com o que importa",
+};
+
 const PADROES_POSTURAIS: Record<keyof EstruturasPct, string> = {
   esquizoide: "Corpo estreito com segmentos visualmente desconectados. Os ombros contraem-se e a pelve fica retraída. As quebras na linha postural criam fragmentação — o corpo não habita a si mesmo por inteiro. Há uma qualidade de ausência parcial, como se só parte da pessoa estivesse presente.",
   oral: "Colapso postural de cima para baixo: o peito afunda, os ombros caem para frente e a cabeça avança além do eixo. O corpo tem baixo tônus geral e pouco enraizamento nos membros inferiores — como se ainda buscasse o apoio externo que não chegou de forma suficiente.",
@@ -382,6 +433,11 @@ export {
   OBS_ROSTO,
   OBS_FRENTE,
   OBS_LADO,
+  COMBO_POSTURAL_LEVE_ORAL,
+  PERFIL_FISICO_HUMANO,
+  SINTESE_ADJ_PRINCIPAL,
+  SINTESE_FOCO,
+  SINTESE_TOQUE_SECUNDARIO,
   PADROES_POSTURAIS,
   CENTROS,
   PADROES_ENERGETICOS,
