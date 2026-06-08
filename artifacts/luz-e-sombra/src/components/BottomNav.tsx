@@ -2,6 +2,7 @@ import { useLocation } from "wouter";
 import type { LucideIcon } from "lucide-react";
 import { Home, Map, Users2, GraduationCap, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { isChromelessRoute } from "@/lib/navConfig";
 
 /** Ordem visual: 5 colunas com mesma largura (flex-1), cada ícone centrado na célula. */
 const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
@@ -19,10 +20,7 @@ export default function BottomNav() {
   const [location, navigate] = useLocation();
   const { user, status } = useAuth();
 
-  const isPublicPage =
-    location === "/" || location === "/login" || location === "/admin/login";
-
-  if (isPublicPage || status !== "authenticated" || !user) return null;
+  if (isChromelessRoute(location) || status !== "authenticated" || !user) return null;
 
   const jornadaActive = location.startsWith("/jornada");
 
