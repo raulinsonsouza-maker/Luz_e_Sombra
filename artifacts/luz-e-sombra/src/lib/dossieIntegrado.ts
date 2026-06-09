@@ -160,6 +160,8 @@ const NOME_ESTRUTURA: Record<string, string> = {
   rigido: "Rígido",
 };
 
+export { NOME_ESTRUTURA };
+
 const NOME_TEMPERAMENTO: Record<string, string> = {
   COLERICO: "Colérico",
   SANGUINEO: "Sanguíneo",
@@ -208,10 +210,10 @@ const ANO_AREAS_CONEXAO: Record<number, Partial<Record<AreaVida, string>>> = {
 
 const VIDA_TRACO: Record<string, Record<string, string>> = {
   psicopata: {
-    "8": "Dois sistemas de poder convergem: Caminho 8 Realizador com estrutura Estratégica. Quando alinhados, a capacidade de impacto é extraordinária. Quando não, o poder pode se tornar um escudo contra a intimidade genuína. A pergunta é: o que você está construindo serve a quem além de você?",
-    "1": "Caminho 1 Pioneiro com estrutura Estratégica: combinação de liderança pura. Você tem o instinto, o magnetismo e a visão. O que separa o potencial da realização plena é a disposição de ser vulnerável, de liderar não apenas com força, mas com humanidade.",
+    "8": "Dois sistemas de poder convergem: Caminho 8 Realizador com estrutura Psicopata. Quando alinhados, a capacidade de impacto é extraordinária. Quando não, o poder pode se tornar um escudo contra a intimidade genuína. A pergunta é: o que você está construindo serve a quem além de você?",
+    "1": "Caminho 1 Pioneiro com estrutura Psicopata: combinação de liderança pura. Você tem o instinto, o magnetismo e a visão. O que separa o potencial da realização plena é a disposição de ser vulnerável, de liderar não apenas com força, mas com humanidade.",
     default:
-      "Caminho de Vida com estrutura Estratégica: você move o mundo com competência e presença. O desafio é integrar o coração à estratégia, porque os resultados mais duradouros vêm de poder que carrega propósito.",
+      "Caminho de Vida com estrutura Psicopata: você move o mundo com competência e presença. O desafio é integrar o coração ao comando, porque os resultados mais duradouros vêm de poder que carrega propósito.",
   },
   oral: {
     "2": "Caminho 2 no Diplomata com estrutura Oral cria um campo magnético de cuidado. Você nasceu para criar conexões, mas o risco é confundir cuidar dos outros com cuidar de si.",
@@ -220,7 +222,7 @@ const VIDA_TRACO: Record<string, Record<string, string>> = {
       "Conexão é sua linguagem primária corporal e numérica. O desafio é garantir que os vínculos sejam recíprocos, não apenas um canal de dar.",
   },
   rigido: {
-    "8": "Caminho 8 Realizador com estrutura de Sustentação: poucos têm essa combinação de poder e integridade. O desafio mais profundo é a flexibilidade, nem toda grande conquista exige sacrifício total.",
+    "8": "Caminho 8 Realizador com estrutura Rígida: poucos têm essa combinação de poder e integridade. O desafio mais profundo é a flexibilidade, nem toda grande conquista exige sacrifício total.",
     default:
       "Você entrega com qualidade e confiabilidade. O convite é descobrir que pode ser real, com falhas e incertezas, e ainda assim ser digno(a) de amor e respeito.",
   },
@@ -230,7 +232,7 @@ const VIDA_TRACO: Record<string, Record<string, string>> = {
       "Processa o mundo com profundidade incomum. A inteligência precisa de pontes para o tangível para criar impacto.",
   },
   masoquista: {
-    "4": "Caminho 4 Construtor com estrutura de Sustentação: persistência que beira o sobre-humano. O perigo está em suportar o que não deveria ser suportado.",
+    "4": "Caminho 4 Construtor com estrutura Masoquista: persistência que beira o sobre-humano. O perigo está em suportar o que não deveria ser suportado.",
     default:
       "Força silenciosa real e impressionante, construída como resposta a um mundo que nem sempre honrou sua voz. Agora é hora de descobrir o que acontece quando você fala.",
   },
@@ -239,13 +241,13 @@ const VIDA_TRACO: Record<string, Record<string, string>> = {
 const TRACO_TEMPERAMENTO: Record<string, Record<string, string>> = {
   psicopata: {
     COLERICO:
-      "O corpo Estratégico e o temperamento Colérico falam a mesma língua: comando, velocidade e resultado. A força é extraordinária, o risco é confundir eficiência com conexão. Quando a ação não espera o outro, o poder vira isolamento.",
+      "O corpo Psicopata e o temperamento Colérico falam a mesma língua: comando, velocidade e resultado. A força é extraordinária, o risco é confundir eficiência com conexão. Quando a ação não espera o outro, o poder vira isolamento.",
     SANGUINEO:
-      "Estratégico no corpo, Sanguíneo no temperamento: magnetismo social com leitura fria de cenários. Você encanta e posiciona ao mesmo tempo, mas pode usar o charme para evitar a entrega emocional que o corpo ainda resiste.",
+      "Psicopata no corpo, Sanguíneo no temperamento: magnetismo social com leitura fria de cenários. Você encanta e posiciona ao mesmo tempo, mas pode usar o charme para evitar a entrega emocional que o corpo ainda resiste.",
     MELANCOLICO:
       "Por fora, presença de comando; por dentro, profundidade melancólica. A tensão entre performar força e sentir com precisão pode gerar exaustão se não houver espaço seguro para vulnerabilidade.",
     FLEUMATICO:
-      "Estratégico com base fleumática: aparenta controle externo, mas por dentro há um ritmo mais lento e cauteloso. O desafio é não usar a estratégia como couraça permanente contra o descanso e a entrega.",
+      "Psicopata com base fleumática: aparenta controle externo, mas por dentro há um ritmo mais lento e cauteloso. O desafio é não usar o comando como couraça permanente contra o descanso e a entrega.",
   },
   oral: {
     SANGUINEO:
@@ -257,11 +259,11 @@ const TRACO_TEMPERAMENTO: Record<string, Record<string, string>> = {
   },
   rigido: {
     MELANCOLICO:
-      "Sustentador corporal com Melancólico no temperamento: responsabilidade e profundidade se somam. Você carrega muito, mas a perfeição pode virar prisão se não houver espaço para erro e prazer.",
+      "Rígido no corpo com Melancólico no temperamento: responsabilidade e profundidade se somam. Você carrega muito, mas a perfeição pode virar prisão se não houver espaço para erro e prazer.",
     COLERICO:
-      "Corpo que sustenta com temperamento que acelera: alta capacidade de entrega, risco de burnout. A disciplina precisa incluir pausas sem culpa.",
+      "Corpo Rígido com temperamento que acelera: alta capacidade de entrega, risco de burnout. A disciplina precisa incluir pausas sem culpa.",
     default:
-      "Estrutura de sustentação com temperamento que define o ritmo interno. O corpo segura; a alma pede o que o corpo ainda não autoriza sentir.",
+      "Estrutura Rígida com temperamento que define o ritmo interno. O corpo segura; a alma pede o que o corpo ainda não autoriza sentir.",
   },
   esquizoide: {
     MELANCOLICO:
@@ -271,7 +273,7 @@ const TRACO_TEMPERAMENTO: Record<string, Record<string, string>> = {
   },
   masoquista: {
     FLEUMATICO:
-      "Sustentação silenciosa: corpo que aguenta e temperamento que evita conflito. O padrão de engolir necessidades pode estar mais ativo do que você percebe.",
+      "Masoquista no corpo, Fleumático no temperamento: sustentação silenciosa. O padrão de engolir necessidades pode estar mais ativo do que você percebe.",
     default:
       "Força de suportar com temperamento que define se você expressa ou retém. A evolução passa por nomear limites antes do corpo cobrar a conta.",
   },
@@ -280,9 +282,9 @@ const TRACO_TEMPERAMENTO: Record<string, Record<string, string>> = {
 const TRACO_LINGUAGEM: Record<string, Partial<Record<string, string>>> = {
   psicopata: {
     servicos:
-      "Corpo Estratégico com linguagem de Atos de Serviço: você demonstra amor fazendo, resolvendo, entregando. O outro pode precisar de palavras ou tempo, não apenas de resultados.",
+      "Corpo Psicopata com linguagem de Atos de Serviço: você demonstra amor fazendo, resolvendo, entregando. O outro pode precisar de palavras ou tempo, não apenas de resultados.",
     palavras:
-      "Estratégico no corpo, Palavras de Afirmação no amor: há tensão entre controlar a narrativa e receber afirmação genuína. Deixar-se elogiar sem desconfiar pode ser trabalho de cura.",
+      "Psicopata no corpo, Palavras de Afirmação no amor: há tensão entre controlar a narrativa e receber afirmação genuína. Deixar-se elogiar sem desconfiar pode ser trabalho de cura.",
     tempo:
       "Presença corporal de comando com necessidade de Tempo de Qualidade: você pode estar fisicamente perto e emocionalmente em modo de gestão. Presença sem agenda é o antídoto.",
     toque:
@@ -298,7 +300,7 @@ const TRACO_LINGUAGEM: Record<string, Partial<Record<string, string>>> = {
   },
   rigido: {
     servicos:
-      "Sustentador corporal com Atos de Serviço: amar é fazer e cumprir. O convite é receber cuidado sem sentir que deve retribuir imediatamente com desempenho.",
+      "Rígido no corpo com Atos de Serviço: amar é fazer e cumprir. O convite é receber cuidado sem sentir que deve retribuir imediatamente com desempenho.",
     default:
       "Corpo que sustenta encontra linguagem do amor, observe se você expressa afeto por dever e não por prazer.",
   },
@@ -475,7 +477,7 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
     const nomeTemp = NOME_TEMPERAMENTO[temperamento.primario] ?? temperamento.primario;
     const arquetipoTemp = temperamento.arquetipo ?? nomeTemp;
     pushCruzamento(lista, {
-      titulo: "Assinatura Integrada. Número, Corpo e Temperamento",
+      titulo: "Assinatura Integrada: Número, Corpo e Temperamento",
       corpo:
         `${primeiroNome} reúne três camadas que se reforçam: ${vidaInfo?.arquetipo ?? `Caminho ${vidaNum}`} na numerologia, ` +
         `estrutura ${nomeEst} na leitura corporal e temperamento ${arquetipoTemp}. ` +
@@ -509,7 +511,7 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
     const texto =
       mapa?.[temperamento.primario] ??
       mapa?.default ??
-      `A estrutura${NOME_ESTRUTURA[estrutura]}no corpo e o temperamento${NOME_TEMPERAMENTO[temperamento.primario]}no comportamento criam uma combinação única, observe onde o corpo sustenta o que o temperamento acelera (ou freia).`;
+      `A estrutura ${NOME_ESTRUTURA[estrutura]} no corpo e o temperamento ${NOME_TEMPERAMENTO[temperamento.primario]} no comportamento criam uma combinação única. Observe onde o corpo sustenta o que o temperamento acelera (ou freia).`;
     pushCruzamento(lista, {
       titulo: `${NOME_ESTRUTURA[estrutura] ?? estrutura} × ${NOME_TEMPERAMENTO[temperamento.primario]}`,
       corpo: texto,
@@ -541,7 +543,7 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
       corpo:
         linguagens.desalinhamento.texto +
         (avaliacao.desenvolvimentoAmoroso <= 6
-          ? `Com vida amorosa em${avaliacao.desenvolvimentoAmoroso}/10, esse desalinhamento pode estar ativo nas relações, não por falta de amor, mas por linguagens diferentes sem tradução consciente.`
+          ? `Com vida amorosa em ${avaliacao.desenvolvimentoAmoroso}/10, esse desalinhamento pode estar ativo nas relações, não por falta de amor, mas por linguagens diferentes sem tradução consciente.`
           : ""),
       icone: "heart",
       relevancia: 82,
@@ -590,7 +592,7 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
   // 8. Ressonância ano = vida
   if (anoPessoalNum && vidaNum && anoPessoalNum === vidaNum) {
     pushCruzamento(lista, {
-      titulo: `Ano de Ressonância. Caminho${vidaNum}encontra Ano${anoPessoalNum}`,
+      titulo: `Ano de Ressonância: Caminho ${vidaNum} encontra Ano ${anoPessoalNum}`,
       corpo:
         "Quando o Ano Pessoal ressoa com o seu Caminho de Vida, a energia se amplifica. Você está num momento em que sua essência mais profunda e a energia do ciclo estão alinhadas. Use isso, é mais raro do que parece.",
       icone: "spark",
@@ -609,7 +611,7 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
             ? `Alma 11 pede inspiração e impacto coletivo; o corpo ${NOME_ESTRUTURA[estrutura]} define como essa missão se corporifica. A pergunta é se seu poder serve à visão maior ou apenas à autoproteção.`
             : almaNum === 7
               ? `Alma 7 busca verdade interior; a estrutura ${NOME_ESTRUTURA[estrutura]} mostra como você defende ou abre esse território no cotidiano.`
-              : `Número de Alma${almaNum}revela o desejo profundo da alma, cruze com${NOME_ESTRUTURA[estrutura]}para ver se o corpo autoriza o que a alma pede.`,
+              : `Número de Alma ${almaNum} revela o desejo profundo da alma. Cruze com ${NOME_ESTRUTURA[estrutura]} para ver se o corpo autoriza o que a alma pede.`,
         icone: "eye",
         relevancia: 72,
       });
@@ -624,7 +626,7 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
       corpo:
         fusao.sinaisConvergentes.slice(0, 2).join(" ") +
         (fusao.alinhamentoFotosFormulario != null
-          ? `Alinhamento fotos/formulário:${fusao.alinhamentoFotosFormulario}%, quanto maior, mais confiável a leitura integrada.`
+          ? ` Alinhamento fotos/formulário: ${fusao.alinhamentoFotosFormulario}%. Quanto maior, mais confiável a leitura integrada.`
           : ""),
       icone: "eye",
       relevancia: 80,
@@ -643,7 +645,7 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
     pushCruzamento(lista, {
       titulo: "Couraça Corporal × Equilíbrio Emocional",
       corpo:
-        `${traco.couracaCorporal}Com equilíbrio emocional em${avaliacao.equilibrioEmocional}/10, essa proteção pode estar custando mais do que protegendo, o corpo segura o que a vida pede para sentir.`,
+        `${traco.couracaCorporal} Com equilíbrio emocional em ${avaliacao.equilibrioEmocional}/10, essa proteção pode estar custando mais do que protegendo. O corpo segura o que a vida pede para sentir.`,
       icone: "shield",
       relevancia: 74,
     });
@@ -707,7 +709,7 @@ function montarSinteseIdentidade(input: DossieInput): string | null {
   if (vidaNum && NUMEROS_DE_VIDA[vidaNum]) {
     const v = NUMEROS_DE_VIDA[vidaNum];
     partes.push(
-      `${primeiroNome}é${v.arquetipo}(Caminho${vidaNum}),${v.essencia?.toLowerCase().replace(/^você /, "alguém que ") ?? ""}`,
+      `${primeiroNome} é ${v.arquetipo} (Caminho ${vidaNum}), ${v.essencia?.toLowerCase().replace(/^você /, "alguém que ") ?? ""}`,
     );
   }
   if (traco?.estruturaPrincipal) {
@@ -749,7 +751,7 @@ function gerarAcoes(input: DossieInput, cruzamentos: CruzamentoDossie[]): string
     const menor = areasOrdenadas(avaliacao)[0];
     if (menor && menor.val < 7) {
       acoes.push(
-        `Priorizar${AREAS_LABELS[menor.key]}(${menor.val}/10) com uma ação concreta esta semana, não apenas intenção.`,
+        `Priorizar ${AREAS_LABELS[menor.key]} (${menor.val}/10) com uma ação concreta esta semana, não apenas intenção.`,
       );
     }
   }

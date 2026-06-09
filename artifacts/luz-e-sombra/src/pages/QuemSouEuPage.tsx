@@ -20,11 +20,13 @@ import {
   parseTemperamentoFromApi,
   parseLinguagensFromApi,
   parseDiagnosticoEmocional,
+  NOME_ESTRUTURA,
   type AvaliacaoDossie,
   type TracoDossie,
   type TemperamentoDossie,
   type LinguagensDossie,
 } from "@/lib/dossieIntegrado";
+import { normalizarObjetoTextos } from "@workspace/copy-voz";
 import {
   Loader2, Sparkles, Heart, Star, Compass,
   Zap, Shield, Brain, Eye, Target, TrendingUp, AlertCircle,
@@ -58,7 +60,7 @@ const AREAS_LABELS: Record<keyof Avaliacao, string> = {
   criatividadeHobbyDiversao: "Criatividade e Prazer",
 };
 
-const AREAS_INTERPRETACAO: Record<keyof Avaliacao, { baixo: string; medio: string; alto: string }> = {
+const AREAS_INTERPRETACAO_RAW: Record<keyof Avaliacao, { baixo: string; medio: string; alto: string }> = {
   plenitudeFelicidade: {
     alto: "Você habita a vida com um nível raro de satisfação interior. Isso não é acidente, é o resultado de escolhas conscientes que muitos ainda não têm coragem de fazer.",
     medio: "Sua felicidade existe, mas de forma intermitente. Há uma sensação de que falta algo, embora seja difícil nomear o quê. O autoconhecimento que você está construindo é exatamente o que abre esse portal.",
@@ -121,7 +123,9 @@ const AREAS_INTERPRETACAO: Record<keyof Avaliacao, { baixo: string; medio: strin
   },
 };
 
-const ESTRUTURAS: Record<string, {
+const AREAS_INTERPRETACAO = normalizarObjetoTextos(AREAS_INTERPRETACAO_RAW);
+
+const ESTRUTURAS_RAW: Record<string, {
   nome: string; cor: string; corBg: string;
   arquetipo: string; padraoProfundo: string; sombra: string;
   dominancias: string[]; relacionamento: string;
@@ -147,12 +151,12 @@ const ESTRUTURAS: Record<string, {
     relacionamento: "Você ama com intensidade e muitas vezes se perde no outro. Relações saudáveis exigem que você cultive uma base interna sólida antes de buscar preenchimento no outro.",
   },
   psicopata: {
-    nome: "Estratégico",
+    nome: "Psicopata",
     cor: "#e07b39",
     corBg: "rgba(224,123,57,0.08)",
-    arquetipo: "O Estrategista Direcionado",
-    padraoProfundo: "A leitura corporal aqui é de eixo forte: a energia costuma subir para cabeça, peito e garganta, gerando presença, foco e capacidade de comando. É um corpo que quer conduzir, organizar o espaço e antecipar movimentos. Quando integrado, isso vira liderança lúcida; quando sobrecarregado, vira tensão no pescoço, mandíbula, peito e respiração curta, como se sentir fosse um risco que precisa ser controlado.",
-    sombra: "A defesa aparece como contenção e vigilância. Em vez de abrir o corpo para o vínculo, ele pode entrar em modo de monitoramento permanente: olhar que avalia, fala que avança, peito que sustenta a postura, abdômen que segura o impulso. O problema não é falta de força, é usar a força para não descer para a vulnerabilidade.",
+    arquetipo: "Liderança e Presença",
+    padraoProfundo: "A leitura corporal aponta eixo forte: energia que sobe para cabeça, peito e garganta, gerando presença, foco e capacidade de comando. Quando integrado, isso vira liderança lúcida; quando sobrecarregado, vira tensão no pescoço, mandíbula, peito e respiração curta.",
+    sombra: "A defesa aparece como contenção e vigilância. Em vez de abrir o corpo para o vínculo, você pode entrar em modo de monitoramento permanente. O problema não é falta de força, é usar a força para não descer para a vulnerabilidade.",
     dominancias: ["Presença firme e direção clara", "Leitura estratégica de pessoas e cenários", "Capacidade de decisão sob pressão", "Energia de comando e posicionamento"],
     relacionamento: "Você se vincula melhor quando não precisa sustentar uma imagem de superioridade. A intimidade cresce quando a força deixa de ser defesa e passa a ser presença disponível.",
   },
@@ -167,18 +171,20 @@ const ESTRUTURAS: Record<string, {
     relacionamento: "Você é o pilar que todos procuram. O desafio é permitir que te apoiem também, e aprender que expressar necessidades não é fraqueza.",
   },
   rigido: {
-    nome: "Sustentador",
+    nome: "Rígido",
     cor: "#c8a56b",
     corBg: "rgba(200,165,107,0.08)",
-    arquetipo: "O Construtor de Presença",
-    padraoProfundo: "O corpo costuma revelar um padrão de sustentação: tronco organizado, tônus constante, postura que passa responsabilidade e confiabilidade. Há muita capacidade de estruturar e manter, mas também tendência a reter tensão no centro do corpo, ombros e mandíbula, como se a vida precisasse ser carregada com controle para não desmoronar.",
+    arquetipo: "Disciplina e Realização",
+    padraoProfundo: "O corpo revela padrão de sustentação: tronco organizado, tônus constante, postura que passa responsabilidade e confiabilidade. Há capacidade de estruturar e manter, mas também tendência a reter tensão no centro do corpo, ombros e mandíbula.",
     sombra: "Quando em excesso, a organização vira contenção. A respiração encurta, o peito fica guardado, a mandíbula aperta e a energia sobe pouco para o prazer. É um corpo que sabe sustentar, mas precisa aprender a soltar sem sentir que perdeu valor.",
     dominancias: ["Disciplina e comprometimento genuínos", "Presença estável e confiável", "Integridade como valor vivido", "Capacidade de construir resultados duradouros"],
     relacionamento: "Você é parceiro(a) confiável e presente, mas precisa aprender a mostrar sentimento sem transformar tudo em responsabilidade. O vínculo amadurece quando a precisão abre espaço para afeto e o corpo pode relaxar sem culpa.",
   },
 };
 
-const ANO_AREAS_CONEXAO: Record<number, Record<string, string>> = {
+const ESTRUTURAS = normalizarObjetoTextos(ESTRUTURAS_RAW);
+
+const ANO_AREAS_CONEXAO_RAW: Record<number, Record<string, string>> = {
   1: {
     realizacaoProposito: "Seu Ano 1 está pedindo que você inaugure uma nova relação com seu propósito. Não espere clareza total, o propósito se revela no movimento, não na espera.",
     recursosFinanceiros: "Ano 1 favorece novos caminhos de renda e independência financeira. A energia está alinhada para você finalmente agir sobre o que sempre pensou em criar.",
@@ -243,6 +249,8 @@ const ANO_AREAS_CONEXAO: Record<number, Record<string, string>> = {
     espiritualidade: "Este é o ano mais espiritual do ciclo. Se espiritualidade está baixa, há uma resistência ao que o universo está oferecendo, liberação, conclusão, transcendência.",
   },
 };
+
+const ANO_AREAS_CONEXAO = normalizarObjetoTextos(ANO_AREAS_CONEXAO_RAW);
 
 // ── Section Component ─────────────────────────────────────────────────────────
 
@@ -402,7 +410,10 @@ export default function QuemSouEuPage() {
   const bottomAreas = areasSorted.slice(-3);
   const topAreas = areasSorted.slice(0, 3);
 
-  const estrutura = traco?.estruturaPrincipal ? ESTRUTURAS[traco.estruturaPrincipal] : null;
+  const estruturaBase = traco?.estruturaPrincipal ? ESTRUTURAS[traco.estruturaPrincipal] : null;
+  const estrutura = estruturaBase && traco?.estruturaPrincipal
+    ? { ...estruturaBase, nome: NOME_ESTRUTURA[traco.estruturaPrincipal] ?? estruturaBase.nome }
+    : null;
   const semDados = !traco && !avaliacao && !vidaNum && !temperamento && !linguagens;
 
   const dossie = gerarDossieIntegrado({
@@ -782,7 +793,9 @@ export default function QuemSouEuPage() {
                     <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.65)" }}>
                       {traco.interpretacao
                         ? traco.interpretacao.slice(0, 420) + (traco.interpretacao.length > 420 ? "…" : "")
-                        : estrutura.sombra}
+                        : traco.sinteseHumana
+                          ? traco.sinteseHumana.slice(0, 420) + (traco.sinteseHumana.length > 420 ? "…" : "")
+                          : estrutura.padraoProfundo}
                     </p>
                     <p className="text-[10px] font-bold tracking-[0.25em] uppercase mb-2" style={{ color: `${estrutura.cor}70` }}>
                       Dominâncias comportamentais

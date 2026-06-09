@@ -285,7 +285,7 @@ export default function MeuPerfilPage() {
                   Dossiê de Vida
                 </p>
                 <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
-                  Numerologia · Traço de Caráter · Ano Pessoal
+                  Traço de Caráter · Temperamento · Linguagens · Roda da Vida · Diagnóstico Emocional
                 </p>
               </div>
 
@@ -388,7 +388,7 @@ export default function MeuPerfilPage() {
               {/* Name row */}
               <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid rgba(200,165,107,0.06)" }}>
                 <p className="text-xs font-semibold" style={{ color: "rgba(247,242,236,0.35)" }}>Nome completo</p>
-                <p className="text-sm font-medium" style={{ color: "#f7f2ec" }}>{user?.nome || "—"}</p>
+                <p className="text-sm font-medium" style={{ color: "#f7f2ec" }}>{user?.nome || "Não informado"}</p>
               </div>
 
               {/* Username row */}
