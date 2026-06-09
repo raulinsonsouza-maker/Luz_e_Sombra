@@ -11,7 +11,7 @@ import {
   LpFaqSection,
   LpFinalCtaSection,
 } from "@/components/lp/LpOfferSections";
-import { VSL_UNLOCK_KEY } from "@/lib/lpConfig";
+import { VSL_UNLOCK_KEY, VSL_COPY } from "@/lib/lpConfig";
 import { trackLpEvent } from "@/lib/lpAnalytics";
 
 function readUnlocked(): boolean {
@@ -80,7 +80,7 @@ export default function VslLandingPage() {
                 color: "#fff",
               }}
             >
-              Garantir acesso
+              {VSL_COPY.navCta}
             </button>
           )}
         </div>
@@ -94,7 +94,7 @@ export default function VslLandingPage() {
               className="text-xs font-bold tracking-[0.3em] uppercase mb-4"
               style={{ color: "rgba(200,165,107,0.6)" }}
             >
-              Assista antes de decidir
+              {VSL_COPY.eyebrow}
             </p>
             <h1
               className="font-tan-mon-cheri mb-4"
@@ -104,20 +104,22 @@ export default function VslLandingPage() {
                 lineHeight: 1.15,
               }}
             >
-              Descubra o mapa completo de quem você é
+              {VSL_COPY.headline}
             </h1>
             <p
               className="text-sm leading-relaxed max-w-lg mx-auto"
               style={{ color: "rgba(247,242,236,0.55)" }}
             >
-              Em minutos, não em anos de terapia. Veja como funciona a plataforma que já transformou
-              centenas de jornadas de autoconhecimento.
+              {VSL_COPY.subheadline}
             </p>
           </div>
 
           <YouTubeGatedPlayer
             onUnlocked={handleUnlocked}
             onVideoStart={handleVideoStart}
+            lockedLabel={VSL_COPY.playerLocked}
+            progressLabel={(remaining) => VSL_COPY.playerProgress(remaining)}
+            unlockedLabel={VSL_COPY.unlockHint}
           />
         </div>
       </section>
@@ -147,11 +149,10 @@ export default function VslLandingPage() {
                 <Lock size={20} style={{ color: "#c8a56b" }} />
               </div>
               <h2 className="font-tan-mon-cheri text-xl mb-2" style={{ color: "#f7f2ec" }}>
-                Conteúdo bloqueado
+                {VSL_COPY.gateTitle}
               </h2>
               <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
-                Assista o vídeo acima por pelo menos 20 segundos para desbloquear a oferta completa,
-                todos os módulos e o checkout.
+                {VSL_COPY.gateDesc}
               </p>
             </div>
           </div>
@@ -165,12 +166,12 @@ export default function VslLandingPage() {
             userSelect: unlocked ? "auto" : "none",
           }}
         >
-          <LpModulesSection theme="dark" />
-          <LpHowItWorksSection theme="light" />
-          <LpTestimonialsSection />
-          <LpOfferSection onCheckout={goCheckout} />
-          <LpFaqSection />
-          <LpFinalCtaSection onCheckout={goCheckout} />
+          <LpModulesSection theme="dark" variant="vsl" />
+          <LpHowItWorksSection theme="light" variant="vsl" />
+          <LpTestimonialsSection variant="vsl" />
+          <LpOfferSection onCheckout={goCheckout} variant="vsl" />
+          <LpFaqSection variant="vsl" />
+          <LpFinalCtaSection onCheckout={goCheckout} variant="vsl" />
         </div>
       </div>
 
@@ -179,7 +180,7 @@ export default function VslLandingPage() {
         style={{ background: "#0a0805", borderTop: "1px solid rgba(200,165,107,0.08)" }}
       >
         <p className="text-xs" style={{ color: "rgba(247,242,236,0.2)" }}>
-          Da Sombra à Luz · Plataforma de Autoconhecimento
+          Da Sombra à Luz · A partir de R$ 47/mês
         </p>
       </footer>
     </div>

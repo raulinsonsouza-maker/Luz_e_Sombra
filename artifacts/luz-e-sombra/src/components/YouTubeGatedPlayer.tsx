@@ -82,6 +82,9 @@ interface Props {
   onUnlocked?: () => void;
   onVideoStart?: () => void;
   className?: string;
+  lockedLabel?: string;
+  progressLabel?: (remainingSeconds: number) => string;
+  unlockedLabel?: string;
 }
 
 export default function YouTubeGatedPlayer({
@@ -90,6 +93,10 @@ export default function YouTubeGatedPlayer({
   onUnlocked,
   onVideoStart,
   className = "",
+  lockedLabel = "Assista o vídeo para desbloquear a oferta",
+  progressLabel = (remaining) =>
+    remaining > 0 ? `Assista mais ${remaining}s para ver a oferta` : "Desbloqueando...",
+  unlockedLabel = "Oferta desbloqueada — role para ver os detalhes",
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
@@ -278,10 +285,8 @@ export default function YouTubeGatedPlayer({
               <Lock size={14} style={{ color: "rgba(200,165,107,0.6)" }} />
               <span className="text-xs" style={{ color: "rgba(247,242,236,0.5)" }}>
                 {playing
-                  ? remaining > 0
-                    ? `Assista mais ${remaining}s para ver a oferta completa`
-                    : "Desbloqueando..."
-                  : "Assista o vídeo para desbloquear a oferta"}
+                  ? progressLabel(remaining)
+                  : lockedLabel}
               </span>
             </div>
             <span className="text-xs font-mono" style={{ color: "rgba(200,165,107,0.5)" }}>
@@ -305,7 +310,7 @@ export default function YouTubeGatedPlayer({
 
       {unlocked && (
         <p className="mt-3 text-xs text-center font-medium" style={{ color: "#c8a56b" }}>
-          Oferta desbloqueada — role para ver todos os detalhes
+          {unlockedLabel}
         </p>
       )}
     </div>

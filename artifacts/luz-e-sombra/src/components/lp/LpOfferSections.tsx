@@ -4,14 +4,19 @@ import {
   LP_TESTIMONIALS,
   LP_FAQ,
   LP_INCLUDED_ITEMS,
-  LP_PRODUCT_NAME,
   LP_GUARANTEE_DAYS,
+  LP_CTA_PRIMARY,
   formatLpPrice,
   LP_PRICE,
   LP_PRICE_ORIGINAL,
   LP_PRICE_PERIOD,
-  LP_BILLING_LABEL,
+  getLpSections,
+  type LpSectionVariant,
 } from "@/lib/lpConfig";
+
+interface SectionProps {
+  variant?: LpSectionVariant;
+}
 
 interface CtaProps {
   onCheckout: () => void;
@@ -19,7 +24,7 @@ interface CtaProps {
   fullWidth?: boolean;
 }
 
-export function LpCtaButton({ onCheckout, label = "Garantir meu acesso", fullWidth }: CtaProps) {
+export function LpCtaButton({ onCheckout, label = LP_CTA_PRIMARY, fullWidth }: CtaProps) {
   return (
     <button
       type="button"
@@ -38,8 +43,10 @@ export function LpCtaButton({ onCheckout, label = "Garantir meu acesso", fullWid
   );
 }
 
-export function LpModulesSection({ theme = "dark" }: { theme?: "dark" | "light" }) {
+export function LpModulesSection({ theme = "dark", variant = "control" }: SectionProps & { theme?: "dark" | "light" }) {
   const isDark = theme === "dark";
+  const copy = getLpSections(variant).modules;
+
   return (
     <section className="py-16 sm:py-20 px-5" style={{ background: isDark ? "#0f0c09" : "#faf8f4" }}>
       <div className="max-w-6xl mx-auto">
@@ -48,7 +55,7 @@ export function LpModulesSection({ theme = "dark" }: { theme?: "dark" | "light" 
             className="text-xs font-bold tracking-[0.3em] uppercase mb-4"
             style={{ color: isDark ? "rgba(200,165,107,0.6)" : "#9c7742" }}
           >
-            Tudo que está incluso
+            {copy.eyebrow}
           </p>
           <h2
             className="font-tan-mon-cheri"
@@ -58,8 +65,16 @@ export function LpModulesSection({ theme = "dark" }: { theme?: "dark" | "light" 
               lineHeight: 1.2,
             }}
           >
-            9 ferramentas. Uma jornada completa.
+            {copy.title}{" "}
+            {copy.titleAccent && (
+              <span style={{ color: isDark ? "#c8a56b" : "#9c7742" }}>{copy.titleAccent}</span>
+            )}
           </h2>
+          {copy.subtitle && (
+            <p className="text-sm mt-4 max-w-xl mx-auto leading-relaxed" style={{ color: isDark ? "rgba(247,242,236,0.45)" : "rgba(47,37,27,0.55)" }}>
+              {copy.subtitle}
+            </p>
+          )}
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {LP_MODULES.map(({ icon: Icon, title, desc }) => (
@@ -73,7 +88,7 @@ export function LpModulesSection({ theme = "dark" }: { theme?: "dark" | "light" 
             >
               <div className="flex items-center gap-3 mb-3">
                 <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                   style={{
                     background: "rgba(200,165,107,0.12)",
                     border: "1px solid rgba(200,165,107,0.2)",
@@ -102,25 +117,9 @@ export function LpModulesSection({ theme = "dark" }: { theme?: "dark" | "light" 
   );
 }
 
-export function LpHowItWorksSection({ theme = "light" }: { theme?: "dark" | "light" }) {
+export function LpHowItWorksSection({ theme = "light", variant = "control" }: SectionProps & { theme?: "dark" | "light" }) {
   const isDark = theme === "dark";
-  const steps = [
-    {
-      step: "01",
-      title: "Assista e entenda",
-      desc: "Veja como a plataforma funciona e o que você vai descobrir sobre si mesmo.",
-    },
-    {
-      step: "02",
-      title: "Garanta seu acesso",
-      desc: "Checkout rápido e seguro. Você recebe login imediato após a confirmação.",
-    },
-    {
-      step: "03",
-      title: "Comece sua jornada",
-      desc: "Primeira avaliação em 15 minutos. Clareza real, no seu ritmo, sem julgamento.",
-    },
-  ];
+  const copy = getLpSections(variant).howItWorks;
 
   return (
     <section className="py-16 sm:py-20 px-5" style={{ background: isDark ? "#1e1812" : "#fff" }}>
@@ -130,7 +129,7 @@ export function LpHowItWorksSection({ theme = "light" }: { theme?: "dark" | "lig
             className="text-xs font-bold tracking-[0.3em] uppercase mb-4"
             style={{ color: isDark ? "rgba(200,165,107,0.6)" : "#9c7742" }}
           >
-            Como funciona
+            {copy.eyebrow}
           </p>
           <h2
             className="font-tan-mon-cheri"
@@ -140,14 +139,17 @@ export function LpHowItWorksSection({ theme = "light" }: { theme?: "dark" | "lig
               lineHeight: 1.2,
             }}
           >
-            Simples. Profundo. Transformador.
+            {copy.title}{" "}
+            {"titleAccent" in copy && copy.titleAccent ? (
+              <span style={{ color: isDark ? "#c8a56b" : "#9c7742" }}>{copy.titleAccent}</span>
+            ) : null}
           </h2>
         </div>
         <div className="grid sm:grid-cols-3 gap-8">
-          {steps.map(({ step, title, desc }) => (
+          {copy.steps.map(({ step, title, desc }) => (
             <div key={step} className="flex gap-4">
               <p
-                className="font-tan-mon-cheri flex-shrink-0"
+                className="font-tan-mon-cheri shrink-0"
                 style={{ fontSize: "3rem", color: "rgba(200,165,107,0.2)", lineHeight: 1 }}
               >
                 {step}
@@ -174,19 +176,21 @@ export function LpHowItWorksSection({ theme = "light" }: { theme?: "dark" | "lig
   );
 }
 
-export function LpTestimonialsSection() {
+export function LpTestimonialsSection({ variant = "control" }: SectionProps) {
+  const copy = getLpSections(variant).testimonials;
+
   return (
     <section className="py-16 sm:py-20 px-5" style={{ background: "#faf8f4" }}>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <p className="text-xs font-bold tracking-[0.3em] uppercase mb-4" style={{ color: "#9c7742" }}>
-            Quem já passou por aqui
+            {copy.eyebrow}
           </p>
           <h2
             className="font-tan-mon-cheri"
             style={{ fontSize: "clamp(1.8rem, 4vw, 2.4rem)", color: "#2f251b", lineHeight: 1.2 }}
           >
-            Resultados reais de pessoas reais
+            {copy.title}
           </h2>
         </div>
         <div className="grid sm:grid-cols-3 gap-5">
@@ -219,7 +223,9 @@ export function LpTestimonialsSection() {
   );
 }
 
-export function LpOfferSection({ onCheckout }: { onCheckout: () => void }) {
+export function LpOfferSection({ onCheckout, variant = "control" }: SectionProps & { onCheckout: () => void }) {
+  const copy = getLpSections(variant).offer;
+
   return (
     <section className="py-16 sm:py-24 px-5 relative overflow-hidden"
       style={{ background: "linear-gradient(160deg, #1e1812 0%, #2f251b 50%, #1a1208 100%)" }}>
@@ -236,23 +242,29 @@ export function LpOfferSection({ onCheckout }: { onCheckout: () => void }) {
       />
       <div className="max-w-lg mx-auto relative text-center">
         <p className="text-xs font-bold tracking-[0.3em] uppercase mb-4" style={{ color: "rgba(200,165,107,0.6)" }}>
-          Oferta especial
+          {copy.eyebrow}
         </p>
         <h2
           className="font-tan-mon-cheri mb-2"
           style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", color: "#f7f2ec", lineHeight: 1.15 }}
         >
-          Acesso completo ao {LP_PRODUCT_NAME}
+          {copy.title}
+          {copy.titleAccent && (
+            <>
+              <br />
+              <span style={{ color: "#c8a56b" }}>{copy.titleAccent}</span>
+            </>
+          )}
         </h2>
         <p className="text-sm mb-8" style={{ color: "rgba(247,242,236,0.45)" }}>
-          {LP_BILLING_LABEL}. Cancele quando quiser. Atualizações inclusas.
+          {copy.subtitle}
         </p>
 
         <div
           className="rounded-2xl p-8 mb-8 text-left"
           style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.22)" }}
         >
-          <div className="flex items-baseline gap-3 mb-6">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-6">
             <span
               className="font-tan-mon-cheri"
               style={{ fontSize: "3rem", color: "#c8a56b", lineHeight: 1 }}
@@ -262,14 +274,14 @@ export function LpOfferSection({ onCheckout }: { onCheckout: () => void }) {
             <span className="text-lg font-medium" style={{ color: "rgba(247,242,236,0.55)" }}>
               {LP_PRICE_PERIOD}
             </span>
-            <span className="text-sm line-through" style={{ color: "rgba(247,242,236,0.3)" }}>
-              {formatLpPrice(LP_PRICE_ORIGINAL)}{LP_PRICE_PERIOD}
+            <span className="text-sm line-through w-full sm:w-auto" style={{ color: "rgba(247,242,236,0.3)" }}>
+              de {formatLpPrice(LP_PRICE_ORIGINAL)}{LP_PRICE_PERIOD}
             </span>
           </div>
           <ul className="space-y-3 mb-6">
             {LP_INCLUDED_ITEMS.map((item) => (
               <li key={item} className="flex items-start gap-2.5">
-                <Check size={15} className="flex-shrink-0 mt-0.5" style={{ color: "#c8a56b" }} />
+                <Check size={15} className="shrink-0 mt-0.5" style={{ color: "#c8a56b" }} />
                 <span className="text-sm" style={{ color: "rgba(247,242,236,0.65)" }}>
                   {item}
                 </span>
@@ -282,33 +294,35 @@ export function LpOfferSection({ onCheckout }: { onCheckout: () => void }) {
           >
             <Shield size={16} style={{ color: "#c8a56b", flexShrink: 0 }} />
             <p className="text-xs" style={{ color: "rgba(247,242,236,0.55)" }}>
-              Garantia incondicional de {LP_GUARANTEE_DAYS} dias. Não gostou? Devolvemos 100%.
+              {LP_GUARANTEE_DAYS} dias de garantia incondicional. Não gostou? Devolvemos 100%.
             </p>
           </div>
         </div>
 
         <LpCtaButton onCheckout={onCheckout} fullWidth />
         <p className="text-xs mt-4" style={{ color: "rgba(247,242,236,0.25)", letterSpacing: "0.06em" }}>
-          Cobrança mensal recorrente · Acesso imediato · Suporte incluso
+          {copy.footnote}
         </p>
       </div>
     </section>
   );
 }
 
-export function LpFaqSection() {
+export function LpFaqSection({ variant = "control" }: SectionProps) {
+  const copy = getLpSections(variant).faq;
+
   return (
     <section className="py-16 sm:py-20 px-5" style={{ background: "#fff" }}>
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10">
           <p className="text-xs font-bold tracking-[0.3em] uppercase mb-4" style={{ color: "#9c7742" }}>
-            Perguntas frequentes
+            {copy.eyebrow}
           </p>
           <h2
             className="font-tan-mon-cheri"
             style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", color: "#2f251b" }}
           >
-            Tire suas dúvidas
+            {copy.title}
           </h2>
         </div>
         <div className="space-y-4">
@@ -332,7 +346,9 @@ export function LpFaqSection() {
   );
 }
 
-export function LpFinalCtaSection({ onCheckout }: { onCheckout: () => void }) {
+export function LpFinalCtaSection({ onCheckout, variant = "control" }: SectionProps & { onCheckout: () => void }) {
+  const copy = getLpSections(variant).finalCta;
+
   return (
     <section className="py-16 sm:py-24 px-5 text-center" style={{ background: "#0f0c09" }}>
       <div className="max-w-xl mx-auto">
@@ -340,11 +356,12 @@ export function LpFinalCtaSection({ onCheckout }: { onCheckout: () => void }) {
           className="font-tan-mon-cheri mb-4"
           style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", color: "#f7f2ec", lineHeight: 1.2 }}
         >
-          Sua jornada começa<br />
-          <span style={{ color: "#c8a56b" }}>com uma escolha</span>
+          {copy.title}
+          <br />
+          <span style={{ color: "#c8a56b" }}>{copy.titleAccent}</span>
         </h2>
         <p className="text-sm leading-relaxed mb-8" style={{ color: "rgba(247,242,236,0.45)" }}>
-          Cada avaliação que você faz é um ato de coragem. A clareza que você busca está mais próxima do que imagina.
+          {copy.body}
         </p>
         <LpCtaButton onCheckout={onCheckout} fullWidth />
       </div>
