@@ -80,8 +80,15 @@ echo " Diretório: $APP_DIR"
 echo "=========================================="
 
 echo ""
-echo "==> git pull"
-git pull
+echo "==> git fetch + reset (clone de produção segue o remoto; alterações locais são descartadas)"
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+if git diff --quiet && git diff --cached --quiet; then
+  git pull --ff-only origin "$BRANCH"
+else
+  echo "   Aviso: working tree suja (ex.: pnpm-lock.yaml modificado localmente); a alinhar com origin/$BRANCH"
+  git fetch origin
+  git reset --hard "origin/$BRANCH"
+fi
 
 echo ""
 echo "==> pnpm install ($PNPM)"
