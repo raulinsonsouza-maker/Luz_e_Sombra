@@ -354,13 +354,14 @@ export default function LinguagensAmorPage() {
       ? `Perfil de ${nomeResultado}`
       : "Seu mapa de receber e expressar amor";
     return (
-      <div className="min-h-screen pb-28 md:pb-12 px-4 pt-6" style={{ background: bg }}>
+      <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
         <MobileTopBar titulo="Linguagens do amor" subtitulo={subtituloResultado} />
         <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
           <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} />
 
           <PageIntroHeader
-            className="hidden md:block mb-2"
+            hiddenOnMobile
+            className="mb-2"
             eyebrow="5 Linguagens do Amor"
             titulo="Seu perfil afetivo"
             subtitulo={subtituloResultado}
@@ -454,7 +455,7 @@ export default function LinguagensAmorPage() {
           <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.55)" }}>
             Cada pessoa sente e demonstra amor de um jeito diferente. Em dois blocos de 15 escolhas, você descobre
             como prefere <strong style={{ color: "rgba(200,165,107,0.8)" }}>receber</strong> e como costuma{" "}
-            <strong style={{ color: "rgba(200,165,107,0.8)" }}>expressar</strong> afeto — o tanque emocional de Gary
+            <strong style={{ color: "rgba(200,165,107,0.8)" }}>expressar</strong> afeto, o tanque emocional de Gary
             Chapman.
           </p>
           <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(247,242,236,0.45)" }}>
@@ -503,7 +504,7 @@ export default function LinguagensAmorPage() {
             className="mb-4 p-3 rounded-xl text-xs text-center"
             style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.2)", color: "rgba(247,242,236,0.6)" }}
           >
-            Bloco 2 de 2 — Agora: como você demonstra amor
+            Bloco 2 de 2. Agora: como você demonstra amor
           </div>
         )}
         <div className="flex items-center justify-between mb-4">

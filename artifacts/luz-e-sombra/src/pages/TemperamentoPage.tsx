@@ -263,13 +263,14 @@ export default function TemperamentoPage() {
     const alertas = (resultadoApi.alertas as string[] | undefined) ?? [];
 
     return (
-      <div className="min-h-screen pb-28 md:pb-12 px-4 pt-6" style={{ background: bg }}>
+      <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
         <MobileTopBar titulo="Temperamento" subtitulo="Seu mapa temperamental" />
         <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
           <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} />
 
           <PageIntroHeader
-            className="hidden md:block mb-2"
+            hiddenOnMobile
+            className="mb-2"
             eyebrow="Análise de temperamento"
             titulo="Seu perfil"
             subtitulo="Quem você é por dentro"

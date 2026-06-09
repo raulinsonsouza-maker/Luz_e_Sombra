@@ -489,7 +489,7 @@ export default function TracodeCaraterPage() {
         : "Tudo pronto, análise completa disponível.";
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #1e1812 0%, #2a1f14 50%, #2f251b 100%)" }}>
+    <div className="min-h-screen pb-28" style={{ background: "linear-gradient(160deg, #1e1812 0%, #2a1f14 50%, #2f251b 100%)" }}>
       <MobileTopBar />
       <div className="max-w-4xl mx-auto px-6 pt-4">
         <NavBackButton
@@ -701,7 +701,7 @@ export default function TracodeCaraterPage() {
                 Diagnóstico emocional
               </h2>
               <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.4)" }}>
-                30 perguntas — contexto emocional antes das fotos (guardado por pessoa)
+                30 perguntas: contexto emocional antes das fotos (guardado por pessoa)
               </p>
             </div>
             {diagnosticoCompleto && <CheckCircle2 className="w-8 h-8 shrink-0" style={{ color: "#5db97a" }} />}

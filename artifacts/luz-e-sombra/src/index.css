@@ -58,6 +58,36 @@ select {
   backdrop-filter: blur(3px);
 }
 
+/* Shell padrão das páginas autenticadas (tema escuro) */
+.app-dark-shell {
+  background: linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%);
+}
+
+.app-dark-shell-warm {
+  background: linear-gradient(160deg, #1e1812 0%, #2a1f14 50%, #2f251b 100%);
+}
+
+/* Texto sobre fundo escuro (numerologia e painéis) */
+.text-on-dark {
+  color: #f7f2ec;
+}
+.text-on-dark-muted {
+  color: rgba(247, 242, 236, 0.65);
+}
+.text-on-dark-soft {
+  color: rgba(247, 242, 236, 0.45);
+}
+.text-on-dark-accent {
+  color: rgba(200, 165, 107, 0.75);
+}
+
+.num-panel {
+  background: rgba(30, 24, 18, 0.6);
+  border: 1px solid rgba(200, 165, 107, 0.12);
+  backdrop-filter: blur(20px);
+  border-radius: 1.5rem;
+}
+
 /* Luxury component classes */
 .luxury-shell {
   min-height: 100vh;

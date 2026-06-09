@@ -1,3 +1,6 @@
+/** Raiz da trilha de jornada (hub de módulos). */
+export const JORNADA_ROOT = "/jornada";
+
 /** Rotas e labels de voltar por módulo da jornada. */
 export const JORNADA_MODULE_NAV = {
   temperamento: { hub: "/jornada/temperamento", backLabel: "Temperamento" },

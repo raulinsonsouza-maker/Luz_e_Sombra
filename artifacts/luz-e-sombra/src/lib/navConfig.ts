@@ -28,8 +28,8 @@ export const NAV_PRIMARY: NavItem[] = [
 
 /** Ferramentas e avaliações — agrupadas no menu «Explorar». */
 export const NAV_TOOLS: NavItem[] = [
-  { href: "/traco-de-carater", label: "Traço de Caráter", icon: Layers, description: "Leitura corporal Reich/Lowen" },
-  { href: "/avaliacao", label: "Avaliação", icon: Target, description: "Roda da Vida e diagnósticos" },
+  { href: "/jornada/traco", label: "Traço de Caráter", icon: Layers, description: "Leitura corporal Reich/Lowen" },
+  { href: "/jornada/roda", label: "Avaliação", icon: Target, description: "Roda da Vida e diagnósticos" },
   { href: "/numerologia", label: "Numerologia", icon: Hash, description: "Mapa numerológico pessoal" },
   { href: "/missoes", label: "Missões", icon: Flame, description: "Desafios e gamificação" },
   { href: "/historico", label: "Histórico", icon: History, description: "Resultados anteriores" },
@@ -46,6 +46,8 @@ export function isToolsGroupActive(location: string): boolean {
 export function isChromelessRoute(location: string): boolean {
   return (
     location === "/" ||
+    location === "/vsl" ||
+    location === "/checkout" ||
     location === "/login" ||
     location === "/admin/login" ||
     location.startsWith("/admin")

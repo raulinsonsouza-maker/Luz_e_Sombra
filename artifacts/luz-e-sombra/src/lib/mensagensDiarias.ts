@@ -7,7 +7,7 @@ const MENSAGENS: readonly string[] = [
   "Hoje é tempo de presença, não pressa.",
   "Respire fundo: você já está no caminho.",
   "Pequena constância vence grandes saltos vazios.",
-  "Observe sem julgar — curiosidade abre portas.",
+  "Observe sem julgar. Curiosidade abre portas.",
   "O que você evita costuma pedir atenção gentil.",
   "Seja honesto consigo: é o começo da liberdade.",
   "Um hábito novo começa com uma escolha só de hoje.",
@@ -15,7 +15,7 @@ const MENSAGENS: readonly string[] = [
   "Seu ritmo é válido. Comparação rouba energia.",
   "Nomeie o que sente: nomear já acalma.",
   "Cuide do corpo como casa da sua mente.",
-  "Escute o cansaço — ele também é mensagem.",
+  "Escute o cansaço. Ele também é mensagem.",
   "Uma conversa sincera vale mais que cem planos.",
   "Gratidão simples muda o tom do dia.",
   "O que você nutre, cresce: escolha com intenção.",
@@ -31,7 +31,7 @@ const MENSAGENS: readonly string[] = [
   "Feche ciclos que só pedem energia.",
   "Abra espaço para o que alinha com seus valores.",
   "Seu valor não depende da opinião de hoje.",
-  "Confie no processo — ele revela camadas.",
+  "Confie no processo. Ele revela camadas.",
   "Da sombra à luz: um dia de cada vez.",
 ];
 

@@ -398,7 +398,7 @@ export default function LinguagensPainelResultado({
               }}
             >
               <p className="text-xs font-medium mb-2" style={{ color: LINGUAGEM_VISUAL[sec].cor }}>
-                Segunda linguagem — {LABEL_LINGUAGEM[sec]}
+                Segunda linguagem: {LABEL_LINGUAGEM[sec]}
               </p>
               <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.58)" }}>
                 {resultado.perfilSecundario.comoSeSenteAmado}

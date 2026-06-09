@@ -9,6 +9,9 @@ import {
 
 import { ANOS_UNIVERSAIS, ANOS_PESSOAIS, COMBINACOES, NUMEROS_DE_VIDA } from "@/lib/numerologia-data";
 import MobileTopBar from "@/components/MobileTopBar";
+import NavBackButton from "@/components/NavBackButton";
+import PageIntroHeader from "@/components/PageIntroHeader";
+import AppPageShell from "@/components/AppPageShell";
 import {
   MesPessoal,
   calcularAnoPessoal,
@@ -40,7 +43,7 @@ function NumBadge({ n, size = "lg" }: { n: number; size?: "sm" | "md" | "lg" | "
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-xs font-semibold tracking-[0.25em] uppercase text-brand-medium mb-2">
+    <p className="text-xs font-semibold tracking-[0.2em] uppercase text-on-dark-accent mb-2">
       {children}
     </p>
   );
@@ -48,8 +51,10 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
-    <span className="px-3 py-1 text-xs rounded-full text-brand-dark"
-      style={{ background: "rgba(200,165,107,0.12)", border: "1px solid rgba(200,165,107,0.3)" }}>
+    <span
+      className="px-3 py-1 text-xs rounded-full text-on-dark-muted"
+      style={{ background: "rgba(200,165,107,0.12)", border: "1px solid rgba(200,165,107,0.3)" }}
+    >
       {children}
     </span>
   );
@@ -57,12 +62,12 @@ function Tag({ children }: { children: React.ReactNode }) {
 
 function InfoCard({ icon: Icon, label, children }: { icon: typeof Briefcase; label: string; children: React.ReactNode }) {
   return (
-    <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
+    <div className="p-5 rounded-xl num-panel">
       <div className="flex items-center gap-2 mb-3">
-        <Icon className="w-4 h-4 text-brand-bronze" />
-        <h3 className="font-semibold text-brand-dark text-sm">{label}</h3>
+        <Icon className="w-4 h-4 text-brand-gold" />
+        <h3 className="font-semibold text-on-dark text-sm">{label}</h3>
       </div>
-      <p className="text-brand-medium text-sm leading-relaxed">{children}</p>
+      <p className="text-on-dark-muted text-sm leading-relaxed">{children}</p>
     </div>
   );
 }
@@ -155,7 +160,7 @@ export default function NumerologiaPage() {
 
   if (status === "loading") {
     return (
-      <div className="luxury-shell flex items-center justify-center">
+      <div className="min-h-screen app-dark-shell flex items-center justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-brand-gold border-t-transparent" />
       </div>
     );
@@ -172,17 +177,17 @@ export default function NumerologiaPage() {
 
         {/* Life Path — the most important */}
         {numerodeVida && numerodeVidaInfo && (
-          <div className="luxury-card-strong p-6 md:p-8">
+          <div className="num-panel p-6 md:p-8">
             <SectionLabel>Número mais importante</SectionLabel>
             <div className="flex items-start gap-4 md:gap-6 mb-6">
               <NumBadge n={numerodeVida} size="xl" />
               <div>
-                <h2 className="font-tan-mon-cheri text-3xl md:text-4xl text-brand-dark mb-1">
+                <h2 className="font-tan-mon-cheri text-3xl md:text-4xl text-on-dark mb-1">
                   {numerodeVidaInfo.titulo}
                 </h2>
-                <p className="text-brand-medium text-sm">{numerodeVidaInfo.arquetipo}</p>
+                <p className="text-on-dark-soft text-sm">{numerodeVidaInfo.arquetipo}</p>
                 {resultado.numerodeVidaRaw && (
-                  <p className="text-xs text-brand-medium/60 mt-2 font-mono">
+                  <p className="text-xs text-on-dark-soft/60 mt-2 font-mono">
                     Cálculo: {resultado.numerodeVidaRaw.passos}
                   </p>
                 )}
@@ -194,22 +199,22 @@ export default function NumerologiaPage() {
               style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.08), rgba(156,119,66,0.05))", border: "1px solid rgba(200,165,107,0.3)" }}>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-4 h-px bg-brand-gold" />
-                <span className="text-xs tracking-widest uppercase text-brand-bronze font-semibold">Essência</span>
+                <span className="text-xs tracking-widest uppercase text-brand-gold font-semibold">Essência</span>
               </div>
-              <p className="text-brand-darker leading-relaxed">{numerodeVidaInfo.essencia}</p>
+              <p className="text-on-darker leading-relaxed">{numerodeVidaInfo.essencia}</p>
             </div>
 
             {/* Mission */}
             <div className="p-5 rounded-xl mb-6"
               style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
               <div className="flex items-center gap-2 mb-2">
-                <Compass className="w-4 h-4 text-brand-bronze" />
-                <span className="text-xs tracking-widest uppercase text-brand-medium font-semibold">Missão de Vida</span>
+                <Compass className="w-4 h-4 text-brand-gold" />
+                <span className="text-xs tracking-widest uppercase text-on-dark-soft font-semibold">Missão de Vida</span>
               </div>
-              <p className="text-brand-darker leading-relaxed text-sm">{numerodeVidaInfo.missao}</p>
+              <p className="text-on-darker leading-relaxed text-sm">{numerodeVidaInfo.missao}</p>
             </div>
 
-            <p className="text-brand-darker text-sm leading-relaxed mb-6">{numerodeVidaInfo.descricao}</p>
+            <p className="text-on-darker text-sm leading-relaxed mb-6">{numerodeVidaInfo.descricao}</p>
 
             {/* 4 life areas */}
             <div className="grid md:grid-cols-2 gap-4 mb-6">
@@ -222,22 +227,22 @@ export default function NumerologiaPage() {
             {/* Talents */}
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.2)" }}>
-                <h3 className="font-semibold text-brand-dark text-sm mb-3">Talentos Naturais</h3>
+                <h3 className="font-semibold text-on-dark text-sm mb-3">Talentos Naturais</h3>
                 <ul className="space-y-2">
                   {numerodeVidaInfo.talentos.map((t, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-brand-darker">
-                      <span className="text-brand-bronze mt-0.5 flex-shrink-0">—</span>
+                    <li key={i} className="flex items-start gap-2 text-xs text-on-darker">
+                      <span className="text-brand-gold mt-0.5 flex-shrink-0">·</span>
                       <span>{t}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
-                <h3 className="font-semibold text-brand-dark text-sm mb-3">Desafios de Crescimento</h3>
+                <h3 className="font-semibold text-on-dark text-sm mb-3">Desafios de Crescimento</h3>
                 <ul className="space-y-2">
                   {numerodeVidaInfo.desafios.map((d, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-brand-darker">
-                      <span className="text-brand-medium/50 mt-0.5 flex-shrink-0">—</span>
+                    <li key={i} className="flex items-start gap-2 text-xs text-on-darker">
+                      <span className="text-on-dark-soft/50 mt-0.5 flex-shrink-0">·</span>
                       <span>{d}</span>
                     </li>
                   ))}
@@ -249,17 +254,17 @@ export default function NumerologiaPage() {
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Eye className="w-3.5 h-3.5 text-brand-medium/60" />
-                  <h3 className="font-semibold text-brand-dark text-sm">Sombra</h3>
+                  <Eye className="w-3.5 h-3.5 text-on-dark-soft/60" />
+                  <h3 className="font-semibold text-on-dark text-sm">Sombra</h3>
                 </div>
-                <p className="text-brand-medium text-xs leading-relaxed">{numerodeVidaInfo.sombra}</p>
+                <p className="text-on-dark-soft text-xs leading-relaxed">{numerodeVidaInfo.sombra}</p>
               </div>
               <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.25)" }}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-3.5 h-3.5 text-brand-bronze" />
-                  <h3 className="font-semibold text-brand-dark text-sm">Afirmação</h3>
+                  <Sparkles className="w-3.5 h-3.5 text-brand-gold" />
+                  <h3 className="font-semibold text-on-dark text-sm">Afirmação</h3>
                 </div>
-                <p className="text-brand-darker text-sm leading-relaxed italic">{numerodeVidaInfo.afirmacao}</p>
+                <p className="text-on-darker text-sm leading-relaxed italic">{numerodeVidaInfo.afirmacao}</p>
               </div>
             </div>
 
@@ -274,19 +279,19 @@ export default function NumerologiaPage() {
         {(expressaoVal || almaVal) && (
           <div className="grid md:grid-cols-2 gap-4">
             {expressaoVal && expressaoInfo && (
-              <div className="luxury-card-strong p-6">
+              <div className="num-panel p-6">
                 <SectionLabel>Número de Expressão</SectionLabel>
                 <div className="flex items-start gap-4 mb-4">
                   <NumBadge n={expressaoVal} size="md" />
                   <div>
-                    <h3 className="font-semibold text-xl text-brand-dark">{expressaoInfo.arquetipo}</h3>
-                    <p className="text-xs text-brand-medium mt-0.5">Do nome completo</p>
+                    <h3 className="font-semibold text-xl text-on-dark">{expressaoInfo.arquetipo}</h3>
+                    <p className="text-xs text-on-dark-soft mt-0.5">Do nome completo</p>
                   </div>
                 </div>
-                <p className="text-sm text-brand-medium leading-relaxed mb-4">
-                  Como você se expressa no mundo e os talentos que manifesta naturalmente — sua "máscara" mais elevada.
+                <p className="text-sm text-on-dark-soft leading-relaxed mb-4">
+                  Como você se expressa no mundo e os talentos que manifesta naturalmente, sua "máscara" mais elevada.
                 </p>
-                <p className="text-sm text-brand-darker leading-relaxed">{expressaoInfo.essencia}</p>
+                <p className="text-sm text-on-darker leading-relaxed">{expressaoInfo.essencia}</p>
                 <div className="flex flex-wrap gap-2 mt-4">
                   {expressaoInfo.palavrasChave.slice(0, 4).map((p, i) => <Tag key={i}>{p}</Tag>)}
                 </div>
@@ -294,19 +299,19 @@ export default function NumerologiaPage() {
             )}
 
             {almaVal && almaInfo && (
-              <div className="luxury-card-strong p-6">
+              <div className="num-panel p-6">
                 <SectionLabel>Número da Alma</SectionLabel>
                 <div className="flex items-start gap-4 mb-4">
                   <NumBadge n={almaVal} size="md" />
                   <div>
-                    <h3 className="font-semibold text-xl text-brand-dark">{almaInfo.arquetipo}</h3>
-                    <p className="text-xs text-brand-medium mt-0.5">Das vogais do nome</p>
+                    <h3 className="font-semibold text-xl text-on-dark">{almaInfo.arquetipo}</h3>
+                    <p className="text-xs text-on-dark-soft mt-0.5">Das vogais do nome</p>
                   </div>
                 </div>
-                <p className="text-sm text-brand-medium leading-relaxed mb-4">
-                  O que você deseja profundamente no íntimo — sua motivação mais oculta, o que move sua alma.
+                <p className="text-sm text-on-dark-soft leading-relaxed mb-4">
+                  O que você deseja profundamente no íntimo, sua motivação mais oculta, o que move sua alma.
                 </p>
-                <p className="text-sm text-brand-darker leading-relaxed">{almaInfo.essencia}</p>
+                <p className="text-sm text-on-darker leading-relaxed">{almaInfo.essencia}</p>
                 <div className="flex flex-wrap gap-2 mt-4">
                   {almaInfo.palavrasChave.slice(0, 4).map((p, i) => <Tag key={i}>{p}</Tag>)}
                 </div>
@@ -317,16 +322,16 @@ export default function NumerologiaPage() {
 
         {/* Personality number */}
         {persVal && NUMEROS_DE_VIDA[persVal] && (
-          <div className="luxury-card-strong p-6">
+          <div className="num-panel p-6">
             <SectionLabel>Número da Personalidade</SectionLabel>
             <div className="flex items-start gap-4">
               <NumBadge n={persVal} size="sm" />
               <div className="flex-1">
-                <h3 className="font-semibold text-lg text-brand-dark mb-1">
+                <h3 className="font-semibold text-lg text-on-dark mb-1">
                   {NUMEROS_DE_VIDA[persVal].arquetipo}
                 </h3>
-                <p className="text-xs text-brand-medium mb-3">Das consoantes do nome — como os outros te percebem</p>
-                <p className="text-sm text-brand-darker leading-relaxed">{NUMEROS_DE_VIDA[persVal].missao}</p>
+                <p className="text-xs text-on-dark-soft mb-3">Das consoantes do nome, como os outros te percebem</p>
+                <p className="text-sm text-on-darker leading-relaxed">{NUMEROS_DE_VIDA[persVal].missao}</p>
               </div>
             </div>
           </div>
@@ -334,7 +339,7 @@ export default function NumerologiaPage() {
 
         {/* Triangle synthesis */}
         {numerodeVida && expressaoVal && almaVal && (
-          <div className="luxury-card-strong p-6 md:p-8"
+          <div className="num-panel p-6 md:p-8"
             style={{ background: "linear-gradient(160deg, #1e1812 0%, #2f251b 60%, #3d2f1f 100%)" }}>
             <SectionLabel><span style={{ color: "rgba(200,165,107,0.9)" }}>Síntese do Perfil</span></SectionLabel>
             <h3 className="font-tan-mon-cheri text-2xl mb-6" style={{ color: "#f7f2ec" }}>
@@ -374,48 +379,48 @@ export default function NumerologiaPage() {
       <div className="space-y-5 md:space-y-6 animate-fadeIn">
 
         {/* Year numbers summary */}
-        <div className="luxury-card-strong p-6 md:p-8">
+        <div className="num-panel p-6 md:p-8">
           <SectionLabel>Contexto temporal de {resultado.ano}</SectionLabel>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="p-6 rounded-2xl"
               style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.35)" }}>
-              <p className="text-xs tracking-widest uppercase text-brand-medium mb-4">Seu Ano Pessoal</p>
+              <p className="text-xs tracking-widest uppercase text-on-dark-soft mb-4">Seu Ano Pessoal</p>
               <div className="flex items-end gap-4 mb-4">
-                <span className="font-tan-mon-cheri text-6xl md:text-8xl text-brand-bronze leading-none">{anoPessoal.reduzido}</span>
+                <span className="font-tan-mon-cheri text-6xl md:text-8xl text-brand-gold leading-none">{anoPessoal.reduzido}</span>
                 <div className="mb-3">
-                  <p className="text-xs text-brand-medium">Ciclo pessoal</p>
-                  <p className="text-xs font-mono text-brand-medium/60 mt-1">{anoPessoal.passos}</p>
+                  <p className="text-xs text-on-dark-soft">Ciclo pessoal</p>
+                  <p className="text-xs font-mono text-on-dark-soft/60 mt-1">{anoPessoal.passos}</p>
                 </div>
               </div>
-              {interp && <p className="text-sm text-brand-darker leading-relaxed">{interp.essencia || interp.descricao}</p>}
+              {interp && <p className="text-sm text-on-darker leading-relaxed">{interp.essencia || interp.descricao}</p>}
             </div>
             <div className="p-6 rounded-2xl"
               style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
-              <p className="text-xs tracking-widest uppercase text-brand-medium mb-4">Ano Universal {resultado.ano}</p>
+              <p className="text-xs tracking-widest uppercase text-on-dark-soft mb-4">Ano Universal {resultado.ano}</p>
               <div className="flex items-end gap-4 mb-4">
-                <span className="font-tan-mon-cheri text-6xl md:text-8xl text-brand-dark leading-none" style={{ opacity: 0.65 }}>{anoUniversal.reduzido}</span>
+                <span className="font-tan-mon-cheri text-6xl md:text-8xl text-on-dark leading-none" style={{ opacity: 0.65 }}>{anoUniversal.reduzido}</span>
                 <div className="mb-3">
-                  <p className="text-xs text-brand-medium">Energia coletiva global</p>
+                  <p className="text-xs text-on-dark-soft">Energia coletiva global</p>
                 </div>
               </div>
-              {univ && <p className="text-sm text-brand-medium leading-relaxed">{univ.climaColetivo}</p>}
+              {univ && <p className="text-sm text-on-dark-soft leading-relaxed">{univ.climaColetivo}</p>}
             </div>
           </div>
         </div>
 
         {/* Personal year full interpretation */}
         {interp && (
-          <div className="luxury-card-strong p-6 md:p-8">
+          <div className="num-panel p-6 md:p-8">
             <div className="flex items-center gap-3 mb-6">
-              <Brain className="w-5 h-5 text-brand-bronze" />
+              <Brain className="w-5 h-5 text-brand-gold" />
               <div>
                 <SectionLabel>Interpretação Completa</SectionLabel>
-                <p className="text-brand-dark font-medium">{interp.titulo}</p>
+                <p className="text-on-dark font-medium">{interp.titulo}</p>
               </div>
             </div>
             <div className="p-6 rounded-2xl mb-6"
               style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.2)" }}>
-              <p className="text-brand-darker leading-relaxed text-sm whitespace-pre-line">{interp.detalhado}</p>
+              <p className="text-on-darker leading-relaxed text-sm whitespace-pre-line">{interp.detalhado}</p>
             </div>
             <div className="grid md:grid-cols-2 gap-4 mb-6">
               <InfoCard icon={Briefcase} label="Carreira">{interp.temas.carreira}</InfoCard>
@@ -434,11 +439,11 @@ export default function NumerologiaPage() {
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               {interp.desafios.length > 0 && (
                 <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
-                  <h3 className="font-semibold text-brand-dark text-sm mb-3">Desafios do Ano</h3>
+                  <h3 className="font-semibold text-on-dark text-sm mb-3">Desafios do Ano</h3>
                   <ul className="space-y-1.5">
                     {interp.desafios.map((d, i) => (
-                      <li key={i} className="text-xs text-brand-darker flex items-start gap-2">
-                        <span className="text-brand-bronze/60 mt-0.5">—</span><span>{d}</span>
+                      <li key={i} className="text-xs text-on-darker flex items-start gap-2">
+                        <span className="text-brand-gold/60 mt-0.5">·</span><span>{d}</span>
                       </li>
                     ))}
                   </ul>
@@ -446,11 +451,11 @@ export default function NumerologiaPage() {
               )}
               {interp.areasDeAtencao && interp.areasDeAtencao.length > 0 && (
                 <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
-                  <h3 className="font-semibold text-brand-dark text-sm mb-3">Áreas de Atenção</h3>
+                  <h3 className="font-semibold text-on-dark text-sm mb-3">Áreas de Atenção</h3>
                   <ul className="space-y-1.5">
                     {interp.areasDeAtencao.map((a, i) => (
-                      <li key={i} className="text-xs text-brand-darker flex items-start gap-2">
-                        <span className="text-brand-bronze/60 mt-0.5">—</span><span>{a}</span>
+                      <li key={i} className="text-xs text-on-darker flex items-start gap-2">
+                        <span className="text-brand-gold/60 mt-0.5">·</span><span>{a}</span>
                       </li>
                     ))}
                   </ul>
@@ -459,11 +464,11 @@ export default function NumerologiaPage() {
             </div>
             {interp.praticasSugeridas && interp.praticasSugeridas.length > 0 && (
               <div className="p-5 rounded-xl mb-4" style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.2)" }}>
-                <h3 className="font-semibold text-brand-dark text-sm mb-3">Práticas Recomendadas</h3>
+                <h3 className="font-semibold text-on-dark text-sm mb-3">Práticas Recomendadas</h3>
                 <div className="grid md:grid-cols-2 gap-x-6 gap-y-1.5">
                   {interp.praticasSugeridas.map((p, i) => (
-                    <div key={i} className="flex items-start gap-2 text-xs text-brand-darker">
-                      <span className="text-brand-bronze mt-0.5 flex-shrink-0">—</span><span>{p}</span>
+                    <div key={i} className="flex items-start gap-2 text-xs text-on-darker">
+                      <span className="text-brand-gold mt-0.5 flex-shrink-0">·</span><span>{p}</span>
                     </div>
                   ))}
                 </div>
@@ -471,10 +476,10 @@ export default function NumerologiaPage() {
             )}
             {interp.afirmacoes && interp.afirmacoes.length > 0 && (
               <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.25)" }}>
-                <h3 className="font-semibold text-brand-dark text-sm mb-3">Afirmações do Ano</h3>
+                <h3 className="font-semibold text-on-dark text-sm mb-3">Afirmações do Ano</h3>
                 <div className="space-y-2">
                   {interp.afirmacoes.map((a, i) => (
-                    <p key={i} className="text-sm text-brand-darker italic">"{a}"</p>
+                    <p key={i} className="text-sm text-on-darker italic">"{a}"</p>
                   ))}
                 </div>
               </div>
@@ -487,12 +492,12 @@ export default function NumerologiaPage() {
 
         {/* Universal year */}
         {univ && (
-          <div className="luxury-card-strong p-6 md:p-8">
+          <div className="num-panel p-6 md:p-8">
             <div className="flex items-center gap-3 mb-6">
-              <TrendingUp className="w-5 h-5 text-brand-bronze" />
+              <TrendingUp className="w-5 h-5 text-brand-gold" />
               <div>
                 <SectionLabel>Contexto Coletivo</SectionLabel>
-                <p className="text-brand-dark font-medium">{univ.titulo}</p>
+                <p className="text-on-dark font-medium">{univ.titulo}</p>
               </div>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
@@ -500,10 +505,10 @@ export default function NumerologiaPage() {
               <InfoCard icon={AlertCircle} label="Desafios Coletivos">{univ.desafios}</InfoCard>
               <div className="md:col-span-2 p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.2)" }}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Lightbulb className="w-4 h-4 text-brand-bronze" />
-                  <h3 className="font-semibold text-brand-dark text-sm">Como Aproveitar o Contexto Coletivo</h3>
+                  <Lightbulb className="w-4 h-4 text-brand-gold" />
+                  <h3 className="font-semibold text-on-dark text-sm">Como Aproveitar o Contexto Coletivo</h3>
                 </div>
-                <p className="text-sm text-brand-darker leading-relaxed">{univ.comoAproveitar}</p>
+                <p className="text-sm text-on-darker leading-relaxed">{univ.comoAproveitar}</p>
               </div>
             </div>
           </div>
@@ -511,10 +516,10 @@ export default function NumerologiaPage() {
 
         {/* Combination */}
         {combinacao && (
-          <div className="luxury-card-strong p-6 md:p-8"
+          <div className="num-panel p-6 md:p-8"
             style={{ background: "linear-gradient(160deg, #1e1812 0%, #2f251b 60%, #3d2f1f 100%)" }}>
             <div className="flex items-center gap-3 mb-6">
-              <Hash className="w-5 h-5 text-brand-bronze" />
+              <Hash className="w-5 h-5 text-brand-gold" />
               <div>
                 <SectionLabel><span style={{ color: "rgba(200,165,107,0.9)" }}>Combinação Pessoal × Universal</span></SectionLabel>
                 <p className="font-medium" style={{ color: "#f7f2ec" }}>{combinacao.tema}</p>
@@ -530,7 +535,7 @@ export default function NumerologiaPage() {
                 <div key={label} className="p-5 rounded-xl"
                   style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.2)" }}>
                   <div className="flex items-center gap-2 mb-2">
-                    <Icon className="w-4 h-4 text-brand-bronze" />
+                    <Icon className="w-4 h-4 text-brand-gold" />
                     <h3 className="font-semibold text-sm" style={{ color: "#f7f2ec" }}>{label}</h3>
                   </div>
                   <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.88)" }}>{val}</p>
@@ -539,7 +544,7 @@ export default function NumerologiaPage() {
             </div>
             <div className="p-6 rounded-2xl" style={{ background: "rgba(200,165,107,0.1)", border: "1px solid rgba(200,165,107,0.3)" }}>
               <div className="flex items-center gap-2 mb-2">
-                <ChevronRight className="w-4 h-4 text-brand-bronze" />
+                <ChevronRight className="w-4 h-4 text-brand-gold" />
                 <h3 className="font-semibold text-sm" style={{ color: "#f7f2ec" }}>Recomendações Práticas</h3>
               </div>
               <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.92)" }}>{combinacao.recomendacoes}</p>
@@ -549,9 +554,9 @@ export default function NumerologiaPage() {
 
         {/* Life path × personal year synthesis when combination isn't in DB */}
         {!combinacao && resultado.numerodeVida && (
-          <div className="luxury-card-strong p-6">
+          <div className="num-panel p-6">
             <SectionLabel>Síntese Personalizada</SectionLabel>
-            <p className="text-sm text-brand-darker leading-relaxed">
+            <p className="text-sm text-on-darker leading-relaxed">
               Seu Caminho de Vida <strong>{resultado.numerodeVida}</strong> encontra a energia do Ano Pessoal <strong>{anoPessoal.reduzido}</strong> e do Ano Universal <strong>{anoUniversal.reduzido}</strong>.
               Cada ciclo anual amplifica ou desafia aspectos específicos do seu Caminho de Vida.
               Considere como as qualidades do seu número <strong>{resultado.numerodeVida}</strong> ({resultado.numerodeVidaInfo?.arquetipo})
@@ -567,50 +572,50 @@ export default function NumerologiaPage() {
     if (!resultado) return null;
     return (
       <div className="space-y-4 md:space-y-5 animate-fadeIn">
-        <div className="luxury-card-strong p-6">
+        <div className="num-panel p-6">
           <SectionLabel>Mapa Mensal</SectionLabel>
-          <h2 className="font-tan-mon-cheri text-2xl text-brand-dark mb-1">
+          <h2 className="font-tan-mon-cheri text-2xl text-on-dark mb-1">
             Os 12 Meses de {resultado.ano}
           </h2>
-          <p className="text-brand-medium text-sm">
+          <p className="text-on-dark-soft text-sm">
             Cada mês recebe uma energia específica baseada no seu Ano Pessoal {resultado.anoPessoal.reduzido}.
           </p>
         </div>
         <div className="grid lg:grid-cols-2 gap-4">
           {resultado.meses.map((mes: MesPessoal, idx: number) => (
-            <div key={idx} className="luxury-card-strong p-5 md:p-6 transition-all hover:shadow-lg"
+            <div key={idx} className="num-panel p-5 md:p-6 transition-all hover:shadow-lg"
               style={{ border: "1px solid rgba(200,165,107,0.18)" }}>
 
               {/* Header */}
               <div className="flex items-center justify-between mb-4 pb-4"
                 style={{ borderBottom: "1px solid rgba(200,165,107,0.15)" }}>
                 <div>
-                  <h3 className="font-semibold text-lg text-brand-dark">{mes.mesNome}</h3>
-                  <p className="text-xs text-brand-bronze mt-0.5 font-semibold tracking-wide uppercase">{mes.energia}</p>
+                  <h3 className="font-semibold text-lg text-on-dark">{mes.mesNome}</h3>
+                  <p className="text-xs text-brand-gold mt-0.5 font-semibold tracking-wide uppercase">{mes.energia}</p>
                 </div>
                 <NumBadge n={mes.reduzido} size="sm" />
               </div>
 
               {/* Short description */}
-              <p className="text-sm text-brand-darker leading-relaxed mb-4">{mes.descricao}</p>
+              <p className="text-sm text-on-darker leading-relaxed mb-4">{mes.descricao}</p>
 
               {/* Deep insight */}
               <div className="p-4 rounded-xl mb-4"
                 style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.15)" }}>
-                <p className="text-xs text-brand-darker leading-relaxed">{mes.profundidade}</p>
+                <p className="text-xs text-on-darker leading-relaxed">{mes.profundidade}</p>
               </div>
 
               {/* Reflection question */}
               <div className="flex items-start gap-3 p-4 rounded-xl mb-4"
                 style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.25)" }}>
-                <Quote className="w-4 h-4 text-brand-bronze flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-brand-darker leading-relaxed italic">{mes.reflexao}</p>
+                <Quote className="w-4 h-4 text-brand-gold flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-on-darker leading-relaxed italic">{mes.reflexao}</p>
               </div>
 
               {/* Areas */}
               {mes.areas.length > 0 && (
                 <div className="mb-4">
-                  <p className="text-xs font-semibold tracking-wider uppercase text-brand-bronze mb-2">Áreas em destaque</p>
+                  <p className="text-xs font-semibold tracking-wider uppercase text-brand-gold mb-2">Áreas em destaque</p>
                   <div className="flex flex-wrap gap-1.5">
                     {mes.areas.map((a, i) => <Tag key={i}>{a}</Tag>)}
                   </div>
@@ -620,11 +625,11 @@ export default function NumerologiaPage() {
               {/* Actions */}
               {mes.acoes.length > 0 && (
                 <div className="mb-4">
-                  <p className="text-xs font-semibold tracking-wider uppercase text-brand-bronze mb-2">Ações recomendadas</p>
+                  <p className="text-xs font-semibold tracking-wider uppercase text-brand-gold mb-2">Ações recomendadas</p>
                   <ul className="space-y-1.5">
                     {mes.acoes.map((a, i) => (
-                      <li key={i} className="text-xs text-brand-darker flex items-start gap-2">
-                        <span className="text-brand-bronze mt-0.5 flex-shrink-0">—</span><span>{a}</span>
+                      <li key={i} className="text-xs text-on-darker flex items-start gap-2">
+                        <span className="text-brand-gold mt-0.5 flex-shrink-0">·</span><span>{a}</span>
                       </li>
                     ))}
                   </ul>
@@ -634,11 +639,11 @@ export default function NumerologiaPage() {
               {/* Avoid */}
               {mes.evitar.length > 0 && (
                 <div className="pt-3" style={{ borderTop: "1px solid rgba(200,165,107,0.1)" }}>
-                  <p className="text-xs font-semibold tracking-wider uppercase text-brand-medium/60 mb-2">O que evitar</p>
+                  <p className="text-xs font-semibold tracking-wider uppercase text-on-dark-soft/60 mb-2">O que evitar</p>
                   <ul className="space-y-1.5">
                     {mes.evitar.map((e, i) => (
-                      <li key={i} className="text-xs text-brand-medium flex items-start gap-2">
-                        <span className="text-brand-medium/40 mt-0.5 flex-shrink-0">—</span><span>{e}</span>
+                      <li key={i} className="text-xs text-on-dark-soft flex items-start gap-2">
+                        <span className="text-on-dark-soft/40 mt-0.5 flex-shrink-0">·</span><span>{e}</span>
                       </li>
                     ))}
                   </ul>
@@ -654,9 +659,17 @@ export default function NumerologiaPage() {
   // ── Page ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="luxury-shell pt-6 pb-28 px-4">
+    <>
       <MobileTopBar titulo="Numerologia" subtitulo="Meus números e ciclos" />
-      <div className="max-w-4xl mx-auto space-y-5 md:space-y-6">
+      <AppPageShell width="wide" contentClassName="space-y-5 md:space-y-6">
+        <NavBackButton to="/dashboard" label="Início" className="mb-0" />
+        <PageIntroHeader
+          eyebrow="Análise numerológica"
+          titulo="Numerologia"
+          subtitulo="Decifre os padrões do seu destino"
+          hiddenOnMobile
+          className="mb-2"
+        />
 
         {/* Hero card */}
         <div className="rounded-3xl overflow-hidden"
@@ -668,18 +681,8 @@ export default function NumerologiaPage() {
           <div className="p-6 sm:p-8 md:p-10">
             {/* Header (título em mobile via MobileTopBar) */}
             <div className="text-center mb-8 md:mb-10">
-              <div className="hidden md:block">
-                <p className="text-xs font-semibold tracking-[0.12em] sm:tracking-[0.3em] uppercase mb-4"
-                  style={{ color: "rgba(200,165,107,0.85)" }}>
-                  Análise · Numerológica · Pessoal
-                </p>
-                <h1 className="font-tan-mon-cheri text-3xl sm:text-4xl md:text-6xl mb-3"
-                  style={{ color: "#c8a56b" }}>
-                  Numerologia
-                </h1>
-              </div>
-              <p className="text-sm mt-2 md:mt-0" style={{ color: "rgba(247,242,236,0.65)" }}>
-                Decifre os padrões do seu destino
+              <p className="text-sm" style={{ color: "rgba(247,242,236,0.65)" }}>
+                Seus números de vida, expressão, alma e ciclos anuais
               </p>
             </div>
 
@@ -707,7 +710,7 @@ export default function NumerologiaPage() {
                     </p>
                     <p className="font-semibold text-xl sm:text-2xl md:text-3xl mb-1.5 leading-tight"
                       style={{ color: "#e8d5b0" }}>
-                      {user?.nome || "—"}
+                      {user?.nome || "Não informado"}
                     </p>
                     <div className="flex items-center gap-2.5 flex-wrap">
                       {user?.dataNascimento ? (
@@ -792,7 +795,7 @@ export default function NumerologiaPage() {
         {resultado && (
           <>
             {/* Tab navigation */}
-            <div className="luxury-card p-1.5 flex gap-1 items-stretch">
+            <div className="num-panel p-1.5 flex gap-1 items-stretch">
               {([
                 { key: "perfil", label: "Perfil Permanente", icon: User },
                 { key: "ano", label: `Análise ${resultado.ano}`, icon: TrendingUp },
@@ -816,7 +819,7 @@ export default function NumerologiaPage() {
             {abaAtiva === "meses" && renderMeses()}
           </>
         )}
-      </div>
-    </div>
+      </AppPageShell>
+    </>
   );
 }

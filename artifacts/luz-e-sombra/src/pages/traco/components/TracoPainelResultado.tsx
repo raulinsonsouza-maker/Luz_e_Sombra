@@ -341,7 +341,7 @@ export function TracoPainelResultado({
               </p>
               {baixaConcordancia && (
                 <p className="text-xs mb-2" style={{ color: "rgba(224,123,57,0.85)" }}>
-                  Parte das leituras aponta em direções diferentes — o perfil integrado equilibra as duas fontes.
+                  Parte das leituras aponta em direções diferentes. O perfil integrado equilibra as duas fontes.
                 </p>
               )}
               <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)" }}>

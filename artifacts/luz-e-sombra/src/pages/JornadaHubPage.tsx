@@ -16,10 +16,13 @@ import { LABEL_LINGUAGEM, type LinguagemAmor } from "@workspace/cinco-linguagens
 import { tituloPerfilTemperamento, type TemperamentoCodigo, type TipoPerfil } from "@workspace/temperamento-v1";
 import MobileTopBar from "@/components/MobileTopBar";
 import NavBackButton from "@/components/NavBackButton";
+import PageIntroHeader from "@/components/PageIntroHeader";
+import AppPageShell from "@/components/AppPageShell";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 import { MinicursoEmbedido } from "@/components/MinicursoEmbedido";
 import {
   JORNADA_HUB_COPY,
+  JORNADA_ROOT,
   hrefNovaAnalise,
   hrefVerResultado,
   hrefIniciarAnalise,
@@ -332,7 +335,7 @@ export default function JornadaHubPage() {
           <p className="text-sm mb-4" style={{ color: "rgba(247,242,236,0.5)" }}>
             Módulo não encontrado.
           </p>
-          <NavBackButton to="/jornada" label="Jornada" className="mx-auto mb-4" />
+          <NavBackButton to={JORNADA_ROOT} label="Jornada" className="mx-auto mb-4" />
         </div>
       </div>
     );
@@ -343,7 +346,7 @@ export default function JornadaHubPage() {
       <div className="min-h-screen px-4 pt-6 pb-28 journey-forest-bg">
         <MobileTopBar titulo={modulo.tituloIntro} subtitulo="Módulo bloqueado" />
         <div className="max-w-lg mx-auto">
-          <NavBackButton to="/jornada" label="Jornada" />
+          <NavBackButton to={JORNADA_ROOT} label="Jornada" />
           <div
             className="rounded-2xl p-8 text-center"
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
@@ -362,19 +365,18 @@ export default function JornadaHubPage() {
   }
 
   return (
-    <div className="min-h-screen pb-28 journey-forest-bg">
+    <>
       <MobileTopBar titulo={modulo.tituloIntro} subtitulo="Módulo da jornada" />
-      <div className="max-w-lg mx-auto px-4 pt-6">
-        <NavBackButton to="/jornada" label="Jornada" />
-
-        <div className="mb-8">
-          <h1 className="font-tan-mon-cheri text-2xl mb-2 hidden md:block" style={{ color: "#f7f2ec" }}>
-            {modulo.tituloIntro}
-          </h1>
-          <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
-            {copy?.introFallback ?? modulo.descricaoIntro}
-          </p>
-        </div>
+      <AppPageShell forest contentClassName="pt-6">
+        <NavBackButton to={JORNADA_ROOT} label="Jornada" className="mb-4" />
+        <PageIntroHeader
+          eyebrow="Módulo da jornada"
+          titulo={modulo.tituloIntro}
+          subtitulo={copy?.introFallback ?? modulo.descricaoIntro}
+          size="compact"
+          hiddenOnMobile
+          className="mb-6"
+        />
 
         {/* 1 — Introdução */}
         <section className="mb-8">
@@ -604,7 +606,7 @@ export default function JornadaHubPage() {
                 Minicurso em breve
               </p>
               <p className="text-xs leading-relaxed max-w-xs" style={{ color: "rgba(247,242,236,0.38)" }}>
-                Estamos preparando um percurso guiado para aprofundar este módulo. Sua análise já está pronta — volte
+                Estamos preparando um percurso guiado para aprofundar este módulo. Sua análise já está pronta, volte
                 aqui quando o curso for liberado.
               </p>
               <span
@@ -636,7 +638,7 @@ export default function JornadaHubPage() {
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5" style={{ color: "#c8a56b" }} />
               <p className="font-semibold text-sm" style={{ color: "#f7f2ec" }}>
-                Módulo concluído — análise e minicurso feitos.
+                Módulo concluído: análise e minicurso feitos.
               </p>
             </div>
             <p className="text-xs" style={{ color: "rgba(247,242,236,0.55)" }}>
@@ -688,7 +690,7 @@ export default function JornadaHubPage() {
             </p>
           </div>
         )}
-      </div>
-    </div>
+      </AppPageShell>
+    </>
   );
 }

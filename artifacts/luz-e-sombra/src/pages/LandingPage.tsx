@@ -1,17 +1,27 @@
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ArrowRight, Circle, Sun, BookOpen, TrendingUp, Star, Compass, Heart, Brain, Layers } from "lucide-react";
+import { LpModulesSection, LpOfferSection, LpFinalCtaSection } from "@/components/lp/LpOfferSections";
+import { trackLpEvent } from "@/lib/lpAnalytics";
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
   const { status } = useAuth();
+  const trackedView = useRef(false);
 
   useEffect(() => {
     if (status === "authenticated") navigate("/dashboard");
-  }, [status]);
+  }, [status, navigate]);
 
-  const handleCTA = () => navigate("/login");
+  useEffect(() => {
+    if (trackedView.current) return;
+    trackedView.current = true;
+    trackLpEvent("lp_view", "control");
+  }, []);
+
+  const goCheckout = () => navigate("/checkout?from=control");
+  const goLogin = () => navigate("/login");
 
   return (
     <div>
@@ -26,7 +36,7 @@ export default function LandingPage() {
               Da Sombra à Luz
             </span>
           </div>
-          <button onClick={handleCTA}
+          <button onClick={goLogin}
             className="px-5 py-2 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90"
             style={{ background: "linear-gradient(135deg, #9c7742, #c8a56b)", color: "#fff", letterSpacing: "0.04em", boxShadow: "0 4px 14px rgba(200,165,107,0.25)" }}>
             Entrar
@@ -63,10 +73,10 @@ export default function LandingPage() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-16">
-              <button onClick={handleCTA}
+              <button onClick={goCheckout}
                 className="flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl font-bold text-base transition-all hover:-translate-y-0.5"
                 style={{ background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)", color: "#fff", letterSpacing: "0.04em", boxShadow: "0 8px 40px rgba(200,165,107,0.35)" }}>
-                Começar Agora
+                Ver oferta completa
                 <ArrowRight size={18} />
               </button>
               <a href="#modulos"
@@ -75,6 +85,12 @@ export default function LandingPage() {
                 Ver como funciona
               </a>
             </div>
+            <p className="text-xs mb-4 -mt-10" style={{ color: "rgba(247,242,236,0.3)" }}>
+              Já comprou?{" "}
+              <button type="button" onClick={goLogin} className="underline hover:opacity-80" style={{ color: "rgba(200,165,107,0.6)" }}>
+                Faça login aqui
+              </button>
+            </p>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4 pt-8" style={{ borderTop: "1px solid rgba(200,165,107,0.12)" }}>
@@ -346,32 +362,11 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <LpModulesSection theme="light" />
+
       {/* ── FINAL CTA — dark ────────────────────────────────────── */}
-      <section className="py-20 sm:py-32 px-5 text-center relative overflow-hidden"
-        style={{ background: "linear-gradient(160deg, #1e1812 0%, #2f251b 50%, #1a1208 100%)" }}>
-        <div className="absolute pointer-events-none" style={{ top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 900, height: 600, background: "radial-gradient(ellipse, rgba(200,165,107,0.09), transparent 65%)" }} />
-        <div className="max-w-xl mx-auto relative">
-          <p className="text-xs font-bold tracking-[0.3em] uppercase mb-6" style={{ color: "rgba(200,165,107,0.6)" }}>
-            Comece Agora
-          </p>
-          <h2 className="font-tan-mon-cheri mb-6" style={{ fontSize: "clamp(2rem, 5vw, 3.8rem)", color: "#f7f2ec", lineHeight: 1.15 }}>
-            Sua jornada começa<br />
-            <span style={{ color: "#c8a56b" }}>com uma escolha</span>
-          </h2>
-          <p className="text-base leading-relaxed mb-10" style={{ color: "rgba(247,242,236,0.5)" }}>
-            Cada avaliação que você faz é um ato de coragem. A clareza que você busca está mais próxima do que você imagina.
-          </p>
-          <button onClick={handleCTA}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-12 py-5 rounded-2xl font-bold text-base transition-all hover:-translate-y-1"
-            style={{ background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)", color: "#fff", letterSpacing: "0.05em", boxShadow: "0 12px 50px rgba(200,165,107,0.35)", fontSize: "1.05rem" }}>
-            Acessar o Sistema
-            <ArrowRight size={20} />
-          </button>
-          <p className="text-xs mt-5" style={{ color: "rgba(247,242,236,0.2)", letterSpacing: "0.08em" }}>
-            Acesso imediato · Plataforma completa · Sem compromisso
-          </p>
-        </div>
-      </section>
+      <LpOfferSection onCheckout={goCheckout} />
+      <LpFinalCtaSection onCheckout={goCheckout} />
 
       {/* ── FOOTER ──────────────────────────────────────────────── */}
       <footer className="py-8 px-5 text-center" style={{ background: "#0a0805", borderTop: "1px solid rgba(200,165,107,0.08)" }}>

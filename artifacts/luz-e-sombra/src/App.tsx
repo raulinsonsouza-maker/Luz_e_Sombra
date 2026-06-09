@@ -1,8 +1,11 @@
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { Toaster as SonnerToaster } from "sonner";
 import SiteHeader from "@/components/SiteHeader";
 import BottomNav from "@/components/BottomNav";
 import LandingPage from "@/pages/LandingPage";
+import VslLandingPage from "@/pages/VslLandingPage";
+import CheckoutPage from "@/pages/CheckoutPage";
 import LoginPage from "@/pages/LoginPage";
 import AdminLoginPage from "@/pages/AdminLoginPage";
 import HomePage from "@/pages/HomePage";
@@ -48,6 +51,8 @@ function Router() {
       <SiteHeader />
       <Switch>
         <Route path="/" component={LandingPage} />
+        <Route path="/vsl" component={VslLandingPage} />
+        <Route path="/checkout" component={CheckoutPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/admin/login" component={AdminLoginPage} />
         <Route path="/dashboard">
@@ -121,6 +126,7 @@ function App() {
     <AuthProvider>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <Router />
+        <SonnerToaster theme="dark" position="top-center" richColors />
       </WouterRouter>
     </AuthProvider>
   );

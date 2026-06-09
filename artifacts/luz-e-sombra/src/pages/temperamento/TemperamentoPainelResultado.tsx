@@ -162,7 +162,7 @@ export default function TemperamentoPainelResultado({
 
         {r.empateProximo && primario && visP && (
           <p className="text-xs px-3 py-2 rounded-lg" style={{ color: "rgba(155,143,222,0.85)", background: "rgba(155,143,222,0.08)" }}>
-            Você tem dois temperamentos bem próximos — mesmo assim, {visP.nome} é o dominante para entender quem você é hoje.
+            Você tem dois temperamentos bem próximos. Mesmo assim, {visP.nome} é o dominante para entender quem você é hoje.
           </p>
         )}
       </Capitulo>
@@ -284,7 +284,7 @@ export default function TemperamentoPainelResultado({
                 })}
               <p className="text-[10px] pt-2 flex items-center gap-1.5" style={{ color: "rgba(247,242,236,0.3)" }}>
                 <Heart className="w-3 h-3" />
-                Os percentuais apoiam a leitura — o foco está em quem você é, não nos números.
+                Os percentuais apoiam a leitura. O foco está em quem você é, não nos números.
               </p>
             </div>
           )}

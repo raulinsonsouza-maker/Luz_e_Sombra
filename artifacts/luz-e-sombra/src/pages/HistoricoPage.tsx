@@ -3,6 +3,10 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { TrendingUp, TrendingDown, Minus, Target, Loader2, ArrowRight, ArrowUp, ArrowDown } from "lucide-react";
 import MobileTopBar from "@/components/MobileTopBar";
+import NavBackButton from "@/components/NavBackButton";
+import PageIntroHeader from "@/components/PageIntroHeader";
+import AppPageShell from "@/components/AppPageShell";
+import DarkCard from "@/components/DarkCard";
 import { apiFetch } from "@/lib/auth";
 
 interface Avaliacao {
@@ -36,21 +40,6 @@ const AREAS = [
   { key: "contribuicaoSocial", nome: "Contribuição Social" },
   { key: "criatividadeHobbyDiversao", nome: "Criatividade, Hobby e Diversão" },
 ];
-
-function DarkCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div
-      className={`rounded-3xl ${className}`}
-      style={{
-        background: "rgba(30,24,18,0.6)",
-        border: "1px solid rgba(200,165,107,0.12)",
-        backdropFilter: "blur(20px)",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
 
 export default function HistoricoPage() {
   const [, navigate] = useLocation();
@@ -91,10 +80,7 @@ export default function HistoricoPage() {
 
   if (status === "loading" || carregando) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
-      >
+      <div className="min-h-screen app-dark-shell flex items-center justify-center">
         <Loader2 className="w-10 h-10 animate-spin" style={{ color: "#c8a56b" }} />
       </div>
     );
@@ -107,27 +93,21 @@ export default function HistoricoPage() {
   const anterior = avaliacoesOrdenadas[1];
 
   return (
-    <div
-      className="min-h-screen pb-28"
-      style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
-    >
+    <>
       <MobileTopBar titulo="Histórico" subtitulo="Evolução da Roda da Vida" />
-      <div className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-4">
-
-        {/* ── Header (desktop — mobile via MobileTopBar) ── */}
-        <div className="mb-2 hidden md:block">
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
-            Evolução
-          </p>
-          <h1 className="font-tan-mon-cheri text-3xl md:text-4xl mb-1" style={{ color: "#f7f2ec" }}>
-            Histórico de Avaliações
-          </h1>
-          {avaliacoes.length > 0 && (
-            <p className="text-sm" style={{ color: "rgba(247,242,236,0.4)" }}>
-              {avaliacoes.length} avaliação{avaliacoes.length !== 1 ? "ões" : ""} realizada{avaliacoes.length !== 1 ? "s" : ""}
-            </p>
-          )}
-        </div>
+      <AppPageShell width="xl" contentClassName="py-6 md:py-10 space-y-4">
+        <NavBackButton to="/dashboard" label="Início" className="mb-0" />
+        <PageIntroHeader
+          eyebrow="Evolução"
+          titulo="Histórico de Avaliações"
+          subtitulo={
+            avaliacoes.length > 0
+              ? `${avaliacoes.length} avaliação${avaliacoes.length !== 1 ? "ões" : ""} realizada${avaliacoes.length !== 1 ? "s" : ""}`
+              : undefined
+          }
+          hiddenOnMobile
+          className="mb-2"
+        />
 
         {avaliacoes.length === 0 ? (
           <DarkCard className="p-12 text-center">
@@ -144,7 +124,7 @@ export default function HistoricoPage() {
               Faça sua primeira avaliação da Roda da Vida para começar a acompanhar sua evolução.
             </p>
             <button
-              onClick={() => navigate("/avaliacao")}
+              onClick={() => navigate("/jornada/roda")}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold"
               style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1e1812" }}
             >
@@ -283,7 +263,7 @@ export default function HistoricoPage() {
 
           </div>
         )}
-      </div>
-    </div>
+      </AppPageShell>
+    </>
   );
 }

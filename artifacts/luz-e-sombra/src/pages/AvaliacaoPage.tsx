@@ -5,6 +5,8 @@ import { AREAS_DA_VIDA, FormData } from "@/lib/types";
 import { ChevronLeft, ChevronRight, Target, User, Calendar, ExternalLink } from "lucide-react";
 import MobileTopBar from "@/components/MobileTopBar";
 import NavBackButton from "@/components/NavBackButton";
+import PageIntroHeader from "@/components/PageIntroHeader";
+import AppPageShell from "@/components/AppPageShell";
 import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import { apiFetch } from "@/lib/auth";
 
@@ -194,19 +196,13 @@ function AvaliacaoContent() {
 
         <div className="hidden md:flex items-center justify-center gap-3 mb-3">
           <div className="w-6 h-px" style={{ background: "rgba(200,165,107,0.4)" }} />
-          <span className="text-xs tracking-[0.25em] uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
+          <span className="text-xs tracking-[0.2em] uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
             Autoconhecimento
           </span>
           <div className="w-6 h-px" style={{ background: "rgba(200,165,107,0.4)" }} />
         </div>
 
-        <h1
-          className="hidden md:block font-tan-mon-cheri text-3xl md:text-4xl mb-3"
-          style={{ color: "#f7f2ec", lineHeight: 1.25 }}
-        >
-          Roda da Vida
-        </h1>
-        <p className="text-sm leading-relaxed mt-2 md:mt-0" style={{ color: "rgba(247,242,236,0.5)", maxWidth: 340, margin: "0 auto" }}>
+        <p className="text-sm leading-relaxed mt-2 md:mt-0 hidden md:block" style={{ color: "rgba(247,242,236,0.5)", maxWidth: 340, margin: "0 auto" }}>
           Uma fotografia honesta do seu momento atual em 12 dimensões da vida
         </p>
       </div>
@@ -228,7 +224,7 @@ function AvaliacaoContent() {
               Avaliando
             </p>
             <p className="font-tan-mon-cheri text-lg" style={{ color: "#f7f2ec" }}>
-              {user?.nome || "—"}
+              {user?.nome || "Não informado"}
             </p>
             {user?.dataNascimento && (
               <p className="flex items-center gap-1 text-xs mt-0.5" style={{ color: "rgba(247,242,236,0.35)" }}>
@@ -260,7 +256,7 @@ function AvaliacaoContent() {
         </p>
         <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
           {primeiroAcesso
-            ? "Esta é sua linha de base — o ponto de partida da sua jornada. Seja completamente honesto: não existe resposta certa."
+            ? "Esta é sua linha de base, o ponto de partida da sua jornada. Seja completamente honesto: não existe resposta certa."
             : "Esta avaliação será adicionada ao seu histórico. Você poderá comparar sua evolução ao longo do tempo."}
         </p>
       </div>
@@ -422,15 +418,20 @@ function AvaliacaoContent() {
   };
 
   return (
-    <div
-      className="min-h-screen pb-28"
-      style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
-    >
+    <>
       <MobileTopBar titulo="Roda da Vida" subtitulo="12 dimensões da vida" />
-      <div className="max-w-lg mx-auto px-4 pt-6">
+      <AppPageShell contentClassName="pt-6">
         <NavBackButton
           to={JORNADA_MODULE_NAV.roda.hub}
           label={JORNADA_MODULE_NAV.roda.backLabel}
+          className="mb-4"
+        />
+        <PageIntroHeader
+          eyebrow="Autoconhecimento"
+          titulo="Roda da Vida"
+          subtitulo="Uma fotografia honesta do seu momento atual em 12 dimensões da vida"
+          hiddenOnMobile
+          className="mb-4"
         />
 
         {/* ── Progress bar ── */}
@@ -541,8 +542,8 @@ function AvaliacaoContent() {
           </div>
         )}
 
-      </div>
-    </div>
+      </AppPageShell>
+    </>
   );
 }
 

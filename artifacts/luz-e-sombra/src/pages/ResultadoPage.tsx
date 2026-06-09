@@ -16,6 +16,7 @@ import {
   Coins, Hand, Palette, LucideIcon,
 } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
+import DarkCard from "@/components/DarkCard";
 
 // ─── Area icon ─────────────────────────────────────────────────────────────
 
@@ -340,23 +341,6 @@ function calcularMedia(aval: Avaliacao): number {
   return v.reduce((a, b) => a + b, 0) / v.length;
 }
 
-// ─── Shared dark card wrapper ───────────────────────────────────────────────
-
-function DarkCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div
-      className={`rounded-3xl ${className}`}
-      style={{
-        background: "rgba(30,24,18,0.6)",
-        border: "1px solid rgba(200,165,107,0.12)",
-        backdropFilter: "blur(20px)",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
 // ─── Page ──────────────────────────────────────────────────────────────────
 
 export default function ResultadoPage() {
@@ -473,7 +457,7 @@ export default function ResultadoPage() {
                 <Sparkles className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#c8a56b" }} />
                 <div>
                   <p className="font-semibold text-sm mb-0.5" style={{ color: "#e8d5b0" }}>Parabéns pela sua primeira avaliação</p>
-                  <p className="text-sm" style={{ color: "rgba(200,165,107,0.7)" }}>Esta é sua linha de base — o ponto de partida de toda a sua jornada de autoconhecimento.</p>
+                  <p className="text-sm" style={{ color: "rgba(200,165,107,0.7)" }}>Esta é sua linha de base, o ponto de partida de toda a sua jornada de autoconhecimento.</p>
                 </div>
               </div>
             )}
@@ -623,7 +607,7 @@ export default function ResultadoPage() {
             Análise Profunda
           </p>
           <p className="text-sm mb-6" style={{ color: "rgba(247,242,236,0.4)" }}>
-            Áreas ordenadas por prioridade — as que mais pedem atenção aparecem primeiro.
+            Áreas ordenadas por prioridade. As que mais pedem atenção aparecem primeiro.
           </p>
 
           <div className="space-y-4">
