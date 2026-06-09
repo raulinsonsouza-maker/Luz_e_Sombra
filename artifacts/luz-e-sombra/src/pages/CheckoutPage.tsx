@@ -7,6 +7,8 @@ import {
   LP_PRODUCT_TAGLINE,
   LP_INCLUDED_ITEMS,
   LP_PRICE,
+  LP_PRICE_PERIOD,
+  LP_BILLING_LABEL,
   formatLpPrice,
   buildCaktoUrl,
   CAKTO_CHECKOUT_URL,
@@ -100,14 +102,17 @@ export default function CheckoutPage() {
             className="rounded-2xl p-6 mb-6"
             style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.2)" }}
           >
-            <div className="flex items-baseline gap-3 mb-5">
+            <div className="flex items-baseline gap-2 mb-1">
               <span className="font-tan-mon-cheri text-4xl" style={{ color: "#c8a56b" }}>
                 {formatLpPrice(LP_PRICE)}
               </span>
-              <span className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
-                pagamento único
+              <span className="text-sm font-medium" style={{ color: "rgba(247,242,236,0.5)" }}>
+                {LP_PRICE_PERIOD}
               </span>
             </div>
+            <p className="text-xs mb-5" style={{ color: "rgba(247,242,236,0.35)" }}>
+              {LP_BILLING_LABEL} · cobrança recorrente
+            </p>
             <ul className="space-y-2.5">
               {LP_INCLUDED_ITEMS.map((item) => (
                 <li key={item} className="flex items-start gap-2">

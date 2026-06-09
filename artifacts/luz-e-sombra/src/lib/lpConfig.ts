@@ -18,8 +18,10 @@ export const VSL_UNLOCK_KEY = "vsl_unlocked";
 
 export const LP_PRODUCT_NAME = "Da Sombra à Luz";
 export const LP_PRODUCT_TAGLINE = "Plataforma completa de autoconhecimento";
-export const LP_PRICE = 97;
-export const LP_PRICE_ORIGINAL = 197;
+export const LP_PRICE = 47;
+export const LP_PRICE_ORIGINAL = 97;
+export const LP_PRICE_PERIOD = "/mês";
+export const LP_BILLING_LABEL = "Assinatura mensal";
 export const LP_GUARANTEE_DAYS = 7;
 
 /** Preencher quando integrar com Cakto. Ex.: https://pay.cakto.com.br/xxx */
@@ -99,8 +101,12 @@ export const LP_TESTIMONIALS = [
 
 export const LP_FAQ = [
   {
-    q: "Como recebo o acesso após a compra?",
+    q: "Como recebo o acesso após assinar?",
     a: "Assim que o pagamento for confirmado, você recebe por e-mail os dados de login para acessar a plataforma imediatamente.",
+  },
+  {
+    q: "Posso cancelar a assinatura?",
+    a: "Sim. Você pode cancelar quando quiser. O acesso permanece ativo até o fim do período já pago.",
   },
   {
     q: "Quanto tempo leva para ver resultados?",
@@ -117,11 +123,11 @@ export const LP_FAQ = [
 ];
 
 export const LP_INCLUDED_ITEMS = [
-  "Acesso vitalício à plataforma completa",
+  "Acesso mensal à plataforma completa",
   "Todos os módulos de autoconhecimento",
   "Interpretações personalizadas (48+ combinações)",
   "Histórico de evolução ilimitado",
-  "Atualizações futuras inclusas",
+  "Atualizações inclusas na assinatura",
   "Suporte por e-mail",
 ];
 

@@ -4,13 +4,13 @@ import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { mensagemDoDia } from "@/lib/mensagensDiarias";
 import MobileTopBar from "@/components/MobileTopBar";
+import MissaoDiariaCard from "@/components/MissaoDiariaCard";
+import { useConcluirMissao } from "@/hooks/useConcluirMissao";
 import {
   ChevronRight,
   Flame,
   Zap,
   Map,
-  CheckCircle2,
-  Circle,
   Users2,
   GraduationCap,
 } from "lucide-react";
@@ -59,6 +59,7 @@ export default function HomePage() {
   const { user, status } = useAuth();
   const [progresso, setProgresso] = useState<Progresso | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const { concluirMissao, concluindo } = useConcluirMissao(setProgresso);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -224,35 +225,13 @@ export default function HomePage() {
                   <div key={i} className="h-14 rounded-2xl animate-pulse" style={{ background: "rgba(200,165,107,0.05)" }} />
                 ))
               : missoesPreview.map((missao) => (
-                  <div
+                  <MissaoDiariaCard
                     key={missao.id}
-                    className="rounded-2xl px-4 py-3 flex items-center gap-3"
-                    style={{
-                      background: missao.concluida ? "rgba(93,185,122,0.06)" : "rgba(255,255,255,0.03)",
-                      border: missao.concluida ? "1px solid rgba(93,185,122,0.15)" : "1px solid rgba(200,165,107,0.08)",
-                    }}
-                  >
-                    {missao.concluida ? (
-                      <CheckCircle2 className="w-5 h-5 shrink-0" style={{ color: "#5db97a" }} />
-                    ) : (
-                      <Circle className="w-5 h-5 shrink-0" style={{ color: "rgba(200,165,107,0.25)" }} />
-                    )}
-                    <p
-                      className="flex-1 text-sm"
-                      style={{
-                        color: missao.concluida ? "rgba(247,242,236,0.35)" : "rgba(247,242,236,0.75)",
-                        textDecoration: missao.concluida ? "line-through" : "none",
-                      }}
-                    >
-                      {missao.titulo}
-                    </p>
-                    <span
-                      className="text-[11px] font-bold shrink-0"
-                      style={{ color: missao.concluida ? "rgba(93,185,122,0.5)" : "rgba(200,165,107,0.6)" }}
-                    >
-                      +{missao.xpRecompensa} XP
-                    </span>
-                  </div>
+                    missao={missao}
+                    compact
+                    concluindo={concluindo === missao.id}
+                    onConcluir={concluirMissao}
+                  />
                 ))}
           </div>
 

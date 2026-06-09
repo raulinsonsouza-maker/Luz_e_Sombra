@@ -4,7 +4,9 @@ import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
-import { CheckCircle2, Circle, Flame, Trophy, Star, Zap, Sunrise, Crown, Target, Gem, Sparkles, Shield, Compass, Mountain, Award, type LucideIcon } from "lucide-react";
+import MissaoDiariaCard from "@/components/MissaoDiariaCard";
+import { useConcluirMissao, type LevelUpInfo } from "@/hooks/useConcluirMissao";
+import { Flame, Trophy, Star, Zap, Sunrise, Crown, Target, Gem, Sparkles, Shield, Compass, Mountain, Award, type LucideIcon } from "lucide-react";
 
 interface Missao {
   id: number;
@@ -24,11 +26,6 @@ interface Progresso {
     traco?: boolean;
     roda?: boolean;
   };
-}
-
-interface LevelUpInfo {
-  nivel: number;
-  nomeNivel: string;
 }
 
 const NIVEL_NOMES: Record<number, string> = {
@@ -75,8 +72,8 @@ export default function MissoesPage() {
   const [tab, setTab] = useState<"diarias" | "conquistas">("diarias");
   const [progresso, setProgresso] = useState<Progresso | null>(null);
   const [carregando, setCarregando] = useState(true);
-  const [concluindo, setConcluindo] = useState<number | null>(null);
   const [levelUp, setLevelUp] = useState<LevelUpInfo | null>(null);
+  const { concluirMissao, concluindo } = useConcluirMissao(setProgresso, setLevelUp);
 
   useEffect(() => {
     if (status === "unauthenticated") { navigate("/login"); return; }
@@ -90,28 +87,6 @@ export default function MissoesPage() {
       if (res.ok) setProgresso(await res.json());
     } catch {}
     setCarregando(false);
-  }
-
-  async function concluirMissao(id: number) {
-    if (concluindo) return;
-    setConcluindo(id);
-    try {
-      const res = await apiFetch(`/gamificacao/missoes/${id}/concluir`, { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        setProgresso(prev => prev ? {
-          ...prev,
-          xp: data.totalXp,
-          nivel: data.nivel,
-          nomeNivel: data.nomeNivel,
-          missoes: prev.missoes.map(m => m.id === id ? { ...m, concluida: true } : m),
-        } : prev);
-        if (data.leveledUp) {
-          setLevelUp({ nivel: data.nivel, nomeNivel: data.nomeNivel });
-        }
-      }
-    } catch {}
-    setConcluindo(null);
   }
 
   const concluidasHoje = progresso?.missoes.filter(m => m.concluida).length ?? 0;
@@ -266,48 +241,12 @@ export default function MissoesPage() {
                   <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: "rgba(200,165,107,0.05)" }} />
                 ))
               ) : progresso?.missoes.map(missao => (
-                <div
+                <MissaoDiariaCard
                   key={missao.id}
-                  className="rounded-2xl p-4 flex items-center gap-3 transition-all"
-                  style={{
-                    background: missao.concluida ? "rgba(93,185,122,0.06)" : "rgba(255,255,255,0.03)",
-                    border: missao.concluida ? "1px solid rgba(93,185,122,0.2)" : "1px solid rgba(200,165,107,0.1)",
-                  }}
-                >
-                  {missao.concluida ? (
-                    <CheckCircle2 className="w-6 h-6 flex-shrink-0" style={{ color: "#5db97a" }} />
-                  ) : (
-                    <Circle className="w-6 h-6 flex-shrink-0" style={{ color: "rgba(200,165,107,0.3)" }} />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className="text-sm font-medium leading-snug"
-                      style={{
-                        color: missao.concluida ? "rgba(247,242,236,0.45)" : "#f7f2ec",
-                        textDecoration: missao.concluida ? "line-through" : "none",
-                      }}
-                    >
-                      {missao.titulo}
-                    </p>
-                  </div>
-                  {missao.concluida ? (
-                    <span
-                      className="text-xs font-bold flex-shrink-0"
-                      style={{ color: "rgba(93,185,122,0.7)" }}
-                    >
-                      +{missao.xpRecompensa} XP
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => concluirMissao(missao.id)}
-                      disabled={concluindo === missao.id}
-                      className="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
-                      style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
-                    >
-                      {concluindo === missao.id ? "..." : `+${missao.xpRecompensa} XP`}
-                    </button>
-                  )}
-                </div>
+                  missao={missao}
+                  concluindo={concluindo === missao.id}
+                  onConcluir={concluirMissao}
+                />
               ))}
             </div>
 

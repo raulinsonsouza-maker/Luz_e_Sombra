@@ -9,6 +9,8 @@ import {
   formatLpPrice,
   LP_PRICE,
   LP_PRICE_ORIGINAL,
+  LP_PRICE_PERIOD,
+  LP_BILLING_LABEL,
 } from "@/lib/lpConfig";
 
 interface CtaProps {
@@ -243,7 +245,7 @@ export function LpOfferSection({ onCheckout }: { onCheckout: () => void }) {
           Acesso completo ao {LP_PRODUCT_NAME}
         </h2>
         <p className="text-sm mb-8" style={{ color: "rgba(247,242,236,0.45)" }}>
-          Pagamento único. Sem mensalidade. Atualizações inclusas.
+          {LP_BILLING_LABEL}. Cancele quando quiser. Atualizações inclusas.
         </p>
 
         <div
@@ -257,8 +259,11 @@ export function LpOfferSection({ onCheckout }: { onCheckout: () => void }) {
             >
               {formatLpPrice(LP_PRICE)}
             </span>
+            <span className="text-lg font-medium" style={{ color: "rgba(247,242,236,0.55)" }}>
+              {LP_PRICE_PERIOD}
+            </span>
             <span className="text-sm line-through" style={{ color: "rgba(247,242,236,0.3)" }}>
-              {formatLpPrice(LP_PRICE_ORIGINAL)}
+              {formatLpPrice(LP_PRICE_ORIGINAL)}{LP_PRICE_PERIOD}
             </span>
           </div>
           <ul className="space-y-3 mb-6">
@@ -284,7 +289,7 @@ export function LpOfferSection({ onCheckout }: { onCheckout: () => void }) {
 
         <LpCtaButton onCheckout={onCheckout} fullWidth />
         <p className="text-xs mt-4" style={{ color: "rgba(247,242,236,0.25)", letterSpacing: "0.06em" }}>
-          Pagamento seguro · Acesso imediato · Suporte incluso
+          Cobrança mensal recorrente · Acesso imediato · Suporte incluso
         </p>
       </div>
     </section>
