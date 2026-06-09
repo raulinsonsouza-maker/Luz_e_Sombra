@@ -4,7 +4,9 @@ import { ArrowRight, FlaskConical, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import MobileTopBar from "@/components/MobileTopBar";
+import NavBackButton from "@/components/NavBackButton";
 import PageIntroHeader from "@/components/PageIntroHeader";
+import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import TemperamentoPainelResultado from "@/pages/temperamento/TemperamentoPainelResultado";
 import type { ResultadoTemperamentoUi } from "@/pages/temperamento/enriquecerResultado";
 import {
@@ -16,6 +18,7 @@ import {
 
 const STORAGE_KEY = "luz_temperamento_v1_draft";
 const TOTAL = 40;
+const TEMP_NAV = JORNADA_MODULE_NAV.temperamento;
 
 const NOME_DIM: Record<string, string> = {
   ENG: "Energia e ritmo",
@@ -263,14 +266,7 @@ export default function TemperamentoPage() {
       <div className="min-h-screen pb-28 md:pb-12 px-4 pt-6" style={{ background: bg }}>
         <MobileTopBar titulo="Temperamento" subtitulo="Seu mapa temperamental" />
         <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
-          <button
-            type="button"
-            className="text-xs tracking-wide opacity-70 hover:opacity-100 transition-opacity"
-            style={{ color: "#c8a56b" }}
-            onClick={() => navigate("/jornada")}
-          >
-            ← Voltar à jornada
-          </button>
+          <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} />
 
           <PageIntroHeader
             className="hidden md:block mb-2"
@@ -313,14 +309,7 @@ export default function TemperamentoPage() {
       <div className="min-h-screen pb-28" style={{ background: bg }}>
         <MobileTopBar titulo="Temperamento" subtitulo="Cinco dimensões, quarenta reflexões" />
         <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
-          <button
-            type="button"
-            className="text-sm mb-6 opacity-75 hover:opacity-100"
-            style={{ color: "#c8a56b" }}
-            onClick={() => navigate("/jornada")}
-          >
-            ← Jornada
-          </button>
+          <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} />
           <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
             Análise de temperamento
           </p>
@@ -328,7 +317,7 @@ export default function TemperamentoPage() {
             Cinco dimensões, quarenta reflexões
           </h1>
           <p className="text-sm leading-relaxed mb-2" style={{ color: "rgba(247,242,236,0.55)" }}>
-            Vais ver <strong>uma afirmação de cada vez</strong>, numa escala de 1 a 5. A ordem dos temas muda em cada sessão.
+            Você verá <strong>uma afirmação de cada vez</strong>, numa escala de 1 a 5. A ordem dos temas muda em cada sessão.
             Não há respostas certas: o importante é o que é verdade para ti na maior parte do tempo.
           </p>
           <p className="text-xs leading-relaxed mb-8" style={{ color: "rgba(247,242,236,0.38)" }}>
@@ -401,6 +390,9 @@ export default function TemperamentoPage() {
         <div className="absolute top-0 left-0 right-0">
           <MobileTopBar titulo="Temperamento" subtitulo="A processar..." />
         </div>
+        <div className="absolute top-24 left-0 right-0 px-4 max-w-lg mx-auto">
+          <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} className="mb-0" />
+        </div>
         <Loader2 className="w-10 h-10 animate-spin" style={{ color: "#c8a56b" }} />
       </div>
     );
@@ -421,6 +413,7 @@ export default function TemperamentoPage() {
     <div className="min-h-screen pb-28" style={{ background: bg }}>
       <MobileTopBar titulo="Temperamento" subtitulo={`${qIndex + 1} de ${TOTAL}`} />
       <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
+        <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} />
         <div className="mb-6" style={{ borderBottom: "1px solid rgba(200,165,107,0.12)" }}>
           <div className="flex items-center justify-between gap-2 mb-2">
             <p className="text-xs" style={{ color: "rgba(200,165,107,0.45)" }}>

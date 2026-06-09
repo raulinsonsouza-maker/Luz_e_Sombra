@@ -5,7 +5,9 @@ import { ptBR } from "date-fns/locale";
 import RadarChart from "@/components/RadarChart";
 import LineChart from "@/components/LineChart";
 import MobileTopBar from "@/components/MobileTopBar";
+import NavBackButton from "@/components/NavBackButton";
 import PageIntroHeader from "@/components/PageIntroHeader";
+import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import { AREAS_DA_VIDA } from "@/lib/types";
 import {
   ArrowRight, Sparkles, TrendingUp, ArrowUp, ArrowDown, Minus,
@@ -75,25 +77,25 @@ interface NivelInfo {
 const INTERPRETACOES: Record<string, Record<Nivel, { interpretacao: string; acao: string }>> = {
   plenitudeFelicidade: {
     urgente: {
-      interpretacao: "Sua vida carrega um peso difícil de nomear. A ausência de alegria genuína não é fraqueza — é um sinal que merece atenção urgente e compaixão. A plenitude não é luxo: é a base de tudo.",
+      interpretacao: "Sua vida carrega um peso difícil de nomear. A ausência de alegria genuína não é fraqueza, é um sinal que merece atenção urgente e compaixão. A plenitude não é luxo: é a base de tudo.",
       acao: "Considere buscar apoio profissional (terapia). Comece com micro-momentos de intenção: o que te trouxe alegria algum dia? Plante ali.",
     },
     atencao: {
-      interpretacao: "Há satisfação intermitente, mas a plenitude ainda parece condicional — dependente de que algo externo mude primeiro. Esta é uma armadilha sutil que pode durar décadas.",
+      interpretacao: "Há satisfação intermitente, mas a plenitude ainda parece condicional, dependente de que algo externo mude primeiro. Esta é uma armadilha sutil que pode durar décadas.",
       acao: "Identifique o que drena sua energia e elimine ou reduza. Crie um ritual diário pequeno de gratidão real, não performática.",
     },
     desenvolvimento: {
-      interpretacao: "Você está bem, mas sabe que 'bem' não é tudo. Há uma versão de você que vive com mais leveza e presença disponível — e ela não exige circunstâncias perfeitas.",
+      interpretacao: "Você está bem, mas sabe que 'bem' não é tudo. Há uma versão de você que vive com mais leveza e presença disponível, e ela não exige circunstâncias perfeitas.",
       acao: "Aprofunde sua prática de presença: meditação, natureza, conexão genuína. O que te aproxima do estado de fluxo?",
     },
     excelencia: {
       interpretacao: "Você cultiva alegria de forma genuína e consistente. Esta base de plenitude é rara e sustenta todas as outras áreas da sua vida com uma solidez que poucos desenvolvem.",
-      acao: "Compartilhe esta qualidade de presença. Como você sustenta isso intencionalmente — e como protege esse estado nos dias difíceis?",
+      acao: "Compartilhe esta qualidade de presença. Como você sustenta isso intencionalmente, e como protege esse estado nos dias difíceis?",
     },
   },
   espiritualidade: {
     urgente: {
-      interpretacao: "A desconexão espiritual cria um vazio existencial que afeta tudo. Perguntas sobre propósito e sentido mais assustam do que abrem — e esse medo de perguntar é o próprio problema.",
+      interpretacao: "A desconexão espiritual cria um vazio existencial que afeta tudo. Perguntas sobre propósito e sentido mais assustam do que abrem, e esse medo de perguntar é o próprio problema.",
       acao: "Comece pequeno: 10 minutos de silêncio diário, sem agenda. Explore uma tradição ou prática sem exigir certeza imediata.",
     },
     atencao: {
@@ -101,29 +103,29 @@ const INTERPRETACOES: Record<string, Record<Nivel, { interpretacao: string; acao
       acao: "Experimente consistência em vez de intensidade: 15 minutos diários de qualquer prática que traga silêncio interior.",
     },
     desenvolvimento: {
-      interpretacao: "Você tem conexão espiritual real, mas ela ainda é intermitente — não totalmente integrada ao cotidiano. A diferença entre espiritualidade e religião é que uma você pratica, a outra você tem.",
+      interpretacao: "Você tem conexão espiritual real, mas ela ainda é intermitente, não totalmente integrada ao cotidiano. A diferença entre espiritualidade e religião é que uma você pratica, a outra você tem.",
       acao: "Aprofunde sua prática existente. Busque um guia, grupo ou comunidade que ressoe com seu caminho.",
     },
     excelencia: {
-      interpretacao: "Sua vida espiritual é uma âncora que sustenta tudo mais. Você vive a partir de um propósito que vai além do ego — e isso se traduz em uma qualidade de presença que outros sentem.",
+      interpretacao: "Sua vida espiritual é uma âncora que sustenta tudo mais. Você vive a partir de um propósito que vai além do ego, e isso se traduz em uma qualidade de presença que outros sentem.",
       acao: "Como você contribui para aprofundar a vida espiritual de quem está ao seu redor?",
     },
   },
   saudeDisposicao: {
     urgente: {
-      interpretacao: "Seu corpo está pedindo socorro. Energia cronicamente baixa, sono comprometido e descuido físico cobram um preço alto em todas as áreas da vida — silenciosamente, progressivamente.",
+      interpretacao: "Seu corpo está pedindo socorro. Energia cronicamente baixa, sono comprometido e descuido físico cobram um preço alto em todas as áreas da vida, silenciosamente, progressivamente.",
       acao: "Escolha UMA coisa: dormir 30 minutos mais por noite, ou caminhar 20 minutos ao dia. Comece aí e não pare.",
     },
     atencao: {
       interpretacao: "Você se cuida minimamente, mas ainda trata o corpo como uma máquina que deve aguentar, não como um aliado que merece cuidado. O corpo é o instrumento de tudo o mais que você quer realizar.",
-      acao: "Revise sua rotina de sono. Adicione um movimento que você realmente goste — não que 'deveria' fazer.",
+      acao: "Revise sua rotina de sono. Adicione um movimento que você realmente goste, não que 'deveria' fazer.",
     },
     desenvolvimento: {
       interpretacao: "Sua saúde está razoável, mas você sabe que há espaço para mais vitalidade, consistência e cuidado preventivo. Saúde no nível 6-7 ainda é saúde reativa, não proativa.",
       acao: "Audite sua alimentação por uma semana. Agende os check-ups que está postergando. Adicione uma prática de mobilidade.",
     },
     excelencia: {
-      interpretacao: "Você habita seu corpo com cuidado e intenção. Sua vitalidade é uma fundação que potencializa todas as outras áreas da vida — e é evidente para quem convive com você.",
+      interpretacao: "Você habita seu corpo com cuidado e intenção. Sua vitalidade é uma fundação que potencializa todas as outras áreas da vida, e é evidente para quem convive com você.",
       acao: "Como você sustenta esta prática sem deixar que a rotina se torne obrigação sem prazer?",
     },
   },
@@ -133,7 +135,7 @@ const INTERPRETACOES: Record<string, Record<Nivel, { interpretacao: string; acao
       acao: "Escolha um livro que te desafie. Leia 10 páginas por dia. Substitua 20 minutos de conteúdo passivo por aprendizado ativo.",
     },
     atencao: {
-      interpretacao: "Há consumo de conteúdo, mas pouco aprendizado transformador. A diferença é que um muda sua lista de informações — o outro muda como você pensa e age no mundo.",
+      interpretacao: "Há consumo de conteúdo, mas pouco aprendizado transformador. A diferença é que um muda sua lista de informações, o outro muda como você pensa e age no mundo.",
       acao: "Defina um tema de estudo para os próximos 90 dias. Priorize profundidade sobre quantidade.",
     },
     desenvolvimento: {
@@ -151,7 +153,7 @@ const INTERPRETACOES: Record<string, Record<Nivel, { interpretacao: string; acao
       acao: "Busque apoio profissional (terapia). Pratique o básico: nomear o que sente antes de agir. 'Estou sentindo X' é o primeiro passo.",
     },
     atencao: {
-      interpretacao: "Você tem alguma consciência emocional, mas ainda é levado por ondas que poderia aprender a navegar com mais habilidade. A emoção não processada não desaparece — ela muda de endereço.",
+      interpretacao: "Você tem alguma consciência emocional, mas ainda é levado por ondas que poderia aprender a navegar com mais habilidade. A emoção não processada não desaparece, ela muda de endereço.",
       acao: "Desenvolva um registro emocional diário. Identifique seus 3 gatilhos mais frequentes e os padrões que surgem.",
     },
     desenvolvimento: {
@@ -159,13 +161,13 @@ const INTERPRETACOES: Record<string, Record<Nivel, { interpretacao: string; acao
       acao: "Aprofunde sua prática: terapia de aprofundamento, trabalho somático, meditação de compaixão. Os padrões mais antigos exigem trabalho mais profundo.",
     },
     excelencia: {
-      interpretacao: "Você demonstra maturidade emocional real — sente profundamente sem ser controlado pelo que sente. Esta inteligência é rara e cria ambientes mais seguros para todos ao seu redor.",
+      interpretacao: "Você demonstra maturidade emocional real, sente profundamente sem ser controlado pelo que sente. Esta inteligência é rara e cria ambientes mais seguros para todos ao seu redor.",
       acao: "Como você usa esta capacidade para criar espaços mais seguros e autênticos com as pessoas que você lidera ou ama?",
     },
   },
   familia: {
     urgente: {
-      interpretacao: "Suas relações familiares estão causando dor real. Feridas antigas ou conflitos ativos pesam no seu presente de formas que merecem atenção — não para os outros, mas por você.",
+      interpretacao: "Suas relações familiares estão causando dor real. Feridas antigas ou conflitos ativos pesam no seu presente de formas que merecem atenção, não para os outros, mas por você.",
       acao: "Considere terapia focada em padrões de origem. Identifique UMA coisa que você pode mudar (não o outro) nesta semana.",
     },
     atencao: {
@@ -177,89 +179,89 @@ const INTERPRETACOES: Record<string, Record<Nivel, { interpretacao: string; acao
       acao: "Inicie uma conversa que você tem evitado. A qualidade das relações aumenta na proporção da coragem de ser honesto.",
     },
     excelencia: {
-      interpretacao: "Seus vínculos familiares são fonte de nutrição genuína. Você investe conscientemente na qualidade dessas relações — e isso cria segurança para toda a rede.",
+      interpretacao: "Seus vínculos familiares são fonte de nutrição genuína. Você investe conscientemente na qualidade dessas relações, e isso cria segurança para toda a rede.",
       acao: "Como você ajuda a criar cultura de segurança emocional e comunicação aberta nas relações familiares ao redor?",
     },
   },
   desenvolvimentoAmoroso: {
     urgente: {
-      interpretacao: "Sua vida amorosa carrega dor significativa — seja em um relacionamento que não nutre mais, seja em padrões que se repetem e bloqueiam o amor saudável de entrar.",
+      interpretacao: "Sua vida amorosa carrega dor significativa, seja em um relacionamento que não nutre mais, seja em padrões que se repetem e bloqueiam o amor saudável de entrar.",
       acao: "Examine honestamente: o que você está tolerando que não deveria? O que em você atrai ou permite esses padrões?",
     },
     atencao: {
-      interpretacao: "Há amor, mas ele convive com distância, mágoa acumulada ou comunicação insuficiente. O que existe tem potencial real, mas precisa ser trabalhado ativamente — não apenas vivido passivamente.",
+      interpretacao: "Há amor, mas ele convive com distância, mágoa acumulada ou comunicação insuficiente. O que existe tem potencial real, mas precisa ser trabalhado ativamente, não apenas vivido passivamente.",
       acao: "Proponha uma conversa honesta sobre o que cada um precisa e o que não está funcionando. Considere terapia de casal.",
     },
     desenvolvimento: {
-      interpretacao: "Seu relacionamento é bom, mas o conforto pode estar mascarando áreas de crescimento. Relacionamentos saudáveis não se sustentam no piloto automático — exigem investimento contínuo.",
+      interpretacao: "Seu relacionamento é bom, mas o conforto pode estar mascarando áreas de crescimento. Relacionamentos saudáveis não se sustentam no piloto automático, exigem investimento contínuo.",
       acao: "Crie rituais de conexão intencionais. Quando foi a última vez que fizeram algo genuinamente novo juntos?",
     },
     excelencia: {
-      interpretacao: "Sua vida amorosa é uma parceria de crescimento mútuo. Vocês se amam, se respeitam e evoluem juntos — o que é raro e precioso, e merece ser cultivado ativamente.",
+      interpretacao: "Sua vida amorosa é uma parceria de crescimento mútuo. Vocês se amam, se respeitam e evoluem juntos, o que é raro e precioso, e merece ser cultivado ativamente.",
       acao: "Como vocês continuam se surpreendendo e crescendo em vez de apenas conviverem confortavelmente?",
     },
   },
   vidaSocial: {
     urgente: {
-      interpretacao: "Solidão real ou relações que drenam em vez de nutrir. O isolamento — mesmo que escolhido — tem um custo que se acumula silenciosamente na saúde mental e no senso de identidade.",
+      interpretacao: "Solidão real ou relações que drenam em vez de nutrir. O isolamento, mesmo que escolhido, tem um custo que se acumula silenciosamente na saúde mental e no senso de identidade.",
       acao: "Faça contato com UMA pessoa que você admira e faz tempo que não vê. Não espere o momento perfeito.",
     },
     atencao: {
-      interpretacao: "Você tem relações, mas elas ficam na superfície. Falta a profundidade que vem da vulnerabilidade e do investimento real — não de eventos sociais, mas de conexão genuína.",
-      acao: "Convide alguém para uma conversa de verdade — com intenção e abertura real, não apenas um encontro social.",
+      interpretacao: "Você tem relações, mas elas ficam na superfície. Falta a profundidade que vem da vulnerabilidade e do investimento real, não de eventos sociais, mas de conexão genuína.",
+      acao: "Convide alguém para uma conversa de verdade, com intenção e abertura real, não apenas um encontro social.",
     },
     desenvolvimento: {
       interpretacao: "Sua vida social existe, mas poderia ser mais intencional, mais nutritiva e mais alinhada com quem você é hoje. Muitas relações rasas não substituem poucas relações profundas.",
       acao: "Avalie sua rede: quem te inspira e te incentiva a crescer? Invista mais nessas e menos nas que apenas consomem energia.",
     },
     excelencia: {
-      interpretacao: "Você cultiva relações genuínas com cuidado e intenção. Sua rede é um ativo de vida real — pessoas que te inspiram, te desafiam e te apoiam com reciprocidade.",
-      acao: "Como você contribui para que essas relações sejam transformadoras — não apenas agradáveis e confortáveis?",
+      interpretacao: "Você cultiva relações genuínas com cuidado e intenção. Sua rede é um ativo de vida real, pessoas que te inspiram, te desafiam e te apoiam com reciprocidade.",
+      acao: "Como você contribui para que essas relações sejam transformadoras, não apenas agradáveis e confortáveis?",
     },
   },
   realizacaoProposito: {
     urgente: {
-      interpretacao: "Viver sem senso de propósito é uma das formas mais sutis e persistentes de sofrimento. A sensação de automatismo é um convite urgente para uma redireção — não de vida inteira, mas de atenção.",
+      interpretacao: "Viver sem senso de propósito é uma das formas mais sutis e persistentes de sofrimento. A sensação de automatismo é um convite urgente para uma redireção, não de vida inteira, mas de atenção.",
       acao: "Reserve 2 horas esta semana para escrever: o que você faria se soubesse que não poderia fracassar? O que te faz perder a noção do tempo?",
     },
     atencao: {
-      interpretacao: "Você tem direção, mas o alinhamento entre o que você faz e o que acredita ser seu propósito ainda é parcial. Essa dissonância cria um cansaço diferente — não de trabalho, mas de alma.",
+      interpretacao: "Você tem direção, mas o alinhamento entre o que você faz e o que acredita ser seu propósito ainda é parcial. Essa dissonância cria um cansaço diferente, não de trabalho, mas de alma.",
       acao: "Identifique a maior contradição entre seus valores declarados e suas escolhas diárias. Comece por reduzir essa dissonância em uma área.",
     },
     desenvolvimento: {
-      interpretacao: "Você vive com senso de significado na maior parte do tempo, mas sabe que há uma expressão mais plena do seu propósito disponível — mais profunda, mais corajosa, mais sua.",
+      interpretacao: "Você vive com senso de significado na maior parte do tempo, mas sabe que há uma expressão mais plena do seu propósito disponível, mais profunda, mais corajosa, mais sua.",
       acao: "O que impede você de ir mais fundo? Medo, comodismo ou falta de clareza? Nomeie o obstáculo real e trabalhe nele.",
     },
     excelencia: {
-      interpretacao: "Você vive alinhado com seu propósito de forma que se sustenta e se alimenta. Isso é genuinamente raro — a maioria das pessoas passa a vida inteira buscando o que você já encontrou.",
+      interpretacao: "Você vive alinhado com seu propósito de forma que se sustenta e se alimenta. Isso é genuinamente raro, a maioria das pessoas passa a vida inteira buscando o que você já encontrou.",
       acao: "Como você amplifica seu impacto? Quem mais pode se beneficiar do que você já descobriu?",
     },
   },
   recursosFinanceiros: {
     urgente: {
-      interpretacao: "A instabilidade financeira gera um ruído de fundo constante que afeta toda a sua vida — atenção, relacionamentos, saúde. É urgente criar clareza e um plano, mesmo que simples.",
+      interpretacao: "A instabilidade financeira gera um ruído de fundo constante que afeta toda a sua vida, atenção, relacionamentos, saúde. É urgente criar clareza e um plano, mesmo que simples.",
       acao: "Mapeie todas as dívidas e receitas em um papel agora. A clareza, mesmo que assustadora, é o primeiro passo obrigatório.",
     },
     atencao: {
-      interpretacao: "Você sobrevive financeiramente, mas não está construindo nada. A ausência de reservas e planejamento deixa você vulnerável a qualquer imprevisto — e isso cria uma ansiedade de fundo.",
+      interpretacao: "Você sobrevive financeiramente, mas não está construindo nada. A ausência de reservas e planejamento deixa você vulnerável a qualquer imprevisto, e isso cria uma ansiedade de fundo.",
       acao: "Crie uma reserva de emergência como primeira prioridade absoluta. Mesmo R$200/mês consistentes fazem diferença.",
     },
     desenvolvimento: {
-      interpretacao: "Sua situação é estável, mas o crescimento patrimonial ainda não é intencional. Você está administrando, não construindo — e existe uma diferença enorme entre os dois.",
+      interpretacao: "Sua situação é estável, mas o crescimento patrimonial ainda não é intencional. Você está administrando, não construindo, e existe uma diferença enorme entre os dois.",
       acao: "Defina um objetivo financeiro de 3 anos e o plano para chegar lá. Revise seus investimentos com alguém que entende do assunto.",
     },
     excelencia: {
-      interpretacao: "Você tem clareza, organização e estratégia financeira. Seu dinheiro trabalha com intencionalidade — e isso cria liberdade real para fazer escolhas baseadas em valores, não em necessidade.",
-      acao: "Como você usa seus recursos para criar impacto além de você mesmo — causas, pessoas, legado?",
+      interpretacao: "Você tem clareza, organização e estratégia financeira. Seu dinheiro trabalha com intencionalidade, e isso cria liberdade real para fazer escolhas baseadas em valores, não em necessidade.",
+      acao: "Como você usa seus recursos para criar impacto além de você mesmo, causas, pessoas, legado?",
     },
   },
   contribuicaoSocial: {
     urgente: {
       interpretacao: "O foco está predominantemente no individual. A desconexão com algo maior que si mesmo cria uma forma de isolamento existencial que é sutil mas persistente.",
-      acao: "Escolha UMA causa que ressoa com seus valores mais profundos e dê um passo concreto nesta semana — não quando sobrar tempo.",
+      acao: "Escolha UMA causa que ressoa com seus valores mais profundos e dê um passo concreto nesta semana, não quando sobrar tempo.",
     },
     atencao: {
-      interpretacao: "Há intenção de contribuir, mas as ações ainda são pontuais e sem consistência. Boas vontades sem compromissos regulares não criam impacto real — apenas uma boa narrativa.",
+      interpretacao: "Há intenção de contribuir, mas as ações ainda são pontuais e sem consistência. Boas vontades sem compromissos regulares não criam impacto real, apenas uma boa narrativa.",
       acao: "Estabeleça um compromisso regular: agende como qualquer prioridade de vida, não como extra para quando sobrar tempo.",
     },
     desenvolvimento: {
@@ -267,17 +269,17 @@ const INTERPRETACOES: Record<string, Record<Nivel, { interpretacao: string; acao
       acao: "Como suas habilidades únicas podem gerar impacto que vai além do que qualquer pessoa pode fazer no seu lugar?",
     },
     excelencia: {
-      interpretacao: "Você age no mundo com senso genuíno de responsabilidade pelo coletivo. Suas escolhas diárias criam ondas que vão além do que você consegue ver — e isso transforma quem te observa.",
+      interpretacao: "Você age no mundo com senso genuíno de responsabilidade pelo coletivo. Suas escolhas diárias criam ondas que vão além do que você consegue ver, e isso transforma quem te observa.",
       acao: "Documente e compartilhe seu impacto. Histórias de contribuição genuína inspiram outros a agirem também.",
     },
   },
   criatividadeHobbyDiversao: {
     urgente: {
-      interpretacao: "A vida adulta te roubou o jogo. A supressão completa da criatividade e do prazer é mais séria do que parece — é uma forma de empobrecer o espírito lentamente, obrigação por obrigação.",
+      interpretacao: "A vida adulta te roubou o jogo. A supressão completa da criatividade e do prazer é mais séria do que parece, é uma forma de empobrecer o espírito lentamente, obrigação por obrigação.",
       acao: "Esta semana, faça UMA coisa completamente inútil que te dê prazer. Sem resultado, sem produtividade. Apenas pelo prazer de ser.",
     },
     atencao: {
-      interpretacao: "Você tem pequenos momentos de lazer, mas eles ainda são tratados como recompensa após as obrigações — não como parte essencial e intransferível da sua vida.",
+      interpretacao: "Você tem pequenos momentos de lazer, mas eles ainda são tratados como recompensa após as obrigações, não como parte essencial e intransferível da sua vida.",
       acao: "Agende um hobby como você agenda reuniões. O que você adorava fazer na infância e abandonou completamente?",
     },
     desenvolvimento: {
@@ -285,7 +287,7 @@ const INTERPRETACOES: Record<string, Record<Nivel, { interpretacao: string; acao
       acao: "Em vez de muitos lazeres superficiais, cultive 1 ou 2 com dedicação real. A maestria é também uma forma de alegria.",
     },
     excelencia: {
-      interpretacao: "Você honra a criança que vive em você. A leveza, o jogo e a criação são partes integrantes de quem você é — não extras que acontecem quando sobra tempo, mas pilares de vida.",
+      interpretacao: "Você honra a criança que vive em você. A leveza, o jogo e a criação são partes integrantes de quem você é, não extras que acontecem quando sobra tempo, mas pilares de vida.",
       acao: "Como você mantém este espaço de não-produtividade em uma cultura que valoriza apenas resultados?",
     },
   },
@@ -314,7 +316,7 @@ function getNivelInfo(areaId: string, valor: number): NivelInfo {
 
 function getMediaLabel(media: number): { label: string; sublabel: string } {
   if (media < 4) return { label: "Terreno a trabalhar", sublabel: "Sua jornada começa agora com coragem e honestidade" };
-  if (media < 5.5) return { label: "Atenção necessária", sublabel: "Várias áreas pedem cuidado — e você deu o primeiro passo" };
+  if (media < 5.5) return { label: "Atenção necessária", sublabel: "Várias áreas pedem cuidado, e você deu o primeiro passo" };
   if (media < 7) return { label: "Equilíbrio emergente", sublabel: "Uma base sólida com espaço significativo para crescer" };
   if (media < 8.5) return { label: "Vida rica", sublabel: "Você cultiva uma vida com profundidade e significado" };
   return { label: "Plena realização", sublabel: "Raro nível de equilíbrio e florescimento em todas as áreas" };
@@ -452,6 +454,11 @@ export default function ResultadoPage() {
     >
       <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-4 animate-fadeIn">
         <MobileTopBar />
+        <NavBackButton
+          to={JORNADA_MODULE_NAV.roda.hub}
+          label={JORNADA_MODULE_NAV.roda.backLabel}
+          className="mb-2"
+        />
         <PageIntroHeader eyebrow="Roda da Vida" titulo="Resultado" subtitulo="Leitura completa da sua avaliação" className="mb-2" />
 
         {/* ── Hero ──────────────────────────────────────────────────────── */}

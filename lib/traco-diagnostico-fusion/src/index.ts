@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizarObjetoTextos } from "@workspace/copy-voz";
 
 /** Estruturas biomecânicas (mesmas chaves que `tracoAnalysis` / API). */
 export const ESTRUTURAS_TRACO = [
@@ -343,11 +344,11 @@ export function aplicarFusaoTracoDiagnostico(
     sinteseIntegrada,
   };
 
-  return {
+  return normalizarObjetoTextos({
     estruturasFusionadas,
     estruturaPrincipal,
     estruturaSecundaria,
     metadata,
     confiancaAnaliseAjustada,
-  };
+  });
 }

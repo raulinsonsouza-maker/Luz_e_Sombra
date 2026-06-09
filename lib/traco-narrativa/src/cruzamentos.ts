@@ -35,7 +35,7 @@ export function montarLeituraEmocionalDeclarada(
   const [p1, p2] = topPadroes(fusao);
   const l1 = LABEL_PADRAO[p1];
   const l2 = LABEL_PADRAO[p2];
-  return `No questionário, destacam-se ${l1} e ${l2} — isso conversa com a couraça de ${T.NOMES[principal].toLowerCase()} e com a influência de ${T.NOMES[secundaria].toLowerCase()} no dia a dia.`;
+  return `No questionário, destacam-se${l1}e${l2}, isso conversa com a couraça de${T.NOMES[principal].toLowerCase()}e com a influência de${T.NOMES[secundaria].toLowerCase()}no dia a dia.`;
 }
 
 export function montarContrasteFotosFormulario(
@@ -51,7 +51,7 @@ export function montarContrasteFotosFormulario(
   const nomeFoto = T.NOMES[pFoto];
   const nomeInt = T.NOMES[pIntegrado];
   if (alinhamento < 55) {
-    return `Pelas fotos sozinhas, o corpo sugeria mais ${nomeFoto}; com o que você declarou no questionário, o perfil integrado destaca ${nomeInt}. As duas leituras são válidas — a fusão equilibra corpo e história emocional.`;
+    return `Pelas fotos sozinhas, o corpo sugeria mais${nomeFoto}; com o que você declarou no questionário, o perfil integrado destaca${nomeInt}. As duas leituras são válidas, a fusão equilibra corpo e história emocional.`;
   }
   if (pFoto !== pIntegrado) {
     return `O corpo nas fotos apontava para ${nomeFoto}, enquanto o conjunto fotos + respostas confirma ${nomeInt} como eixo principal.`;
@@ -66,13 +66,13 @@ export function montarCouracaCorporal(
   if (!eixos) return undefined;
   const partes: string[] = [];
   if (eixos.indiceContencao > 0.4) {
-    partes.push("Há contenção perceptível no tórax e na cintura — o corpo segura o que sente antes de expressar.");
+    partes.push("Há contenção perceptível no tórax e na cintura, o corpo segura o que sente antes de expressar.");
   }
   if (eixos.indiceRetracao > 0.4) {
     partes.push("Sinais de retração sugerem proteção: recuar antes de ser tocado emocionalmente.");
   }
   if (eixos.indiceCompressao > 0.4) {
-    partes.push("Compressão vertical indica pressão acumulada — muitas vezes lealdade ou autocobrança guardadas no corpo.");
+    partes.push("Compressão vertical indica pressão acumulada, muitas vezes lealdade ou autocobrança guardadas no corpo.");
   }
   if (eixos.indiceExpansao > 0.45 && principal === "psicopata") {
     partes.push("Expansão superior: presença que ocupa espaço, com coração ainda em processo de abertura.");

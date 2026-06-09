@@ -6,6 +6,7 @@ import {
   montarRelatorioInterno,
   montarNarrativaV3,
   arquetipoFrasePorTemperamento,
+  tituloPerfilTemperamento,
 } from "./interpretacao";
 import type { RelatorioInterno, NarrativaTemperamentoV3 } from "./interpretacao";
 import type { EntradaTemperamento } from "./schemas";
@@ -194,7 +195,8 @@ export function computarTemperamento(entrada: EntradaTemperamento): ResultadoTem
   const alertas = calcularAlertas(valores, metadata.tempo_total_segundos, norm);
   const confiabilidade = calcularConfiabilidade(valores, metadata.tempo_total_segundos);
 
-  const { arquetipo, frase_sintese } = arquetipoFrasePorTemperamento(primario);
+  const { frase_sintese } = arquetipoFrasePorTemperamento(primario);
+  const arquetipo = tituloPerfilTemperamento(primario, secundario, tipo);
 
   const relatorio_vars: Record<string, string | number> = {
     primario,

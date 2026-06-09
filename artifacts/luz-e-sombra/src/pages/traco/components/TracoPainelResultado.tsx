@@ -808,7 +808,7 @@ export function TracoPainelResultado({
             className="w-full flex items-center justify-between px-6 py-4"
             style={{ background: "rgba(30,24,18,0.5)", color: "rgba(247,242,236,0.65)" }}
           >
-            <span className="text-sm font-medium">Como chegamos neste resultado</span>
+            <span className="text-sm font-medium">Detalhes técnicos da análise</span>
             {expandedAuditoria ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {expandedAuditoria && (
@@ -853,7 +853,7 @@ export function TracoPainelResultado({
               {segmentos && (
                 <div>
                   <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.45)" }}>
-                    Segmentos Reich (couraça)
+                    Proteção corporal por segmento
                   </p>
                   <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
                     {Object.entries(segmentos)
@@ -873,7 +873,7 @@ export function TracoPainelResultado({
                         {ev.estrutura} ({ev.peso > 0 ? "+" : ""}
                         {ev.peso.toFixed(2)})
                       </span>
-                      {" — "}
+                      {","}
                       {ev.descricao}
                     </p>
                   ))}

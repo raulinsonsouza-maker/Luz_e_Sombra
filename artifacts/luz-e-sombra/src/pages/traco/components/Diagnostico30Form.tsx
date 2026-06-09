@@ -17,6 +17,8 @@ import {
   storageKeyDiagnostico30,
   tracoQueryPessoa,
 } from "@/lib/tracoFormStorage";
+import NavBackButton from "@/components/NavBackButton";
+import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -205,7 +207,7 @@ export default function Diagnostico30Form({
                   border: "1px solid rgba(200,165,107,0.22)",
                 }}
               >
-                Estas <strong>30 respostas</strong> ficam guardadas só para esta pessoa no Traço de Caráter (não se misturam com o teu &quot;Eu&quot; nem com outras análises).
+                Estas <strong>30 respostas</strong> ficam guardadas só para esta pessoa no Traço de Caráter (não se misturam com o seu &quot;Eu&quot; nem com outras análises).
               </p>
             )}
             <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(247,242,236,0.55)" }}>
@@ -437,6 +439,11 @@ export default function Diagnostico30Form({
               Este resultado entra na análise de <strong style={{ color: "rgba(200,165,107,0.85)" }}>Traço de Caráter</strong>{" "}
               quando houver fotos: as percentagens finais combinam o que o corpo mostra com o que você declarou aqui.
             </p>
+
+            <NavBackButton
+              to={JORNADA_MODULE_NAV.traco.hub}
+              label={JORNADA_MODULE_NAV.traco.backLabel}
+            />
 
             <button
               type="button"

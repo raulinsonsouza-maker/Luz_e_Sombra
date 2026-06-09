@@ -82,7 +82,7 @@ const RECOMENDACOES: Record<keyof EstruturasPct, string[]> = {
   masoquista: [
     "Pratique pequenas expansões diárias: dizer não, expressar uma opinião, ocupar mais espaço",
     "Trabalho corporal focado em liberação da região pélvica, quadril e lombar",
-    "Identifique onde você engole ao invés de expressar, e pratique expressar com suavidade",
+    "Identifique onde você engole em vez de expressar, e pratique expressar com suavidade",
     "Celebre progressos sem minimizá-los, o prazer é permitido",
     "Psicoterapia ou bioenergética focada em desbloqueio da expressão",
   ],
@@ -107,7 +107,7 @@ const OBS_FRENTE: Record<keyof EstruturasPct, string> = {
   esquizoide: "A silhueta frontal revela estreiteza e fragmentação. O corpo não flui com continuidade entre os segmentos, há quebras visuais que criam a impressão de peças separadas habitando o mesmo espaço. A desconexão entre tórax e membros inferiores é visível. Os ombros podem estar contraídos e a pelve parece retraída, como se o corpo buscasse ocupar o mínimo de espaço possível.",
   oral: "O corpo apresenta colapso postural de cima para baixo: o peito cede, os ombros caem para frente, a cabeça avança além do eixo. O tônus muscular geral é baixo, não por fraqueza de caráter, mas porque o sistema nervoso aprendeu que não havia suporte suficiente disponível. A estrutura inteira parece buscar um apoio externo que ainda não chegou de forma consistente.",
   psicopata: "A silhueta frontal é dominada pela região superior: ombros largos e peito expandido criam uma presença imediata. A distribuição de massa concentra-se claramente acima da cintura. Os membros superiores são mais expressivos, os inferiores menos desenvolvidos em relação ao tronco. A postura comunica domínio e expansão antes de qualquer palavra.",
-  masoquista: "O corpo frontal é comprimido e denso. A largura é expressiva, quadril, tronco e coxas ocupam bastante espaço. A compressão vertical é perceptível: o pescoço parece curto, os ombros estão rebaixados, o tronco parece pressionado de cima para baixo. É um corpo que aprendeu a resistir ao invés de expandir.",
+  masoquista: "O corpo frontal é comprimido e denso. A largura é expressiva, quadril, tronco e coxas ocupam bastante espaço. A compressão vertical é perceptível: o pescoço parece curto, os ombros estão rebaixados, o tronco parece pressionado de cima para baixo. É um corpo que aprendeu a resistir em vez de expandir.",
   rigido: "O corpo apresenta organização e simetria notáveis. As proporções entre ombros e quadril são equilibradas, a coluna está ereta, e os membros são simétricos. O tônus muscular está bem distribuído. Há uma beleza na estrutura que também é couraça, o corpo funciona bem porque aprendeu a se manter unido acima de tudo.",
 };
 
@@ -215,7 +215,7 @@ const INTERPRETACOES: Record<keyof EstruturasPct, string[]> = {
     "A estrutura Oral carrega a ferida do abandono, não necessariamente um abandono literal, mas a experiência de não ter havido suporte suficiente, consistente e incondicional. No corpo, isso aparece como colapso postural: o peito cede, os ombros caem, o sistema todo aprende a operar com menos energia. O trabalho interno é aprender a apoiar-se em si mesmo.",
     "Você nutre o outro com uma generosidade extraordinária. Mas existe uma pergunta silenciosa que o acompanha: 'E eu, quem me sustenta?' O caminho de cura passa por aprender a pedir, a receber, a deixar que cuidem de você com a mesma entrega com que você cuida. Você merece isso, não como recompensa, mas como direito.",
     "Sua sensibilidade é um presente que o mundo precisa. A melancolia, a saudade, o anseio de pertencer, são expressões de um coração que ama profundamente. Quanto mais você encontrar estrutura interna, limites, autocuidado, apoio próprio, mais você pode amar o mundo sem se dissolver nele.",
-    "A transformação da estrutura Oral é sobre plenitude, aprender que você pode se encher por dentro ao invés de depender do outro para isso. Não é sobre fechar o coração, mas sobre ter um centro tão forte quanto a abertura que você já carrega naturalmente.",
+    "A transformação da estrutura Oral é sobre plenitude, aprender que você pode se encher por dentro em vez de depender do outro para isso. Não é sobre fechar o coração, mas sobre ter um centro tão forte quanto a abertura que você já carrega naturalmente.",
   ],
   psicopata: [
     "Você chegou ao mundo com uma capacidade de influência que é visível no seu corpo: a parte superior se impõe, os ombros comunicam antes de você falar, a postura comanda o espaço ao redor. Essa não é uma falha de caráter, é uma resposta adaptativa de um ser que precisou controlar o ambiente para sobreviver.",
@@ -228,7 +228,7 @@ const INTERPRETACOES: Record<keyof EstruturasPct, string[]> = {
     "Há uma força em você que é silenciosa e contínua, uma capacidade de suportar que não é fraqueza, mas acúmulo de pressão não expressa. O corpo masoquista comprimiu-se ao longo do tempo, como uma mola que nunca pôde expandir. Essa compressão é visível nas proporções e na textura da postura.",
     "A ferida que moldou essa estrutura foi a humilhação, a vontade que foi quebrada repetidamente até que a submissão se tornou mais segura que a expressão. No corpo, isso aparece como tensão crônica nos quadris, pescoço e coxas, lugares onde se guarda o que não pode ser dito, o que foi engolido por décadas.",
     "Sua lealdade é profunda. Uma vez que você se compromete com alguém ou algo, vai até o fim, mesmo quando isso custa mais do que deveria. Você conhece o sofrimento de dentro e por isso tem uma compaixão rara. O caminho de cura passa por aprender que expansão é possível, que o mundo não vai desabar quando você diz não.",
-    "A transformação para a estrutura Masoquista é a expansão gradual. Não a explosão, mas o crescimento suave e contínuo, a voz que sobe um tom de cada vez, o corpo que aprende a ocupar mais espaço. Cada vez que você se expressa ao invés de engolir, está reescrevendo a história do seu corpo.",
+    "A transformação para a estrutura Masoquista é a expansão gradual. Não a explosão, mas o crescimento suave e contínuo, a voz que sobe um tom de cada vez, o corpo que aprende a ocupar mais espaço. Cada vez que você se expressa em vez de engolir, está reescrevendo a história do seu corpo.",
     "A alegria, o prazer, a leveza, não são recompensas por sofrimento. São direitos que existem independentemente do quanto você suportou. A vida está esperando que você se permita florescer, não apesar do que passou, mas além disso.",
   ],
   rigido: [
@@ -313,7 +313,7 @@ const ESTILOS_COMUNICACAO: Record<keyof EstruturasPct, EstiloComunicacao> = {
     tipo: "Reservado e profundo",
     descricao: "Você é seletivo com palavras, cada uma tem peso real. A comunicação acontece quando há necessidade genuína ou quando um tema desperta interesse verdadeiro. Em silêncio, você está pensando, processando, habitando mundos interiores, não ausente.",
     emGrupos: "Em grupos, tende a observar mais do que participar. A conversa superficial esgota rapidamente; o que você busca é a troca que vai fundo. Com uma pessoa certa, em um espaço seguro, pode falar por horas com uma riqueza que surpreende quem só te conhecia calado.",
-    emRelacoes: "Prefere se comunicar por escrito ou em profundidade e reflexão ao invés de impulso. Expressar o que sente verbalmente é genuinamente mais difícil do que compreender o que sente. Os outros podem interpretar seu silêncio como distância, raramente é isso.",
+    emRelacoes: "Prefere se comunicar por escrito ou em profundidade e reflexão em vez de impulso. Expressar o que sente verbalmente é genuinamente mais difícil do que compreender o que sente. Os outros podem interpretar seu silêncio como distância, raramente é isso.",
     emConflito: "Diante do conflito, o impulso é recuar e processar internamente. Raramente responde no calor da hora, e quando responde, é com uma clareza e precisão que pode surpreender quem esperava reação emocional imediata.",
     emTensao: "A tensão alta faz você desaparecer internamente, presente no corpo, ausente na interação. Pode levar horas ou dias para processar o que aconteceu e só então encontrar as palavras certas. Isso não é fraqueza: é como seu sistema trabalha.",
   },
@@ -323,7 +323,7 @@ const ESTILOS_COMUNICACAO: Record<keyof EstruturasPct, EstiloComunicacao> = {
     emGrupos: "Em grupos, busca conexão genuína e frequentemente aquece o ambiente. Tem facilidade para perceber o que o outro precisa ouvir, e generosidade para dizê-lo. Pode ser o centro emocional de um grupo sem precisar ser o mais falante.",
     emRelacoes: "Nas relações íntimas, a comunicação flui com naturalidade, você fala, compartilha, confessa. O desafio é perceber quando está falando mais para aliviar a própria ansiedade do que para genuinamente conectar. A distinção faz toda a diferença.",
     emConflito: "Em situações de conflito, a tendência é tentar harmonizar, a discórdia é fisicamente desconfortável. Às vezes cede antes de expressar o que realmente pensa ou sente. Com o tempo, o não-dito vira peso.",
-    emTensao: "Sob tensão, pode tornar-se mais verborrágico, falar como forma de manejar a ansiedade. Perceber esse padrão é o primeiro passo para escolher as palavras que realmente importam ao invés de produzir volume.",
+    emTensao: "Sob tensão, pode tornar-se mais verborrágico, falar como forma de manejar a ansiedade. Perceber esse padrão é o primeiro passo para escolher as palavras que realmente importam em vez de produzir volume.",
   },
   psicopata: {
     tipo: "Direto e estratégico",
@@ -424,24 +424,24 @@ const DINAMICAS_FUNCIONAIS: Record<keyof EstruturasPct, DinamicaFuncional> = {
 /** Origem Reich/Lowen em linguagem acessível (1 parágrafo por estrutura). */
 const DORES_LIVRO: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "Na origem, o corpo aprendeu que existir era arriscado demais. A couraça não é frieza — é proteção contra um mundo que parecia grande demais. O sintoma relacional costuma ser distância: afastar-se antes de ser invadido.",
+    "Na origem, o corpo aprendeu que existir era arriscado demais. A couraça não é frieza, é proteção contra um mundo que parecia grande demais. O sintoma relacional costuma ser distância: afastar-se antes de ser invadido.",
   oral:
     "A ferida nasce do abandono ou do suporte inconsistente na infância. O corpo colapsa para buscar apoio externo. Na relação, aparece como dar demais, pedir pouco e sentir que nunca é sustentado o suficiente.",
   psicopata:
-    "Quando a vulnerabilidade foi punida cedo, o corpo expandiu-se para cima como defesa. Na relação, pode parecer forte e distante — o desafio é permitir que o coração apareça sem perder presença.",
+    "Quando a vulnerabilidade foi punida cedo, o corpo expandiu-se para cima como defesa. Na relação, pode parecer forte e distante, o desafio é permitir que o coração apareça sem perder presença.",
   masoquista:
     "A humilhação repetida ensinou que expressar a vontade custava caro. O corpo comprime e aguenta. Na relação, surge como lealdade excessiva, dificuldade em dizer não e ressentimento silencioso.",
   rigido:
-    "Quando amar foi punido ou não correspondido, o corpo organizou-se em couraça funcional. Na relação, parece confiável e competente — mas o coração pede espaço para sentir sem gerenciar cada emoção.",
+    "Quando amar foi punido ou não correspondido, o corpo organizou-se em couraça funcional. Na relação, parece confiável e competente, mas o coração pede espaço para sentir sem gerenciar cada emoção.",
 };
 
 const PERGUNTAS_TRANSFORMACAO: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "O que mudaria na sua vida se você soubesse, no corpo, que é seguro estar aqui — sem precisar recuar para a mente?",
+    "O que mudaria na sua vida se você soubesse, no corpo, que é seguro estar aqui, sem precisar recuar para a mente?",
   oral:
     "E você, quem te sustenta quando você sustenta todo mundo? O que pediria hoje, sem culpa?",
   psicopata:
-    "Quando ninguém está olhando, o que você sente — e o que permitiria sentir se não precisasse impressionar?",
+    "Quando ninguém está olhando, o que você sente, e o que permitiria sentir se não precisasse impressionar?",
   masoquista:
     "O que você engoliu por tanto tempo que o corpo ainda carrega? O que seria dizer não uma vez, com gentileza?",
   rigido:
@@ -458,7 +458,7 @@ const PONTE_POSTURAL_SECUNDARIA: Partial<Record<keyof EstruturasPct, string>> = 
 
 const CUIDADOS_FERIDA: Record<keyof EstruturasPct, string> = {
   esquizoide: "Pratique estar no corpo antes de recuar para a mente em momentos de pressão.",
-  oral: "Observe onde você dá mais do que recebe — e pratique pedir algo concreto esta semana.",
+  oral: "Observe onde você dá mais do que recebe, e pratique pedir algo concreto esta semana.",
   psicopata: "Permita um momento de vulnerabilidade com alguém de confiança, sem estratégia.",
   masoquista: "Diga não a uma pequena cobrança que você costumaria aceitar em silêncio.",
   rigido: "Deixe uma emoção aparecer sem corrigi-la ou organizá-la imediatamente.",

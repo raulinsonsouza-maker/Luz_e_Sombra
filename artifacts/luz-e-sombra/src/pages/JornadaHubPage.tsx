@@ -3,7 +3,6 @@ import { useLocation, useParams } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import {
-  ChevronLeft,
   Lock,
   Loader2,
   CheckCircle2,
@@ -14,7 +13,9 @@ import {
   Clock,
 } from "lucide-react";
 import { LABEL_LINGUAGEM, type LinguagemAmor } from "@workspace/cinco-linguagens-amor";
+import { tituloPerfilTemperamento, type TemperamentoCodigo, type TipoPerfil } from "@workspace/temperamento-v1";
 import MobileTopBar from "@/components/MobileTopBar";
+import NavBackButton from "@/components/NavBackButton";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 import { MinicursoEmbedido } from "@/components/MinicursoEmbedido";
 import {
@@ -71,11 +72,20 @@ async function carregarPreviewAnalise(
         if (!res.ok) return null;
         const row = await res.json();
         const p = row?.resultado?.perfil;
-        if (!p?.arquetipo) return null;
+        if (!p?.primario) return null;
+        const titulo =
+          p.primario && p.secundario && p.tipo
+            ? tituloPerfilTemperamento(
+                p.primario as TemperamentoCodigo,
+                p.secundario as TemperamentoCodigo,
+                p.tipo as TipoPerfil,
+              )
+            : (p.arquetipo as string | undefined);
+        if (!titulo) return null;
         return {
-          titulo: p.arquetipo as string,
+          titulo,
           linha: p.frase_sintese as string | undefined,
-          badge: p.primario ? String(p.primario).replace("_", " ") : undefined,
+          badge: p.primario ? String(p.primario).replace("_", " ").toLowerCase() : undefined,
         };
       }
       case "traco": {
@@ -322,9 +332,7 @@ export default function JornadaHubPage() {
           <p className="text-sm mb-4" style={{ color: "rgba(247,242,236,0.5)" }}>
             Módulo não encontrado.
           </p>
-          <button type="button" onClick={() => navigate("/jornada")} className="text-sm underline" style={{ color: "#c8a56b" }}>
-            Voltar à jornada
-          </button>
+          <NavBackButton to="/jornada" label="Jornada" className="mx-auto mb-4" />
         </div>
       </div>
     );
@@ -335,15 +343,7 @@ export default function JornadaHubPage() {
       <div className="min-h-screen px-4 pt-6 pb-28 journey-forest-bg">
         <MobileTopBar titulo={modulo.tituloIntro} subtitulo="Módulo bloqueado" />
         <div className="max-w-lg mx-auto">
-          <button
-            type="button"
-            onClick={() => navigate("/jornada")}
-            className="flex items-center gap-2 text-sm mb-6"
-            style={{ color: "rgba(200,165,107,0.65)" }}
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Jornada
-          </button>
+          <NavBackButton to="/jornada" label="Jornada" />
           <div
             className="rounded-2xl p-8 text-center"
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
@@ -365,15 +365,7 @@ export default function JornadaHubPage() {
     <div className="min-h-screen pb-28 journey-forest-bg">
       <MobileTopBar titulo={modulo.tituloIntro} subtitulo="Módulo da jornada" />
       <div className="max-w-lg mx-auto px-4 pt-6">
-        <button
-          type="button"
-          onClick={() => navigate("/jornada")}
-          className="flex items-center gap-2 text-sm mb-6"
-          style={{ color: "rgba(200,165,107,0.65)" }}
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Jornada
-        </button>
+        <NavBackButton to="/jornada" label="Jornada" />
 
         <div className="mb-8">
           <h1 className="font-tan-mon-cheri text-2xl mb-2 hidden md:block" style={{ color: "#f7f2ec" }}>
@@ -668,7 +660,7 @@ export default function JornadaHubPage() {
           >
             <p className="text-sm" style={{ color: "rgba(247,242,236,0.6)" }}>
               Sua análise está pronta
-              {!minicursoDisponivel ? " — o minicurso será liberado em breve." : " — falta concluir o minicurso acima."}
+              {!minicursoDisponivel ? ", o minicurso será liberado em breve." : ", falta concluir o minicurso acima."}
             </p>
             {!minicursoDisponivel && (
               <button

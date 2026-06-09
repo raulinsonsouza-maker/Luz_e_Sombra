@@ -13,6 +13,8 @@ import {
   parsePessoaIdFromSearch,
 } from "@/lib/tracoFormStorage";
 import MobileTopBar from "@/components/MobileTopBar";
+import NavBackButton from "@/components/NavBackButton";
+import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import Diagnostico30Form from "@/pages/traco/components/Diagnostico30Form";
 import { FOTOS_CONFIG, type EstruturasPct, type TipoFoto } from "@/pages/traco/tracoConfig";
 import { TracoPainelResultado } from "@/pages/traco/components/TracoPainelResultado";
@@ -483,12 +485,18 @@ export default function TracodeCaraterPage() {
     : fotosCount === 0
       ? "Envie ao menos uma foto para liberar a análise."
       : fotosCount < 3
-        ? `${fotosCount}/3 fotos — a análise fica mais precisa com as 3.`
-        : "Tudo pronto — análise completa disponível.";
+        ? `${fotosCount}/3 fotos, a análise fica mais precisa com as 3.`
+        : "Tudo pronto, análise completa disponível.";
 
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #1e1812 0%, #2a1f14 50%, #2f251b 100%)" }}>
       <MobileTopBar />
+      <div className="max-w-4xl mx-auto px-6 pt-4">
+        <NavBackButton
+          to={JORNADA_MODULE_NAV.traco.hub}
+          label={JORNADA_MODULE_NAV.traco.backLabel}
+        />
+      </div>
       {/* ── Hero ── */}
       <section
         className="relative overflow-hidden"

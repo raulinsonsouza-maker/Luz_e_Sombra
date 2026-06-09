@@ -263,6 +263,9 @@ importers:
       '@workspace/cinco-linguagens-amor':
         specifier: workspace:*
         version: link:../../lib/cinco-linguagens-amor
+      '@workspace/copy-voz':
+        specifier: workspace:*
+        version: link:../../lib/copy-voz
       '@workspace/temperamento-v1':
         specifier: workspace:*
         version: link:../../lib/temperamento-v1
@@ -681,9 +684,24 @@ importers:
 
   lib/cinco-linguagens-amor:
     dependencies:
+      '@workspace/copy-voz':
+        specifier: workspace:*
+        version: link:../copy-voz
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
+      typescript:
+        specifier: ~5.9.2
+        version: 5.9.3
+
+  lib/copy-voz:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -734,6 +752,9 @@ importers:
 
   lib/temperamento-v1:
     dependencies:
+      '@workspace/copy-voz':
+        specifier: workspace:*
+        version: link:../copy-voz
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -766,6 +787,9 @@ importers:
 
   lib/traco-diagnostico-fusion:
     dependencies:
+      '@workspace/copy-voz':
+        specifier: workspace:*
+        version: link:../copy-voz
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -808,6 +832,9 @@ importers:
 
   lib/traco-narrativa:
     dependencies:
+      '@workspace/copy-voz':
+        specifier: workspace:*
+        version: link:../copy-voz
       '@workspace/traco-diagnostico-fusion':
         specifier: workspace:*
         version: link:../traco-diagnostico-fusion

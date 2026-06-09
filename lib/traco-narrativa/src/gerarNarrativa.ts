@@ -8,6 +8,7 @@ import type {
   TipoFoto,
 } from "@workspace/traco-imagem-engine";
 import type { FusaoDiagnosticoEmocionalMetadata } from "@workspace/traco-diagnostico-fusion";
+import { normalizarObjetoTextos } from "@workspace/copy-voz";
 import type { DinamicaFuncional, EstiloComunicacao, ResultadoAnalise } from "./types.js";
 import * as T from "./tabelas.js";
 import { VERSAO_NARRATIVA } from "./constants.js";
@@ -189,11 +190,11 @@ function construirInterpretacao(
 
   if (incluirTensao) {
     blocos.push(
-      `Entre ${T.NOMES[principal]} e ${T.NOMES[secundaria]} há uma tensão viva no cotidiano — não um defeito, mas um convite à integração.`,
+      `Entre${T.NOMES[principal]}e${T.NOMES[secundaria]}há uma tensão viva no cotidiano, não um defeito, mas um convite à integração.`,
     );
   } else if (pctP - pctS < 12) {
     blocos.push(
-      "Os dois padrões centrais aparecem com intensidade próxima — respostas mais contextuais e híbridas.",
+      "Os dois padrões centrais aparecem com intensidade próxima, respostas mais contextuais e híbridas.",
     );
   }
 
@@ -424,7 +425,7 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
     comboKey,
   );
 
-  return {
+  const resultado: ResultadoAnalise = {
     versaoNarrativa: VERSAO_NARRATIVA,
     estruturas,
     estruturaPrincipal: principal,
@@ -479,4 +480,5 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
     segmentosReich: marcadoresAgregados.segmentosReich ?? metadata?.segmentosReich,
     estruturasSomenteFotos,
   };
+  return normalizarObjetoTextos(resultado);
 }

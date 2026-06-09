@@ -75,10 +75,12 @@ export default function TemperamentoPainelResultado({
   const secundario = perfil?.secundario as TemperamentoCodigo | undefined;
   const pct = r.scores?.temperamentos_percentuais;
   const visP = primario ? TEMPERAMENTO_VISUAL[primario] : null;
-  const visS = secundario ? TEMPERAMENTO_VISUAL[secundario] : null;
   const IconP = visP?.icon;
 
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
+
+  const tituloPerfil =
+    primario && secundario && perfil?.tipo ? perfil.arquetipo : perfil?.arquetipo ?? "";
 
   return (
     <div className="space-y-5">
@@ -108,11 +110,11 @@ export default function TemperamentoPainelResultado({
                   {labelTipoPerfil(perfil.tipo)}
                 </p>
                 <h1 className="font-tan-mon-cheri text-xl md:text-2xl" style={{ color: "#f7f2ec" }}>
-                  {perfil.arquetipo}
+                  {tituloPerfil}
                 </h1>
-                {primario && secundario && visS && pct && primario !== secundario && (
-                  <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.45)" }}>
-                    {visP.nome} + {visS.nome}
+                {pct && primario && (
+                  <p className="text-xs mt-1 tabular-nums" style={{ color: "rgba(247,242,236,0.45)" }}>
+                    {visP.nome} · {pct[primario]}% do seu perfil
                   </p>
                 )}
               </div>
@@ -158,9 +160,9 @@ export default function TemperamentoPainelResultado({
           </div>
         )}
 
-        {r.empateProximo && (
+        {r.empateProximo && primario && visP && (
           <p className="text-xs px-3 py-2 rounded-lg" style={{ color: "rgba(155,143,222,0.85)", background: "rgba(155,143,222,0.08)" }}>
-            Seus dois temperamentos principais estão bem próximos — você alterna entre essas forças conforme a situação.
+            Você tem dois temperamentos bem próximos — mesmo assim, {visP.nome} é o dominante para entender quem você é hoje.
           </p>
         )}
       </Capitulo>
@@ -213,45 +215,9 @@ export default function TemperamentoPainelResultado({
         </Capitulo>
       )}
 
-      {/* Capítulo 4 — Combinação (duplo) */}
-      {r.combo && (r.comboNarrativa || r.combo.forca) && (
-        <Capitulo
-          numero={4}
-          titulo="Sua combinação única"
-          subtitulo={visP && visS ? `${visP.nome} + ${visS.nome}` : undefined}
-          defaultOpen
-        >
-          {r.comboNarrativa && (
-            <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.9 }}>
-              {r.comboNarrativa}
-            </p>
-          )}
-          <div className="space-y-3">
-            <div className="rounded-xl p-4" style={{ background: "rgba(109,185,109,0.05)", border: "1px solid rgba(109,185,109,0.15)" }}>
-              <p className="text-[10px] uppercase tracking-wide mb-1" style={{ color: "rgba(109,185,109,0.6)" }}>
-                O que isso te dá de força
-              </p>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.68)" }}>{r.combo.forca}</p>
-            </div>
-            <div className="rounded-xl p-4" style={{ background: "rgba(224,123,57,0.05)", border: "1px solid rgba(224,123,57,0.15)" }}>
-              <p className="text-[10px] uppercase tracking-wide mb-1" style={{ color: "rgba(224,123,57,0.6)" }}>
-                O que pede atenção
-              </p>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.68)" }}>{r.combo.tensao}</p>
-            </div>
-            <div className="rounded-xl p-4" style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.12)" }}>
-              <p className="text-[10px] uppercase tracking-wide mb-1" style={{ color: "rgba(200,165,107,0.55)" }}>
-                Onde você brilha
-              </p>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.68)" }}>{r.combo.contexto}</p>
-            </div>
-          </div>
-        </Capitulo>
-      )}
-
-      {/* Capítulo 5 — Crescimento */}
+      {/* Capítulo 4 — Crescimento */}
       {(r.passoPratico || r.perguntaCrescimento) && (
-        <Capitulo numero={r.combo ? 5 : 4} titulo="Para crescer a partir daqui" defaultOpen>
+        <Capitulo numero={4} titulo="Para crescer a partir daqui" defaultOpen>
           {r.passoPratico && (
             <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
               {r.passoPratico}
@@ -286,7 +252,7 @@ export default function TemperamentoPainelResultado({
             className="w-full flex items-center justify-between px-5 py-3 text-left text-xs"
             style={{ background: "rgba(30,24,18,0.4)", color: "rgba(247,242,236,0.4)" }}
           >
-            <span>Ver distribuição detalhada dos temperamentos</span>
+            <span>Ver os outros temperamentos no seu perfil</span>
             {detalhesAbertos ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {detalhesAbertos && (

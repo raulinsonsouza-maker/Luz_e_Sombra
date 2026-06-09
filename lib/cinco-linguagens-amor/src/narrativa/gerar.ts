@@ -9,6 +9,7 @@ import type {
   ResultadoLinguagensAmorComputado,
 } from "../types.js";
 import { COMBINACAO_PAR, CONTEUDO_LINGUAGEM } from "./tabelas.js";
+import { normalizarObjetoTextos } from "@workspace/copy-voz";
 
 function chavePar(a: LinguagemAmor, b: LinguagemAmor): string {
   return `${a}+${b}`;
@@ -48,7 +49,7 @@ function sinteseHumana(
     }
     return `Você recebe e demonstra amor principalmente em ${lp}, com ${LABEL_LINGUAGEM[receber.secundaria].toLowerCase()} como complemento importante.`;
   }
-  return `Você se sente mais amado(a) em ${lp}, mas costuma demonstrar amor em ${le}. Esse descompasso é comum — e entendê-lo já melhora seus relacionamentos.`;
+  return `Você se sente mais amado(a) em${lp}, mas costuma demonstrar amor em${le}. Esse descompasso é comum, e entendê-lo já melhora seus relacionamentos.`;
 }
 
 function textoTanque(receber: DimensaoPerfil, metricas: MetricasQualidade): string {
@@ -71,7 +72,7 @@ function textoDesalinhamento(receber: DimensaoPerfil, expressar: DimensaoPerfil)
   const le = LABEL_LINGUAGEM[expressar.principal].toLowerCase();
   return {
     ativo: true,
-    texto: `Você precisa receber principalmente ${lr}, mas demonstra amor naturalmente em ${le}. Quem te ama pode estar falando a língua errada — não por falta de carinho, mas por desconhecer seu mapa emocional. Compartilhe este resultado e peça o mesmo gesto que você costuma oferecer.`,
+    texto: `Você precisa receber principalmente${lr}, mas demonstra amor naturalmente em${le}. Quem te ama pode estar falando a língua errada, não por falta de carinho, mas por desconhecer seu mapa emocional. Compartilhe este resultado e peça o mesmo gesto que você costuma oferecer.`,
   };
 }
 
@@ -114,11 +115,11 @@ function recomendacoesSemana(
   }
   if (metricas.confianca < 70) {
     out.push(
-      "Se algumas respostas foram rápidas demais, considere refazer com mais calma — o resultado fica mais fiel ao seu dia a dia.",
+      "Se algumas respostas foram rápidas demais, considere refazer com mais calma, o resultado fica mais fiel ao seu dia a dia.",
     );
   }
   out.push(
-    "Três vezes por semana, pergunte em casa: «De zero a dez, como está seu tanque de amor?» e faça um gesto concreto na linguagem certa.",
+    "Três vezes por semana, pergunte em casa: \"De zero a dez, como está seu tanque de amor?\" e faça um gesto concreto na linguagem certa.",
   );
   return out.slice(0, 4);
 }
@@ -141,7 +142,7 @@ export function montarNarrativaV2(input: {
   const { receber, expressar, metricas } = input;
   const desalinhamento = textoDesalinhamento(receber, expressar);
 
-  return {
+  return normalizarObjetoTextos({
     versao: "linguagens_amor_v2",
     receber,
     expressar,
@@ -164,7 +165,7 @@ export function montarNarrativaV2(input: {
     ranking: receber.ranking,
     interpretacaoPrincipal: textoDominante(receber.principal),
     interpretacaoPar: textoParPrincipalSecundaria(receber.principal, receber.secundaria),
-  };
+  });
 }
 
 /** Alias para retrocompatibilidade com imports v1. */

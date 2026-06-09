@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { CursoCapa } from "@/components/CursoCapa";
 import MobileTopBar from "@/components/MobileTopBar";
+import NavBackButton from "@/components/NavBackButton";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 
 interface Aula {
@@ -114,17 +115,7 @@ export default function CursoPage() {
       <MobileTopBar titulo={curso.titulo} subtitulo={curso.categoria ?? "Curso"} />
       <div className="max-w-2xl mx-auto px-4 sm:px-5 pt-4 sm:pt-6">
 
-        <button
-          type="button"
-          onClick={() => navigate("/cursos")}
-          className="flex items-center gap-2 mb-4 sm:mb-6 text-sm transition-all"
-          style={{ color: "rgba(200,165,107,0.55)" }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#c8a56b"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "rgba(200,165,107,0.55)"; }}
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Voltar aos cursos
-        </button>
+        <NavBackButton to="/cursos" label="Cursos" />
 
         {/* Hero do curso */}
         <div className="rounded-2xl overflow-hidden mb-6 shadow-xl shadow-black/30"

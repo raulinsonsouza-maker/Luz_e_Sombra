@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { profilePhotoViewResponseIsImageBody } from "@/lib/profilePhotoView";
 import MobileTopBar from "@/components/MobileTopBar";
+import NavBackButton from "@/components/NavBackButton";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import {
   calcularNumerodeVida,
@@ -25,7 +26,7 @@ import {
   type LinguagensDossie,
 } from "@/lib/dossieIntegrado";
 import {
-  Loader2, ChevronLeft, Sparkles, Heart, Star, Compass,
+  Loader2, Sparkles, Heart, Star, Compass,
   Zap, Shield, Brain, Eye, Target, TrendingUp, AlertCircle,
   CheckCircle2, Clock, Activity, Flame, Anchor, User,
 } from "lucide-react";
@@ -59,28 +60,28 @@ const AREAS_LABELS: Record<keyof Avaliacao, string> = {
 
 const AREAS_INTERPRETACAO: Record<keyof Avaliacao, { baixo: string; medio: string; alto: string }> = {
   plenitudeFelicidade: {
-    alto: "Você habita a vida com um nível raro de satisfação interior. Isso não é acidente — é o resultado de escolhas conscientes que muitos ainda não têm coragem de fazer.",
+    alto: "Você habita a vida com um nível raro de satisfação interior. Isso não é acidente, é o resultado de escolhas conscientes que muitos ainda não têm coragem de fazer.",
     medio: "Sua felicidade existe, mas de forma intermitente. Há uma sensação de que falta algo, embora seja difícil nomear o quê. O autoconhecimento que você está construindo é exatamente o que abre esse portal.",
     baixo: "Há um vazio de realização que merece atenção urgente. Não como emergência, mas como um sinal de que sua vida atual não reflete quem você realmente é.",
   },
   espiritualidade: {
     alto: "Sua conexão com algo maior do que você mesmo está ativa e sustentando sua jornada. Isso é uma base invisível de força que poucos conseguem cultivar.",
-    medio: "Você acredita, mas a prática ainda não se tornou hábito. A espiritualidade está chamando — não para mais ritual, mas para mais presença no cotidiano.",
-    baixo: "Esta área mostra um distanciamento do transcendente. Pode não ser falta de fé — pode ser exaustão, descrença ou simplesmente uma fase mais pragmática da vida. Vale investigar.",
+    medio: "Você acredita, mas a prática ainda não se tornou hábito. A espiritualidade está chamando, não para mais ritual, mas para mais presença no cotidiano.",
+    baixo: "Esta área mostra um distanciamento do transcendente. Pode não ser falta de fé, pode ser exaustão, descrença ou simplesmente uma fase mais pragmática da vida. Vale investigar.",
   },
   saudeDisposicao: {
     alto: "Seu corpo está sendo bem cuidado. A vitalidade que você cultiva aqui alimenta todas as outras áreas da sua vida.",
-    medio: "Saúde no patamar médio costuma indicar atenção parcial — você sabe o que precisa fazer, mas a consistência ainda é o desafio.",
+    medio: "Saúde no patamar médio costuma indicar atenção parcial, você sabe o que precisa fazer, mas a consistência ainda é o desafio.",
     baixo: "O corpo está mandando sinais que precisam ser ouvidos. Sem saúde e disposição, tudo mais perde o brilho. Esta é uma prioridade de base.",
   },
   desenvolvimentoIntelectual: {
     alto: "Sua mente está sendo alimentada com qualidade. O investimento em conhecimento se reflete na qualidade das suas decisões e da sua visão de mundo.",
-    medio: "Há curiosidade, mas a profundidade ainda não chegou. Você está consumindo muito e processando pouco — ou vice-versa.",
-    baixo: "Sua mente está subnutrida. Não por falta de capacidade — por falta de estímulo adequado ou por um cotidiano que não deixa espaço para crescer.",
+    medio: "Há curiosidade, mas a profundidade ainda não chegou. Você está consumindo muito e processando pouco, ou vice-versa.",
+    baixo: "Sua mente está subnutrida. Não por falta de capacidade, por falta de estímulo adequado ou por um cotidiano que não deixa espaço para crescer.",
   },
   equilibrioEmocional: {
-    alto: "Você tem cultivado uma relação madura com suas emoções. Isso não significa ausência de dor — significa que você sabe o que fazer com ela.",
-    medio: "Emoções ainda te pegam de surpresa com frequência. O equilíbrio existe em partes — mas nos momentos decisivos, ainda há instabilidade.",
+    alto: "Você tem cultivado uma relação madura com suas emoções. Isso não significa ausência de dor, significa que você sabe o que fazer com ela.",
+    medio: "Emoções ainda te pegam de surpresa com frequência. O equilíbrio existe em partes, mas nos momentos decisivos, ainda há instabilidade.",
     baixo: "Esta é possivelmente a área mais urgente do seu dossiê. Quando o equilíbrio emocional está comprometido, todas as outras áreas sofrem consequência.",
   },
   familia: {
@@ -91,32 +92,32 @@ const AREAS_INTERPRETACAO: Record<keyof Avaliacao, { baixo: string; medio: strin
   desenvolvimentoAmoroso: {
     alto: "Sua vida amorosa está nutrida e recíproca. Isso exige maturidade emocional que você demonstra ter construído.",
     medio: "O amor existe, mas há padrões que se repetem. Uma análise honesta do que você atrai e como você ama pode abrir novos horizontes.",
-    baixo: "Esta área pede atenção — não apenas à relação em si, mas ao que dentro de você ainda não permite uma entrega amorosa plena e recíproca.",
+    baixo: "Esta área pede atenção, não apenas à relação em si, mas ao que dentro de você ainda não permite uma entrega amorosa plena e recíproca.",
   },
   vidaSocial: {
     alto: "Você tem uma rede social que nutre e expande. Conexões genuínas são um dos ativos mais valiosos que existem.",
     medio: "Há pessoas na sua vida, mas a profundidade das conexões ainda não corresponde ao que você realmente precisa.",
-    baixo: "Isolamento ou superficialidade nas conexões. Pode ser escolha consciente — ou pode ser um sinal de que você se fechou mais do que deveria.",
+    baixo: "Isolamento ou superficialidade nas conexões. Pode ser escolha consciente, ou pode ser um sinal de que você se fechou mais do que deveria.",
   },
   realizacaoProposito: {
-    alto: "Você acordou para o propósito e está vivendo em alinhamento com ele. Poucas pessoas chegam aqui — honre esse estado.",
+    alto: "Você acordou para o propósito e está vivendo em alinhamento com ele. Poucas pessoas chegam aqui, honre esse estado.",
     medio: "Você sente que há algo maior esperando, mas ainda não conseguiu articular com clareza o que é ou como chegar lá.",
-    baixo: "A falta de propósito claro é uma das formas mais sutis de sofrimento. Você não está perdido — está esperando por uma clareza que só vem com movimento.",
+    baixo: "A falta de propósito claro é uma das formas mais sutis de sofrimento. Você não está perdido, está esperando por uma clareza que só vem com movimento.",
   },
   recursosFinanceiros: {
     alto: "Sua relação com dinheiro está madura e seus recursos estão organizados. Isso cria liberdade real de escolha.",
     medio: "Finanças funcionam, mas de forma instável. A relação com dinheiro ainda carrega crenças limitantes que valem ser investigadas.",
-    baixo: "Recursos financeiros em nível crítico impactam a paz interna de forma profunda. Não é só sobre dinheiro — é sobre liberdade, segurança e autoestima.",
+    baixo: "Recursos financeiros em nível crítico impactam a paz interna de forma profunda. Não é só sobre dinheiro, é sobre liberdade, segurança e autoestima.",
   },
   contribuicaoSocial: {
     alto: "Você está contribuindo com algo além de si mesmo. Esse senso de serviço é uma das fontes mais sustentáveis de significado.",
-    medio: "Você quer contribuir, mas ainda não encontrou o canal certo ou o momento. A intenção está lá — a expressão ainda precisa de forma.",
+    medio: "Você quer contribuir, mas ainda não encontrou o canal certo ou o momento. A intenção está lá, a expressão ainda precisa de forma.",
     baixo: "Não há nada de errado em focar em si mesmo por um período. Mas quando isso se estende, a alma começa a sentir falta de propósito coletivo.",
   },
   criatividadeHobbyDiversao: {
-    alto: "Criatividade e prazer têm espaço real na sua vida. Isso não é fútil — é essencial para a saúde psíquica e para a inovação.",
+    alto: "Criatividade e prazer têm espaço real na sua vida. Isso não é fútil, é essencial para a saúde psíquica e para a inovação.",
     medio: "Há criatividade latente esperando expressão. A vida adulta séria muitas vezes suprime essa dimensão sem que a pessoa perceba.",
-    baixo: "Prazer, leveza e expressão criativa estão ausentes. Isso é um sinal importante — a vida não pode ser apenas produção e obrigações.",
+    baixo: "Prazer, leveza e expressão criativa estão ausentes. Isso é um sinal importante, a vida não pode ser apenas produção e obrigações.",
   },
 };
 
@@ -140,7 +141,7 @@ const ESTRUTURAS: Record<string, {
     cor: "#5b9bd5",
     corBg: "rgba(91,155,213,0.08)",
     arquetipo: "O Cuidador Profundo",
-    padraoProfundo: "Você foi moldado(a) por uma necessidade de conexão e pertencimento. Nutre o outro como forma de linguagem natural — e frequentemente se esquece de nutrir a si mesmo com a mesma intensidade.",
+    padraoProfundo: "Você foi moldado(a) por uma necessidade de conexão e pertencimento. Nutre o outro como forma de linguagem natural, e frequentemente se esquece de nutrir a si mesmo com a mesma intensidade.",
     sombra: "O medo de abandono e a necessidade de ser necessário podem criar dependências emocionais que drenam. Aprender a receber é seu maior desafio.",
     dominancias: ["Empatia visceral e genuína", "Capacidade de criar pertencimento", "Calor humano que transforma ambientes", "Lealdade profunda nas relações"],
     relacionamento: "Você ama com intensidade e muitas vezes se perde no outro. Relações saudáveis exigem que você cultive uma base interna sólida antes de buscar preenchimento no outro.",
@@ -151,7 +152,7 @@ const ESTRUTURAS: Record<string, {
     corBg: "rgba(224,123,57,0.08)",
     arquetipo: "O Estrategista Direcionado",
     padraoProfundo: "A leitura corporal aqui é de eixo forte: a energia costuma subir para cabeça, peito e garganta, gerando presença, foco e capacidade de comando. É um corpo que quer conduzir, organizar o espaço e antecipar movimentos. Quando integrado, isso vira liderança lúcida; quando sobrecarregado, vira tensão no pescoço, mandíbula, peito e respiração curta, como se sentir fosse um risco que precisa ser controlado.",
-    sombra: "A defesa aparece como contenção e vigilância. Em vez de abrir o corpo para o vínculo, ele pode entrar em modo de monitoramento permanente: olhar que avalia, fala que avança, peito que sustenta a postura, abdômen que segura o impulso. O problema não é falta de força — é usar a força para não descer para a vulnerabilidade.",
+    sombra: "A defesa aparece como contenção e vigilância. Em vez de abrir o corpo para o vínculo, ele pode entrar em modo de monitoramento permanente: olhar que avalia, fala que avança, peito que sustenta a postura, abdômen que segura o impulso. O problema não é falta de força, é usar a força para não descer para a vulnerabilidade.",
     dominancias: ["Presença firme e direção clara", "Leitura estratégica de pessoas e cenários", "Capacidade de decisão sob pressão", "Energia de comando e posicionamento"],
     relacionamento: "Você se vincula melhor quando não precisa sustentar uma imagem de superioridade. A intimidade cresce quando a força deixa de ser defesa e passa a ser presença disponível.",
   },
@@ -160,10 +161,10 @@ const ESTRUTURAS: Record<string, {
     cor: "#6db96d",
     corBg: "rgba(109,185,109,0.08)",
     arquetipo: "O Portador Silencioso",
-    padraoProfundo: "Você suporta cargas que quebrariam a maioria. Sua resistência é genuína e profunda — mas frequentemente usada para carregar o que não é seu, ou para evitar o conflito necessário que libertaria.",
-    sombra: "A tendência de engolir necessidades e postergar a própria voz cria um acúmulo de pressão interna que eventualmente precisa de vazão — geralmente de formas não desejadas.",
+    padraoProfundo: "Você suporta cargas que quebrariam a maioria. Sua resistência é genuína e profunda, mas frequentemente usada para carregar o que não é seu, ou para evitar o conflito necessário que libertaria.",
+    sombra: "A tendência de engolir necessidades e postergar a própria voz cria um acúmulo de pressão interna que eventualmente precisa de vazão, geralmente de formas não desejadas.",
     dominancias: ["Persistência e resistência excepcionais", "Lealdade inabalável", "Capacidade de sustentar processos longos", "Profundidade emocional impressionante"],
-    relacionamento: "Você é o pilar que todos procuram. O desafio é permitir que te apoiem também — e aprender que expressar necessidades não é fraqueza.",
+    relacionamento: "Você é o pilar que todos procuram. O desafio é permitir que te apoiem também, e aprender que expressar necessidades não é fraqueza.",
   },
   rigido: {
     nome: "Sustentador",
@@ -171,7 +172,7 @@ const ESTRUTURAS: Record<string, {
     corBg: "rgba(200,165,107,0.08)",
     arquetipo: "O Construtor de Presença",
     padraoProfundo: "O corpo costuma revelar um padrão de sustentação: tronco organizado, tônus constante, postura que passa responsabilidade e confiabilidade. Há muita capacidade de estruturar e manter, mas também tendência a reter tensão no centro do corpo, ombros e mandíbula, como se a vida precisasse ser carregada com controle para não desmoronar.",
-    sombra: "Quando em excesso, a organização vira contenção. A respiração encurta, o peito fica guardado, a mandíbula aperta e a energia sobe pouco para o prazer. É um corpo que sabe sustentar — mas precisa aprender a soltar sem sentir que perdeu valor.",
+    sombra: "Quando em excesso, a organização vira contenção. A respiração encurta, o peito fica guardado, a mandíbula aperta e a energia sobe pouco para o prazer. É um corpo que sabe sustentar, mas precisa aprender a soltar sem sentir que perdeu valor.",
     dominancias: ["Disciplina e comprometimento genuínos", "Presença estável e confiável", "Integridade como valor vivido", "Capacidade de construir resultados duradouros"],
     relacionamento: "Você é parceiro(a) confiável e presente, mas precisa aprender a mostrar sentimento sem transformar tudo em responsabilidade. O vínculo amadurece quando a precisão abre espaço para afeto e o corpo pode relaxar sem culpa.",
   },
@@ -179,67 +180,67 @@ const ESTRUTURAS: Record<string, {
 
 const ANO_AREAS_CONEXAO: Record<number, Record<string, string>> = {
   1: {
-    realizacaoProposito: "Seu Ano 1 está pedindo que você inaugure uma nova relação com seu propósito. Não espere clareza total — o propósito se revela no movimento, não na espera.",
+    realizacaoProposito: "Seu Ano 1 está pedindo que você inaugure uma nova relação com seu propósito. Não espere clareza total, o propósito se revela no movimento, não na espera.",
     recursosFinanceiros: "Ano 1 favorece novos caminhos de renda e independência financeira. A energia está alinhada para você finalmente agir sobre o que sempre pensou em criar.",
-    vidaSocial: "Este é o ano de expandir sua rede com intenção. Conexões novas têm um peso especial — cada pessoa que você conhecer agora pode fazer parte do próximo ciclo de 9 anos.",
-    equilibrioEmocional: "A energia do 1 exige que você se coloque em primeiro lugar. Cuidar do equilíbrio emocional não é luxo este ano — é pré-requisito para liderar.",
+    vidaSocial: "Este é o ano de expandir sua rede com intenção. Conexões novas têm um peso especial, cada pessoa que você conhecer agora pode fazer parte do próximo ciclo de 9 anos.",
+    equilibrioEmocional: "A energia do 1 exige que você se coloque em primeiro lugar. Cuidar do equilíbrio emocional não é luxo este ano, é pré-requisito para liderar.",
     espiritualidade: "Inícios espirituais têm peso particular no Ano 1. Uma nova prática iniciada agora pode definir o seu próximo ciclo completo.",
   },
   2: {
-    desenvolimentoAmoroso: "Seu Ano 2 e sua vida amorosa estão em ressonância direta. Este é literalmente o ano das relações — o que você trabalhar aqui terá efeito multiplicado.",
-    equilibrioEmocional: "O Ano 2 amplifica a sensibilidade emocional. Se o equilíbrio está baixo, esse ano pode intensificar o desconforto — mas também é o ano com mais recursos para cura emocional.",
+    desenvolimentoAmoroso: "Seu Ano 2 e sua vida amorosa estão em ressonância direta. Este é literalmente o ano das relações, o que você trabalhar aqui terá efeito multiplicado.",
+    equilibrioEmocional: "O Ano 2 amplifica a sensibilidade emocional. Se o equilíbrio está baixo, esse ano pode intensificar o desconforto, mas também é o ano com mais recursos para cura emocional.",
     familia: "Dinâmicas familiares pedem atenção no Ano 2. Conversas que foram adiadas têm um convite especial de acontecerem agora.",
-    vidaSocial: "Conexões se aprofundam no Ano 2. Este não é o ano de expandir a rede — é o de aprofundar os laços que realmente importam.",
-    realizacaoProposito: "Propósito no Ano 2 costuma se revelar através das relações. Pergunte-se: com quem você quer construir — e o quê?",
+    vidaSocial: "Conexões se aprofundam no Ano 2. Este não é o ano de expandir a rede, é o de aprofundar os laços que realmente importam.",
+    realizacaoProposito: "Propósito no Ano 2 costuma se revelar através das relações. Pergunte-se: com quem você quer construir, e o quê?",
   },
   3: {
-    criatividadeHobbyDiversao: "Seu Ano 3 está pedindo expressão criativa — urgente. Criatividade baixa neste ano é uma energia represada que vai se manifestar de outras formas se não encontrar canal.",
-    vidaSocial: "O Ano 3 expande naturalmente as conexões sociais. Se vida social está baixa, você está nadando contra uma maré favorável — o que está impedindo?",
+    criatividadeHobbyDiversao: "Seu Ano 3 está pedindo expressão criativa, urgente. Criatividade baixa neste ano é uma energia represada que vai se manifestar de outras formas se não encontrar canal.",
+    vidaSocial: "O Ano 3 expande naturalmente as conexões sociais. Se vida social está baixa, você está nadando contra uma maré favorável, o que está impedindo?",
     realizacaoProposito: "Propósito no Ano 3 tem tudo a ver com comunicação e criação. O que você tem a dizer ao mundo que ainda não disse?",
     equilibrioEmocional: "A energia criativa do 3 pode ser esmagadora quando não tem saída. Expressar emoções através da criatividade é especialmente poderoso este ano.",
-    plenitudeFelicidade: "O Ano 3 convida para a alegria como prática. Se felicidade está baixa, esta é uma dissonância importante — o universo está oferecendo leveza que você não está aceitando.",
+    plenitudeFelicidade: "O Ano 3 convida para a alegria como prática. Se felicidade está baixa, esta é uma dissonância importante, o universo está oferecendo leveza que você não está aceitando.",
   },
   4: {
     recursosFinanceiros: "Ano 4 é o ano de organizar finanças. Se recursos estão baixos, a energia do universo está completamente alinhada com você criar estrutura financeira agora.",
     saudeDisposicao: "Rotinas de saúde têm um poder especial no Ano 4. Hábitos criados este ano tendem a ser os mais duradouros do ciclo.",
     realizacaoProposito: "No Ano 4, propósito se manifesta como construção concreta. O que você está construindo que vai durar além deste ano?",
     desenvolvimentoIntelectual: "Estudo sistemático é especialmente recompensado no Ano 4. É o ano de aprender com profundidade, não apenas consumir conteúdo.",
-    equilibrioEmocional: "O Ano 4 pode trazer peso e seriedade. Criar estrutura emocional — rotinas de autocuidado, limites claros — é especialmente importante agora.",
+    equilibrioEmocional: "O Ano 4 pode trazer peso e seriedade. Criar estrutura emocional, rotinas de autocuidado, limites claros, é especialmente importante agora.",
   },
   5: {
-    familia: "Dinâmicas familiares podem passar por mudança ou tensão no Ano 5. O que estava estagnado vai se mover — com ou sem sua permissão.",
-    realizacaoProposito: "O Ano 5 traz convites inesperados de propósito. Esteja aberto(a) — o caminho pode ser diferente do que você imaginou, mas não menos verdadeiro.",
-    recursosFinanceiros: "Finanças no Ano 5 pedem cuidado com impulsividade. A tentação de mudanças radicais existe — discerna entre transformação e fuga.",
-    vidaSocial: "Pessoas novas entram com força no Ano 5. Se vida social está baixa, há uma abertura natural para isso mudar — mas você precisa dar o primeiro passo.",
+    familia: "Dinâmicas familiares podem passar por mudança ou tensão no Ano 5. O que estava estagnado vai se mover, com ou sem sua permissão.",
+    realizacaoProposito: "O Ano 5 traz convites inesperados de propósito. Esteja aberto(a), o caminho pode ser diferente do que você imaginou, mas não menos verdadeiro.",
+    recursosFinanceiros: "Finanças no Ano 5 pedem cuidado com impulsividade. A tentação de mudanças radicais existe, discerna entre transformação e fuga.",
+    vidaSocial: "Pessoas novas entram com força no Ano 5. Se vida social está baixa, há uma abertura natural para isso mudar, mas você precisa dar o primeiro passo.",
     equilibrioEmocional: "Mudanças rápidas do Ano 5 podem desestabilizar emocionalmente. Criar um âncora interna é mais importante do que controlar o externo.",
   },
   6: {
-    familia: "Ano 6 e família estão em conexão direta. O universo está pedindo que você cuide dessa dimensão — com presença real, não com boa intenção.",
+    familia: "Ano 6 e família estão em conexão direta. O universo está pedindo que você cuide dessa dimensão, com presença real, não com boa intenção.",
     desenvolimentoAmoroso: "O Ano 6 é um dos mais poderosos para a vida amorosa. O que você trabalhar aqui vai definir a qualidade dos seus vínculos pelos próximos anos.",
-    saudeDisposicao: "Autocuidado é especialmente importante no Ano 6. Cuidar dos outros precisa vir de um lugar de abundância — e isso exige que você cuide de si primeiro.",
+    saudeDisposicao: "Autocuidado é especialmente importante no Ano 6. Cuidar dos outros precisa vir de um lugar de abundância, e isso exige que você cuide de si primeiro.",
     contribuicaoSocial: "Serviço e contribuição têm resonância especial no Ano 6. Uma ação de cuidado ao coletivo pode trazer um retorno de significado inesperadamente poderoso.",
-    espiritualidade: "Espiritualidade no Ano 6 costuma se manifestar através do amor nas relações. O sagrado está nas conexões — não apenas nas práticas solitárias.",
+    espiritualidade: "Espiritualidade no Ano 6 costuma se manifestar através do amor nas relações. O sagrado está nas conexões, não apenas nas práticas solitárias.",
   },
   7: {
-    espiritualidade: "Seu Ano 7 está pedindo aprofundamento espiritual. Se espiritualidade está baixa, a dissonância é grande — o universo está literalmente te convidando para dentro.",
+    espiritualidade: "Seu Ano 7 está pedindo aprofundamento espiritual. Se espiritualidade está baixa, a dissonância é grande, o universo está literalmente te convidando para dentro.",
     desenvolvimentoIntelectual: "O Ano 7 é o ano do estudo profundo e da investigação. Investir em conhecimento agora traz retornos que vão muito além deste ciclo.",
-    equilibrioEmocional: "Introspecção necessária do Ano 7 pode revelar emoções que estavam subterrâneas. Isso não é breakdown — é breakthrough. A terapia este ano tem poder especial.",
+    equilibrioEmocional: "Introspecção necessária do Ano 7 pode revelar emoções que estavam subterrâneas. Isso não é colapso, é virada. A terapia este ano tem poder especial.",
     realizacaoProposito: "No silêncio do Ano 7, propósito se revela. Se você não está parando o suficiente para ouvir, pode estar perdendo a mensagem mais importante do ciclo.",
-    vidaSocial: "O Ano 7 naturalmente reduz energia social. Se vida social está baixa, não lute — use esse tempo de recolhimento para se aprofundar.",
+    vidaSocial: "O Ano 7 naturalmente reduz energia social. Se vida social está baixa, não lute, use esse tempo de recolhimento para se aprofundar.",
   },
   8: {
-    recursosFinanceiros: "Seu Ano 8 e sua área financeira estão em confronto direto. Este é literalmente o ano do poder material — agir sobre finanças agora é aproveitar uma janela que não se repete tão cedo.",
-    realizacaoProposito: "Ano 8 e propósito em nível baixo criam uma tensão produtiva. O universo está pressionando você a se posicionar — o que você quer construir que tenha impacto real?",
+    recursosFinanceiros: "Seu Ano 8 e sua área financeira estão em confronto direto. Este é literalmente o ano do poder material, agir sobre finanças agora é aproveitar uma janela que não se repete tão cedo.",
+    realizacaoProposito: "Ano 8 e propósito em nível baixo criam uma tensão produtiva. O universo está pressionando você a se posicionar, o que você quer construir que tenha impacto real?",
     carreira: "O Ano 8 favorece promoções, negociações e visibilidade profissional. Se propósito está baixo, talvez a carreira atual não reflita mais quem você é.",
     vidaSocial: "Conexões com pessoas de influência são especialmente poderosas no Ano 8. Quem você precisa conhecer para o próximo capítulo?",
     saudeDisposicao: "No Ano 8, saúde comprometida é um dreno direto de poder. Cuide do corpo como você cuidaria do seu negócio mais importante.",
   },
   9: {
-    plenitudeFelicidade: "O Ano 9 é de encerramento de ciclos. Felicidade baixa pode ser a sensação de que algo precisa ser liberado — não resistido.",
-    familia: "Dinâmicas familiares chegam a pontos de resolução no Ano 9. Perdões, conversas, encerramentos — o que precisa ser terminado aqui?",
+    plenitudeFelicidade: "O Ano 9 é de encerramento de ciclos. Felicidade baixa pode ser a sensação de que algo precisa ser liberado, não resistido.",
+    familia: "Dinâmicas familiares chegam a pontos de resolução no Ano 9. Perdões, conversas, encerramentos, o que precisa ser terminado aqui?",
     desenvolimentoAmoroso: "Relacionamentos que não têm futuro chegam ao fim natural no Ano 9. Mas os que têm, se aprofundam com uma qualidade nova. Clareza é o presente deste ano.",
-    contribuicaoSocial: "O Ano 9 amplifica o chamado para o serviço. Contribuição social tem uma ressonância especial — pequenos atos de generosidade têm impacto desproporcionalmente grande.",
-    espiritualidade: "Este é o ano mais espiritual do ciclo. Se espiritualidade está baixa, há uma resistência ao que o universo está oferecendo — liberação, conclusão, transcendência.",
+    contribuicaoSocial: "O Ano 9 amplifica o chamado para o serviço. Contribuição social tem uma ressonância especial, pequenos atos de generosidade têm impacto desproporcionalmente grande.",
+    espiritualidade: "Este é o ano mais espiritual do ciclo. Se espiritualidade está baixa, há uma resistência ao que o universo está oferecendo, liberação, conclusão, transcendência.",
   },
 };
 
@@ -445,13 +446,7 @@ export default function QuemSouEuPage() {
 
       <div className="max-w-lg mx-auto px-4 pt-6 space-y-5">
         <div className="flex items-center justify-between gap-3">
-          <button
-            onClick={() => navigate("/perfil")}
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
-            style={{ background: "rgba(200,165,107,0.08)", color: "#c8a56b" }}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+          <NavBackButton to="/perfil" label="Perfil" className="mb-0" />
           <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.3)" }}>
             {anoAtual}
           </span>
@@ -629,7 +624,7 @@ export default function QuemSouEuPage() {
                   </div>
                   <div>
                     <p className="font-tan-mon-cheri text-lg leading-tight mb-1" style={{ color: "#f7f2ec" }}>
-                      {anoPessoalInfo.titulo.split("—")[1]?.trim() || anoPessoalInfo.titulo}
+                      {anoPessoalInfo.titulo.split(",")[1]?.trim() || anoPessoalInfo.titulo}
                     </p>
                     <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
                       {anoPessoalInfo.descricao}
@@ -843,9 +838,9 @@ export default function QuemSouEuPage() {
                         {temperamento.sinteseHumana}
                       </p>
                     )}
-                    {temperamento.combo && (
+                    {temperamento.perguntaCrescimento && (
                       <p className="text-xs mt-3 italic" style={{ color: "rgba(91,155,213,0.55)" }}>
-                        {temperamento.combo.forca}
+                        {temperamento.perguntaCrescimento}
                       </p>
                     )}
                   </div>
@@ -885,7 +880,7 @@ export default function QuemSouEuPage() {
                     <div className="flex items-center gap-2 mb-3">
                       <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "rgba(93,185,122,0.7)" }} />
                       <p className="text-[10px] font-bold tracking-[0.25em] uppercase" style={{ color: "rgba(93,185,122,0.6)" }}>
-                        Zonas de Força — onde você floresce
+                        Zonas de Força: onde você floresce
                       </p>
                     </div>
                     <div className="space-y-3">
@@ -921,7 +916,7 @@ export default function QuemSouEuPage() {
                     <div className="flex items-center gap-2 mb-3">
                       <AlertCircle className="w-3.5 h-3.5" style={{ color: "rgba(200,165,107,0.7)" }} />
                       <p className="text-[10px] font-bold tracking-[0.25em] uppercase" style={{ color: "rgba(200,165,107,0.6)" }}>
-                        Zonas de Atenção — onde há potencial não realizado
+                        Zonas de Atenção: onde há potencial não realizado
                       </p>
                     </div>
                     <div className="space-y-3">
@@ -957,7 +952,7 @@ export default function QuemSouEuPage() {
                     <div className="flex items-center gap-2 mb-3">
                       <Flame className="w-3.5 h-3.5" style={{ color: "rgba(224,123,57,0.7)" }} />
                       <p className="text-[10px] font-bold tracking-[0.25em] uppercase" style={{ color: "rgba(224,123,57,0.6)" }}>
-                        Chamados Urgentes — o que pede atenção agora
+                        Chamados Urgentes: o que pede atenção agora
                       </p>
                     </div>
                     <div className="space-y-3">

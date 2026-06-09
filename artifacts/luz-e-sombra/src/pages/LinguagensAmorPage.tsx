@@ -5,7 +5,9 @@ import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { storageKeyLinguagensAmorDraft, parsePessoaIdFromSearch } from "@/lib/tracoFormStorage";
 import MobileTopBar from "@/components/MobileTopBar";
+import NavBackButton from "@/components/NavBackButton";
 import PageIntroHeader from "@/components/PageIntroHeader";
+import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import {
   PARES_RECEBER,
   PARES_EXPRESSAR,
@@ -19,6 +21,7 @@ import LinguagensCruzamento from "./linguagens-amor/LinguagensCruzamento";
 
 const TOTAL = 30;
 const BLOCO1 = 15;
+const LING_NAV = JORNADA_MODULE_NAV["linguagens-amor"];
 
 type Fase = "intro" | "perguntas" | "enviando" | "resultado";
 
@@ -354,14 +357,7 @@ export default function LinguagensAmorPage() {
       <div className="min-h-screen pb-28 md:pb-12 px-4 pt-6" style={{ background: bg }}>
         <MobileTopBar titulo="Linguagens do amor" subtitulo={subtituloResultado} />
         <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
-          <button
-            type="button"
-            onClick={() => navigate("/jornada/linguagens-amor")}
-            className="text-xs tracking-wide opacity-70 hover:opacity-100 transition-opacity"
-            style={{ color: "#c8a56b" }}
-          >
-            ← Voltar ao módulo
-          </button>
+          <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} />
 
           <PageIntroHeader
             className="hidden md:block mb-2"
@@ -419,6 +415,9 @@ export default function LinguagensAmorPage() {
         <div className="absolute top-0 left-0 right-0">
           <MobileTopBar titulo="Linguagens do amor" subtitulo="A guardar…" />
         </div>
+        <div className="absolute top-24 left-0 right-0 px-4 max-w-lg mx-auto">
+          <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} className="mb-0" />
+        </div>
         <Loader2 className="w-10 h-10 animate-spin mb-4" style={{ color: "#c8a56b" }} />
         <p className="text-sm" style={{ color: "rgba(247,242,236,0.5)" }}>
           A guardar sua análise…
@@ -431,7 +430,8 @@ export default function LinguagensAmorPage() {
     return (
       <div className="min-h-screen pb-28 px-4 pt-8" style={{ background: bg }}>
         <MobileTopBar titulo="5 Linguagens do Amor" subtitulo="Questionário v2" />
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-lg mx-auto px-4">
+          <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} />
           <Heart className="w-12 h-12 mb-6 hidden md:block" style={{ color: "#c8a56b" }} />
           <h1 className="font-tan-mon-cheri text-3xl mb-4 hidden md:block" style={{ color: "#f7f2ec" }}>
             5 Linguagens do Amor
@@ -496,7 +496,8 @@ export default function LinguagensAmorPage() {
   return (
     <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
       <MobileTopBar titulo="Linguagens do amor" subtitulo={subtituloPerguntas} />
-      <div className="max-w-lg mx-auto">
+      <div className="max-w-lg mx-auto px-4">
+        <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} />
         {bloco === 1 && qIndex === 0 && (
           <div
             className="mb-4 p-3 rounded-xl text-xs text-center"

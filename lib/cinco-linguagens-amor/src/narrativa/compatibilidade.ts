@@ -77,12 +77,12 @@ export function computarCompatibilidade(
 
   if (!matchARecebeBExpressa) {
     pontesParaA.push(
-      `${nomeB} pode aprender a oferecer mais ${LABEL_LINGUAGEM[perfilA.receber.principal].toLowerCase()} — é o que mais enche seu tanque.`,
+      `${nomeB}pode aprender a oferecer mais${LABEL_LINGUAGEM[perfilA.receber.principal].toLowerCase()}, é o que mais enche seu tanque.`,
     );
   }
   if (!matchBRecebeAExpressa) {
     pontesParaB.push(
-      `Você pode oferecer mais ${LABEL_LINGUAGEM[b.receber.principal].toLowerCase()} para ${nomeB} — é o que mais enche o tanque dela(e).`,
+      `Você pode oferecer mais${LABEL_LINGUAGEM[b.receber.principal].toLowerCase()}para${nomeB}, é o que mais enche o tanque dela(e).`,
     );
   }
 
@@ -92,7 +92,7 @@ export function computarCompatibilidade(
   } else if (matchARecebeBExpressa || matchBRecebeAExpressa) {
     resumoHumano = `Há uma ponte clara entre vocês em pelo menos uma direção. Com pequenos ajustes na outra direção, o vínculo pode aquecer muito.`;
   } else {
-    resumoHumano = `Vocês falam linguagens diferentes — isso não é falta de amor, é falta de tradução. Usem as pontes abaixo como roteiro prático.`;
+    resumoHumano = `Vocês falam linguagens diferentes, isso não é falta de amor, é falta de tradução. Usem as pontes abaixo como roteiro prático.`;
   }
 
   return {

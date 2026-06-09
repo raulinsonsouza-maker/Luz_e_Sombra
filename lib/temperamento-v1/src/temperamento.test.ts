@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { CODIGOS_PERGUNTA } from "./perguntas";
 import { entradaTemperamentoSchema } from "./schemas";
 import { computarTemperamento } from "./compute";
+import { tituloPerfilTemperamento, sanitizarTituloTemperamentoLegado } from "./interpretacao";
 import { gerarOrdemBlocosPerguntas } from "./shuffle";
 import { desvioPadrao } from "./qualidade";
 
@@ -48,6 +49,7 @@ describe("temperamento-v1", () => {
     assert.ok(r.portraitIdentidade.length > 40);
     assert.ok(r.tracosMarcantes.length >= 1);
     assert.ok(r.sinteseHumana.includes("Você") || r.sinteseHumana.length > 10);
+    assert.ok(!JSON.stringify(r).includes("—"), "copy user-facing não deve conter travessões");
   });
 
   it("respostas extremas altas aumentam ENG/DOM e devolvem perfil coerente", () => {
@@ -64,5 +66,21 @@ describe("temperamento-v1", () => {
     assert.ok(r.scores.dimensoes.DOM.normalizado > 0.5);
     const sumPct = Object.values(r.scores.temperamentos_percentuais).reduce((a, b) => a + b, 0);
     assert.ok(Math.abs(sumPct - 100) < 0.01);
+  });
+
+  it("titulo do perfil usa temperamento dominante", () => {
+    assert.equal(
+      tituloPerfilTemperamento("COLERICO", "SANGUINEO", "DUPLO"),
+      "Colérico",
+    );
+    assert.equal(tituloPerfilTemperamento("FLEUMATICO", "FLEUMATICO", "DOMINANTE"), "Fleumático");
+    assert.equal(
+      sanitizarTituloTemperamentoLegado("O Executor", "COLERICO", "SANGUINEO", "DUPLO"),
+      "Colérico",
+    );
+    assert.equal(
+      sanitizarTituloTemperamentoLegado("Colérico + Sanguíneo", "COLERICO", "SANGUINEO", "DUPLO"),
+      "Colérico",
+    );
   });
 });

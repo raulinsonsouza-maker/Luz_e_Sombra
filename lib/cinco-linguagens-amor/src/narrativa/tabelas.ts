@@ -13,7 +13,7 @@ export interface ConteudoLinguagem {
 export const CONTEUDO_LINGUAGEM: Record<LinguagemAmor, ConteudoLinguagem> = {
   palavras: {
     essencia:
-      "Para você, o amor fala alto quando chega em palavras: reconhecimento, gratidão, encorajamento e ternura. Não precisa ser poesia — precisa ser verdade e consistência.",
+      "Para você, o amor fala alto quando chega em palavras: reconhecimento, gratidão, encorajamento e ternura. Não precisa ser poesia, precisa ser verdade e consistência.",
     comoSeSenteAmado:
       "Elogios específicos, um obrigado que nota o que você fez, frases que validam quem você é. Quando alguém diz que acredita em você, seu tanque emocional enche.",
     comoExpressa:
@@ -59,13 +59,13 @@ export const CONTEUDO_LINGUAGEM: Record<LinguagemAmor, ConteudoLinguagem> = {
       "Ao chegar em casa, pause cinco minutos antes de se isolar em tarefas",
     ],
     dicaParaParceiro:
-      "Agende tempo com você como se fosse compromisso. Desligue distrações. Muitas vezes você não quer conselhos — quer sentir que está sendo ouvido(a) e acompanhado(a).",
+      "Agende tempo com você como se fosse compromisso. Desligue distrações. Muitas vezes você não quer conselhos, quer sentir que está sendo ouvido(a) e acompanhado(a).",
   },
   presentes: {
     essencia:
-      "Para você, amor deixa rastro visível: um gesto, um símbolo, uma lembrança que diz «pensei em você». O valor emocional importa mais do que o preço.",
+      "Para você, amor deixa rastro visível: um gesto, um símbolo, uma lembrança que diz \"pensei em você\". O valor emocional importa mais do que o preço.",
     comoSeSenteAmado:
-      "Surpresas pensadas, algo que mostra que te conhecem, presença física em momentos importantes. Um presente diz: «não te esqueci».",
+      "Surpresas pensadas, algo que mostra que te conhecem, presença física em momentos importantes. Um presente diz: \"não te esqueci\".",
     comoExpressa:
       "Você demonstra amor com gestos tangíveis: presentes, lembranças, símbolos e surpresas que mostram atenção aos detalhes da vida do outro.",
     dialetos: [
@@ -88,7 +88,7 @@ export const CONTEUDO_LINGUAGEM: Record<LinguagemAmor, ConteudoLinguagem> = {
   },
   servicos: {
     essencia:
-      "Para você, amor aparece em ações: aliviar carga, resolver o que pesa, fazer sem precisar ser lembrado. Servir com boa vontade comunica «estou com você na vida real».",
+      "Para você, amor aparece em ações: aliviar carga, resolver o que pesa, fazer sem precisar ser lembrado. Servir com boa vontade comunica \"estou com você na vida real\".",
     comoSeSenteAmado:
       "Quando alguém tira trabalho das suas mãos, antecipa necessidades ou ajuda sem reclamar. Pequenas tarefas feitas com cuidado falam mais alto do que discursos.",
     comoExpressa:
@@ -109,7 +109,7 @@ export const CONTEUDO_LINGUAGEM: Record<LinguagemAmor, ConteudoLinguagem> = {
       "Agradeça serviços pequenos que costuma dar como garantidos",
     ],
     dicaParaParceiro:
-      "Pergunte «em que posso ajudar?» e execute com boa vontade. Para você, amor é menos discurso e mais mãos postas na vida comum.",
+      "Pergunte \"em que posso ajudar?\" e execute com boa vontade. Para você, amor é menos discurso e mais mãos postas na vida comum.",
   },
   toque: {
     essencia:
@@ -117,13 +117,13 @@ export const CONTEUDO_LINGUAGEM: Record<LinguagemAmor, ConteudoLinguagem> = {
     comoSeSenteAmado:
       "Contato afetuoso no dia a dia, abraço quando está mal, gestos de pertença em público e em privado. Intimidade física, quando há confiança, confirma vínculo.",
     comoExpressa:
-      "Você demonstra amor com proximidade física: abraços, carinho, mãos dadas e presença corporal. O toque é sua forma natural de dizer «estou aqui».",
+      "Você demonstra amor com proximidade física: abraços, carinho, mãos dadas e presença corporal. O toque é sua forma natural de dizer \"estou aqui\".",
     dialetos: [
       "Abraços e beijos de chegada e despedida",
       "Mão na cintura, ombro ou costas em momentos calmos",
       "Carinho em crises, mesmo sem muitas palavras",
       "Proximidade no sofá ou na cama com presença real",
-      "Toques breves ao passar que dizem «estou aqui»",
+      "Toques breves ao passar que dizem \"estou aqui\"",
     ],
     oQueMagoa:
       "Rejeição física prolongada, distância fria, violência ou toque apenas utilitário. Em momentos de dor, ausência de abraço esvazia o tanque rapidamente.",
@@ -134,7 +134,7 @@ export const CONTEUDO_LINGUAGEM: Record<LinguagemAmor, ConteudoLinguagem> = {
       "Separe necessidade física de necessidade emocional: ambas importam",
     ],
     dicaParaParceiro:
-      "Toque com respeito e frequência. Em dias difíceis, um abraço pode valer mais do que um sermão. Pergunte o que é confortável — não assuma.",
+      "Toque com respeito e frequência. Em dias difíceis, um abraço pode valer mais do que um sermão. Pergunte o que é confortável, não assuma.",
   },
 };
 
@@ -150,7 +150,7 @@ export const COMBINACAO_PAR: Partial<Record<string, string>> = {
   "tempo+presentes":
     "Presença e símbolos: você quer estar junto e lembrar momentos. Ausência em datas importantes pesa muito.",
   "tempo+servicos":
-    "Tempo focado em você e ajuda prática formam o mesmo pacote: «não estou sozinho(a) nesta vida».",
+    "Tempo focado em você e ajuda prática formam o mesmo pacote: \"não estou sozinho(a) nesta vida\".",
   "tempo+toque":
     "Estar perto com corpo e atenção. Conversa de qualidade e abraço caminham lado a lado.",
   "presentes+servicos":
@@ -162,19 +162,19 @@ export const COMBINACAO_PAR: Partial<Record<string, string>> = {
 };
 
 export const PONTE_COMPATIBILIDADE: Partial<Record<string, string>> = {
-  "palavras+palavras": "Troquem elogios específicos toda semana — vocês dois falam essa língua.",
+  "palavras+palavras": "Troquem elogios específicos toda semana, vocês dois falam essa língua.",
   "palavras+tempo": "Quem precisa de palavras: reserve 20 minutos sem telas antes de conversar.",
   "palavras+presentes": "Combine presente simbólico com cartão escrito à mão.",
   "palavras+servicos": "Quem serve: diga em voz alta o que fez e peça reconhecimento, não só silêncio.",
   "palavras+toque": "Quem toca: abrace antes de falar; quem precisa de palavras: diga o que sente em voz alta.",
-  "tempo+tempo": "Criem um ritual semanal só de vocês — passeio, café ou conversa longa.",
+  "tempo+tempo": "Criem um ritual semanal só de vocês, passeio, café ou conversa longa.",
   "tempo+presentes": "Presenteie com experiência a dois, não só objeto.",
-  "tempo+servicos": "Ajude nas tarefas e fique junto enquanto faz — presença + ação.",
+  "tempo+servicos": "Ajude nas tarefas e fique junto enquanto faz, presença + ação.",
   "tempo+toque": "Conversa de qualidade terminando com abraço ou carinho.",
   "presentes+presentes": "Surpresas pequenas e frequentes valem mais que extravagância rara.",
   "presentes+servicos": "Presente prático que poupa tempo da pessoa.",
   "presentes+toque": "Em momentos difíceis, presença física antes de qualquer objeto.",
-  "servicos+servicos": "Dividam tarefas com gratidão explícita — vocês valorizam ação.",
-  "servicos+toque": "Ajude e finalize com gesto afetuoso — serviço frio não basta.",
+  "servicos+servicos": "Dividam tarefas com gratidão explícita, vocês valorizam ação.",
+  "servicos+toque": "Ajude e finalize com gesto afetuoso, serviço frio não basta.",
   "toque+toque": "Rituais de chegada com abraço; proximidade diária mantém o vínculo.",
 };

@@ -9,6 +9,8 @@ export type { AlertaQualidade } from "./qualidade";
 export type { RelatorioInterno, RelatorioSecao, NarrativaTemperamentoV2, NarrativaTemperamentoV3 } from "./interpretacao";
 export {
   NOME_TEMPERAMENTO,
+  tituloPerfilTemperamento,
+  sanitizarTituloTemperamentoLegado,
   montarNarrativaV2,
   montarNarrativaV3,
   montarSinteseHumana,

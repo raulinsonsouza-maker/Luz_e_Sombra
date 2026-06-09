@@ -4,6 +4,8 @@ import { useAuth } from "@/context/AuthContext";
 import { AREAS_DA_VIDA, FormData } from "@/lib/types";
 import { ChevronLeft, ChevronRight, Target, User, Calendar, ExternalLink } from "lucide-react";
 import MobileTopBar from "@/components/MobileTopBar";
+import NavBackButton from "@/components/NavBackButton";
+import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import { apiFetch } from "@/lib/auth";
 
 // Icon map inline (avoids AreaIcon which uses brand-* classes)
@@ -426,6 +428,10 @@ function AvaliacaoContent() {
     >
       <MobileTopBar titulo="Roda da Vida" subtitulo="12 dimensões da vida" />
       <div className="max-w-lg mx-auto px-4 pt-6">
+        <NavBackButton
+          to={JORNADA_MODULE_NAV.roda.hub}
+          label={JORNADA_MODULE_NAV.roda.backLabel}
+        />
 
         {/* ── Progress bar ── */}
         <div className="mb-6">

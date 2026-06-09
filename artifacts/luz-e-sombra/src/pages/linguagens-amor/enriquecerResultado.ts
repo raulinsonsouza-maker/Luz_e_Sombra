@@ -6,6 +6,7 @@ import {
   type LinguagemAmor,
 } from "@workspace/cinco-linguagens-amor";
 import type { PerfilLinguagemDetalhe } from "@workspace/cinco-linguagens-amor";
+import { normalizarObjetoTextos } from "@workspace/copy-voz";
 
 export type ResultadoLinguagensUi = {
   versao?: string;
@@ -63,7 +64,7 @@ function sinteseLegado(p: LinguagemAmor, s: LinguagemAmor, pct?: number): string
   const ls = LABEL_LINGUAGEM[s].toLowerCase();
   const forte = (pct ?? 0) >= 35;
   if (forte) {
-    return `${c.essencia} Sua segunda linguagem, ${ls}, complementa o tanque — quando as duas aparecem na relação, você se sente plenamente nutrido(a).`;
+    return `${c.essencia}Sua segunda linguagem,${ls}, complementa o tanque, quando as duas aparecem na relação, você se sente plenamente nutrido(a).`;
   }
   return `${c.essencia} Você também responde fortemente a ${ls}: relações que misturam as duas linguagens costumam durar mais e doer menos.`;
 }
@@ -191,5 +192,5 @@ export function enriquecerResultado(
     }
   }
 
-  return out;
+  return normalizarObjetoTextos(out);
 }

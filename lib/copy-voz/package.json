@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/temperamento-v1",
+  "name": "@workspace/copy-voz",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,11 +8,8 @@
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --test src/*.test.ts"
-  },
-  "dependencies": {
-    "@workspace/copy-voz": "workspace:*",
-    "zod": "catalog:"
+    "test": "node --import tsx --test src/*.test.ts",
+    "verify-copy": "node --import tsx ../../scripts/verify-sem-travessoes.ts"
   },
   "devDependencies": {
     "@types/node": "catalog:",

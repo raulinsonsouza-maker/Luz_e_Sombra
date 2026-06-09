@@ -1,6 +1,8 @@
+import { normalizarObjetoTextos } from "@workspace/copy-voz";
 import {
   extrairPerguntaCrescimento,
   montarNarrativaV3,
+  sanitizarTituloTemperamentoLegado,
   type RelatorioSecao,
 } from "@workspace/temperamento-v1";
 import type { Dimensao, TemperamentoCodigo, TipoPerfil } from "@workspace/temperamento-v1";
@@ -57,15 +59,31 @@ function normFromScores(raw: ResultadoTemperamentoUi): Record<Dimensao, number> 
 }
 
 export function enriquecerResultadoTemperamento(raw: ResultadoTemperamentoUi): ResultadoTemperamentoUi {
-  if (raw.versaoNarrativa === "temperamento_v3" && raw.portraitIdentidade) {
-    return raw;
-  }
-
   const perfil = raw.perfil;
   const primario = perfil?.primario;
   const secundario = perfil?.secundario;
   const pct = raw.scores?.temperamentos_percentuais;
   const norm = normFromScores(raw);
+
+  let base = raw;
+
+  if (primario && secundario && perfil?.tipo) {
+    const tituloCorreto = sanitizarTituloTemperamentoLegado(
+      perfil.arquetipo,
+      primario,
+      secundario,
+      perfil.tipo,
+    );
+    if (tituloCorreto !== perfil.arquetipo || raw.relatorioInterno?.titulo !== tituloCorreto) {
+      base = {
+        ...base,
+        perfil: { ...perfil, arquetipo: tituloCorreto },
+        relatorioInterno: base.relatorioInterno
+          ? { ...base.relatorioInterno, titulo: tituloCorreto }
+          : base.relatorioInterno,
+      };
+    }
+  }
 
   if (primario && secundario && pct && norm && perfil?.tipo && perfil.frase_sintese) {
     const narrativa = montarNarrativaV3({
@@ -74,19 +92,24 @@ export function enriquecerResultadoTemperamento(raw: ResultadoTemperamentoUi): R
       secundario,
       temperamentos_percentuais: pct,
       norm,
-      empateProximo: Boolean(raw.empateProximo),
+      empateProximo: Boolean(base.empateProximo),
       frase_sintese: perfil.frase_sintese,
     });
-    return { ...raw, ...narrativa };
+    return normalizarObjetoTextos({
+      ...base,
+      ...narrativa,
+      combo: undefined,
+      comboNarrativa: undefined,
+    });
   }
 
-  const passo = secao(raw.relatorioInterno, "passo");
+  const passo = secao(base.relatorioInterno, "passo");
   const passoTexto = passo?.paragrafos[0] ?? "";
 
-  return {
-    ...raw,
-    perguntaCrescimento: raw.perguntaCrescimento ?? extrairPerguntaCrescimento(passoTexto),
-  };
+  return normalizarObjetoTextos({
+    ...base,
+    perguntaCrescimento: base.perguntaCrescimento ?? extrairPerguntaCrescimento(passoTexto),
+  });
 }
 
 export function textoSecao(raw: ResultadoTemperamentoUi, id: string): string | undefined {
