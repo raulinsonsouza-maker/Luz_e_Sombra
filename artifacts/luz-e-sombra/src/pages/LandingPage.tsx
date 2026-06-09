@@ -107,10 +107,6 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-
-        {/* Fade to light */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
-          style={{ background: "linear-gradient(to bottom, transparent, #faf8f4)" }} />
       </section>
 
       {/* ── MANIFESTO — light ───────────────────────────────────── */}
