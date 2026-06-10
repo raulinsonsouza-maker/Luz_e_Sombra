@@ -12,6 +12,7 @@ import MobileTopBar from "@/components/MobileTopBar";
 import NavBackButton from "@/components/NavBackButton";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import AppPageShell from "@/components/AppPageShell";
+import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import {
   MesPessoal,
   calcularAnoPessoal,
@@ -662,7 +663,7 @@ export default function NumerologiaPage() {
     <>
       <MobileTopBar titulo="Numerologia" subtitulo="Meus números e ciclos" />
       <AppPageShell width="wide" contentClassName="space-y-5 md:space-y-6">
-        <NavBackButton to="/dashboard" label="Início" className="mb-0" />
+        <NavBackButton to={JORNADA_MODULE_NAV.numerologia.hub} label={JORNADA_MODULE_NAV.numerologia.backLabel} className="mb-0" />
         <PageIntroHeader
           eyebrow="Análise numerológica"
           titulo="Numerologia"

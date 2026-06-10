@@ -86,7 +86,7 @@ export default function HomePage() {
     ? Math.min(100, Math.round((progresso.xpNoNivel / progresso.xpParaProximo) * 100))
     : 0;
 
-  const missoesPreview = progresso?.missoes.slice(0, 3) ?? [];
+  const missoesPreview = progresso?.missoes.slice(0, 4) ?? [];
   const concluidasHoje = progresso?.missoes.filter((m) => m.concluida).length ?? 0;
   const totalHoje = progresso?.missoes.length ?? 0;
 
@@ -96,10 +96,11 @@ export default function HomePage() {
         progresso.jornada.temperamento === true,
         progresso.jornada.linguagensAmor === true,
         progresso.jornada.roda,
+        progresso.jornada.numerologia,
       ].filter(Boolean).length
     : 0;
 
-  const TOTAL_ETAPAS_INICIANTE = 4;
+  const TOTAL_ETAPAS_INICIANTE = 5;
 
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
@@ -221,7 +222,7 @@ export default function HomePage() {
 
           <div className="space-y-2.5">
             {carregando
-              ? [0, 1, 2].map((i) => (
+              ? [0, 1, 2, 3].map((i) => (
                   <div key={i} className="h-14 rounded-2xl animate-pulse" style={{ background: "rgba(200,165,107,0.05)" }} />
                 ))
               : missoesPreview.map((missao) => (

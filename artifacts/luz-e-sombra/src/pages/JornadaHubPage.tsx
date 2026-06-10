@@ -28,6 +28,8 @@ import {
   hrefIniciarAnalise,
 } from "@/lib/jornadaHubConfig";
 import SeletorPessoaAnalise, { type PessoaAnalise } from "@/components/SeletorPessoaAnalise";
+import { NUMEROS_DE_VIDA } from "@/lib/numerologia-data";
+import { calcularNumerodeVida, formatarDataBrasileira } from "@/lib/numerologia-utils";
 
 const MODULOS_MULTI_PESSOA = new Set(["traco", "linguagens-amor"]);
 
@@ -66,6 +68,7 @@ async function carregarPreviewAnalise(
   slug: string,
   pessoaId: number | null,
   nomePessoa?: string | null,
+  usuario?: { dataNascimento?: string | null } | null,
 ): Promise<PreviewAnalise | null> {
   try {
     const qs = pessoaId !== null ? `?pessoaId=${pessoaId}` : "";
@@ -156,6 +159,18 @@ async function carregarPreviewAnalise(
           badge: "12 dimensões",
         };
       }
+      case "numerologia": {
+        const dataNasc = usuario?.dataNascimento;
+        if (!dataNasc) return null;
+        const vida = calcularNumerodeVida(formatarDataBrasileira(dataNasc));
+        if (!vida?.valor) return null;
+        const info = NUMEROS_DE_VIDA[vida.valor];
+        return {
+          titulo: info?.titulo ?? `Caminho ${vida.valor}`,
+          linha: info?.essencia?.slice(0, 150) ?? `Número de vida ${vida.valor}.`,
+          badge: `Vida ${vida.valor}`,
+        };
+      }
       default:
         return null;
     }
@@ -201,7 +216,7 @@ function PassoBadge({
 export default function JornadaHubPage() {
   const { slug } = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const [lista, setLista] = useState<ModuloApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState<PreviewAnalise | null>(null);
@@ -263,11 +278,16 @@ export default function JornadaHubPage() {
       return;
     }
     setPreviewLoading(true);
-    void carregarPreviewAnalise(slug, multiPessoa ? selectedPessoaId : null, pessoaAtiva?.nome).then((p) => {
+    void carregarPreviewAnalise(
+      slug,
+      multiPessoa ? selectedPessoaId : null,
+      pessoaAtiva?.nome,
+      user,
+    ).then((p) => {
       setPreview(p);
       setPreviewLoading(false);
     });
-  }, [slug, modulo?.analiseConcluida, multiPessoa, selectedPessoaId, pessoaAtiva?.nome]);
+  }, [slug, modulo?.analiseConcluida, multiPessoa, selectedPessoaId, pessoaAtiva?.nome, user]);
 
   async function adicionarPessoa() {
     setAddErro(null);

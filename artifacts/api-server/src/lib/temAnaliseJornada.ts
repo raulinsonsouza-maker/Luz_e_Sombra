@@ -3,6 +3,7 @@ import {
   analiseTemperamento40Table,
   analiseLinguagensAmorTable,
   avaliacoesTable,
+  usuariosTable,
 } from "@workspace/db/schema";
 import { and, eq, isNull } from "drizzle-orm";
 
@@ -66,6 +67,14 @@ export async function temAnalise(
         .where(eq(avaliacoesTable.usuarioId, usuarioId))
         .limit(1);
       return !!r;
+    }
+    case "numerologia": {
+      const [r] = await dbConn
+        .select({ dataNascimento: usuariosTable.dataNascimento })
+        .from(usuariosTable)
+        .where(eq(usuariosTable.id, usuarioId))
+        .limit(1);
+      return !!r?.dataNascimento;
     }
     default:
       return false;

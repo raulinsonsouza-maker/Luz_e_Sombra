@@ -7,6 +7,7 @@ export const JORNADA_MODULE_NAV = {
   "linguagens-amor": { hub: "/jornada/linguagens-amor", backLabel: "Linguagens do amor" },
   traco: { hub: "/jornada/traco", backLabel: "Traço de Caráter" },
   roda: { hub: "/jornada/roda", backLabel: "Roda da Vida" },
+  numerologia: { hub: "/jornada/numerologia", backLabel: "Numerologia" },
 } as const;
 
 export type JornadaModuleSlug = keyof typeof JORNADA_MODULE_NAV;
@@ -60,6 +61,16 @@ export const JORNADA_HUB_COPY: Record<
     novaAnaliseLabel: "Nova avaliação",
     verResultadoLabel: "Ver minha roda",
   },
+  numerologia: {
+    introFallback:
+      "Seus números de vida, expressão, alma e ciclos anuais revelam padrões que cruzam com o resto da sua jornada.",
+    analiseTitulo: "Mapa Numerológico",
+    analiseDescricaoSem:
+      "Confirme a data de nascimento no perfil e gere seu relatório. Leva poucos minutos.",
+    analiseDescricaoCom: "Seu mapa numerológico já está disponível com base no perfil.",
+    novaAnaliseLabel: "Atualizar data no perfil",
+    verResultadoLabel: "Ver meu mapa",
+  },
 };
 
 export function hrefComPessoa(hrefAnalise: string, pessoaId: number | null | undefined): string {
@@ -77,7 +88,7 @@ export function hrefVerResultado(
     slug === "traco" || slug === "linguagens-amor"
       ? hrefComPessoa(hrefAnalise, pessoaId ?? null)
       : hrefAnalise;
-  if (slug === "roda") return base.split("?")[0] ?? hrefAnalise;
+  if (slug === "roda" || slug === "numerologia") return base.split("?")[0] ?? hrefAnalise;
   const sep = base.includes("?") ? "&" : "?";
   return `${base}${sep}ver=resultado`;
 }
@@ -87,6 +98,7 @@ export function hrefNovaAnalise(
   hrefAnalise: string,
   pessoaId?: number | null,
 ): string {
+  if (slug === "numerologia") return "/perfil";
   const base =
     slug === "traco" || slug === "linguagens-amor"
       ? hrefComPessoa(hrefAnalise, pessoaId ?? null)

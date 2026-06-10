@@ -11,7 +11,7 @@ import { temAnalise } from "../lib/temAnaliseJornada";
 
 const router = Router();
 
-export const SLUGS_MODULO_JORNADA = ["traco", "temperamento", "linguagens-amor", "roda"] as const;
+export const SLUGS_MODULO_JORNADA = ["traco", "temperamento", "linguagens-amor", "roda", "numerologia"] as const;
 export type SlugModuloJornada = (typeof SLUGS_MODULO_JORNADA)[number];
 
 function hrefAnalise(slug: string): string {
@@ -24,6 +24,8 @@ function hrefAnalise(slug: string): string {
       return "/linguagens-amor";
     case "roda":
       return "/avaliacao";
+    case "numerologia":
+      return "/numerologia";
     default:
       return "/jornada";
   }

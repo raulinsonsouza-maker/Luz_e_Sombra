@@ -36,5 +36,6 @@ VALUES
   ('traco', 'Traço de Caráter', 'Entenda como funciona a análise visual e o questionário. Em seguida, faça a análise e desbloqueie o minicurso.', NULL, NULL, 1, 'iniciante'),
   ('temperamento', 'Temperamento', 'Introdução ao questionário de temperamento e ao que você vai descobrir. Depois, complete a análise e o minicurso.', NULL, NULL, 2, 'iniciante'),
   ('linguagens-amor', '5 Linguagens do Amor', 'Descubra como você dá e recebe afeto. Complete o questionário e aprofunde no minicurso.', NULL, NULL, 3, 'iniciante'),
-  ('roda', 'Roda da Vida', 'Avalie as áreas da sua vida com clareza. Depois, use o minicurso para transformar insights em ação.', NULL, NULL, 4, 'iniciante')
+  ('roda', 'Roda da Vida', 'Avalie as áreas da sua vida com clareza. Depois, use o minicurso para transformar insights em ação.', NULL, NULL, 4, 'iniciante'),
+  ('numerologia', 'Numerologia', 'Descubra o mapa dos seus números de vida, expressão e ciclos. Use a data de nascimento do perfil e explore o relatório completo.', NULL, NULL, 5, 'iniciante')
 ON CONFLICT (slug) DO NOTHING;

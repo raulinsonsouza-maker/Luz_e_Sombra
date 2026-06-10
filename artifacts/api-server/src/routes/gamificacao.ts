@@ -157,11 +157,13 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
       temperamento: boolean;
       linguagensAmor: boolean;
       roda: boolean;
+      numerologia: boolean;
     } = {
       traco: true,
       temperamento: true,
       linguagensAmor: true,
       roda: true,
+      numerologia: true,
     };
     for (const c of configsMod) {
       const ok = await minicursoCompletoParaUsuario(userId, c.cursoVinculadoId);
@@ -169,6 +171,7 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
       else if (c.slug === "temperamento") minicursoConcluido.temperamento = ok;
       else if (c.slug === "linguagens-amor") minicursoConcluido.linguagensAmor = ok;
       else if (c.slug === "roda") minicursoConcluido.roda = ok;
+      else if (c.slug === "numerologia") minicursoConcluido.numerologia = ok;
     }
 
     const [usuario] = await db

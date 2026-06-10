@@ -38,6 +38,39 @@ interface Usuario {
 type FormValues = { username: string; senha: string; nome: string; email: string; dataNascimento: string; isAdmin: boolean };
 const emptyForm: FormValues = { username: "", senha: "", nome: "", email: "", dataNascimento: "", isAdmin: false };
 
+function validarUsernameAdmin(u: string): string | null {
+  const norm = u.trim().toLowerCase();
+  if (!norm) return "Usuário é obrigatório.";
+  if (!/^[a-z0-9._-]{3,30}$/.test(norm)) {
+    return "Usuário inválido: 3 a 30 caracteres, só minúsculas, números, ponto, hífen ou underline.";
+  }
+  return null;
+}
+
+function validarSenhaAdmin(s: string, obrigatoria: boolean): string | null {
+  if (!s) return obrigatoria ? "Senha é obrigatória." : null;
+  if (s.length < 6) return "Senha deve ter pelo menos 6 caracteres.";
+  return null;
+}
+
+function validarEmailAdmin(e: string): string | null {
+  const norm = e.trim().toLowerCase();
+  if (!norm) return null;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(norm)) return "Email inválido.";
+  return null;
+}
+
+function validarFormularioUsuario(values: FormValues, editando: boolean): string | null {
+  const usernameErr = validarUsernameAdmin(values.username);
+  if (usernameErr) return usernameErr;
+  const senhaErr = validarSenhaAdmin(values.senha, !editando);
+  if (senhaErr) return senhaErr;
+  if (!values.nome.trim()) return "Nome completo é obrigatório.";
+  const emailErr = validarEmailAdmin(values.email);
+  if (emailErr) return emailErr;
+  return null;
+}
+
 interface Post {
   id: number; tipo: string; conteudo: string; mediaUrl: string | null; criadoEm: string;
   autorNome: string; reacoes: Record<string, number>;
@@ -372,6 +405,7 @@ function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 8;
   const [novoUsuario, setNovoUsuario] = useState<FormValues>(emptyForm);
+  const [erroModal, setErroModal] = useState<string | null>(null);
 
   useEffect(() => { buscarUsuarios(); }, []);
 
@@ -381,35 +415,79 @@ function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string
     setCarregando(false);
   }
 
-  function fecharModal() { setMostrarModal(false); setUsuarioEditando(null); setNovoUsuario(emptyForm); }
+  function abrirNovoUsuario() {
+    setUsuarioEditando(null);
+    setNovoUsuario(emptyForm);
+    setErroModal(null);
+    setMostrarModal(true);
+  }
+
+  function fecharModal() {
+    setMostrarModal(false);
+    setUsuarioEditando(null);
+    setNovoUsuario(emptyForm);
+    setErroModal(null);
+  }
 
   function abrirEdicao(u: Usuario) {
     setUsuarioEditando(u);
     setNovoUsuario({ username: u.username, senha: "", nome: u.nome, email: u.email || "", dataNascimento: u.dataNascimento || "", isAdmin: u.isAdmin });
+    setErroModal(null);
     setMostrarModal(true);
   }
 
   async function criarUsuario(e: React.FormEvent) {
-    e.preventDefault(); setSalvando(true);
+    e.preventDefault();
+    const erroLocal = validarFormularioUsuario(novoUsuario, false);
+    if (erroLocal) {
+      setErroModal(erroLocal);
+      return;
+    }
+    setErroModal(null);
+    setSalvando(true);
     try {
       const res = await apiFetch("/usuarios", { method: "POST", body: JSON.stringify({ ...novoUsuario, username: novoUsuario.username.trim().toLowerCase() }) });
       const data = await res.json();
       if (res.ok) { showMsg("sucesso", "Usuário criado!"); fecharModal(); buscarUsuarios(); }
-      else showMsg("erro", data.error || "Erro ao criar usuário");
-    } catch { showMsg("erro", "Erro ao criar usuário"); }
+      else {
+        const msg = data.error || "Erro ao criar usuário";
+        setErroModal(msg);
+        showMsg("erro", msg);
+      }
+    } catch {
+      const msg = "Erro ao criar usuário";
+      setErroModal(msg);
+      showMsg("erro", msg);
+    }
     setSalvando(false);
   }
 
   async function salvarEdicao(e: React.FormEvent) {
-    e.preventDefault(); if (!usuarioEditando) return; setSalvando(true);
+    e.preventDefault();
+    if (!usuarioEditando) return;
+    const erroLocal = validarFormularioUsuario(novoUsuario, true);
+    if (erroLocal) {
+      setErroModal(erroLocal);
+      return;
+    }
+    setErroModal(null);
+    setSalvando(true);
     try {
       const payload: Record<string, unknown> = { nome: novoUsuario.nome, email: novoUsuario.email, dataNascimento: novoUsuario.dataNascimento, isAdmin: novoUsuario.isAdmin };
       if (novoUsuario.senha) payload.senha = novoUsuario.senha;
       const res = await apiFetch(`/usuarios/${usuarioEditando.id}`, { method: "PUT", body: JSON.stringify(payload) });
       const data = await res.json();
       if (res.ok) { showMsg("sucesso", "Usuário atualizado!"); fecharModal(); buscarUsuarios(); }
-      else showMsg("erro", data.error || "Erro ao atualizar");
-    } catch { showMsg("erro", "Erro ao atualizar usuário"); }
+      else {
+        const msg = data.error || "Erro ao atualizar";
+        setErroModal(msg);
+        showMsg("erro", msg);
+      }
+    } catch {
+      const msg = "Erro ao atualizar usuário";
+      setErroModal(msg);
+      showMsg("erro", msg);
+    }
     setSalvando(false);
   }
 
@@ -446,7 +524,7 @@ function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string
             <input value={busca} onChange={e => { setBusca(e.target.value); setPaginaAtual(1); }}
               className={`${ic} pl-9`} style={INPUT_ST} placeholder="Buscar usuário, nome ou email" />
           </div>
-          <button onClick={() => setMostrarModal(true)}
+          <button onClick={abrirNovoUsuario}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
             style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}>
             <Plus className="w-4 h-4" /> Novo Usuário
@@ -548,20 +626,33 @@ function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string
           <div className="p-8 max-w-md w-full max-h-[90vh] overflow-y-auto rounded-2xl"
             style={{ background: "linear-gradient(160deg, #1e1812, #2f251b)", border: "1px solid rgba(200,165,107,0.25)" }}>
             <h2 className="font-tan-mon-cheri text-2xl mb-6" style={{ color: C.text }}>{usuarioEditando ? "Editar Usuário" : "Novo Usuário"}</h2>
+            {erroModal && (
+              <div className="mb-4 flex items-start gap-2 rounded-xl px-3 py-2.5 text-sm"
+                style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.25)", color: "#f87171" }}>
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{erroModal}</span>
+              </div>
+            )}
             <form onSubmit={usuarioEditando ? salvarEdicao : criarUsuario} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>Usuário *</label>
                 <input type="text" required={!usuarioEditando} disabled={!!usuarioEditando} value={novoUsuario.username}
-                  onChange={e => setNovoUsuario({ ...novoUsuario, username: e.target.value.trim().toLowerCase() })}
-                  className={ic} style={INPUT_ST} placeholder="username" />
+                  onChange={e => { setErroModal(null); setNovoUsuario({ ...novoUsuario, username: e.target.value.trim().toLowerCase() }); }}
+                  className={ic} style={INPUT_ST} placeholder="username" autoComplete="off" />
+                <p className="text-[11px] mt-1.5 leading-snug" style={{ color: C.dim }}>
+                  Minúsculas, números, ponto, hífen ou underline. Mínimo 3 caracteres.
+                </p>
               </div>
               <div>
                 <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>
                   Senha {usuarioEditando ? "(em branco para não alterar)" : "*"}
                 </label>
-                <input type="password" required={!usuarioEditando} value={novoUsuario.senha}
-                  onChange={e => setNovoUsuario({ ...novoUsuario, senha: e.target.value })}
-                  className={ic} style={INPUT_ST} placeholder="••••••••" />
+                <input type="password" required={!usuarioEditando} minLength={usuarioEditando ? undefined : 6} value={novoUsuario.senha}
+                  onChange={e => { setErroModal(null); setNovoUsuario({ ...novoUsuario, senha: e.target.value }); }}
+                  className={ic} style={INPUT_ST} placeholder="••••••••" autoComplete="new-password" />
+                <p className="text-[11px] mt-1.5 leading-snug" style={{ color: C.dim }}>
+                  Mínimo 6 caracteres.
+                </p>
               </div>
               <div>
                 <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: C.muted }}>Nome Completo *</label>
@@ -1453,6 +1544,7 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
               <option value="temperamento" style={OPT}>temperamento</option>
               <option value="linguagens-amor" style={OPT}>linguagens-amor</option>
               <option value="roda" style={OPT}>roda</option>
+              <option value="numerologia" style={OPT}>numerologia</option>
             </select>
           </div>
           <div className="space-y-2">
@@ -1579,6 +1671,7 @@ function CursosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) 
                           <option value="temperamento" style={OPT}>temperamento</option>
                           <option value="linguagens-amor" style={OPT}>linguagens-amor</option>
                           <option value="roda" style={OPT}>roda</option>
+                          <option value="numerologia" style={OPT}>numerologia</option>
                         </select>
                         <button
                           type="button"
