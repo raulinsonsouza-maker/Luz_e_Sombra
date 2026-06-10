@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { CODIGOS_PERGUNTA } from "./perguntas";
+import { CODIGOS_PAR } from "./pares";
 
-const respostaItem = z.number().int().min(1).max(5);
+const lado = z.enum(["a", "b"]);
 
 export const metadataTemperamentoSchema = z.object({
   tempo_total_segundos: z.number().int().nonnegative().optional(),
@@ -9,24 +9,30 @@ export const metadataTemperamentoSchema = z.object({
   versao_questionario: z.string().optional(),
 });
 
+const CODIGOS_V2 = new Set(CODIGOS_PAR as readonly string[]);
+const CODIGOS_V1 = /^(ENG|SOC|DOM|EST|PRO)\d{2}$/;
+
 export const entradaTemperamentoSchema = z.object({
   answers: z
-    .record(z.string(), respostaItem)
+    .record(z.string(), lado)
     .superRefine((rec, ctx) => {
-      for (const cod of CODIGOS_PERGUNTA) {
+      for (const cod of CODIGOS_PAR) {
         if (rec[cod] === undefined) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Resposta em falta: ${cod}`,
+            message: `Escolha em falta: ${cod}`,
             path: ["answers", cod],
           });
         }
       }
       for (const k of Object.keys(rec)) {
-        if (!CODIGOS_PERGUNTA.includes(k)) {
+        if (!CODIGOS_V2.has(k)) {
+          const msg = CODIGOS_V1.test(k)
+            ? `Código v1 obsoleto (${k}). Refaça o questionário com T01–T24.`
+            : `Código desconhecido: ${k}`;
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Código desconhecido: ${k}`,
+            message: msg,
             path: ["answers", k],
           });
         }

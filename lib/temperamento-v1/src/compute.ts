@@ -1,7 +1,9 @@
-import { perguntasPorDimensao, type ItemPergunta } from "./perguntas";
+import { PARES_FORCADOS, TOTAL_PARES } from "./pares";
 import type { Dimensao, TemperamentoCodigo, TipoPerfil, QualityFlag, StatusResultado } from "./types";
-import { TEMPERAMENTOS, DIMENSOES } from "./types";
-import { desvioPadrao, proporcaoRespostas3, calcularAlertas, calcularConfiabilidade } from "./qualidade";
+import { TEMPERAMENTOS } from "./types";
+import type { AlertaQualidade } from "./qualidade";
+import { calcularAlertasV2, calcularConfiabilidadeV2 } from "./qualidadeV2";
+import { pontuarPares, dimensoesFromVotos } from "./pontuar";
 import {
   montarRelatorioInterno,
   montarNarrativaV3,
@@ -11,75 +13,19 @@ import {
 import type { RelatorioInterno, NarrativaTemperamentoV3 } from "./interpretacao";
 import type { EntradaTemperamento } from "./schemas";
 
-const SOMA_PESOS_DIMENSAO = 3 * 1.2 + 5 * 1.0; // 8.6
-const MIN_BRUTO = 1 * SOMA_PESOS_DIMENSAO;
-const MAX_BRUTO = 5 * SOMA_PESOS_DIMENSAO;
-
-const MATRIZ: Record<TemperamentoCodigo, Record<Dimensao, number>> = {
-  COLERICO: { ENG: 0.3, SOC: 0.15, DOM: 0.35, EST: -0.1, PRO: 0.1 },
-  SANGUINEO: { ENG: 0.3, SOC: 0.4, DOM: 0.1, EST: -0.1, PRO: -0.1 },
-  MELANCOLICO: { ENG: -0.1, SOC: -0.1, DOM: 0.1, EST: 0.2, PRO: 0.4 },
-  FLEUMATICO: { ENG: -0.2, SOC: -0.1, DOM: -0.1, EST: 0.4, PRO: 0.2 },
-};
-
-function valorUsado(resposta: number, item: ItemPergunta): number {
-  const r = item.reversa ? 6 - resposta : resposta;
-  return r;
-}
-
-function calcularScoreBrutoDimensao(
-  dim: Dimensao,
-  respostas: Record<string, number>,
-): number {
-  let total = 0;
-  for (const p of perguntasPorDimensao(dim)) {
-    total += valorUsado(respostas[p.codigo]!, p) * p.peso;
-  }
-  return total;
-}
-
-function normalizarDimensao(scoreBruto: number): number {
-  const n = (scoreBruto - MIN_BRUTO) / (MAX_BRUTO - MIN_BRUTO);
-  return Math.min(1, Math.max(0, n));
-}
-
-function projetarTemperamentos(norm: Record<Dimensao, number>): Record<TemperamentoCodigo, number> {
-  const out = {} as Record<TemperamentoCodigo, number>;
-  for (const t of TEMPERAMENTOS) {
-    let s = 0;
-    for (const d of DIMENSOES) {
-      s += norm[d] * MATRIZ[t][d];
-    }
-    out[t] = s;
-  }
-  return out;
-}
-
 function normalizarTemperamentosPercentuais(
-  scoresBrutos: Record<TemperamentoCodigo, number>,
+  votos: Record<TemperamentoCodigo, number>,
 ): Record<TemperamentoCodigo, number> {
-  const zerados = {} as Record<TemperamentoCodigo, number>;
-  for (const t of TEMPERAMENTOS) {
-    zerados[t] = Math.max(0, scoresBrutos[t]!);
-  }
-  const total = TEMPERAMENTOS.reduce((s, t) => s + zerados[t]!, 0);
+  const total = TEMPERAMENTOS.reduce((s, t) => s + votos[t]!, 0);
   if (total === 0) {
-    const u = 25.0;
-    return {
-      COLERICO: u,
-      SANGUINEO: u,
-      MELANCOLICO: u,
-      FLEUMATICO: u,
-    };
+    return { COLERICO: 25, SANGUINEO: 25, MELANCOLICO: 25, FLEUMATICO: 25 };
   }
-
   const pct = {} as Record<TemperamentoCodigo, number>;
   for (const t of TEMPERAMENTOS) {
-    pct[t] = Math.round((zerados[t]! / total) * 1000) / 10;
+    pct[t] = Math.round((votos[t]! / total) * 1000) / 10;
   }
   const sumPct = TEMPERAMENTOS.reduce((s, t) => s + pct[t]!, 0);
   const diff = Math.round((100 - sumPct) * 10) / 10;
-
   let maiorT: TemperamentoCodigo = "COLERICO";
   let maiorV = -1;
   for (const t of TEMPERAMENTOS) {
@@ -121,16 +67,16 @@ function classificarPerfil(
   return { tipo, primario: prim[0], secundario: sec[0] };
 }
 
-function qualityFlagFromIVR_ITC(ivrLow: boolean, itcHigh: boolean): QualityFlag {
-  if (ivrLow) return "LOW_VARIANCE";
-  if (itcHigh) return "HIGH_CENTRAL_TENDENCY";
+function qualityFlagFromAlertas(alertas: AlertaQualidade[]): QualityFlag {
+  if (alertas.includes("HIGH_VARIANCE")) return "HIGH_CENTRAL_TENDENCY";
+  if (alertas.includes("EXTREME_PROFILE")) return "LOW_VARIANCE";
   return "OK";
 }
 
 export interface ResultadoTemperamentoComputado {
   status: StatusResultado;
   quality_flag: QualityFlag;
-  alertas: import("./qualidade").AlertaQualidade[];
+  alertas: AlertaQualidade[];
   confiabilidade: number;
   empateProximo: boolean;
   scores: {
@@ -164,36 +110,35 @@ export interface ResultadoTemperamentoComputado {
 
 export function computarTemperamento(entrada: EntradaTemperamento): ResultadoTemperamentoComputado {
   const { answers, metadata } = entrada;
-  const valores = DIMENSOES.flatMap((d) =>
-    perguntasPorDimensao(d).map((p) => answers[p.codigo]!),
-  );
 
-  const dp = desvioPadrao(valores);
-  const prop3 = proporcaoRespostas3(valores);
-  const ivrLow = dp < 0.5;
-  const itcHigh = prop3 > 0.7;
-  const quality_flag = qualityFlagFromIVR_ITC(ivrLow, itcHigh);
-  const status: StatusResultado =
-    quality_flag === "OK" ? "success" : "low_quality";
-
-  const dimensoes = {} as Record<Dimensao, { bruto: number; normalizado: number }>;
-  for (const d of DIMENSOES) {
-    const bruto = calcularScoreBrutoDimensao(d, answers);
-    dimensoes[d] = { bruto, normalizado: normalizarDimensao(bruto) };
+  const votos = pontuarPares(PARES_FORCADOS, answers);
+  const sumVotos = TEMPERAMENTOS.reduce((s, t) => s + votos[t]!, 0);
+  if (sumVotos !== TOTAL_PARES) {
+    throw new Error(`Pontuação interna inconsistente: ${sumVotos} votos, esperado ${TOTAL_PARES}`);
   }
 
-  const norm = {} as Record<Dimensao, number>;
-  for (const d of DIMENSOES) norm[d] = dimensoes[d]!.normalizado;
+  const alertas = calcularAlertasV2(PARES_FORCADOS, answers, votos, metadata.tempo_total_segundos);
+  const quality_flag = qualityFlagFromAlertas(alertas);
+  const status: StatusResultado = quality_flag === "OK" ? "success" : "low_quality";
+  const confiabilidade = calcularConfiabilidadeV2(
+    PARES_FORCADOS,
+    answers,
+    votos,
+    metadata.tempo_total_segundos,
+  );
 
-  const temperamentos_brutos = projetarTemperamentos(norm);
-  const temperamentos_percentuais = normalizarTemperamentosPercentuais(temperamentos_brutos);
+  const dimensoes = dimensoesFromVotos(votos, TOTAL_PARES);
+  const norm = {} as Record<Dimensao, number>;
+  for (const d of Object.keys(dimensoes) as Dimensao[]) {
+    norm[d] = dimensoes[d]!.normalizado;
+  }
+
+  const temperamentos_brutos = { ...votos };
+  const temperamentos_percentuais = normalizarTemperamentosPercentuais(votos);
   const { tipo, primario, secundario } = classificarPerfil(temperamentos_percentuais);
 
   const ord = ordenarPercentuais(temperamentos_percentuais);
   const empateProximo = ord[0]![1] - ord[1]![1] < 2;
-
-  const alertas = calcularAlertas(valores, metadata.tempo_total_segundos, norm);
-  const confiabilidade = calcularConfiabilidade(valores, metadata.tempo_total_segundos);
 
   const { frase_sintese } = arquetipoFrasePorTemperamento(primario);
   const arquetipo = tituloPerfilTemperamento(primario, secundario, tipo);

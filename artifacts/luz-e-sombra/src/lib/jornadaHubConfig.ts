@@ -36,7 +36,7 @@ export const JORNADA_HUB_COPY: Record<
     introFallback:
       "Descubra como você pensa, age e se relaciona. Colérico, Sanguíneo, Melancólico e Fleumático em um mapa claro sobre quem você é.",
     analiseTitulo: "Questionário de Temperamento",
-    analiseDescricaoSem: "40 perguntas, cerca de 10 minutos. Responda com calma, não há resposta certa ou errada.",
+    analiseDescricaoSem: "24 escolhas entre duas opções, cerca de 5 minutos. Em cada par, escolha o que mais combina com você.",
     analiseDescricaoCom: "Seu mapa temperamental já foi gerado.",
     novaAnaliseLabel: "Refazer questionário",
     verResultadoLabel: "Ver meu perfil",

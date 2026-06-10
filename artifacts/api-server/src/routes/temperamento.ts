@@ -5,7 +5,7 @@ import { desc, eq } from "drizzle-orm";
 import {
   computarTemperamento,
   entradaTemperamentoSchema,
-  VERSAO_TEMPERAMENTO_V1,
+  VERSAO_TEMPERAMENTO_ATUAL,
 } from "@workspace/temperamento-v1";
 
 const router = Router();
@@ -15,7 +15,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
     const parsed = entradaTemperamentoSchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        error: "Corpo inválido: são necessárias as 40 respostas (1–5) e metadados opcionais.",
+        error: "Corpo inválido: são necessárias as 24 escolhas (a ou b) e metadados opcionais.",
         detalhes: parsed.error.flatten(),
       });
     }
@@ -32,7 +32,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
         usuarioId: req.user!.id,
         respostas: parsed.data.answers,
         resultado,
-        versao: VERSAO_TEMPERAMENTO_V1,
+        versao: VERSAO_TEMPERAMENTO_ATUAL,
       })
       .returning();
     return res.json({ id: row.id, ...resultado });

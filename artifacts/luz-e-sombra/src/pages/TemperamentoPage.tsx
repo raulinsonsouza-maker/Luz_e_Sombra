@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation, useSearch } from "wouter";
-import { ArrowRight, FlaskConical, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import MobileTopBar from "@/components/MobileTopBar";
@@ -10,66 +10,33 @@ import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import TemperamentoPainelResultado from "@/pages/temperamento/TemperamentoPainelResultado";
 import type { ResultadoTemperamentoUi } from "@/pages/temperamento/enriquecerResultado";
 import {
-  gerarOrdemBlocosPerguntas,
-  PERGUNTAS,
+  gerarOrdemPares,
+  TOTAL_PARES,
   entradaTemperamentoSchema,
-  type ItemPergunta,
+  parPorId,
+  type ParForcadoTemperamento,
 } from "@workspace/temperamento-v1";
 
-const STORAGE_KEY = "luz_temperamento_v1_draft";
-const TOTAL = 40;
+const STORAGE_KEY = "luz_temperamento_v2_draft";
+const TOTAL = TOTAL_PARES;
 const TEMP_NAV = JORNADA_MODULE_NAV.temperamento;
-
-const NOME_DIM: Record<string, string> = {
-  ENG: "Energia e ritmo",
-  SOC: "Sociabilidade e expressão",
-  DOM: "Dominância e controlo",
-  EST: "Estabilidade emocional",
-  PRO: "Profundidade e análise",
-};
-
-const ESCALA_EXTREMOS = {
-  um: "Discordo totalmente",
-  cinco: "Concordo totalmente",
-} as const;
 
 type Fase = "intro" | "perguntas" | "enviando" | "resultado";
 
 type DraftPersist = {
-  blocosCodes: string[][];
-  answers: Record<string, number>;
-  /** Índice global 0–39 na ordem dos blocos (preferido) */
-  qIndex?: number;
-  /** Legado: bloco 0–4 (migrado para qIndex ao carregar) */
-  blockIndex?: number;
+  ordemIds: string[];
+  answers: Record<string, "a" | "b">;
+  qIndex: number;
   startedAt: number;
 };
 
-function blocosFromCodes(codes: string[][]): ItemPergunta[][] {
-  const map = new Map(PERGUNTAS.map((p) => [p.codigo, p]));
-  return codes.map((row) => row.map((c) => map.get(c)!));
+function paresFromIds(ids: string[]): ParForcadoTemperamento[] {
+  return ids.map((id) => parPorId(id)!);
 }
 
-function codesFromBlocos(blocos: ItemPergunta[][]): string[][] {
-  return blocos.map((b) => b.map((p) => p.codigo));
-}
-
-function flatFromBlocos(blocos: ItemPergunta[][]): ItemPergunta[] {
-  return blocos.flat();
-}
-
-function primeiroIndiceSemResposta(flat: ItemPergunta[], answers: Record<string, number>): number {
-  const i = flat.findIndex((p) => typeof answers[p.codigo] !== "number");
-  return i === -1 ? Math.max(0, flat.length - 1) : i;
-}
-
-function migrarQIndex(d: DraftPersist, flat: ItemPergunta[]): number {
-  if (typeof d.qIndex === "number" && d.qIndex >= 0 && d.qIndex < flat.length) return d.qIndex;
-  if (typeof d.blockIndex === "number") {
-    const b = Math.min(4, Math.max(0, d.blockIndex));
-    return Math.min(flat.length - 1, b * 8);
-  }
-  return primeiroIndiceSemResposta(flat, d.answers ?? {});
+function primeiroIndiceSemResposta(ids: string[], answers: Record<string, "a" | "b">): number {
+  const i = ids.findIndex((id) => answers[id] === undefined);
+  return i === -1 ? Math.max(0, ids.length - 1) : i;
 }
 
 export default function TemperamentoPage() {
@@ -77,9 +44,9 @@ export default function TemperamentoPage() {
   const search = useSearch();
   const { status } = useAuth();
   const [fase, setFase] = useState<Fase>("intro");
-  const [blocos, setBlocos] = useState<ItemPergunta[][]>([]);
+  const [ordemIds, setOrdemIds] = useState<string[]>([]);
   const [qIndex, setQIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Record<string, "a" | "b">>({});
   const [startedAt, setStartedAt] = useState<number>(() => Date.now());
   const [erro, setErro] = useState<string | null>(null);
   const [resultadoApi, setResultadoApi] = useState<ResultadoTemperamentoUi | null>(null);
@@ -90,11 +57,9 @@ export default function TemperamentoPage() {
     if (status === "unauthenticated") navigate("/login");
   }, [status, navigate]);
 
-  const flatPerguntas = useMemo(() => flatFromBlocos(blocos), [blocos]);
-  const perguntaAtual = flatPerguntas[qIndex];
-  const progresso = fase === "perguntas" && flatPerguntas.length === TOTAL ? (qIndex + 1) / TOTAL : 0;
-  const respostaAtual = perguntaAtual ? answers[perguntaAtual.codigo] : undefined;
-  const podeAvancar = typeof respostaAtual === "number";
+  const paresOrdenados = useMemo(() => paresFromIds(ordemIds), [ordemIds]);
+  const parAtual = paresOrdenados[qIndex];
+  const progresso = fase === "perguntas" && ordemIds.length === TOTAL ? (qIndex + 1) / TOTAL : 0;
 
   const iniciarOuRecuperar = useCallback(() => {
     setMsgIntro(null);
@@ -102,16 +67,14 @@ export default function TemperamentoPage() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const d = JSON.parse(raw) as DraftPersist;
-        if (
-          Array.isArray(d.blocosCodes) &&
-          d.blocosCodes.length === 5 &&
-          d.blocosCodes.every((row) => row.length === 8)
-        ) {
-          const b = blocosFromCodes(d.blocosCodes);
-          const flat = flatFromBlocos(b);
-          setBlocos(b);
+        if (Array.isArray(d.ordemIds) && d.ordemIds.length === TOTAL) {
+          setOrdemIds(d.ordemIds);
           setAnswers(typeof d.answers === "object" && d.answers ? d.answers : {});
-          setQIndex(migrarQIndex(d, flat));
+          setQIndex(
+            typeof d.qIndex === "number"
+              ? Math.min(TOTAL - 1, Math.max(0, d.qIndex))
+              : primeiroIndiceSemResposta(d.ordemIds, d.answers ?? {}),
+          );
           setStartedAt(typeof d.startedAt === "number" ? d.startedAt : Date.now());
           setFase("perguntas");
           return;
@@ -120,18 +83,14 @@ export default function TemperamentoPage() {
     } catch {
       /* ignore */
     }
-    const novo = gerarOrdemBlocosPerguntas();
-    setBlocos(novo);
+    const novo = gerarOrdemPares();
+    const ids = novo.map((p) => p.id);
+    setOrdemIds(ids);
     setAnswers({});
     setQIndex(0);
     const t = Date.now();
     setStartedAt(t);
-    const draft: DraftPersist = {
-      blocosCodes: codesFromBlocos(novo),
-      answers: {},
-      qIndex: 0,
-      startedAt: t,
-    };
+    const draft: DraftPersist = { ordemIds: ids, answers: {}, qIndex: 0, startedAt: t };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
     } catch {
@@ -176,8 +135,9 @@ export default function TemperamentoPage() {
       } catch {
         /* ignore */
       }
-      const novo = gerarOrdemBlocosPerguntas();
-      setBlocos(novo);
+      const novo = gerarOrdemPares();
+      const ids = novo.map((p) => p.id);
+      setOrdemIds(ids);
       setAnswers({});
       setQIndex(0);
       setStartedAt(Date.now());
@@ -186,35 +146,26 @@ export default function TemperamentoPage() {
   }, [status, search, carregarUltimoServidor]);
 
   useEffect(() => {
-    if (fase !== "perguntas" || blocos.length === 0) return;
-    const draft: DraftPersist = {
-      blocosCodes: codesFromBlocos(blocos),
-      answers,
-      qIndex,
-      startedAt,
-    };
+    if (fase !== "perguntas" || ordemIds.length !== TOTAL) return;
+    const draft: DraftPersist = { ordemIds, answers, qIndex, startedAt };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
     } catch {
       /* ignore */
     }
-  }, [fase, blocos, answers, qIndex, startedAt]);
+  }, [fase, ordemIds, answers, qIndex, startedAt]);
 
-  function setResposta(codigo: string, valor: number) {
-    setAnswers((prev) => ({ ...prev, [codigo]: valor }));
-  }
-
-  async function enviar() {
+  async function enviar(ans: Record<string, "a" | "b">) {
     const parsed = entradaTemperamentoSchema.safeParse({
-      answers,
+      answers: ans,
       metadata: {
         tempo_total_segundos: Math.max(0, Math.floor((Date.now() - startedAt) / 1000)),
         idioma: "pt-BR",
-        versao_questionario: "1.0",
+        versao_questionario: "2.0",
       },
     });
     if (!parsed.success) {
-      setErro("Respostas incompletas ou inválidas.");
+      setErro("Respostas incompletas.");
       return;
     }
     setErro(null);
@@ -239,13 +190,15 @@ export default function TemperamentoPage() {
     }
   }
 
-  function avancar() {
-    if (!podeAvancar || flatPerguntas.length !== TOTAL) return;
+  function escolher(lado: "a" | "b") {
+    if (!parAtual) return;
+    const novas = { ...answers, [parAtual.id]: lado };
+    setAnswers(novas);
     if (qIndex < TOTAL - 1) {
       setQIndex((i) => i + 1);
       return;
     }
-    void enviar();
+    void enviar(novas);
   }
 
   function voltar() {
@@ -294,7 +247,7 @@ export default function TemperamentoPage() {
             onClick={() => {
               setResultadoApi(null);
               setFase("intro");
-              setBlocos([]);
+              setOrdemIds([]);
               setQIndex(0);
             }}
           >
@@ -308,18 +261,18 @@ export default function TemperamentoPage() {
   if (fase === "intro") {
     return (
       <div className="min-h-screen pb-28" style={{ background: bg }}>
-        <MobileTopBar titulo="Temperamento" subtitulo="Cinco dimensões, quarenta reflexões" />
+        <MobileTopBar titulo="Temperamento" subtitulo="Escolha forçada · v2" />
         <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
           <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} />
           <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
             Análise de temperamento
           </p>
           <h1 className="font-tan-mon-cheri text-2xl mb-4" style={{ color: "#f7f2ec" }}>
-            Cinco dimensões, quarenta reflexões
+            Quem você é por dentro
           </h1>
           <p className="text-sm leading-relaxed mb-2" style={{ color: "rgba(247,242,236,0.55)" }}>
-            Você verá <strong>uma afirmação de cada vez</strong>, numa escala de 1 a 5. A ordem dos temas muda em cada sessão.
-            Não há respostas certas: o importante é o que é verdade para ti na maior parte do tempo.
+            Em cada par, escolha a frase que <strong>mais combina com você</strong> na maior parte do tempo.
+            São {TOTAL} escolhas rápidas, sem escala nem notas. Não há resposta certa.
           </p>
           <p className="text-xs leading-relaxed mb-8" style={{ color: "rgba(247,242,236,0.38)" }}>
             O progresso guarda-se automaticamente neste dispositivo se saíres a meio.
@@ -346,7 +299,7 @@ export default function TemperamentoPage() {
                 const raw = localStorage.getItem(STORAGE_KEY);
                 if (raw) {
                   const d = JSON.parse(raw) as DraftPersist;
-                  if (Array.isArray(d.blocosCodes) && d.blocosCodes.length === 5) {
+                  if (Array.isArray(d.ordemIds) && d.ordemIds.length === TOTAL) {
                     return "Continuar onde parei";
                   }
                 }
@@ -399,7 +352,7 @@ export default function TemperamentoPage() {
     );
   }
 
-  if (!perguntaAtual || flatPerguntas.length !== TOTAL) {
+  if (!parAtual || ordemIds.length !== TOTAL) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm" style={{ background: bg, color: "#f7f2ec" }}>
         A carregar…
@@ -407,94 +360,60 @@ export default function TemperamentoPage() {
     );
   }
 
-  const dimNome = NOME_DIM[perguntaAtual.dimensao] ?? perguntaAtual.dimensao;
-  const noBloco = (qIndex % 8) + 1;
-
   return (
     <div className="min-h-screen pb-28" style={{ background: bg }}>
       <MobileTopBar titulo="Temperamento" subtitulo={`${qIndex + 1} de ${TOTAL}`} />
       <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
         <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} />
-        <div className="mb-6" style={{ borderBottom: "1px solid rgba(200,165,107,0.12)" }}>
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <p className="text-xs" style={{ color: "rgba(200,165,107,0.45)" }}>
-              {qIndex + 1} / {TOTAL}
-            </p>
-            <span
-              className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md"
-              style={{ color: "rgba(200,165,107,0.85)", background: "rgba(200,165,107,0.1)", border: "1px solid rgba(200,165,107,0.2)" }}
-            >
-              {dimNome}
-            </span>
-          </div>
-          <div className="h-1.5 rounded-full overflow-hidden mb-2" style={{ background: "rgba(255,255,255,0.06)" }}>
-            <div
-              className="h-full rounded-full transition-all duration-300"
-              style={{
-                width: `${progresso * 100}%`,
-                background: "linear-gradient(90deg, #9c7742, #c8a56b)",
-              }}
-            />
-          </div>
-          <p className="text-[10px] mb-3" style={{ color: "rgba(247,242,236,0.35)" }}>
-            Pergunta {noBloco} de 8 neste tema · marca o grau em que a frase te descreve
-          </p>
+
+        <div className="flex items-center justify-between mb-4">
+          <button type="button" onClick={voltar} className="text-xs" style={{ color: "rgba(200,165,107,0.65)" }}>
+            Voltar
+          </button>
+          <span className="text-[11px] tabular-nums" style={{ color: "rgba(247,242,236,0.35)" }}>
+            {qIndex + 1} / {TOTAL}
+          </span>
+        </div>
+
+        <div className="h-1.5 rounded-full overflow-hidden mb-8" style={{ background: "rgba(255,255,255,0.06)" }}>
+          <div
+            className="h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${progresso * 100}%`,
+              background: "linear-gradient(90deg, #9c7742, #c8a56b)",
+            }}
+          />
         </div>
 
         {erro && <p className="text-sm mb-4 text-red-300">{erro}</p>}
 
         <div className="space-y-6">
-          <h2 className="font-tan-mon-cheri text-lg leading-snug" style={{ color: "#f7f2ec" }}>
-            {perguntaAtual.texto}
-          </h2>
-          <div>
-            <p className="text-xs mb-2" style={{ color: "rgba(200,165,107,0.65)" }}>
-              Quanto concordas com esta afirmação?
-            </p>
-            <div className="grid grid-cols-5 gap-2">
-              {[1, 2, 3, 4, 5].map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setResposta(perguntaAtual.codigo, v)}
-                  className="py-3 rounded-xl text-sm font-bold leading-tight"
-                  style={{
-                    background: respostaAtual === v ? "rgba(200,165,107,0.25)" : "rgba(255,255,255,0.05)",
-                    border: `1px solid ${respostaAtual === v ? "rgba(200,165,107,0.45)" : "rgba(255,255,255,0.08)"}`,
-                    color: respostaAtual === v ? "#c8a56b" : "rgba(247,242,236,0.5)",
-                  }}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
-            <p className="text-[10px] mt-2 leading-snug" style={{ color: "rgba(247,242,236,0.35)" }}>
-              1 = {ESCALA_EXTREMOS.um} · 5 = {ESCALA_EXTREMOS.cinco}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex gap-3 mt-10">
+          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
+            O que é mais verdadeiro para você?
+          </p>
           <button
             type="button"
-            onClick={voltar}
-            className="flex-1 py-3 rounded-xl text-sm"
-            style={{ color: "rgba(200,165,107,0.75)", border: "1px solid rgba(200,165,107,0.2)" }}
+            onClick={() => escolher("a")}
+            className="w-full text-left p-5 rounded-2xl text-sm leading-relaxed transition-all active:scale-[0.99]"
+            style={{
+              background: answers[parAtual.id] === "a" ? "rgba(200,165,107,0.12)" : "rgba(255,255,255,0.05)",
+              border: `1px solid ${answers[parAtual.id] === "a" ? "rgba(200,165,107,0.35)" : "rgba(200,165,107,0.18)"}`,
+              color: "#f7f2ec",
+            }}
           >
-            Voltar
+            A — {parAtual.textoA}
           </button>
           <button
             type="button"
-            disabled={!podeAvancar}
-            onClick={avancar}
-            className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-35 flex items-center justify-center gap-2"
+            onClick={() => escolher("b")}
+            className="w-full text-left p-5 rounded-2xl text-sm leading-relaxed transition-all active:scale-[0.99]"
             style={{
-              background: "linear-gradient(135deg, #c8a56b, #8a6a3a)",
-              color: "#1a1208",
+              background: answers[parAtual.id] === "b" ? "rgba(200,165,107,0.12)" : "rgba(255,255,255,0.05)",
+              border: `1px solid ${answers[parAtual.id] === "b" ? "rgba(200,165,107,0.35)" : "rgba(200,165,107,0.18)"}`,
+              color: "#f7f2ec",
             }}
           >
-            {qIndex >= TOTAL - 1 ? "Concluir" : "Seguinte"}
-            {qIndex < TOTAL - 1 && <ArrowRight className="w-4 h-4" />}
+            B — {parAtual.textoB}
           </button>
         </div>
       </div>
