@@ -272,7 +272,10 @@ export default function JornadaHubPage() {
       setPreview(null);
       return;
     }
-    const deveCarregar = multiPessoa || modulo?.analiseConcluida;
+    const deveCarregar =
+      multiPessoa ||
+      modulo?.analiseConcluida ||
+      (slug === "numerologia" && modulo?.status === "active" && !!user?.dataNascimento);
     if (!deveCarregar) {
       setPreview(null);
       return;
@@ -287,7 +290,7 @@ export default function JornadaHubPage() {
       setPreview(p);
       setPreviewLoading(false);
     });
-  }, [slug, modulo?.analiseConcluida, multiPessoa, selectedPessoaId, pessoaAtiva?.nome, user]);
+  }, [slug, modulo?.analiseConcluida, modulo?.status, multiPessoa, selectedPessoaId, pessoaAtiva?.nome, user]);
 
   async function adicionarPessoa() {
     setAddErro(null);

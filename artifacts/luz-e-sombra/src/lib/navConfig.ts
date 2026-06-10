@@ -30,7 +30,7 @@ export const NAV_PRIMARY: NavItem[] = [
 export const NAV_TOOLS: NavItem[] = [
   { href: "/jornada/traco", label: "Traço de Caráter", icon: Layers, description: "Leitura corporal Reich/Lowen" },
   { href: "/jornada/roda", label: "Avaliação", icon: Target, description: "Roda da Vida e diagnósticos" },
-  { href: "/numerologia", label: "Numerologia", icon: Hash, description: "Mapa numerológico pessoal" },
+  { href: "/jornada/numerologia", label: "Numerologia", icon: Hash, description: "Mapa numerológico pessoal" },
   { href: "/missoes", label: "Missões", icon: Flame, description: "Desafios e gamificação" },
   { href: "/historico", label: "Histórico", icon: History, description: "Resultados anteriores" },
 ];

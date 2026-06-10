@@ -70,11 +70,11 @@ export async function temAnalise(
     }
     case "numerologia": {
       const [r] = await dbConn
-        .select({ dataNascimento: usuariosTable.dataNascimento })
+        .select({ concluida: usuariosTable.numerologiaJornadaConcluida })
         .from(usuariosTable)
         .where(eq(usuariosTable.id, usuarioId))
         .limit(1);
-      return !!r?.dataNascimento;
+      return r?.concluida === true;
     }
     default:
       return false;

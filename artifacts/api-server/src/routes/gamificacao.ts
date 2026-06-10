@@ -13,6 +13,7 @@ import {
 import { eq, and, isNull } from "drizzle-orm";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
 import { minicursoCompletoParaUsuario } from "./modulosJornada";
+import { temAnalise } from "../lib/temAnaliseJornada";
 import { MISSOES_POR_DIA } from "../lib/missoesCuradas";
 
 const router = Router();
@@ -174,11 +175,7 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
       else if (c.slug === "numerologia") minicursoConcluido.numerologia = ok;
     }
 
-    const [usuario] = await db
-      .select({ dataNascimento: usuariosTable.dataNascimento })
-      .from(usuariosTable)
-      .where(eq(usuariosTable.id, userId))
-      .limit(1);
+    const numerologiaConcluida = await temAnalise(userId, "numerologia");
 
     res.json({
       xp: gam.xp,
@@ -200,7 +197,7 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
         temperamento: !!temperamento,
         roda: !!avaliacao,
         linguagensAmor: !!linguagensRow,
-        numerologia: !!(usuario?.dataNascimento),
+        numerologia: numerologiaConcluida,
         minicursoConcluido,
       },
     });

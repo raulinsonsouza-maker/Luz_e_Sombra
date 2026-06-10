@@ -5,6 +5,7 @@ import {
   configuracoesModulosTable,
   aulasTable,
   progressoCursosTable,
+  usuariosTable,
 } from "@workspace/db";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { temAnalise } from "../lib/temAnaliseJornada";
@@ -72,86 +73,140 @@ export async function moduloInicianteCompleto(
   return analise && mini;
 }
 
+export type ModuloJornadaItem = {
+  slug: string;
+  tituloIntro: string;
+  descricaoIntro: string;
+  videoIntroUrl: string | null;
+  cursoVinculadoId: number | null;
+  ordem: number;
+  nivelDificuldade: string;
+  hrefAnalise: string;
+  hubHref: string;
+  analiseConcluida: boolean;
+  minicursoDisponivel: boolean;
+  minicursoConcluido: boolean;
+  minicursoProgresso: { total: number; concluidas: number } | null;
+  status: "done" | "active" | "locked";
+};
+
+export async function buildModulosJornadaLista(usuarioId: number): Promise<ModuloJornadaItem[]> {
+  const configs = await db
+    .select()
+    .from(configuracoesModulosTable)
+    .orderBy(asc(configuracoesModulosTable.ordem));
+
+  let todosAnterioresCompletos = true;
+  const lista: ModuloJornadaItem[] = [];
+  for (const c of configs) {
+    const analiseOk = await temAnalise(usuarioId, c.slug);
+    const totalAulas =
+      c.cursoVinculadoId != null
+        ? (
+            await db
+              .select({ id: aulasTable.id })
+              .from(aulasTable)
+              .where(eq(aulasTable.cursoId, c.cursoVinculadoId))
+          ).length
+        : 0;
+    let concluidas = 0;
+    if (c.cursoVinculadoId != null && totalAulas > 0) {
+      const ids = (
+        await db
+          .select({ id: aulasTable.id })
+          .from(aulasTable)
+          .where(eq(aulasTable.cursoId, c.cursoVinculadoId))
+      ).map((a) => a.id);
+      const prog = await db
+        .select({ aulaId: progressoCursosTable.aulaId })
+        .from(progressoCursosTable)
+        .where(
+          and(eq(progressoCursosTable.usuarioId, usuarioId), inArray(progressoCursosTable.aulaId, ids)),
+        );
+      concluidas = prog.length;
+    }
+    const miniDisponivel = minicursoEstaDisponivel(c.cursoVinculadoId, totalAulas);
+    const miniOk = miniDisponivel
+      ? await minicursoCompletoParaUsuario(usuarioId, c.cursoVinculadoId)
+      : false;
+    const completo = analiseOk && (!miniDisponivel || miniOk);
+
+    let status: "done" | "active" | "locked";
+    if (completo) {
+      status = "done";
+    } else if (todosAnterioresCompletos) {
+      status = "active";
+    } else {
+      status = "locked";
+    }
+
+    todosAnterioresCompletos = todosAnterioresCompletos && completo;
+
+    lista.push({
+      slug: c.slug,
+      tituloIntro: c.tituloIntro,
+      descricaoIntro: c.descricaoIntro,
+      videoIntroUrl: c.videoIntroUrl,
+      cursoVinculadoId: c.cursoVinculadoId,
+      ordem: c.ordem,
+      nivelDificuldade: c.nivelDificuldade,
+      hrefAnalise: hrefAnalise(c.slug),
+      hubHref: `/jornada/${c.slug}`,
+      analiseConcluida: analiseOk,
+      minicursoDisponivel: miniDisponivel,
+      minicursoConcluido: miniOk,
+      minicursoProgresso:
+        c.cursoVinculadoId != null && totalAulas > 0
+          ? { total: totalAulas, concluidas: concluidas }
+          : null,
+      status,
+    });
+  }
+  return lista;
+}
+
 // GET /modulos-jornada — módulos Iniciante com status
 router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const usuarioId = req.user!.id;
-    const configs = await db
-      .select()
-      .from(configuracoesModulosTable)
-      .orderBy(asc(configuracoesModulosTable.ordem));
-
-    let todosAnterioresCompletos = true;
-    const lista = [];
-    for (const c of configs) {
-      const analiseOk = await temAnalise(usuarioId, c.slug);
-      const totalAulas =
-        c.cursoVinculadoId != null
-          ? (
-              await db
-                .select({ id: aulasTable.id })
-                .from(aulasTable)
-                .where(eq(aulasTable.cursoId, c.cursoVinculadoId))
-            ).length
-          : 0;
-      let concluidas = 0;
-      if (c.cursoVinculadoId != null && totalAulas > 0) {
-        const ids = (
-          await db
-            .select({ id: aulasTable.id })
-            .from(aulasTable)
-            .where(eq(aulasTable.cursoId, c.cursoVinculadoId))
-        ).map((a) => a.id);
-        const prog = await db
-          .select({ aulaId: progressoCursosTable.aulaId })
-          .from(progressoCursosTable)
-          .where(
-            and(eq(progressoCursosTable.usuarioId, usuarioId), inArray(progressoCursosTable.aulaId, ids)),
-          );
-        concluidas = prog.length;
-      }
-      const miniDisponivel = minicursoEstaDisponivel(c.cursoVinculadoId, totalAulas);
-      const miniOk = miniDisponivel
-        ? await minicursoCompletoParaUsuario(usuarioId, c.cursoVinculadoId)
-        : false;
-      const completo = analiseOk && (!miniDisponivel || miniOk);
-
-      let status: "done" | "active" | "locked";
-      if (completo) {
-        status = "done";
-      } else if (todosAnterioresCompletos) {
-        status = "active";
-      } else {
-        status = "locked";
-      }
-
-      todosAnterioresCompletos = todosAnterioresCompletos && completo;
-
-      lista.push({
-        slug: c.slug,
-        tituloIntro: c.tituloIntro,
-        descricaoIntro: c.descricaoIntro,
-        videoIntroUrl: c.videoIntroUrl,
-        cursoVinculadoId: c.cursoVinculadoId,
-        ordem: c.ordem,
-        nivelDificuldade: c.nivelDificuldade,
-        hrefAnalise: hrefAnalise(c.slug),
-        hubHref: `/jornada/${c.slug}`,
-        analiseConcluida: analiseOk,
-        minicursoDisponivel: miniDisponivel,
-        minicursoConcluido: miniOk,
-        minicursoProgresso:
-          c.cursoVinculadoId != null && totalAulas > 0
-            ? { total: totalAulas, concluidas: concluidas }
-            : null,
-        status,
-      });
-    }
-
+    const lista = await buildModulosJornadaLista(req.user!.id);
     return res.json(lista);
   } catch (err) {
     req.log?.error(err);
     return res.status(500).json({ error: "Erro ao listar módulos da jornada." });
+  }
+});
+
+// POST /modulos-jornada/numerologia/concluir-analise — marca passo 5 concluído na jornada
+router.post("/numerologia/concluir-analise", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const usuarioId = req.user!.id;
+    const lista = await buildModulosJornadaLista(usuarioId);
+    const numerologia = lista.find((m) => m.slug === "numerologia");
+    if (!numerologia) {
+      return res.status(404).json({ error: "Módulo numerologia não configurado." });
+    }
+    if (numerologia.status === "locked") {
+      return res.status(403).json({ error: "Conclua os módulos anteriores da jornada para desbloquear a numerologia." });
+    }
+
+    const [usuario] = await db
+      .select({ dataNascimento: usuariosTable.dataNascimento })
+      .from(usuariosTable)
+      .where(eq(usuariosTable.id, usuarioId))
+      .limit(1);
+    if (!usuario?.dataNascimento) {
+      return res.status(400).json({ error: "Cadastre sua data de nascimento no perfil antes de concluir." });
+    }
+
+    await db
+      .update(usuariosTable)
+      .set({ numerologiaJornadaConcluida: true, atualizadoEm: new Date() })
+      .where(eq(usuariosTable.id, usuarioId));
+
+    return res.json({ ok: true });
+  } catch (err) {
+    req.log?.error(err);
+    return res.status(500).json({ error: "Erro ao concluir análise numerológica na jornada." });
   }
 });
 

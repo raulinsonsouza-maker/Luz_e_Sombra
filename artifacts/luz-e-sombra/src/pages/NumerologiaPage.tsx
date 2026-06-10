@@ -4,15 +4,17 @@ import { useAuth } from "@/context/AuthContext";
 import {
   Calendar, TrendingUp, Heart, Briefcase, DollarSign, Activity,
   AlertCircle, Brain, Lightbulb, ChevronRight, Sparkles,
-  User, Star, Zap, Shield, Eye, Hash, BookOpen, Compass, Quote, ExternalLink,
+  User, Star, Zap, Shield, Eye, Hash, BookOpen, Compass, Quote, ExternalLink, Lock,
 } from "lucide-react";
+import { apiFetch } from "@/lib/auth";
+import { useJornadaModulo } from "@/hooks/useJornadaModulo";
 
 import { ANOS_UNIVERSAIS, ANOS_PESSOAIS, COMBINACOES, NUMEROS_DE_VIDA } from "@/lib/numerologia-data";
 import MobileTopBar from "@/components/MobileTopBar";
 import NavBackButton from "@/components/NavBackButton";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import AppPageShell from "@/components/AppPageShell";
-import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
+import { JORNADA_MODULE_NAV, JORNADA_ROOT } from "@/lib/jornadaHubConfig";
 import {
   MesPessoal,
   calcularAnoPessoal,
@@ -89,6 +91,10 @@ function calcularIdade(dataNascimentoISO: string): number | null {
 export default function NumerologiaPage() {
   const [, navigate] = useLocation();
   const { user, status } = useAuth();
+  const { bloqueado, carregando: carregandoJornada } = useJornadaModulo(
+    "numerologia",
+    status === "authenticated",
+  );
 
   const ANOS_DISPONIVEIS = [2025, 2026];
   const anoAtual = new Date().getFullYear();
@@ -144,7 +150,7 @@ export default function NumerologiaPage() {
     };
   }
 
-  function handleCalcular() {
+  async function handleCalcular() {
     setErro("");
     const dataNasc = user?.dataNascimento ?? "";
     const nomeUser = user?.nome ?? "";
@@ -153,13 +159,17 @@ export default function NumerologiaPage() {
       return;
     }
     const r = calcular(dataNasc, nomeUser, anoAnalise);
-    if (r) {
-      setResultado(r);
-      setAbaAtiva("perfil");
+    if (!r) return;
+    setResultado(r);
+    setAbaAtiva("perfil");
+    try {
+      await apiFetch("/modulos-jornada/numerologia/concluir-analise", { method: "POST" });
+    } catch {
+      /* resultado já exibido; conclusão na jornada pode ser repetida depois */
     }
   }
 
-  if (status === "loading") {
+  if (status === "loading" || carregandoJornada) {
     return (
       <div className="min-h-screen app-dark-shell flex items-center justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-brand-gold border-t-transparent" />
@@ -656,6 +666,38 @@ export default function NumerologiaPage() {
       </div>
     );
   };
+
+  if (bloqueado) {
+    return (
+      <div className="min-h-screen app-dark-shell px-4 pt-6 pb-28">
+        <MobileTopBar titulo="Numerologia" subtitulo="Módulo bloqueado" />
+        <div className="max-w-lg mx-auto">
+          <NavBackButton to={JORNADA_ROOT} label="Jornada" />
+          <div
+            className="rounded-2xl p-8 text-center mt-6"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            <Lock className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "#f7f2ec" }} />
+            <h1 className="font-tan-mon-cheri text-xl mb-2" style={{ color: "#f7f2ec" }}>
+              Numerologia bloqueada
+            </h1>
+            <p className="text-sm mb-6" style={{ color: "rgba(247,242,236,0.45)" }}>
+              Conclua os quatro módulos anteriores da jornada (Traço, Temperamento, Linguagens do amor e Roda da Vida)
+              para desbloquear este passo.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate(JORNADA_ROOT)}
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold"
+              style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
+            >
+              Ir para a Jornada
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ── Page ─────────────────────────────────────────────────────────────────
 
