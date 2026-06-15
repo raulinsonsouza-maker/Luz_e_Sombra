@@ -80,6 +80,10 @@ select {
 .text-on-dark-accent {
   color: rgba(200, 165, 107, 0.75);
 }
+/* Corpo de texto principal sobre fundo escuro (numerologia) */
+.text-on-darker {
+  color: rgba(247, 242, 236, 0.88);
+}
 
 .num-panel {
   background: rgba(30, 24, 18, 0.6);

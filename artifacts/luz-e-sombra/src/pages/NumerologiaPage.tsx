@@ -55,7 +55,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function Tag({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className="px-3 py-1 text-xs rounded-full text-on-dark-muted"
+      className="px-3 py-1 text-xs rounded-full text-on-darker"
       style={{ background: "rgba(200,165,107,0.12)", border: "1px solid rgba(200,165,107,0.3)" }}
     >
       {children}
@@ -70,7 +70,7 @@ function InfoCard({ icon: Icon, label, children }: { icon: typeof Briefcase; lab
         <Icon className="w-4 h-4 text-brand-gold" />
         <h3 className="font-semibold text-on-dark text-sm">{label}</h3>
       </div>
-      <p className="text-on-dark-muted text-sm leading-relaxed">{children}</p>
+      <p className="text-on-darker text-sm leading-relaxed">{children}</p>
     </div>
   );
 }
@@ -196,7 +196,7 @@ export default function NumerologiaPage() {
                 <h2 className="font-tan-mon-cheri text-3xl md:text-4xl text-on-dark mb-1">
                   {numerodeVidaInfo.titulo}
                 </h2>
-                <p className="text-on-dark-soft text-sm">{numerodeVidaInfo.arquetipo}</p>
+                <p className="text-on-dark-muted text-sm">{numerodeVidaInfo.arquetipo}</p>
                 {resultado.numerodeVidaRaw && (
                   <p className="text-xs text-on-dark-soft/60 mt-2 font-mono">
                     Cálculo: {resultado.numerodeVidaRaw.passos}
@@ -268,7 +268,7 @@ export default function NumerologiaPage() {
                   <Eye className="w-3.5 h-3.5 text-on-dark-soft/60" />
                   <h3 className="font-semibold text-on-dark text-sm">Sombra</h3>
                 </div>
-                <p className="text-on-dark-soft text-xs leading-relaxed">{numerodeVidaInfo.sombra}</p>
+                <p className="text-on-dark-muted text-xs leading-relaxed">{numerodeVidaInfo.sombra}</p>
               </div>
               <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.25)" }}>
                 <div className="flex items-center gap-2 mb-2">
@@ -299,7 +299,7 @@ export default function NumerologiaPage() {
                     <p className="text-xs text-on-dark-soft mt-0.5">Do nome completo</p>
                   </div>
                 </div>
-                <p className="text-sm text-on-dark-soft leading-relaxed mb-4">
+                <p className="text-sm text-on-dark-muted leading-relaxed mb-4">
                   Como você se expressa no mundo e os talentos que manifesta naturalmente, sua "máscara" mais elevada.
                 </p>
                 <p className="text-sm text-on-darker leading-relaxed">{expressaoInfo.essencia}</p>
@@ -319,7 +319,7 @@ export default function NumerologiaPage() {
                     <p className="text-xs text-on-dark-soft mt-0.5">Das vogais do nome</p>
                   </div>
                 </div>
-                <p className="text-sm text-on-dark-soft leading-relaxed mb-4">
+                <p className="text-sm text-on-dark-muted leading-relaxed mb-4">
                   O que você deseja profundamente no íntimo, sua motivação mais oculta, o que move sua alma.
                 </p>
                 <p className="text-sm text-on-darker leading-relaxed">{almaInfo.essencia}</p>
@@ -414,7 +414,7 @@ export default function NumerologiaPage() {
                   <p className="text-xs text-on-dark-soft">Energia coletiva global</p>
                 </div>
               </div>
-              {univ && <p className="text-sm text-on-dark-soft leading-relaxed">{univ.climaColetivo}</p>}
+              {univ && <p className="text-sm text-on-dark-muted leading-relaxed">{univ.climaColetivo}</p>}
             </div>
           </div>
         </div>
@@ -588,7 +588,7 @@ export default function NumerologiaPage() {
           <h2 className="font-tan-mon-cheri text-2xl text-on-dark mb-1">
             Os 12 Meses de {resultado.ano}
           </h2>
-          <p className="text-on-dark-soft text-sm">
+          <p className="text-on-dark-muted text-sm">
             Cada mês recebe uma energia específica baseada no seu Ano Pessoal {resultado.anoPessoal.reduzido}.
           </p>
         </div>
@@ -653,8 +653,8 @@ export default function NumerologiaPage() {
                   <p className="text-xs font-semibold tracking-wider uppercase text-on-dark-soft/60 mb-2">O que evitar</p>
                   <ul className="space-y-1.5">
                     {mes.evitar.map((e, i) => (
-                      <li key={i} className="text-xs text-on-dark-soft flex items-start gap-2">
-                        <span className="text-on-dark-soft/40 mt-0.5 flex-shrink-0">·</span><span>{e}</span>
+                      <li key={i} className="text-xs text-on-dark-muted flex items-start gap-2">
+                        <span className="text-on-dark-soft mt-0.5 flex-shrink-0">·</span><span>{e}</span>
                       </li>
                     ))}
                   </ul>
@@ -848,7 +848,7 @@ export default function NumerologiaPage() {
                   className="flex-1 min-h-[46px] flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-center"
                   style={abaAtiva === key
                     ? { background: "linear-gradient(135deg, #9c7742, #c8a56b)", color: "#fff" }
-                    : { color: "rgba(95,74,47,0.6)" }}>
+                    : { color: "rgba(247,242,236,0.6)" }}>
                   <Icon className="w-4 h-4" />
                   <span className="hidden sm:inline">{label}</span>
                   <span className="sm:hidden">{key === "perfil" ? "Perfil" : key === "ano" ? "Ano" : "Meses"}</span>
@@ -857,9 +857,11 @@ export default function NumerologiaPage() {
             </div>
 
             {/* Tab content */}
-            {abaAtiva === "perfil" && renderPerfilPermanente()}
-            {abaAtiva === "ano" && renderAnoPessoal()}
-            {abaAtiva === "meses" && renderMeses()}
+            <div className="text-on-darker">
+              {abaAtiva === "perfil" && renderPerfilPermanente()}
+              {abaAtiva === "ano" && renderAnoPessoal()}
+              {abaAtiva === "meses" && renderMeses()}
+            </div>
           </>
         )}
       </AppPageShell>
