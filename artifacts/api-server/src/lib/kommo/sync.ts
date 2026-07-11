@@ -256,7 +256,8 @@ export function syncKommoOnRegister(
   log?: Logger,
 ): void {
   void syncKommoOnRegisterAsync(params, log).catch((error) => {
-    log?.error({ error, usuarioId: params.usuarioId }, "Falha no sync Kommo (register)");
+    const errMsg = error instanceof Error ? error.message : String(error);
+    log?.error({ errMsg, usuarioId: params.usuarioId }, "Falha no sync Kommo (register)");
   });
 }
 
@@ -271,12 +272,14 @@ export function syncKommoOnPaymentPaid(
   log?: Logger,
 ): void {
   void syncKommoOnPaymentPaidAsync(params, log).catch((error) => {
-    log?.error({ error, usuarioId: params.usuarioId }, "Falha no sync Kommo (payment paid)");
+    const errMsg = error instanceof Error ? error.message : String(error);
+    log?.error({ errMsg, usuarioId: params.usuarioId }, "Falha no sync Kommo (payment paid)");
   });
 }
 
 export function syncKommoOnAccessRevoked(params: { usuarioId: number }, log?: Logger): void {
   void syncKommoOnAccessRevokedAsync(params, log).catch((error) => {
-    log?.error({ error, usuarioId: params.usuarioId }, "Falha no sync Kommo (access revoked)");
+    const errMsg = error instanceof Error ? error.message : String(error);
+    log?.error({ errMsg, usuarioId: params.usuarioId }, "Falha no sync Kommo (access revoked)");
   });
 }

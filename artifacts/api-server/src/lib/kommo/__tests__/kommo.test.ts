@@ -4,7 +4,7 @@ import {
   normalizeBrazilPhoneE164,
   firstNameFromFullName,
 } from "../phone.js";
-import { buildLeadComplexPayloadForTest } from "../leads.js";
+import { buildLeadComplexPayloadForTest, parseLeadComplexResponseForTest } from "../leads.js";
 
 describe("kommo phone", () => {
   it("normaliza celular BR para E.164", () => {
@@ -62,5 +62,11 @@ describe("kommo leads/complex payload", () => {
     delete process.env.KOMMO_PIPELINE_ID;
     delete process.env.KOMMO_CF_CHECKOUT_URL;
     delete process.env.KOMMO_CF_LOGIN_URL;
+  });
+
+  it("parseia resposta array do leads/complex", () => {
+    const parsed = parseLeadComplexResponseForTest([{ id: 6945514, contact_id: 17705710 }]);
+    assert.equal(parsed.leadId, 6945514);
+    assert.equal(parsed.contactId, 17705710);
   });
 });

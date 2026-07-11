@@ -6,7 +6,22 @@ type CustomFieldValue = { field_id: number; values: Array<{ value: string | numb
 
 type KommoEmbeddedLeads = { leads?: Array<{ id: number }> };
 type KommoEmbeddedContacts = { contacts?: Array<{ id: number; _embedded?: { leads?: Array<{ id: number }> } }> };
-type KommoComplexResponse = { _embedded?: KommoEmbeddedLeads & KommoEmbeddedContacts };
+type KommoComplexResponse =
+  | Array<{ id: number; contact_id?: number | null }>
+  | { _embedded?: KommoEmbeddedLeads & KommoEmbeddedContacts };
+
+function parseComplexResponse(data: KommoComplexResponse): { leadId: number; contactId: number | null } {
+  if (Array.isArray(data)) {
+    const row = data[0];
+    if (!row?.id) throw new Error("Kommo não retornou lead_id em leads/complex");
+    return { leadId: row.id, contactId: row.contact_id ?? null };
+  }
+
+  const leadId = data._embedded?.leads?.[0]?.id;
+  const contactId = data._embedded?.contacts?.[0]?.id ?? null;
+  if (!leadId) throw new Error("Kommo não retornou lead_id em leads/complex");
+  return { leadId, contactId };
+}
 
 export type LeadCustomFieldsInput = {
   checkoutUrl?: string;
@@ -43,7 +58,7 @@ function buildCustomFields(input?: LeadCustomFieldsInput): CustomFieldValue[] {
     fields.push({ field_id: cfg.cfEmail, values: [{ value: input.email }] });
   }
   if (cfg.cfUsuarioId && input?.usuarioId !== undefined) {
-    fields.push({ field_id: cfg.cfUsuarioId, values: [{ value: input.usuarioId }] });
+    fields.push({ field_id: cfg.cfUsuarioId, values: [{ value: String(input.usuarioId) }] });
   }
 
   return fields;
@@ -104,13 +119,7 @@ export async function createLeadComplex(input: CreateLeadInput): Promise<UpsertL
     body: buildComplexPayload(input),
   });
 
-  const leadId = data._embedded?.leads?.[0]?.id;
-  const contactId = data._embedded?.contacts?.[0]?.id ?? null;
-
-  if (!leadId) {
-    throw new Error("Kommo não retornou lead_id em leads/complex");
-  }
-
+  const { leadId, contactId } = parseComplexResponse(data);
   return { leadId, contactId, created: true };
 }
 
@@ -147,4 +156,9 @@ export async function setLeadCustomFields(leadId: number, input?: LeadCustomFiel
 /** Monta payload para testes unitários. */
 export function buildLeadComplexPayloadForTest(input: CreateLeadInput): unknown {
   return buildComplexPayload(input);
+}
+
+/** Parse da resposta leads/complex (formato array ou _embedded). */
+export function parseLeadComplexResponseForTest(data: unknown): { leadId: number; contactId: number | null } {
+  return parseComplexResponse(data as KommoComplexResponse);
 }
