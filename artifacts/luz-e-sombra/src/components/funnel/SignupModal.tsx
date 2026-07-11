@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { getStoredUtms } from "@/lib/utm";
 import { trackLpEvent, type LpVariant } from "@/lib/lpAnalytics";
 import { toastApiError } from "@/lib/apiError";
+import { digitsOnlyPhone, formatBrazilPhone, isValidBrazilPhone } from "@/lib/phoneMask";
 
 interface Props {
   open: boolean;
@@ -33,6 +34,10 @@ export default function SignupModal({ open, onClose, variant }: Props) {
       toast.error("A senha deve ter pelo menos 6 caracteres.");
       return;
     }
+    if (!isValidBrazilPhone(telefone)) {
+      toast.error("Informe um celular válido com DDD.");
+      return;
+    }
 
     setEnviando(true);
     trackLpEvent("signup_start", variant);
@@ -44,7 +49,7 @@ export default function SignupModal({ open, onClose, variant }: Props) {
         body: JSON.stringify({
           nome: nome.trim(),
           email: email.trim(),
-          telefone: telefone.trim(),
+          telefone: digitsOnlyPhone(telefone),
           senha,
           variant,
           utm: getStoredUtms(),
@@ -101,11 +106,10 @@ export default function SignupModal({ open, onClose, variant }: Props) {
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
           {[
-            { id: "nome", label: "Nome completo *", type: "text", value: nome, set: setNome, placeholder: "Seu nome" },
-            { id: "email", label: "E-mail *", type: "email", value: email, set: setEmail, placeholder: "seu@email.com" },
-            { id: "telefone", label: "Celular *", type: "tel", value: telefone, set: setTelefone, placeholder: "(00) 00000-0000" },
-            { id: "senha", label: "Senha *", type: "password", value: senha, set: setSenha, placeholder: "Mínimo 6 caracteres" },
-            { id: "confirmar", label: "Confirmar senha *", type: "password", value: confirmarSenha, set: setConfirmarSenha, placeholder: "Repita a senha" },
+            { id: "nome", label: "Nome completo *", type: "text" as const, value: nome, set: setNome, placeholder: "Seu nome" },
+            { id: "email", label: "E-mail *", type: "email" as const, value: email, set: setEmail, placeholder: "seu@email.com" },
+            { id: "senha", label: "Senha *", type: "password" as const, value: senha, set: setSenha, placeholder: "Mínimo 6 caracteres" },
+            { id: "confirmar", label: "Confirmar senha *", type: "password" as const, value: confirmarSenha, set: setConfirmarSenha, placeholder: "Repita a senha" },
           ].map(({ id, label, type, value, set, placeholder }) => (
             <div key={id}>
               <label htmlFor={id} className="block text-xs mb-1.5 font-medium" style={{ color: "rgba(247,242,236,0.5)" }}>
@@ -127,6 +131,29 @@ export default function SignupModal({ open, onClose, variant }: Props) {
               />
             </div>
           ))}
+
+          <div>
+            <label htmlFor="telefone" className="block text-xs mb-1.5 font-medium" style={{ color: "rgba(247,242,236,0.5)" }}>
+              Celular *
+            </label>
+            <input
+              id="telefone"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel"
+              value={telefone}
+              onChange={(e) => setTelefone(formatBrazilPhone(e.target.value))}
+              required
+              maxLength={16}
+              className="w-full px-4 py-3 rounded-xl text-sm outline-none"
+              style={{
+                background: "rgba(15,12,9,0.8)",
+                border: "1px solid rgba(200,165,107,0.2)",
+                color: "#f7f2ec",
+              }}
+              placeholder="(00) 00000-0000"
+            />
+          </div>
 
           <button
             type="submit"
