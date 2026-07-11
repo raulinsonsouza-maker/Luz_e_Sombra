@@ -9,9 +9,11 @@ export async function sendPaymentPendingReminderEmail(
 ): Promise<void> {
   const { publicUrl } = getEmailConfig();
   const checkoutUrl = `${publicUrl}/checkout?token=${encodeURIComponent(params.checkoutToken)}`;
+  const loginUrl = `${publicUrl}/login`;
   const { subject, html } = paymentPendingReminderEmail({
     nome: params.nome,
     checkoutUrl,
+    loginUrl,
   });
 
   await sendTransactionalEmail(
@@ -45,6 +47,7 @@ export async function sendJourneyNudgeEmail(
     nome: params.nome,
     moduloTitulo: params.moduloTitulo,
     jornadaUrl: href,
+    loginUrl: `${publicUrl}/login`,
   });
 
   await sendTransactionalEmail(

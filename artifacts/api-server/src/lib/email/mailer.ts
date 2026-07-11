@@ -111,7 +111,8 @@ export function sendCheckoutWelcomeEmail(
 ): void {
   const { publicUrl } = getEmailConfig();
   const checkoutUrl = `${publicUrl}/checkout?token=${encodeURIComponent(params.checkoutToken)}`;
-  const { subject, html } = checkoutWelcomeEmail({ nome: params.nome, checkoutUrl });
+  const loginUrl = `${publicUrl}/login`;
+  const { subject, html } = checkoutWelcomeEmail({ nome: params.nome, checkoutUrl, loginUrl });
 
   void sendTransactionalEmail(
     {

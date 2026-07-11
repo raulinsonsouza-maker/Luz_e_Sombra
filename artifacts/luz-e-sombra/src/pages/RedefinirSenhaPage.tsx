@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link, useLocation } from "wouter";
-import { KeyRound, Loader2, ArrowLeft, CheckCircle2, Eye, EyeOff } from "lucide-react";
-import { LP_PORTAL_NAME } from "@/lib/lpConfig";
+import { KeyRound, Loader2, ArrowLeft, CheckCircle2, Eye, EyeOff, LogIn } from "lucide-react";
+import { LP_PORTAL_NAME, LP_JOURNEY_NAME } from "@/lib/lpConfig";
 import { apiFetch } from "@/lib/auth";
 import { PASSWORD_HINT, validatePassword } from "@/lib/passwordPolicy";
 
@@ -38,7 +38,6 @@ export default function RedefinirSenhaPage() {
     try {
       const res = await apiFetch("/auth/reset-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, novaSenha }),
       });
       const data = await res.json().catch(() => ({}));
@@ -47,7 +46,7 @@ export default function RedefinirSenhaPage() {
         return;
       }
       setSucesso(true);
-      setTimeout(() => navigate("/login"), 2500);
+      setTimeout(() => navigate("/login"), 4000);
     } catch {
       setErro("Erro de conexão. Tente novamente.");
     } finally {
@@ -60,8 +59,11 @@ export default function RedefinirSenhaPage() {
       <div className="min-h-screen flex items-center justify-center px-4 py-12"
         style={{ background: "linear-gradient(160deg, #faf8f4 0%, #f0ebe3 100%)" }}>
         <div className="w-full max-w-md luxury-card p-8 text-center">
+          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-brand-medium mb-2">{LP_PORTAL_NAME}</p>
           <h1 className="font-tan-mon-cheri text-2xl text-brand-dark mb-3">Link inválido</h1>
-          <p className="text-sm text-brand-medium/80 mb-6">Este link expirou ou está incompleto.</p>
+          <p className="text-sm text-brand-medium/80 mb-6 leading-relaxed">
+            Este link expirou ou está incompleto. Solicite um novo e-mail de redefinição de senha.
+          </p>
           <Link href="/esqueci-senha" className="luxury-btn-primary inline-flex">Solicitar novo link</Link>
         </div>
       </div>
@@ -78,15 +80,29 @@ export default function RedefinirSenhaPage() {
         </Link>
 
         <div className="luxury-card p-8">
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-brand-medium mb-2">{LP_PORTAL_NAME}</p>
+          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-brand-medium mb-1">{LP_PORTAL_NAME}</p>
+          <p className="text-xs text-brand-medium/60 mb-3">{LP_JOURNEY_NAME}</p>
           <h1 className="font-tan-mon-cheri text-3xl text-brand-dark mb-2">Nova senha</h1>
-          <p className="text-sm text-brand-medium/70 mb-8">Crie uma senha forte para acessar sua conta.</p>
+          <p className="text-sm text-brand-medium/70 mb-8">
+            Crie uma senha forte para acessar sua conta no {LP_PORTAL_NAME}.
+          </p>
 
           {sucesso ? (
-            <div className="flex items-start gap-3 p-4 rounded-xl"
-              style={{ background: "rgba(93,185,122,0.08)", border: "1px solid rgba(93,185,122,0.2)" }}>
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-              <p className="text-sm text-brand-dark">Senha redefinida! Redirecionando para o login...</p>
+            <div className="space-y-5">
+              <div className="flex items-start gap-3 p-4 rounded-xl"
+                style={{ background: "rgba(93,185,122,0.08)", border: "1px solid rgba(93,185,122,0.2)" }}>
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm text-brand-dark font-medium mb-1">Senha redefinida com sucesso!</p>
+                  <p className="text-sm text-brand-medium/80">
+                    Você receberá um e-mail de confirmação. Redirecionando para o login...
+                  </p>
+                </div>
+              </div>
+              <Link href="/login" className="w-full luxury-btn-primary inline-flex justify-center py-3.5">
+                <LogIn className="w-4 h-4" />
+                Ir para o login agora
+              </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -132,7 +148,7 @@ export default function RedefinirSenhaPage() {
                 />
               </div>
 
-              {erro && <p className="text-sm text-red-600">{erro}</p>}
+              {erro && <p className="text-sm text-red-600" role="alert">{erro}</p>}
 
               <button type="submit" disabled={carregando} className="w-full luxury-btn-primary disabled:opacity-50 py-3.5">
                 {carregando ? (
@@ -143,7 +159,7 @@ export default function RedefinirSenhaPage() {
                 ) : (
                   <>
                     <KeyRound className="w-4 h-4" />
-                    Redefinir senha
+                    Salvar nova senha
                   </>
                 )}
               </button>
