@@ -34,6 +34,22 @@ export const LP_GUARANTEE_DAYS = 7;
 export const LP_CTA_PRIMARY = "Começar minha jornada";
 export const LP_CTA_NAV = "Começar jornada";
 
+/** Copy do hero da LP controle (/) */
+export const LP_HERO = {
+  badge: "Trilha guiada de autoconhecimento",
+  headlineLine1: "Jornada",
+  headlineLine2: "Da Sombra",
+  headlineAccent: "à Luz",
+  subline:
+    "Nove análises profundas — traço, temperamento, roda da vida e mais — conectadas num único mapa para você parar de repetir padrões e agir com clareza.",
+  bullets: [
+    "Diagnósticos personalizados, nada genérico",
+    "Trilha gamificada passo a passo",
+    "Primeira leitura em cerca de 15 minutos",
+  ],
+  priceTeaser: "A partir de R$ 57,90 · pagamento único",
+} as const;
+
 /** Copy exclusiva da LP VSL (/vsl) */
 export const VSL_COPY = {
   navCta: "Começar jornada",
