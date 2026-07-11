@@ -7,6 +7,8 @@ import { CursoCapa } from "@/components/CursoCapa";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import { GraduationCap, Loader2, BookOpen, CheckCircle2, ChevronRight, Lock, Sparkles } from "lucide-react";
+import { FEATURE_FLAGS } from "@/lib/featureFlags";
+import { CursosEmBreve } from "@/components/CursosEmBreve";
 
 interface Curso {
   id: number;
@@ -31,9 +33,10 @@ export default function CursosPage() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const [cursos, setCursos] = useState<Curso[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(FEATURE_FLAGS.SHOW_COURSES_CATALOG);
 
   useEffect(() => {
+    if (!FEATURE_FLAGS.SHOW_COURSES_CATALOG) return;
     buscarCursos();
   }, []);
 
@@ -64,7 +67,9 @@ export default function CursosPage() {
           subtitulo="Transforme conhecimento em prática"
         />
 
-        {loading ? (
+        {!FEATURE_FLAGS.SHOW_COURSES_CATALOG ? (
+          <CursosEmBreve />
+        ) : loading ? (
           <div className="flex justify-center py-16">
             <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#c8a56b" }} />
           </div>

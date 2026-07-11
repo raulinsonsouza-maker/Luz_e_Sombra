@@ -4,6 +4,8 @@ import {
   Loader2, CheckCircle2, Circle, Play, BookOpen, Clock, ChevronRight, ChevronLeft, ExternalLink,
 } from "lucide-react";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
+import { FEATURE_FLAGS } from "@/lib/featureFlags";
+import { VideoEmBrevePlaceholder } from "@/components/VideoEmBrevePlaceholder";
 
 export interface AulaMinicurso {
   id: number;
@@ -116,7 +118,10 @@ export function MinicursoEmbedido({ cursoId, tituloExtra, onTodasAulasConcluidas
   const totalAulas = curso.aulas.length;
   const totalConcluidas = curso.aulas.filter((a) => a.concluida).length;
   const pct = totalAulas > 0 ? Math.round((totalConcluidas / totalAulas) * 100) : 0;
-  const embedUrl = aulaAtiva?.videoUrl ? getVideoEmbedUrl(aulaAtiva.videoUrl) : null;
+  const embedUrl =
+    FEATURE_FLAGS.SHOW_COURSE_LESSON_VIDEOS && aulaAtiva?.videoUrl
+      ? getVideoEmbedUrl(aulaAtiva.videoUrl)
+      : null;
   const nAtiva = aulaAtiva ? indiceAula(curso.aulas, aulaAtiva.id) : 0;
   const temVideoEmbutido = Boolean(embedUrl);
 
@@ -168,7 +173,7 @@ export function MinicursoEmbedido({ cursoId, tituloExtra, onTodasAulasConcluidas
           className="rounded-2xl overflow-hidden mb-4"
           style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.14)" }}
         >
-          {embedUrl ? (
+          {FEATURE_FLAGS.SHOW_COURSE_LESSON_VIDEOS && embedUrl ? (
             <div className="aspect-video w-full bg-black">
               <iframe
                 src={embedUrl}
@@ -178,7 +183,7 @@ export function MinicursoEmbedido({ cursoId, tituloExtra, onTodasAulasConcluidas
                 title={aulaAtiva.titulo}
               />
             </div>
-          ) : aulaAtiva.videoUrl?.trim() ? (
+          ) : FEATURE_FLAGS.SHOW_COURSE_LESSON_VIDEOS && aulaAtiva.videoUrl?.trim() ? (
             <div
               className="aspect-video w-full flex flex-col items-center justify-center gap-4 px-6 text-center py-8"
               style={{ background: "rgba(200,165,107,0.06)", borderBottom: "1px solid rgba(200,165,107,0.08)" }}
@@ -199,14 +204,9 @@ export function MinicursoEmbedido({ cursoId, tituloExtra, onTodasAulasConcluidas
               </a>
             </div>
           ) : (
-            <div className="aspect-video max-h-48 w-full flex items-center justify-center" style={{ background: "rgba(200,165,107,0.05)" }}>
-              <div className="text-center px-4">
-                <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-35" style={{ color: "#c8a56b" }} />
-                <p className="text-sm" style={{ color: "rgba(247,242,236,0.35)" }}>
-                  Esta aula ainda não tem vídeo
-                </p>
-              </div>
-            </div>
+            <VideoEmBrevePlaceholder
+              descricao="O vídeo desta aula será publicado em breve. Você pode ler o conteúdo abaixo enquanto isso."
+            />
           )}
 
           <div className="p-5 sm:p-6">

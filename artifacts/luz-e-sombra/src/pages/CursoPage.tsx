@@ -10,6 +10,8 @@ import { CursoCapa } from "@/components/CursoCapa";
 import MobileTopBar from "@/components/MobileTopBar";
 import NavBackButton from "@/components/NavBackButton";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
+import { FEATURE_FLAGS } from "@/lib/featureFlags";
+import { VideoEmBrevePlaceholder } from "@/components/VideoEmBrevePlaceholder";
 
 interface Aula {
   id: number;
@@ -48,8 +50,12 @@ export default function CursoPage() {
   const [toggling, setToggling] = useState<number | null>(null);
 
   useEffect(() => {
+    if (!FEATURE_FLAGS.SHOW_COURSES_CATALOG) {
+      navigate("/cursos");
+      return;
+    }
     if (id) buscarCurso();
-  }, [id]);
+  }, [id, navigate]);
 
   async function buscarCurso() {
     setLoading(true);
@@ -108,7 +114,10 @@ export default function CursoPage() {
   const totalAulas = curso.aulas.length;
   const totalConcluidas = curso.aulas.filter(a => a.concluida).length;
   const pct = totalAulas > 0 ? Math.round((totalConcluidas / totalAulas) * 100) : 0;
-  const embedUrl = aulaAtiva?.videoUrl ? getVideoEmbedUrl(aulaAtiva.videoUrl) : null;
+  const embedUrl =
+    FEATURE_FLAGS.SHOW_COURSE_LESSON_VIDEOS && aulaAtiva?.videoUrl
+      ? getVideoEmbedUrl(aulaAtiva.videoUrl)
+      : null;
   const nAtiva = aulaAtiva ? indiceAula(curso.aulas, aulaAtiva.id) : 0;
   const temVideoEmbutido = Boolean(embedUrl);
 
@@ -174,7 +183,7 @@ export default function CursoPage() {
           <div className="rounded-2xl overflow-hidden mb-6"
             style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.14)" }}>
 
-            {embedUrl ? (
+            {FEATURE_FLAGS.SHOW_COURSE_LESSON_VIDEOS && embedUrl ? (
               <div className="aspect-video w-full bg-black">
                 <iframe
                   src={embedUrl}
@@ -184,7 +193,7 @@ export default function CursoPage() {
                   title={aulaAtiva.titulo}
                 />
               </div>
-            ) : aulaAtiva.videoUrl?.trim() ? (
+            ) : FEATURE_FLAGS.SHOW_COURSE_LESSON_VIDEOS && aulaAtiva.videoUrl?.trim() ? (
               <div className="aspect-video w-full flex flex-col items-center justify-center gap-4 px-6 text-center py-8"
                 style={{ background: "rgba(200,165,107,0.06)", borderBottom: "1px solid rgba(200,165,107,0.08)" }}>
                 <Play className="w-10 h-10" style={{ color: "rgba(200,165,107,0.45)" }} />
@@ -203,13 +212,9 @@ export default function CursoPage() {
                 </a>
               </div>
             ) : (
-              <div className="aspect-video max-h-48 w-full flex items-center justify-center"
-                style={{ background: "rgba(200,165,107,0.05)" }}>
-                <div className="text-center px-4">
-                  <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-35" style={{ color: "#c8a56b" }} />
-                  <p className="text-sm" style={{ color: "rgba(247,242,236,0.35)" }}>Esta aula ainda não tem vídeo</p>
-                </div>
-              </div>
+              <VideoEmBrevePlaceholder
+                descricao="O vídeo desta aula será publicado em breve. Você pode ler o conteúdo abaixo enquanto isso."
+              />
             )}
 
             <div className="p-5 sm:p-6">

@@ -9,7 +9,6 @@ import {
   Sparkles,
   Plus,
   Eye,
-  PlayCircle,
   Clock,
 } from "lucide-react";
 import { LABEL_LINGUAGEM, type LinguagemAmor } from "@workspace/cinco-linguagens-amor";
@@ -19,6 +18,8 @@ import NavBackButton from "@/components/NavBackButton";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import AppPageShell from "@/components/AppPageShell";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
+import { FEATURE_FLAGS } from "@/lib/featureFlags";
+import { VideoEmBrevePlaceholder } from "@/components/VideoEmBrevePlaceholder";
 import { MinicursoEmbedido } from "@/components/MinicursoEmbedido";
 import {
   JORNADA_HUB_COPY,
@@ -322,8 +323,9 @@ export default function JornadaHubPage() {
   }, [lista, modulo]);
 
   const minicursoDisponivel =
-    modulo?.minicursoDisponivel ??
-    (modulo?.cursoVinculadoId != null && (modulo?.minicursoProgresso?.total ?? 0) > 0);
+    FEATURE_FLAGS.SHOW_COURSES_CATALOG &&
+    (modulo?.minicursoDisponivel ??
+      (modulo?.cursoVinculadoId != null && (modulo?.minicursoProgresso?.total ?? 0) > 0));
 
   const moduloTotalmenteConcluido =
     modulo?.analiseConcluida && minicursoDisponivel && modulo.minicursoConcluido;
@@ -331,7 +333,10 @@ export default function JornadaHubPage() {
   const podeSeguirJornada =
     modulo?.analiseConcluida && (!minicursoDisponivel || modulo.minicursoConcluido);
 
-  const embedIntro = modulo?.videoIntroUrl ? getVideoEmbedUrl(modulo.videoIntroUrl) : null;
+  const embedIntro =
+    FEATURE_FLAGS.SHOW_COURSE_INTRO_VIDEOS && modulo?.videoIntroUrl
+      ? getVideoEmbedUrl(modulo.videoIntroUrl)
+      : null;
 
   const perfilTemPreview = !!preview && !previewLoading;
   const verResultadoLabel = pessoaAtiva
@@ -415,21 +420,12 @@ export default function JornadaHubPage() {
               />
             </div>
           ) : (
-            <div
-              className="rounded-xl p-5 flex gap-3 items-start"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.1)" }}
-            >
-              <PlayCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "rgba(200,165,107,0.4)" }} />
-              <div>
-                <p className="text-sm font-medium mb-1" style={{ color: "rgba(247,242,236,0.65)" }}>
-                  Vídeo em breve
-                </p>
-                <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.38)" }}>
-                  {copy?.introFallback ??
-                    "Enquanto o vídeo não é publicado, você já pode fazer a análise abaixo e ver seu resultado."}
-                </p>
-              </div>
-            </div>
+            <VideoEmBrevePlaceholder
+              descricao={
+                copy?.introFallback ??
+                "Enquanto o vídeo não é publicado, você já pode fazer a análise abaixo e ver seu resultado."
+              }
+            />
           )}
         </section>
 
