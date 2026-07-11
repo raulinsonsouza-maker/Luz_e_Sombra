@@ -7,6 +7,7 @@ import { trackLpEvent, type LpVariant } from "@/lib/lpAnalytics";
 import { toastApiError } from "@/lib/apiError";
 import { digitsOnlyPhone, formatBrazilPhone, isValidBrazilPhone } from "@/lib/phoneMask";
 import { PASSWORD_HINT, validatePassword } from "@/lib/passwordPolicy";
+import { LP_JOURNEY_NAME, LP_PORTAL_NAME } from "@/lib/lpConfig";
 
 interface Props {
   open: boolean;
@@ -168,10 +169,10 @@ export default function SignupModal({ open, onClose, variant }: Props) {
         </button>
 
         <h2 className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>
-          Crie seu acesso
+          Comece sua jornada
         </h2>
         <p className="text-xs mb-6" style={{ color: "rgba(247,242,236,0.45)" }}>
-          Preencha seus dados para continuar ao pagamento seguro.
+          Cadastre-se para acessar a {LP_JOURNEY_NAME} no {LP_PORTAL_NAME}.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3.5">

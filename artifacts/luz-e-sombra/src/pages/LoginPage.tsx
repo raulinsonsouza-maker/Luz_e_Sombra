@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { LogIn, AlertCircle, Loader2, Eye, EyeOff } from "lucide-react";
+import { LP_PORTAL_NAME, LP_JOURNEY_NAME } from "@/lib/lpConfig";
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
@@ -66,7 +67,7 @@ export default function LoginPage() {
           />
           <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-2"
             style={{ color: "#c8a56b" }}>
-            Plataforma de Autoconhecimento
+            {LP_PORTAL_NAME}
           </p>
         </div>
 
@@ -76,19 +77,17 @@ export default function LoginPage() {
             className="font-tan-mon-cheri leading-tight mb-6"
             style={{ fontSize: "clamp(2.8rem, 4vw, 4rem)", color: "#f7f2ec" }}
           >
-            Da Sombra<br />à Luz
+            {LP_JOURNEY_NAME}
           </h1>
           <p style={{ color: "rgba(200,165,107,0.75)", lineHeight: "1.8", maxWidth: "340px" }}>
-            Uma jornada de clareza, propósito e transformação profunda.
-            Descubra quem você realmente é.
+            Continue sua trilha de autoconhecimento com clareza e propósito.
           </p>
 
-          {/* Decorative line */}
           <div className="flex items-center gap-4 mt-10">
             <div className="w-8 h-px" style={{ background: "#c8a56b" }} />
             <span className="text-xs tracking-[0.2em] uppercase"
               style={{ color: "rgba(200,165,107,0.5)" }}>
-              Roda da Vida · Numerologia · Histórico
+              9 análises · Trilha guiada
             </span>
           </div>
         </div>
@@ -112,10 +111,10 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile brand (hidden on desktop) */}
           <div className="lg:hidden text-center mb-10">
-            <h1 className="font-tan-mon-cheri text-4xl text-brand-dark mb-2">
-              Da Sombra à Luz
+            <h1 className="font-tan-mon-cheri text-3xl text-brand-dark mb-1">
+              {LP_PORTAL_NAME}
             </h1>
-            <p className="text-brand-medium text-sm">Plataforma de Autoconhecimento</p>
+            <p className="text-brand-medium text-sm">{LP_JOURNEY_NAME}</p>
           </div>
 
           {/* Form card */}
@@ -225,7 +224,7 @@ export default function LoginPage() {
             {/* Subtle divider + brand note */}
             <div className="mt-10 pt-8 border-t border-brand-gold/15 text-center">
               <p className="text-xs tracking-widest uppercase text-brand-medium/50">
-                Da Sombra à Luz · Área Privada
+                {LP_PORTAL_NAME} · Área privada
               </p>
             </div>
           </div>

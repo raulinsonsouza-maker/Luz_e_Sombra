@@ -17,8 +17,13 @@ export const LP_GATE_SECONDS = 20;
 export const LP_GATE_PERCENT = 80;
 export const VSL_UNLOCK_KEY = "vsl_unlocked";
 
-export const LP_PRODUCT_NAME = "Portal iluminando";
-export const LP_PRODUCT_TAGLINE = "Da Sombra à Luz — autoconhecimento em clareza prática";
+export const LP_PORTAL_NAME = "Portal Iluminando";
+export const LP_JOURNEY_NAME = "Jornada Da Sombra à Luz";
+export const LP_JOURNEY_TAGLINE =
+  "Uma trilha guiada com 9 análises para sair do automático e ganhar clareza sobre quem você é.";
+export const LP_PRODUCT_NAME = LP_JOURNEY_NAME;
+export const LP_PRODUCT_TAGLINE = LP_JOURNEY_TAGLINE;
+export const LP_CHECKOUT_SUBTITLE = `Acesso completo no ${LP_PORTAL_NAME}`;
 export const LP_PRICE = 57.9;
 export const LP_PRICE_INSTALLMENTS = 3;
 export const LP_PRICE_INSTALLMENT_VALUE = 21.19;
@@ -26,19 +31,19 @@ export const LP_PRICE_ORIGINAL = 97;
 export const LP_PRICE_PERIOD = "";
 export const LP_BILLING_LABEL = "Pagamento único";
 export const LP_GUARANTEE_DAYS = 7;
-export const LP_CTA_PRIMARY = "Quero meu acesso agora";
-export const LP_CTA_NAV = "Começar agora";
+export const LP_CTA_PRIMARY = "Começar minha jornada";
+export const LP_CTA_NAV = "Começar jornada";
 
 /** Copy exclusiva da LP VSL (/vsl) */
 export const VSL_COPY = {
-  navCta: "Quero começar",
-  eyebrow: "Para quem sente que repete os mesmos padrões",
-  headline: "Existe um mapa de quem você é.",
+  navCta: "Começar jornada",
+  eyebrow: LP_PORTAL_NAME,
+  headline: "Veja como a Jornada Da Sombra à Luz conecta suas análises.",
   subheadline:
-    "Assista ao vídeo e veja como cruzar traço corporal, temperamentos, relações e 12 áreas da vida — com clareza prática em minutos, não em anos de tentativa e erro.",
+    "Assista ao vídeo e entenda como traço corporal, temperamentos, relações e 12 áreas da vida se cruzam numa trilha guiada — com clareza prática em minutos.",
   gateTitle: "A oferta aparece em instantes",
   gateDesc:
-    "Continue assistindo. Em poucos segundos você libera o plano completo, o que está incluso e como ativar seu acesso hoje.",
+    "Continue assistindo. Em poucos segundos você libera o que está incluso na jornada e como ativar seu acesso hoje.",
   unlockHint: "Pronto — role e veja tudo que você recebe",
   playerLocked: "Assista para liberar a oferta completa",
   playerProgress: (percent: number) =>
@@ -47,11 +52,11 @@ export const VSL_COPY = {
 
 export const LP_SECTIONS = {
   modules: {
-    eyebrow: "Dentro da plataforma",
-    title: "Não é avaliação genérica.",
-    titleAccent: "São 9 lentes sobre você.",
+    eyebrow: "Etapas da jornada",
+    title: "9 análises integradas.",
+    titleAccent: "Um mapa de quem você é.",
     subtitle:
-      "Cada ferramenta responde uma pergunta diferente — e juntas montam o retrato mais completo que você já teve de si.",
+      "Cada etapa responde uma pergunta diferente — e juntas compõem a Jornada Da Sombra à Luz no Portal Iluminando.",
   },
   howItWorks: {
     eyebrow: "Como começar",
@@ -60,17 +65,17 @@ export const LP_SECTIONS = {
       {
         step: "01",
         title: "Assista o método",
-        desc: "O vídeo acima mostra como tudo se conecta — e por que funciona quando outras abordagens falham.",
+        desc: "O vídeo mostra como as análises se conectam na jornada — e por que isso funciona quando outras abordagens falham.",
       },
       {
         step: "02",
-        title: "Ative seu acesso",
-        desc: "R$ 57,90 à vista ou 3x de R$ 21,19 no cartão. Checkout seguro e acesso após confirmação do pagamento.",
+        title: "Ative sua jornada",
+        desc: "R$ 57,90 à vista ou 3x de R$ 21,19 no cartão. Checkout seguro e acesso no Portal Iluminando após confirmação.",
       },
       {
         step: "03",
-        title: "Receba sua primeira leitura",
-        desc: "Em cerca de 15 minutos você já tem diagnóstico personalizado na mão. Sem julgamento, no seu ritmo.",
+        title: "Faça sua primeira análise",
+        desc: "Em cerca de 15 minutos você já tem diagnóstico personalizado na trilha. Sem julgamento, no seu ritmo.",
       },
     ],
   },
@@ -80,15 +85,15 @@ export const LP_SECTIONS = {
   },
   offer: {
     eyebrow: "Para quem assistiu até aqui",
-    title: "Investimento único",
-    titleAccent: "na clareza que você adia",
+    title: LP_JOURNEY_NAME,
+    titleAccent: "no Portal Iluminando",
     subtitle: "Pagamento único. 7 dias de garantia total.",
     footnote: "PIX ou cartão · Acesso após confirmação · Garantia de 7 dias",
   },
   finalCta: {
     title: "Da próxima vez que você se perguntar",
     titleAccent: "por que repito isso?",
-    body: "Você já terá um mapa — não só mais uma dúvida. A escolha é sua. O sistema está pronto.",
+    body: "Você já terá um mapa na jornada — não só mais uma dúvida. A escolha é sua.",
   },
   faq: {
     eyebrow: "Ainda com dúvida?",
@@ -99,30 +104,31 @@ export const LP_SECTIONS = {
 /** Copy das seções na LP controle (/) — tom mais editorial */
 export const CONTROL_SECTIONS = {
   modules: {
-    eyebrow: "Tudo que está incluso",
-    title: "9 ferramentas.",
-    titleAccent: "Uma jornada completa.",
-    subtitle: "Cada módulo ilumina uma dimensão diferente de quem você é.",
+    eyebrow: "Etapas da jornada",
+    title: "9 análises que se conectam",
+    titleAccent: "numa trilha guiada.",
+    subtitle:
+      "Cada etapa ilumina uma dimensão de quem você é — todas levam você da sombra à luz.",
   },
   howItWorks: {
     eyebrow: "Como funciona",
-    title: "Simples. Profundo.",
-    titleAccent: "Transformador.",
+    title: "Cadastre-se, percorra,",
+    titleAccent: "transforme-se.",
     steps: [
       {
         step: "01",
-        title: "Assista e entenda",
-        desc: "Veja como a plataforma funciona e o que você vai descobrir sobre si.",
+        title: "Garanta sua jornada",
+        desc: "Cadastro rápido e pagamento seguro. Acesso ao Portal Iluminando após confirmação.",
       },
       {
         step: "02",
-        title: "Garanta seu acesso",
-        desc: "Checkout rápido. Login imediato após a confirmação do pagamento.",
+        title: "Percorra as análises",
+        desc: "Traço, temperamento, roda da vida e mais — na ordem da trilha, no seu ritmo.",
       },
       {
         step: "03",
-        title: "Comece sua jornada",
-        desc: "Primeira avaliação em 15 minutos. Clareza real, no seu ritmo.",
+        title: "Ganhe clareza integrada",
+        desc: "Cada resultado conversa com o próximo. Em minutos você vê padrões que antes pareciam aleatórios.",
       },
     ],
   },
@@ -131,16 +137,16 @@ export const CONTROL_SECTIONS = {
     title: "Resultados reais",
   },
   offer: {
-    eyebrow: "Oferta especial",
-    title: `Acesso completo ao ${LP_PRODUCT_NAME}`,
+    eyebrow: "O que você está comprando",
+    title: LP_JOURNEY_NAME,
     titleAccent: "",
-    subtitle: `${LP_BILLING_LABEL}. Acesso completo após confirmação do pagamento.`,
+    subtitle: `${LP_BILLING_LABEL} · Acesso no ${LP_PORTAL_NAME} após confirmação do pagamento.`,
     footnote: "PIX ou cartão · Acesso após pagamento · Garantia de 7 dias",
   },
   finalCta: {
-    title: "Sua jornada começa",
-    titleAccent: "com uma escolha",
-    body: "A clareza que você busca está mais próxima do que imagina. Cada avaliação é um passo consciente.",
+    title: "Sua jornada da sombra à luz",
+    titleAccent: "começa com uma escolha",
+    body: "Nove análises integradas esperando por você. Cada passo é consciência — não mais automático.",
   },
   faq: {
     eyebrow: "Perguntas frequentes",
@@ -154,7 +160,7 @@ export function getLpSections(variant: LpSectionVariant = "control") {
   return variant === "vsl" ? LP_SECTIONS : CONTROL_SECTIONS;
 }
 
-/** URL do checkout Cakto (Portal iluminando) */
+/** URL do checkout Cakto */
 export const CAKTO_CHECKOUT_URL =
   import.meta.env.VITE_CAKTO_CHECKOUT_URL || "https://pay.cakto.com.br/3dr2icy_975648";
 
@@ -168,47 +174,47 @@ export const LP_MODULES: LpModuleItem[] = [
   {
     icon: Layers,
     title: "Traço de Caráter",
-    desc: "O que seu corpo revela sobre seu caráter — padrões que você repete sem perceber, lidos por fotos e Reich/Lowen.",
+    desc: "Etapa da jornada: o que seu corpo revela sobre padrões que você repete — lidos por fotos e Reich/Lowen.",
   },
   {
     icon: FlaskConical,
     title: "Temperamento",
-    desc: "Por que você reage, decide e se relaciona do jeito que reage — e o que muda quando você entende isso.",
+    desc: "Etapa da jornada: por que você reage e se relaciona do jeito que reage — e o que muda ao entender isso.",
   },
   {
     icon: Heart,
     title: "Linguagens do Amor",
-    desc: "Como você pede afeto, como demonstra e por que certas relações parecem nunca funcionar do seu jeito.",
+    desc: "Etapa da jornada: como você pede e demonstra afeto — e por que certas relações não fluem do seu jeito.",
   },
   {
     icon: Target,
     title: "Roda da Vida",
-    desc: "Raio-x honesto de 12 áreas: onde sua energia está, onde você se sabota e o que pede atenção agora.",
+    desc: "Etapa da jornada: raio-x de 12 áreas — onde sua energia está, onde você se sabota e o que pede atenção agora.",
   },
   {
     icon: Hash,
     title: "Numerologia",
-    desc: "Missão, talentos e ciclos da sua data de nascimento — traduzidos em reflexão e ação concreta.",
+    desc: "Etapa da jornada: missão, talentos e ciclos da sua data de nascimento em reflexão e ação concreta.",
   },
   {
     icon: Map,
-    title: "Jornada gamificada",
-    desc: "Trilha guiada com XP e missões diárias para você não parar no meio — constância sem peso.",
+    title: "Trilha gamificada",
+    desc: "A jornada guiada com XP e missões diárias — constância sem peso, passo a passo.",
   },
   {
     icon: GraduationCap,
-    title: "Cursos e minicursos",
-    desc: "Vídeos integrados à jornada para aprofundar cada etapa no momento certo.",
+    title: "Aprofundamentos",
+    desc: "Conteúdos integrados à trilha para aprofundar cada etapa no momento certo (em breve).",
   },
   {
     icon: Users2,
     title: "Comunidade",
-    desc: "Pessoas na mesma fase de transformação — você não caminha sozinho(a) nesse processo.",
+    desc: "Etapa da jornada: pessoas na mesma fase de transformação — você não caminha sozinho(a).",
   },
   {
     icon: Sparkles,
     title: "Quem Sou Eu",
-    desc: "Síntese final: numerologia + traço + roda da vida cruzados em um retrato integrado de quem você é.",
+    desc: "Síntese final da jornada: numerologia, traço e roda da vida cruzados num retrato integrado.",
   },
 ];
 
@@ -232,8 +238,12 @@ export const LP_TESTIMONIALS = [
 
 export const LP_FAQ = [
   {
+    q: "O que exatamente estou comprando?",
+    a: `A ${LP_JOURNEY_NAME} — uma trilha com 9 análises integradas no ${LP_PORTAL_NAME}. Não são ferramentas soltas: é um percurso guiado da sombra à luz.`,
+  },
+  {
     q: "Preciso entender de numerologia ou terapia corporal?",
-    a: "Não. A plataforma guia cada passo com perguntas claras e interpretações prontas. Você responde com honestidade — o sistema faz o resto.",
+    a: "Não. A jornada guia cada passo com perguntas claras e interpretações prontas. Você responde com honestidade — o sistema faz o resto.",
   },
   {
     q: "Como recebo o acesso depois de comprar?",
@@ -258,12 +268,12 @@ export const LP_FAQ = [
 ];
 
 export const LP_INCLUDED_ITEMS = [
-  "9 ferramentas de autoconhecimento desbloqueadas",
+  `Acesso completo à ${LP_JOURNEY_NAME}`,
+  "9 análises integradas na trilha guiada",
   "Diagnósticos personalizados — nada genérico",
   "48+ interpretações exclusivas por pontuação",
   "Histórico para acompanhar sua evolução",
-  "Missões diárias e trilha gamificada",
-  "Atualizações e suporte inclusos no acesso",
+  `Portal ${LP_PORTAL_NAME} com missões e suporte inclusos`,
 ];
 
 export function formatLpPriceLabel(): string {

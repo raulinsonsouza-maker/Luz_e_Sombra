@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import {
   LP_PRODUCT_NAME,
   LP_PRODUCT_TAGLINE,
+  LP_PORTAL_NAME,
+  LP_CHECKOUT_SUBTITLE,
   LP_INCLUDED_ITEMS,
   LP_PRICE,
   LP_PRICE_INSTALLMENTS,
@@ -267,7 +269,7 @@ export default function CheckoutPage() {
           <div className="flex items-center gap-2">
             <Sparkles size={14} style={{ color: "#c8a56b" }} />
             <span className="font-tan-mon-cheri text-sm hidden sm:inline" style={{ color: "#f7f2ec" }}>
-              {LP_PRODUCT_NAME}
+              {LP_PORTAL_NAME}
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "rgba(200,165,107,0.6)" }}>
@@ -300,6 +302,9 @@ export default function CheckoutPage() {
                 {LP_PRODUCT_NAME}
               </h1>
               <p className="text-sm max-w-lg" style={{ color: "rgba(247,242,236,0.45)" }}>
+                {LP_CHECKOUT_SUBTITLE}
+              </p>
+              <p className="text-xs mt-1 max-w-lg" style={{ color: "rgba(247,242,236,0.35)" }}>
                 {LP_PRODUCT_TAGLINE}
               </p>
             </div>

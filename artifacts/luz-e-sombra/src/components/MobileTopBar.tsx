@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { Bell } from "lucide-react";
 import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
+import { LP_PORTAL_NAME } from "@/lib/lpConfig";
 
 type Props = {
   titulo?: string;
@@ -32,7 +33,7 @@ export default function MobileTopBar({ titulo, subtitulo, mostrarSino = true }: 
               style={{ background: "linear-gradient(to bottom, transparent, #c8a56b, transparent)" }}
             />
             <span className="font-tan-mon-cheri text-base tracking-wide truncate" style={{ color: "#f7f2ec" }}>
-              Da Sombra à Luz
+              {LP_PORTAL_NAME}
             </span>
           </button>
           {mostrarSino && (

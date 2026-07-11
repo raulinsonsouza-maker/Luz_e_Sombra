@@ -11,7 +11,7 @@ import {
   LpFaqSection,
   LpFinalCtaSection,
 } from "@/components/lp/LpOfferSections";
-import { VSL_UNLOCK_KEY, VSL_COPY, LP_GATE_PERCENT, formatLpPriceLabel } from "@/lib/lpConfig";
+import { VSL_UNLOCK_KEY, VSL_COPY, LP_GATE_PERCENT, formatLpPriceLabel, LP_PORTAL_NAME, LP_JOURNEY_NAME } from "@/lib/lpConfig";
 import { trackLpEvent } from "@/lib/lpAnalytics";
 import SignupModal from "@/components/funnel/SignupModal";
 import { captureUtmsFromUrl } from "@/lib/utm";
@@ -73,7 +73,7 @@ export default function VslLandingPage() {
       >
         <div className="max-w-3xl mx-auto px-5 w-full flex items-center justify-between">
           <span className="font-tan-mon-cheri text-base" style={{ color: "#f7f2ec" }}>
-            Da Sombra à Luz
+            {LP_PORTAL_NAME}
           </span>
           {unlocked && (
             <button
@@ -186,7 +186,7 @@ export default function VslLandingPage() {
         style={{ background: "#0a0805", borderTop: "1px solid rgba(200,165,107,0.08)" }}
       >
         <p className="text-xs" style={{ color: "rgba(247,242,236,0.2)" }}>
-          Portal iluminando · {formatLpPriceLabel()}
+          {LP_PORTAL_NAME} · {LP_JOURNEY_NAME} · {formatLpPriceLabel()}
         </p>
       </footer>
 

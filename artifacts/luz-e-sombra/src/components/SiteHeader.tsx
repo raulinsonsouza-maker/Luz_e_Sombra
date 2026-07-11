@@ -25,6 +25,7 @@ import {
   isToolsGroupActive,
   isChromelessRoute,
 } from "@/lib/navConfig";
+import { LP_PORTAL_NAME } from "@/lib/lpConfig";
 
 const GOLD = "#c8a56b";
 const TEXT = "#f7f2ec";
@@ -104,7 +105,7 @@ export default function SiteHeader() {
               style={{ background: `linear-gradient(to bottom, transparent, ${GOLD}, transparent)` }}
             />
             <span className="font-tan-mon-cheri text-base tracking-wide" style={{ color: TEXT }}>
-              Da Sombra à Luz
+              {LP_PORTAL_NAME}
             </span>
           </button>
 
