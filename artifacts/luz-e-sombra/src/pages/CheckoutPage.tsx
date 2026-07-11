@@ -33,8 +33,6 @@ import {
 import { formatBrazilPhone } from "@/lib/phoneMask";
 import { trackLpEvent, type LpVariant } from "@/lib/lpAnalytics";
 
-const AUTO_REDIRECT_SECONDS = 4;
-
 interface CheckoutInfo {
   nome: string;
   email: string;
@@ -143,7 +141,6 @@ export default function CheckoutPage() {
   const [info, setInfo] = useState<CheckoutInfo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [enviando, setEnviando] = useState(false);
-  const [countdown, setCountdown] = useState(AUTO_REDIRECT_SECONDS);
 
   useEffect(() => {
     if (!token) {
@@ -192,21 +189,6 @@ export default function CheckoutPage() {
     toast.error("Checkout Cakto não configurado.");
     setEnviando(false);
   }, [info, token, variant]);
-
-  useEffect(() => {
-    if (!info || enviando) return;
-
-    const tick = setInterval(() => {
-      setCountdown((c) => Math.max(0, c - 1));
-    }, 1000);
-
-    const redirect = setTimeout(() => handlePay(), AUTO_REDIRECT_SECONDS * 1000);
-
-    return () => {
-      clearInterval(tick);
-      clearTimeout(redirect);
-    };
-  }, [info, enviando, handlePay]);
 
   useEffect(() => {
     if (!enviando) return;
@@ -486,17 +468,7 @@ export default function CheckoutPage() {
                 </ol>
               </div>
 
-              {/* Countdown + CTA */}
-              {!enviando && countdown > 0 && (
-                <p className="text-center text-xs mb-3" style={{ color: "rgba(247,242,236,0.4)" }}>
-                  Redirecionando em{" "}
-                  <span className="font-bold tabular-nums" style={{ color: "#c8a56b" }}>
-                    {countdown}s
-                  </span>
-                  ...
-                </p>
-              )}
-
+              {/* CTA */}
               <button
                 type="button"
                 onClick={handlePay}
