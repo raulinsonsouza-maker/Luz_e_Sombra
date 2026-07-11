@@ -8,6 +8,9 @@ export const usuariosTable = pgTable("usuarios", {
   senha: text("senha").notNull(),
   nome: text("nome").notNull(),
   email: text("email").unique(),
+  telefone: text("telefone"),
+  /** pending = aguardando pagamento; active = acesso pago; revoked = reembolso/chargeback */
+  statusAcesso: text("status_acesso").notNull().default("active"),
   dataNascimento: text("data_nascimento"),
   fotoPerfil: text("foto_perfil"),
   primeiroAcesso: boolean("primeiro_acesso").notNull().default(true),

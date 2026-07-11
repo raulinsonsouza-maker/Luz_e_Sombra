@@ -100,6 +100,29 @@ export const tracoAnalisarEnvelopeSchema = z.object({
   diagnosticoEmocional: z.unknown().optional(),
 });
 
+const emailRequiredSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .refine((v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), "E-mail inválido");
+
+export const funnelRegisterSchema = z.object({
+  nome: z.string().trim().min(2, "Nome é obrigatório"),
+  email: emailRequiredSchema,
+  telefone: z.string().trim().min(10, "Celular é obrigatório"),
+  senha: senhaSchema,
+  variant: z.enum(["control", "vsl"]).default("control"),
+  utm: z
+    .object({
+      source: z.string().optional(),
+      medium: z.string().optional(),
+      campaign: z.string().optional(),
+      content: z.string().optional(),
+      term: z.string().optional(),
+    })
+    .optional(),
+});
+
 export function parseBody<T extends z.ZodTypeAny>(
   schema: T,
   body: unknown,

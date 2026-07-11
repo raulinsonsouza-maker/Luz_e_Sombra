@@ -11,8 +11,10 @@ import {
   LpFaqSection,
   LpFinalCtaSection,
 } from "@/components/lp/LpOfferSections";
-import { VSL_UNLOCK_KEY, VSL_COPY } from "@/lib/lpConfig";
+import { VSL_UNLOCK_KEY, VSL_COPY, LP_GATE_PERCENT, formatLpPriceLabel } from "@/lib/lpConfig";
 import { trackLpEvent } from "@/lib/lpAnalytics";
+import SignupModal from "@/components/funnel/SignupModal";
+import { captureUtmsFromUrl } from "@/lib/utm";
 
 function readUnlocked(): boolean {
   try {
@@ -26,6 +28,7 @@ export default function VslLandingPage() {
   const [, navigate] = useLocation();
   const { status } = useAuth();
   const [unlocked, setUnlocked] = useState(readUnlocked);
+  const [signupOpen, setSignupOpen] = useState(false);
   const trackedView = useRef(false);
   const trackedUnlock = useRef(false);
 
@@ -34,6 +37,7 @@ export default function VslLandingPage() {
   }, [status, navigate]);
 
   useEffect(() => {
+    captureUtmsFromUrl();
     if (trackedView.current) return;
     trackedView.current = true;
     trackLpEvent("lp_view", "vsl");
@@ -52,8 +56,9 @@ export default function VslLandingPage() {
   }, []);
 
   const goCheckout = useCallback(() => {
-    navigate("/checkout?from=vsl");
-  }, [navigate]);
+    if (!unlocked) return;
+    setSignupOpen(true);
+  }, [unlocked]);
 
   return (
     <div style={{ background: "#0f0c09", minHeight: "100vh" }}>
@@ -115,6 +120,7 @@ export default function VslLandingPage() {
           </div>
 
           <YouTubeGatedPlayer
+            gatePercent={LP_GATE_PERCENT}
             onUnlocked={handleUnlocked}
             onVideoStart={handleVideoStart}
             lockedLabel={VSL_COPY.playerLocked}
@@ -180,9 +186,11 @@ export default function VslLandingPage() {
         style={{ background: "#0a0805", borderTop: "1px solid rgba(200,165,107,0.08)" }}
       >
         <p className="text-xs" style={{ color: "rgba(247,242,236,0.2)" }}>
-          Da Sombra à Luz · A partir de R$ 47/mês
+          Portal iluminando · {formatLpPriceLabel()}
         </p>
       </footer>
+
+      <SignupModal open={signupOpen} onClose={() => setSignupOpen(false)} variant="vsl" />
     </div>
   );
 }

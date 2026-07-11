@@ -5,7 +5,7 @@ import { clearTracoSessionStorage } from "@/lib/tracoFormStorage";
 interface AuthContextType {
   user: User | null;
   status: "loading" | "authenticated" | "unauthenticated";
-  login: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  login: (username: string, password: string) => Promise<{ ok: boolean; error?: string; code?: string }>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
@@ -66,6 +66,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(data.user);
         setStatus("authenticated");
         return { ok: true };
+      }
+      if (res.status === 402) {
+        return { ok: false, error: "Pagamento pendente.", code: "pagamento_pendente" };
       }
       return { ok: false, error: data.error || "Erro ao fazer login" };
     } catch {

@@ -4,6 +4,8 @@ export type LpEventName =
   | "lp_view"
   | "vsl_video_start"
   | "vsl_unlock"
+  | "signup_start"
+  | "signup_complete"
   | "checkout_start"
   | "checkout_complete";
 

@@ -14,14 +14,17 @@ import {
 export const LP_VIDEO_URL = "https://youtu.be/t_0-OV_MzVM?si=J5LYzhiBpat1WDPz";
 export const LP_VIDEO_ID = "t_0-OV_MzVM";
 export const LP_GATE_SECONDS = 20;
+export const LP_GATE_PERCENT = 80;
 export const VSL_UNLOCK_KEY = "vsl_unlocked";
 
-export const LP_PRODUCT_NAME = "Da Sombra à Luz";
-export const LP_PRODUCT_TAGLINE = "O sistema que transforma autoconhecimento em clareza prática";
-export const LP_PRICE = 47;
+export const LP_PRODUCT_NAME = "Portal iluminando";
+export const LP_PRODUCT_TAGLINE = "Da Sombra à Luz — autoconhecimento em clareza prática";
+export const LP_PRICE = 57.9;
+export const LP_PRICE_INSTALLMENTS = 3;
+export const LP_PRICE_INSTALLMENT_VALUE = 21.19;
 export const LP_PRICE_ORIGINAL = 97;
-export const LP_PRICE_PERIOD = "/mês";
-export const LP_BILLING_LABEL = "Assinatura mensal";
+export const LP_PRICE_PERIOD = "";
+export const LP_BILLING_LABEL = "Pagamento único";
 export const LP_GUARANTEE_DAYS = 7;
 export const LP_CTA_PRIMARY = "Quero meu acesso agora";
 export const LP_CTA_NAV = "Começar agora";
@@ -38,8 +41,8 @@ export const VSL_COPY = {
     "Continue assistindo. Em poucos segundos você libera o plano completo, o que está incluso e como ativar seu acesso hoje.",
   unlockHint: "Pronto — role e veja tudo que você recebe",
   playerLocked: "Assista para liberar a oferta completa",
-  playerProgress: (seconds: number) =>
-    seconds > 0 ? `Faltam ${seconds}s para liberar` : "Liberando...",
+  playerProgress: (percent: number) =>
+    percent > 0 ? `Assista mais ${percent}% do vídeo para liberar` : "Desbloqueando...",
 };
 
 export const LP_SECTIONS = {
@@ -62,7 +65,7 @@ export const LP_SECTIONS = {
       {
         step: "02",
         title: "Ative seu acesso",
-        desc: "R$ 47/mês, checkout seguro e login imediato. Sem fidelidade — cancela quando quiser.",
+        desc: "R$ 57,90 à vista ou 3x de R$ 21,19 no cartão. Checkout seguro e acesso após confirmação do pagamento.",
       },
       {
         step: "03",
@@ -77,10 +80,10 @@ export const LP_SECTIONS = {
   },
   offer: {
     eyebrow: "Para quem assistiu até aqui",
-    title: "Menos de R$ 1,60 por dia",
+    title: "Investimento único",
     titleAccent: "na clareza que você adia",
-    subtitle: "Assinatura mensal. Sem contrato. 7 dias de garantia total.",
-    footnote: "Cobrança mensal · Acesso imediato · Cancele quando quiser",
+    subtitle: "Pagamento único. 7 dias de garantia total.",
+    footnote: "PIX ou cartão · Acesso após confirmação · Garantia de 7 dias",
   },
   finalCta: {
     title: "Da próxima vez que você se perguntar",
@@ -131,8 +134,8 @@ export const CONTROL_SECTIONS = {
     eyebrow: "Oferta especial",
     title: `Acesso completo ao ${LP_PRODUCT_NAME}`,
     titleAccent: "",
-    subtitle: `${LP_BILLING_LABEL}. Cancele quando quiser. Atualizações inclusas.`,
-    footnote: "Cobrança mensal recorrente · Acesso imediato · Suporte incluso",
+    subtitle: `${LP_BILLING_LABEL}. Acesso completo após confirmação do pagamento.`,
+    footnote: "PIX ou cartão · Acesso após pagamento · Garantia de 7 dias",
   },
   finalCta: {
     title: "Sua jornada começa",
@@ -151,8 +154,9 @@ export function getLpSections(variant: LpSectionVariant = "control") {
   return variant === "vsl" ? LP_SECTIONS : CONTROL_SECTIONS;
 }
 
-/** Preencher quando integrar com Cakto. Ex.: https://pay.cakto.com.br/xxx */
-export const CAKTO_CHECKOUT_URL = "";
+/** URL do checkout Cakto (Portal iluminando) */
+export const CAKTO_CHECKOUT_URL =
+  import.meta.env.VITE_CAKTO_CHECKOUT_URL || "https://pay.cakto.com.br/3dr2icy_975648";
 
 export interface LpModuleItem {
   icon: LucideIcon;
@@ -232,12 +236,12 @@ export const LP_FAQ = [
     a: "Não. A plataforma guia cada passo com perguntas claras e interpretações prontas. Você responde com honestidade — o sistema faz o resto.",
   },
   {
-    q: "Como recebo o acesso depois de assinar?",
-    a: "Pagamento confirmado, login no e-mail na hora. Você entra e já pode começar a primeira avaliação.",
+    q: "Como recebo o acesso depois de comprar?",
+    a: "Assim que o pagamento for confirmado (PIX ou cartão), você entra automaticamente na plataforma com o e-mail e senha que cadastrou.",
   },
   {
-    q: "Posso cancelar quando quiser?",
-    a: "Sim. Sem multa, sem burocracia. O acesso fica ativo até o fim do período que você já pagou.",
+    q: "Posso parcelar?",
+    a: `Sim. No cartão você pode pagar em até ${LP_PRICE_INSTALLMENTS}x de ${formatLpPrice(LP_PRICE_INSTALLMENT_VALUE)} ou ${formatLpPrice(LP_PRICE)} à vista.`,
   },
   {
     q: "Quanto tempo até eu ver algo concreto?",
@@ -259,18 +263,28 @@ export const LP_INCLUDED_ITEMS = [
   "48+ interpretações exclusivas por pontuação",
   "Histórico para acompanhar sua evolução",
   "Missões diárias e trilha gamificada",
-  "Atualizações e suporte inclusos na assinatura",
+  "Atualizações e suporte inclusos no acesso",
 ];
+
+export function formatLpPriceLabel(): string {
+  return `${formatLpPrice(LP_PRICE)} à vista ou ${LP_PRICE_INSTALLMENTS}x de ${formatLpPrice(LP_PRICE_INSTALLMENT_VALUE)}`;
+}
 
 export function formatLpPrice(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-export function buildCaktoUrl(nome: string, email: string, telefone?: string): string {
+export function buildCaktoUrl(
+  nome: string,
+  email: string,
+  telefone?: string,
+  checkoutToken?: string,
+): string {
   if (!CAKTO_CHECKOUT_URL) return "";
   const url = new URL(CAKTO_CHECKOUT_URL);
   url.searchParams.set("name", nome);
   url.searchParams.set("email", email);
   if (telefone) url.searchParams.set("phone", telefone);
+  if (checkoutToken) url.searchParams.set("ref", checkoutToken);
   return url.toString();
 }

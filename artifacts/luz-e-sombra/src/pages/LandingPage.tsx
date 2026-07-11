@@ -1,26 +1,30 @@
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Circle, Sun, BookOpen, TrendingUp, Star, Compass, Heart, Brain, Layers } from "lucide-react";
 import { LpModulesSection, LpOfferSection, LpFinalCtaSection } from "@/components/lp/LpOfferSections";
+import SignupModal from "@/components/funnel/SignupModal";
+import { captureUtmsFromUrl } from "@/lib/utm";
 import { trackLpEvent } from "@/lib/lpAnalytics";
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
   const { status } = useAuth();
   const trackedView = useRef(false);
+  const [signupOpen, setSignupOpen] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated") navigate("/dashboard");
   }, [status, navigate]);
 
   useEffect(() => {
+    captureUtmsFromUrl();
     if (trackedView.current) return;
     trackedView.current = true;
     trackLpEvent("lp_view", "control");
   }, []);
 
-  const goCheckout = () => navigate("/checkout?from=control");
+  const goCheckout = () => setSignupOpen(true);
   const goLogin = () => navigate("/login");
 
   return (
@@ -374,6 +378,7 @@ export default function LandingPage() {
         </p>
       </footer>
 
+      <SignupModal open={signupOpen} onClose={() => setSignupOpen(false)} variant="control" />
     </div>
   );
 }

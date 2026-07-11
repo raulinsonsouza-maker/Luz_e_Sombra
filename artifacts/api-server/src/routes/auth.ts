@@ -43,18 +43,30 @@ router.post("/login", async (req: Request, res: Response) => {
     }
 
     const usernameNorm = String(username).trim().toLowerCase();
+    const isEmail = usernameNorm.includes("@");
     const [usuario] = await db
       .select()
       .from(usuariosTable)
-      .where(eq(usuariosTable.username, usernameNorm))
+      .where(
+        isEmail
+          ? eq(usuariosTable.email, usernameNorm)
+          : eq(usuariosTable.username, usernameNorm),
+      )
       .limit(1);
 
-    if (!usuario || !usuario.ativo) {
+    if (!usuario) {
       return res.status(401).json({ error: "Usuário ou senha inválidos" });
     }
 
     const senhaValida = await bcrypt.compare(String(password), usuario.senha);
     if (!senhaValida) {
+      return res.status(401).json({ error: "Usuário ou senha inválidos" });
+    }
+
+    if (!usuario.ativo) {
+      if (usuario.statusAcesso === "pending") {
+        return res.status(402).json({ error: "pagamento_pendente" });
+      }
       return res.status(401).json({ error: "Usuário ou senha inválidos" });
     }
 
@@ -104,7 +116,11 @@ router.get("/session", async (req: Request, res: Response) => {
       .where(eq(usuariosTable.id, decoded.id))
       .limit(1);
 
-    if (!usuario || !usuario.ativo) {
+    if (!usuario) {
+      return res.status(401).json({ error: "Usuário não encontrado ou inativo" });
+    }
+
+    if (!usuario.ativo) {
       return res.status(401).json({ error: "Usuário não encontrado ou inativo" });
     }
 

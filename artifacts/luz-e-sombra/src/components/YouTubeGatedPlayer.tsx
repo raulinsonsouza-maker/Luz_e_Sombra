@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Play, Lock } from "lucide-react";
-import { LP_GATE_SECONDS, LP_VIDEO_ID, VSL_UNLOCK_KEY } from "@/lib/lpConfig";
+import { LP_GATE_SECONDS, LP_GATE_PERCENT, LP_VIDEO_ID, VSL_UNLOCK_KEY } from "@/lib/lpConfig";
 
 declare global {
   interface Window {
@@ -28,6 +28,7 @@ declare global {
 
 interface YTPlayer {
   getCurrentTime(): number;
+  getDuration(): number;
   getPlayerState(): number;
   destroy(): void;
 }
@@ -79,23 +80,25 @@ function persistUnlock() {
 interface Props {
   videoId?: string;
   gateSeconds?: number;
+  gatePercent?: number;
   onUnlocked?: () => void;
   onVideoStart?: () => void;
   className?: string;
   lockedLabel?: string;
-  progressLabel?: (remainingSeconds: number) => string;
+  progressLabel?: (remainingPercent: number) => string;
   unlockedLabel?: string;
 }
 
 export default function YouTubeGatedPlayer({
   videoId = LP_VIDEO_ID,
   gateSeconds = LP_GATE_SECONDS,
+  gatePercent = LP_GATE_PERCENT,
   onUnlocked,
   onVideoStart,
   className = "",
   lockedLabel = "Assista o vídeo para desbloquear a oferta",
   progressLabel = (remaining) =>
-    remaining > 0 ? `Assista mais ${remaining}s para ver a oferta` : "Desbloqueando...",
+    remaining > 0 ? `Assista mais ${remaining}% do vídeo para ver a oferta` : "Desbloqueando...",
   unlockedLabel = "Oferta desbloqueada — role para ver os detalhes",
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -107,7 +110,7 @@ export default function YouTubeGatedPlayer({
   const [apiReady, setApiReady] = useState(false);
   const [apiFailed, setApiFailed] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
+  const [watchedPercent, setWatchedPercent] = useState(0);
   const [unlocked, setUnlocked] = useState(unlockedRef.current);
   const [fallbackSeconds, setFallbackSeconds] = useState(0);
   const [showFallbackBtn, setShowFallbackBtn] = useState(false);
@@ -198,8 +201,14 @@ export default function YouTubeGatedPlayer({
       if (!p) return;
       try {
         const time = p.getCurrentTime();
-        setElapsed(Math.floor(time));
-        if (time >= gateSeconds) doUnlock();
+        const duration = p.getDuration();
+        if (duration > 0) {
+          const pct = Math.min(100, Math.floor((time / duration) * 100));
+          setWatchedPercent(pct);
+          if (pct >= gatePercent) doUnlock();
+        } else if (time >= gateSeconds) {
+          doUnlock();
+        }
       } catch {
         /* ignore */
       }
@@ -208,7 +217,7 @@ export default function YouTubeGatedPlayer({
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [unlocked, apiFailed, gateSeconds, doUnlock]);
+  }, [unlocked, apiFailed, gatePercent, gateSeconds, doUnlock]);
 
   useEffect(() => {
     if (!apiFailed || unlocked) return;
@@ -222,8 +231,8 @@ export default function YouTubeGatedPlayer({
     if (apiFailed && fallbackSeconds >= 25) setShowFallbackBtn(true);
   }, [apiFailed, fallbackSeconds]);
 
-  const remaining = Math.max(0, gateSeconds - elapsed);
-  const progressPct = unlocked ? 100 : Math.min(100, (elapsed / gateSeconds) * 100);
+  const remainingPercent = Math.max(0, gatePercent - watchedPercent);
+  const progressPct = unlocked ? 100 : Math.min(100, (watchedPercent / gatePercent) * 100);
 
   if (apiFailed && !unlocked) {
     return (
@@ -284,13 +293,11 @@ export default function YouTubeGatedPlayer({
             <div className="flex items-center gap-2">
               <Lock size={14} style={{ color: "rgba(200,165,107,0.6)" }} />
               <span className="text-xs" style={{ color: "rgba(247,242,236,0.5)" }}>
-                {playing
-                  ? progressLabel(remaining)
-                  : lockedLabel}
+                {playing ? progressLabel(remainingPercent) : lockedLabel}
               </span>
             </div>
             <span className="text-xs font-mono" style={{ color: "rgba(200,165,107,0.5)" }}>
-              {Math.min(elapsed, gateSeconds)}/{gateSeconds}s
+              {Math.min(watchedPercent, gatePercent)}%/{gatePercent}%
             </span>
           </div>
           <div

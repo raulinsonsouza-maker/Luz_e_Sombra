@@ -6,6 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import LandingPage from "@/pages/LandingPage";
 import VslLandingPage from "@/pages/VslLandingPage";
 import CheckoutPage from "@/pages/CheckoutPage";
+import AcessoPosCompraPage from "@/pages/AcessoPosCompraPage";
 import LoginPage from "@/pages/LoginPage";
 import AdminLoginPage from "@/pages/AdminLoginPage";
 import HomePage from "@/pages/HomePage";
@@ -53,6 +54,7 @@ function Router() {
         <Route path="/" component={LandingPage} />
         <Route path="/vsl" component={VslLandingPage} />
         <Route path="/checkout" component={CheckoutPage} />
+        <Route path="/acesso-pos-compra" component={AcessoPosCompraPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/admin/login" component={AdminLoginPage} />
         <Route path="/dashboard">

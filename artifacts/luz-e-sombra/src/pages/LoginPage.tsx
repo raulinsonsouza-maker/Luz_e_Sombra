@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { LogIn, AlertCircle, Loader2, Eye, EyeOff } from "lucide-react";
 
@@ -9,18 +9,33 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [erro, setErro] = useState("");
+  const [pagamentoPendente, setPagamentoPendente] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const pendingToken = (() => {
+    try {
+      return sessionStorage.getItem("pending_checkout_token");
+    } catch {
+      return null;
+    }
+  })();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
+    setPagamentoPendente(false);
     setCarregando(true);
     const result = await login(username.trim().toLowerCase(), password);
     if (result.ok) {
       navigate("/dashboard");
     } else {
-      setErro(result.error || "Usuário ou senha inválidos");
+      if (result.code === "pagamento_pendente") {
+        setPagamentoPendente(true);
+        setErro("Seu pagamento ainda não foi confirmado. Continue o checkout para liberar o acesso.");
+      } else {
+        setErro(result.error || "Usuário ou senha inválidos");
+      }
       setCarregando(false);
     }
   }
@@ -128,7 +143,7 @@ export default function LoginPage() {
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   className="luxury-input"
-                  placeholder="Digite seu usuário"
+                  placeholder="Seu usuário ou e-mail"
                   required
                   autoComplete="username"
                   autoFocus
@@ -171,7 +186,18 @@ export default function LoginPage() {
                 <div className="flex items-start gap-3 p-4 rounded-xl animate-fadeIn"
                   style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)" }}>
                   <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-700">{erro}</p>
+                  <div>
+                    <p className="text-sm text-red-700">{erro}</p>
+                    {pagamentoPendente && pendingToken && (
+                      <Link
+                        href={`/checkout?token=${encodeURIComponent(pendingToken)}&from=control`}
+                        className="text-sm font-semibold mt-2 inline-block underline"
+                        style={{ color: "#9c7742" }}
+                      >
+                        Continuar pagamento
+                      </Link>
+                    )}
+                  </div>
                 </div>
               )}
 

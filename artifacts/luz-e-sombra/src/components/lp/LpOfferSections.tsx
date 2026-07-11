@@ -8,8 +8,11 @@ import {
   LP_CTA_PRIMARY,
   formatLpPrice,
   LP_PRICE,
+  LP_PRICE_INSTALLMENTS,
+  LP_PRICE_INSTALLMENT_VALUE,
   LP_PRICE_ORIGINAL,
   LP_PRICE_PERIOD,
+  formatLpPriceLabel,
   getLpSections,
   type LpSectionVariant,
 } from "@/lib/lpConfig";
@@ -272,10 +275,10 @@ export function LpOfferSection({ onCheckout, variant = "control" }: SectionProps
               {formatLpPrice(LP_PRICE)}
             </span>
             <span className="text-lg font-medium" style={{ color: "rgba(247,242,236,0.55)" }}>
-              {LP_PRICE_PERIOD}
+              à vista
             </span>
-            <span className="text-sm line-through w-full sm:w-auto" style={{ color: "rgba(247,242,236,0.3)" }}>
-              de {formatLpPrice(LP_PRICE_ORIGINAL)}{LP_PRICE_PERIOD}
+            <span className="text-sm w-full sm:w-auto" style={{ color: "rgba(247,242,236,0.45)" }}>
+              ou {LP_PRICE_INSTALLMENTS}x de {formatLpPrice(LP_PRICE_INSTALLMENT_VALUE)} no cartão
             </span>
           </div>
           <ul className="space-y-3 mb-6">
