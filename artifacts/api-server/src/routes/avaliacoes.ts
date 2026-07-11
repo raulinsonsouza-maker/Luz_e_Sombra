@@ -5,6 +5,9 @@ import { eq, desc } from "drizzle-orm";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
 import { createAvaliacaoSchema, parseBody } from "../lib/schemas";
 
+import { tryAwardJornadaModuloXp } from "../lib/jornadaXp";
+import { temAnalise } from "../lib/temAnaliseJornada";
+
 const router = Router();
 
 // GET /api/avaliacoes - List user's assessments (or all for admin)
@@ -56,6 +59,8 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
     }
     const body = parsed.data;
 
+    const jaExistia = await temAnalise(user.id, "roda");
+
     const [avaliacao] = await db.insert(avaliacoesTable).values({
       usuarioId: user.id,
       plenitudeFelicidade: body.plenitudeFelicidade,
@@ -71,6 +76,8 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
       contribuicaoSocial: body.contribuicaoSocial,
       criatividadeHobbyDiversao: body.criatividadeHobbyDiversao,
     }).returning();
+
+    await tryAwardJornadaModuloXp(user.id, jaExistia);
 
     return res.json(avaliacao);
   } catch (error) {

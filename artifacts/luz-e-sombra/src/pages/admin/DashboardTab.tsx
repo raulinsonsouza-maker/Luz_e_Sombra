@@ -18,6 +18,14 @@ import {
 
 export function DashboardTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg: string) => void }) {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [funnelStats, setFunnelStats] = useState<{
+    cadastros: number;
+    pagos: number;
+    pendentes: number;
+    revogados: number;
+    taxaConversao: number;
+    utms: { source: string; total: number; pagos: number }[];
+  } | null>(null);
   const [recentUsers, setRecentUsers] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [notiTitulo, setNotiTitulo] = useState("");
@@ -30,9 +38,14 @@ export function DashboardTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg
   useEffect(() => {
     async function load() {
       try {
-        const [sr, ur] = await Promise.all([apiFetch("/usuarios/stats"), apiFetch("/usuarios")]);
+        const [sr, ur, fr] = await Promise.all([
+          apiFetch("/usuarios/stats"),
+          apiFetch("/usuarios"),
+          apiFetch("/admin/funnel-stats"),
+        ]);
         if (sr.ok) setStats(await sr.json());
         if (ur.ok) { const all: Usuario[] = await ur.json(); setRecentUsers(all.slice(0, 6)); }
+        if (fr.ok) setFunnelStats(await fr.json());
       } catch {
         toastApiError();
       }
@@ -107,6 +120,42 @@ export function DashboardTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg
           </div>
         ))}
       </div>
+
+      {/* Funil de aquisição */}
+      {funnelStats && (
+        <div className="rounded-2xl overflow-hidden" style={CARD_S}>
+          <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
+            <p className="text-xs tracking-[0.2em] uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>Funil</p>
+            <h3 className="font-semibold" style={{ color: C.text }}>Cadastro → Pagamento</h3>
+          </div>
+          <div className="p-5 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Cadastros", value: funnelStats.cadastros },
+              { label: "Pagos", value: funnelStats.pagos },
+              { label: "Pendentes", value: funnelStats.pendentes },
+              { label: "Conversão", value: `${funnelStats.taxaConversao}%` },
+            ].map(({ label, value }) => (
+              <div key={label}>
+                <p className="text-2xl font-tan-mon-cheri" style={{ color: C.gold }}>{value}</p>
+                <p className="text-xs" style={{ color: C.muted }}>{label}</p>
+              </div>
+            ))}
+          </div>
+          {funnelStats.utms.length > 0 && (
+            <div className="px-5 pb-5">
+              <p className="text-xs font-semibold mb-2 uppercase tracking-wider" style={{ color: C.muted }}>Por UTM source</p>
+              <div className="space-y-1">
+                {funnelStats.utms.slice(0, 5).map((u) => (
+                  <div key={u.source} className="flex justify-between text-xs" style={{ color: C.text }}>
+                    <span>{u.source}</span>
+                    <span style={{ color: C.muted }}>{u.pagos}/{u.total} pagos</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Recent users */}
       <div className="rounded-2xl overflow-hidden" style={CARD_S}>

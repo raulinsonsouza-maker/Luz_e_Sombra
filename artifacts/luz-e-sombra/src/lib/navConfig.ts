@@ -23,7 +23,6 @@ export const NAV_PRIMARY: NavItem[] = [
   { href: "/dashboard", label: "Início", icon: Home },
   { href: "/jornada", label: "Jornada", icon: Map, description: "Sua trilha de auto-conhecimento" },
   { href: "/comunidade", label: "Comunidade", icon: Users2 },
-  { href: "/cursos", label: "Cursos", icon: GraduationCap },
 ];
 
 /** Ferramentas e avaliações — agrupadas no menu «Explorar». */
@@ -48,6 +47,7 @@ export function isChromelessRoute(location: string): boolean {
     location === "/" ||
     location === "/vsl" ||
     location === "/checkout" ||
+    location === "/acesso-pos-compra" ||
     location === "/login" ||
     location === "/esqueci-senha" ||
     location === "/redefinir-senha" ||

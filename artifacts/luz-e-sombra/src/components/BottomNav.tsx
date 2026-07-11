@@ -1,14 +1,12 @@
 import { useLocation } from "wouter";
 import type { LucideIcon } from "lucide-react";
-import { Home, Map, Users2, GraduationCap, User } from "lucide-react";
+import { Home, Map, Users2, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { isChromelessRoute } from "@/lib/navConfig";
 
-/** Ordem visual: 5 colunas com mesma largura (flex-1), cada ícone centrado na célula. */
 const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/dashboard", label: "Início", icon: Home },
   { href: "/comunidade", label: "Comunidade", icon: Users2 },
-  { href: "/cursos", label: "Cursos", icon: GraduationCap },
   { href: "/perfil", label: "Perfil", icon: User },
 ];
 
@@ -112,9 +110,6 @@ export default function BottomNav() {
 
         <div className="flex-1 flex justify-center items-end min-w-0">
           <SideItem href={NAV_ITEMS[2].href} label={NAV_ITEMS[2].label} icon={NAV_ITEMS[2].icon} />
-        </div>
-        <div className="flex-1 flex justify-center items-end min-w-0">
-          <SideItem href={NAV_ITEMS[3].href} label={NAV_ITEMS[3].label} icon={NAV_ITEMS[3].icon} />
         </div>
       </div>
     </nav>

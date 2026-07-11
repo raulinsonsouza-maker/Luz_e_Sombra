@@ -11,34 +11,53 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [erro, setErro] = useState("");
   const [pagamentoPendente, setPagamentoPendente] = useState(false);
+  const [checkoutToken, setCheckoutToken] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const pendingToken = (() => {
+  async function resolverCheckoutToken(emailOuUser: string): Promise<string | null> {
+    const trimmed = emailOuUser.trim().toLowerCase();
+    if (!trimmed.includes("@")) return null;
     try {
-      return sessionStorage.getItem("pending_checkout_token");
+      const res = await fetch(
+        `/api/funnel/checkout-token-by-email?email=${encodeURIComponent(trimmed)}`,
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.checkoutToken ?? null;
     } catch {
       return null;
     }
-  })();
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
     setPagamentoPendente(false);
+    setCheckoutToken(null);
     setCarregando(true);
     const result = await login(username.trim().toLowerCase(), password);
     if (result.ok) {
-      navigate("/dashboard");
-    } else {
-      if (result.code === "pagamento_pendente") {
-        setPagamentoPendente(true);
-        setErro("Seu pagamento ainda não foi confirmado. Continue o checkout para liberar o acesso.");
-      } else {
-        setErro(result.error || "Usuário ou senha inválidos");
-      }
-      setCarregando(false);
+      navigate(result.primeiroAcesso ? "/jornada/traco" : "/dashboard");
+      return;
     }
+    if (result.code === "pagamento_pendente") {
+      setPagamentoPendente(true);
+      let token = result.checkoutToken ?? null;
+      if (!token) {
+        token = await resolverCheckoutToken(username);
+      }
+      setCheckoutToken(token);
+      setErro("Seu pagamento ainda não foi confirmado. Continue o checkout para liberar o acesso.");
+    } else if (result.code === "acesso_revogado") {
+      setErro(
+        result.error ||
+          "Seu acesso foi encerrado por reembolso ou estorno. Fale com o suporte em contato@portaliluminando.com.br.",
+      );
+    } else {
+      setErro(result.error || "Usuário ou senha inválidos");
+    }
+    setCarregando(false);
   }
 
   return (
@@ -48,18 +67,15 @@ export default function LoginPage() {
         className="hidden lg:flex lg:w-1/2 flex-col justify-between p-16 relative overflow-hidden"
         style={{ background: "linear-gradient(160deg, #1e1812 0%, #2f251b 50%, #3d2f1f 100%)" }}
       >
-        {/* Decorative gold orb top-right */}
         <div
           className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-20"
           style={{ background: "radial-gradient(circle, #c8a56b 0%, transparent 70%)" }}
         />
-        {/* Decorative gold orb bottom-left */}
         <div
           className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full opacity-10"
           style={{ background: "radial-gradient(circle, #c8a56b 0%, transparent 70%)" }}
         />
 
-        {/* Brand mark */}
         <div className="relative z-10">
           <div
             className="w-12 h-0.5 mb-8"
@@ -71,7 +87,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Main headline */}
         <div className="relative z-10">
           <h1
             className="font-tan-mon-cheri leading-tight mb-6"
@@ -92,7 +107,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Bottom quote */}
         <div className="relative z-10">
           <blockquote
             className="font-tan-mon-cheri text-lg leading-relaxed"
@@ -103,13 +117,11 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right panel — form */}
       <div
         className="flex-1 flex items-center justify-center px-6 py-12"
         style={{ background: "linear-gradient(135deg, #fdf8f2 0%, #faf6ee 100%)" }}
       >
         <div className="w-full max-w-md">
-          {/* Mobile brand (hidden on desktop) */}
           <div className="lg:hidden text-center mb-10">
             <h1 className="font-tan-mon-cheri text-3xl text-brand-dark mb-1">
               {LP_PORTAL_NAME}
@@ -117,11 +129,8 @@ export default function LoginPage() {
             <p className="text-brand-medium text-sm">{LP_JOURNEY_NAME}</p>
           </div>
 
-          {/* Form card */}
           <div>
-            <h2
-              className="font-tan-mon-cheri text-3xl text-brand-dark mb-2"
-            >
+            <h2 className="font-tan-mon-cheri text-3xl text-brand-dark mb-2">
               Bem-vindo(a)
             </h2>
             <p className="text-brand-medium mb-10 text-sm leading-relaxed">
@@ -193,9 +202,9 @@ export default function LoginPage() {
                   <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm text-red-700">{erro}</p>
-                    {pagamentoPendente && pendingToken && (
+                    {pagamentoPendente && checkoutToken && (
                       <Link
-                        href={`/checkout?token=${encodeURIComponent(pendingToken)}&from=control`}
+                        href={`/checkout?token=${encodeURIComponent(checkoutToken)}&from=control`}
                         className="text-sm font-semibold mt-2 inline-block underline"
                         style={{ color: "#9c7742" }}
                       >
@@ -227,7 +236,6 @@ export default function LoginPage() {
               </div>
             </form>
 
-            {/* Subtle divider + brand note */}
             <div className="mt-10 pt-8 border-t border-brand-gold/15 text-center">
               <p className="text-xs tracking-widest uppercase text-brand-medium/50">
                 {LP_PORTAL_NAME} · Área privada

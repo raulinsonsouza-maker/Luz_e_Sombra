@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { db } from "@workspace/db";
-import { usuariosTable, passwordResetTokensTable } from "@workspace/db/schema";
+import { usuariosTable, passwordResetTokensTable, comprasCaktoTable } from "@workspace/db/schema";
 import { eq, and, isNull, gt } from "drizzle-orm";
 import { parseBody, forgotPasswordSchema, resetPasswordSchema } from "../lib/schemas";
 import {
@@ -74,7 +74,22 @@ router.post("/login", async (req: Request, res: Response) => {
 
     if (!usuario.ativo) {
       if (usuario.statusAcesso === "pending") {
-        return res.status(402).json({ error: "pagamento_pendente" });
+        const [compra] = await db
+          .select({ checkoutToken: comprasCaktoTable.checkoutToken })
+          .from(comprasCaktoTable)
+          .where(eq(comprasCaktoTable.usuarioId, usuario.id))
+          .limit(1);
+        return res.status(402).json({
+          error: "pagamento_pendente",
+          code: "pagamento_pendente",
+          checkoutToken: compra?.checkoutToken ?? null,
+        });
+      }
+      if (usuario.statusAcesso === "revoked") {
+        return res.status(403).json({
+          error: "Seu acesso foi encerrado por reembolso ou estorno. Entre em contato com o suporte se precisar de ajuda.",
+          code: "acesso_revogado",
+        });
       }
       return res.status(401).json({ error: "Usuário ou senha inválidos" });
     }

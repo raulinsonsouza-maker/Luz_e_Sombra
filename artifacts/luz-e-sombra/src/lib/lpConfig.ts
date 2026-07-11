@@ -300,6 +300,13 @@ export function formatLpPrice(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+export function buildCaktoReturnUrl(checkoutToken: string): string {
+  const base =
+    import.meta.env.VITE_PUBLIC_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "https://portaliluminando.com.br");
+  return `${base}/acesso-pos-compra?token=${encodeURIComponent(checkoutToken)}`;
+}
+
 export function buildCaktoUrl(
   nome: string,
   email: string,
@@ -311,6 +318,9 @@ export function buildCaktoUrl(
   url.searchParams.set("name", nome);
   url.searchParams.set("email", email);
   if (telefone) url.searchParams.set("phone", telefone);
-  if (checkoutToken) url.searchParams.set("ref", checkoutToken);
+  if (checkoutToken) {
+    url.searchParams.set("ref", checkoutToken);
+    url.searchParams.set("success_url", buildCaktoReturnUrl(checkoutToken));
+  }
   return url.toString();
 }

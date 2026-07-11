@@ -128,3 +128,51 @@ export function passwordChangedEmail(params: {
     }),
   };
 }
+
+export function paymentPendingReminderEmail(params: {
+  nome: string;
+  checkoutUrl: string;
+}): { subject: string; html: string } {
+  const primeiroNome = params.nome.split(" ")[0] || params.nome;
+  const bodyHtml = [
+    p(`Olá, ${strong(primeiroNome)}.`),
+    p("Notamos que seu pagamento via PIX ainda não foi confirmado."),
+    p("Se você já pagou, aguarde alguns minutos — a confirmação pode levar um pouco. Caso contrário, finalize agora para liberar seu acesso."),
+  ].join("");
+
+  return {
+    subject: "Seu PIX ainda está pendente — Portal Iluminando",
+    html: renderEmailLayout({
+      preheader: "Finalize seu pagamento PIX para acessar a jornada.",
+      title: "Pagamento pendente",
+      bodyHtml,
+      ctaLabel: "Continuar pagamento",
+      ctaHref: params.checkoutUrl,
+      footerNote: "O link expira quando o checkout for concluído ou cancelado.",
+    }),
+  };
+}
+
+export function journeyNudgeEmail(params: {
+  nome: string;
+  moduloTitulo: string;
+  jornadaUrl: string;
+}): { subject: string; html: string } {
+  const primeiroNome = params.nome.split(" ")[0] || params.nome;
+  const bodyHtml = [
+    p(`Olá, ${strong(primeiroNome)}.`),
+    p("Seu acesso à Jornada Da Sombra à Luz já está liberado, mas você ainda não começou sua primeira análise."),
+    p(`Recomendamos começar por ${strong(params.moduloTitulo)} — leva cerca de 15 minutos e já traz insights valiosos.`),
+  ].join("");
+
+  return {
+    subject: "Sua jornada está esperando — Portal Iluminando",
+    html: renderEmailLayout({
+      preheader: "Comece sua primeira análise na jornada.",
+      title: "Hora de dar o primeiro passo",
+      bodyHtml,
+      ctaLabel: "Iniciar minha jornada",
+      ctaHref: params.jornadaUrl,
+    }),
+  };
+}

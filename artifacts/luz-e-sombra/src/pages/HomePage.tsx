@@ -12,8 +12,17 @@ import {
   Zap,
   Map,
   Users2,
-  GraduationCap,
+  Sparkles,
+  FileText,
 } from "lucide-react";
+
+interface ModuloJornada {
+  slug: string;
+  tituloIntro: string;
+  status: "done" | "active" | "locked";
+  hubHref: string;
+  hrefAnalise: string;
+}
 
 interface Missao {
   id: number;
@@ -51,13 +60,13 @@ function saudacao() {
 const QUICK_ACTIONS = [
   { label: "Comunidade", sub: "Espaço compartilhado", icon: Users2, href: "/comunidade" },
   { label: "Jornada", sub: "Sua trilha", icon: Map, href: "/jornada" },
-  { label: "Cursos", sub: "Aprofunde-se", icon: GraduationCap, href: "/cursos" },
 ] as const;
 
 export default function HomePage() {
   const [, navigate] = useLocation();
   const { user, status } = useAuth();
   const [progresso, setProgresso] = useState<Progresso | null>(null);
+  const [modulosJornada, setModulosJornada] = useState<ModuloJornada[]>([]);
   const [carregando, setCarregando] = useState(true);
   const { concluirMissao, concluindo } = useConcluirMissao(setProgresso);
 
@@ -67,13 +76,21 @@ export default function HomePage() {
       return;
     }
     if (status === "loading") return;
+    if (user?.primeiroAcesso) {
+      navigate("/jornada/traco");
+      return;
+    }
     buscarDados();
   }, [status, user]);
 
   async function buscarDados() {
     try {
-      const resProg = await apiFetch("/gamificacao/progresso");
+      const [resProg, resMod] = await Promise.all([
+        apiFetch("/gamificacao/progresso"),
+        apiFetch("/modulos-jornada"),
+      ]);
       if (resProg.ok) setProgresso(await resProg.json());
+      if (resMod.ok) setModulosJornada(await resMod.json());
     } catch {
       /* noop */
     }
@@ -101,6 +118,8 @@ export default function HomePage() {
     : 0;
 
   const TOTAL_ETAPAS_INICIANTE = 5;
+
+  const moduloAtivo = modulosJornada.find((m) => m.status === "active");
 
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
@@ -132,6 +151,74 @@ export default function HomePage() {
             </p>
           </div>
         </div>
+
+        {/* Seu próximo passo */}
+        {moduloAtivo && (
+          <div
+            className="rounded-3xl p-5 mb-4"
+            style={{
+              background: "linear-gradient(135deg, rgba(200,165,107,0.14) 0%, rgba(60,42,28,0.35) 100%)",
+              border: "1px solid rgba(200,165,107,0.28)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4" style={{ color: "#c8a56b" }} />
+              <p className="text-xs font-bold tracking-wider uppercase" style={{ color: "#c8a56b" }}>
+                Seu próximo passo
+              </p>
+            </div>
+            <p className="text-base font-semibold mb-1" style={{ color: "#f7f2ec" }}>
+              {moduloAtivo.tituloIntro}
+            </p>
+            <p className="text-xs mb-4 leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
+              Continue sua jornada por aqui — é o módulo ativo agora.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate(moduloAtivo.hubHref)}
+              className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+              style={{
+                background: "linear-gradient(135deg, #c8a56b, #9c7742)",
+                color: "#1a1208",
+              }}
+            >
+              Ir para o módulo
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Dossiê integrado */}
+        {etapasInicianteConcluidas >= 2 && (
+          <button
+            type="button"
+            onClick={() => navigate("/quem-sou-eu")}
+            className="w-full rounded-3xl p-5 mb-4 text-left transition-all active:scale-[0.99]"
+            style={{
+              background: "linear-gradient(135deg, rgba(93,185,122,0.08) 0%, rgba(200,165,107,0.06) 100%)",
+              border: "1px solid rgba(93,185,122,0.22)",
+            }}
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: "rgba(93,185,122,0.12)" }}
+              >
+                <FileText className="w-5 h-5" style={{ color: "#5db97a" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold mb-1" style={{ color: "#f7f2ec" }}>
+                  Seu Dossiê — Quem Sou Eu
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
+                  Você já concluiu {etapasInicianteConcluidas} análises. Veja como elas se conectam num mapa integrado.
+                </p>
+              </div>
+              <ChevronRight className="w-4 h-4 shrink-0 mt-1" style={{ color: "rgba(93,185,122,0.6)" }} />
+            </div>
+          </button>
+        )}
 
         {/* Nível + XP */}
         <div
@@ -255,7 +342,7 @@ export default function HomePage() {
           <p className="text-xs font-semibold tracking-wider uppercase mb-3" style={{ color: "rgba(200,165,107,0.5)" }}>
             Explorar
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {QUICK_ACTIONS.map(({ label, sub, icon: Icon, href }) => (
               <button
                 key={href}

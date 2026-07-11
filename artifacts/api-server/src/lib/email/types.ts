@@ -4,7 +4,8 @@ export type EmailTemplateId =
   | "access_revoked"
   | "password_reset"
   | "password_changed"
-  | "payment_pending_reminder";
+  | "payment_pending_reminder"
+  | "journey_nudge";
 
 export type EmailSendStatus = "sent" | "failed" | "skipped";
 

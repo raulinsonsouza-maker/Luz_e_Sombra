@@ -41,6 +41,54 @@ async function uniqueUsername(base: string): Promise<string> {
   return `${base.slice(0, 16)}${randomUUID().slice(0, 8)}`;
 }
 
+// GET /api/funnel/checkout-token-by-email?email=...
+router.get("/checkout-token-by-email", async (req: Request, res: Response) => {
+  try {
+    const email = String(req.query.email ?? "")
+      .trim()
+      .toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "E-mail inválido" });
+    }
+
+    const [usuario] = await db
+      .select({
+        id: usuariosTable.id,
+        statusAcesso: usuariosTable.statusAcesso,
+        ativo: usuariosTable.ativo,
+      })
+      .from(usuariosTable)
+      .where(eq(usuariosTable.email, email))
+      .limit(1);
+
+    if (!usuario) {
+      return res.status(404).json({ error: "E-mail não encontrado" });
+    }
+
+    if (usuario.ativo && usuario.statusAcesso === "active") {
+      return res.json({ status: "active", checkoutToken: null });
+    }
+
+    const [compra] = await db
+      .select({ checkoutToken: comprasCaktoTable.checkoutToken, status: comprasCaktoTable.status })
+      .from(comprasCaktoTable)
+      .where(eq(comprasCaktoTable.usuarioId, usuario.id))
+      .limit(1);
+
+    if (!compra) {
+      return res.json({ status: usuario.statusAcesso, checkoutToken: null });
+    }
+
+    return res.json({
+      status: compra.status === "paid" ? "paid" : usuario.statusAcesso,
+      checkoutToken: compra.checkoutToken,
+    });
+  } catch (error) {
+    req.log.error({ error }, "Erro ao buscar checkout token por e-mail");
+    return res.status(500).json({ error: "Erro ao buscar checkout" });
+  }
+});
+
 // GET /api/funnel/check-email?email=...
 router.get("/check-email", async (req: Request, res: Response) => {
   try {

@@ -155,7 +155,12 @@ export default function CheckoutPage() {
         if (!res.ok) throw new Error("not found");
         return res.json() as Promise<CheckoutInfo>;
       })
-      .then(setInfo)
+      .then((data) => {
+        setInfo(data);
+        if (data.status === "paid") {
+          navigate(`/acesso-pos-compra?token=${encodeURIComponent(token!)}`);
+        }
+      })
       .catch(() => {
         toast.error("Checkout inválido ou expirado.");
         navigate(from === "vsl" ? "/vsl" : "/");
@@ -182,6 +187,11 @@ export default function CheckoutPage() {
     );
 
     if (CAKTO_CHECKOUT_URL && caktoUrl) {
+      try {
+        sessionStorage.setItem("pending_checkout_token", token);
+      } catch {
+        /* ignore */
+      }
       trackLpEvent("checkout_complete", variant, { provider: "cakto" });
       window.location.href = caktoUrl;
       return;

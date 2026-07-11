@@ -596,8 +596,8 @@ export default function JornadaHubPage() {
           <PassoBadge
             numero={3}
             titulo="Minicurso"
-            concluido={minicursoDisponivel && modulo.minicursoConcluido}
-            bloqueado={!modulo.analiseConcluida || !minicursoDisponivel}
+            concluido={modulo.analiseConcluida && (!minicursoDisponivel || modulo.minicursoConcluido)}
+            bloqueado={!modulo.analiseConcluida}
           />
           {!modulo.analiseConcluida ? (
             <div
@@ -615,28 +615,33 @@ export default function JornadaHubPage() {
           ) : !minicursoDisponivel ? (
             <div
               className="rounded-2xl p-6 flex flex-col items-center text-center gap-3"
-              style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(200,165,107,0.12)" }}
+              style={{
+                background: "linear-gradient(135deg, rgba(93,185,122,0.08) 0%, rgba(200,165,107,0.06) 100%)",
+                border: "1px solid rgba(93,185,122,0.2)",
+              }}
             >
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.2)" }}
+                style={{ background: "rgba(93,185,122,0.12)", border: "1px solid rgba(93,185,122,0.25)" }}
               >
-                <Lock className="w-6 h-6" style={{ color: "rgba(200,165,107,0.55)" }} />
+                <Sparkles className="w-6 h-6" style={{ color: "#5db97a" }} />
               </div>
-              <p className="text-sm font-medium" style={{ color: "rgba(247,242,236,0.6)" }}>
-                Minicurso em breve
+              <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>
+                Análise concluída — parabéns!
               </p>
-              <p className="text-xs leading-relaxed max-w-xs" style={{ color: "rgba(247,242,236,0.38)" }}>
-                Estamos preparando um percurso guiado para aprofundar este módulo. Sua análise já está pronta, volte
-                aqui quando o curso for liberado.
+              <p className="text-xs leading-relaxed max-w-xs" style={{ color: "rgba(247,242,236,0.5)" }}>
+                Sua leitura deste módulo já está pronta. O minicurso aprofundado será liberado em breve — você pode seguir para o próximo passo da jornada quando quiser.
               </p>
-              <span
-                className="text-[10px] uppercase tracking-widest flex items-center gap-1.5 mt-1"
-                style={{ color: "rgba(200,165,107,0.45)" }}
-              >
-                <Clock className="w-3 h-3" />
-                Em desenvolvimento
-              </span>
+              {proximoHub && (
+                <button
+                  type="button"
+                  onClick={() => navigate(proximoHub)}
+                  className="mt-2 text-xs font-semibold px-4 py-2 rounded-xl"
+                  style={{ background: "rgba(200,165,107,0.15)", color: "#c8a56b" }}
+                >
+                  Ver próximo módulo
+                </button>
+              )}
             </div>
           ) : (
             <MinicursoEmbedido

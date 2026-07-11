@@ -5,7 +5,13 @@ import { clearTracoSessionStorage } from "@/lib/tracoFormStorage";
 interface AuthContextType {
   user: User | null;
   status: "loading" | "authenticated" | "unauthenticated";
-  login: (username: string, password: string) => Promise<{ ok: boolean; error?: string; code?: string }>;
+  login: (username: string, password: string) => Promise<{
+    ok: boolean;
+    error?: string;
+    code?: string;
+    checkoutToken?: string | null;
+    primeiroAcesso?: boolean;
+  }>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
@@ -65,10 +71,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAuth(data.token, data.user);
         setUser(data.user);
         setStatus("authenticated");
-        return { ok: true };
+        return { ok: true, primeiroAcesso: data.user?.primeiroAcesso === true };
       }
       if (res.status === 402) {
-        return { ok: false, error: "Pagamento pendente.", code: "pagamento_pendente" };
+        return {
+          ok: false,
+          error: data.error || "Pagamento pendente.",
+          code: "pagamento_pendente",
+          checkoutToken: data.checkoutToken ?? null,
+        };
+      }
+      if (res.status === 403 && data.code === "acesso_revogado") {
+        return {
+          ok: false,
+          error: data.error || "Acesso encerrado.",
+          code: "acesso_revogado",
+        };
       }
       return { ok: false, error: data.error || "Erro ao fazer login" };
     } catch {

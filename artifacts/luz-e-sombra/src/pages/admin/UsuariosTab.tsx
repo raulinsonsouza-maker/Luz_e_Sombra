@@ -28,6 +28,9 @@ export function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg:
   const itensPorPagina = 8;
   const [novoUsuario, setNovoUsuario] = useState<FormValues>(emptyForm);
   const [erroModal, setErroModal] = useState<string | null>(null);
+  const [fichaUsuario, setFichaUsuario] = useState<Usuario | null>(null);
+  const [fichaDados, setFichaDados] = useState<Record<string, unknown> | null>(null);
+  const [fichaCarregando, setFichaCarregando] = useState(false);
 
   useEffect(() => { buscarUsuarios(); }, []);
 
@@ -49,6 +52,19 @@ export function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg:
     setUsuarioEditando(null);
     setNovoUsuario(emptyForm);
     setErroModal(null);
+  }
+
+  async function abrirFicha(u: Usuario) {
+    setFichaUsuario(u);
+    setFichaDados(null);
+    setFichaCarregando(true);
+    try {
+      const res = await apiFetch(`/admin/usuarios/${u.id}/ficha`);
+      if (res.ok) setFichaDados(await res.json());
+    } catch {
+      showMsg("erro", "Erro ao carregar ficha");
+    }
+    setFichaCarregando(false);
   }
 
   function abrirEdicao(u: Usuario) {
@@ -199,6 +215,13 @@ export function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg:
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-center gap-1">
+                        <button onClick={() => abrirFicha(u)} className="p-2 rounded-lg transition-all"
+                          style={{ color: C.gold }}
+                          title="Ficha 360"
+                          onMouseEnter={e => (e.currentTarget.style.background = "rgba(200,165,107,0.12)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                          <FileText className="w-3.5 h-3.5" />
+                        </button>
                         <button onClick={() => abrirEdicao(u)} className="p-2 rounded-lg transition-all"
                           style={{ color: C.bronze }}
                           onMouseEnter={e => (e.currentTarget.style.background = "rgba(200,165,107,0.12)")}
@@ -331,6 +354,62 @@ export function UsuariosTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", msg:
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
                 style={{ background: "rgba(220,38,38,0.8)" }}>Excluir</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ficha 360 */}
+      {fichaUsuario && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-2xl"
+            style={{ background: "linear-gradient(160deg, #1e1812, #2f251b)", border: "1px solid rgba(200,165,107,0.25)" }}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-tan-mon-cheri text-xl" style={{ color: C.text }}>Ficha 360 — {fichaUsuario.nome}</h2>
+              <button type="button" onClick={() => { setFichaUsuario(null); setFichaDados(null); }} style={{ color: C.muted }}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {fichaCarregando ? (
+              <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin" style={{ color: C.gold }} /></div>
+            ) : fichaDados ? (
+              <div className="space-y-4 text-sm">
+                <div className="rounded-xl p-4" style={CARD}>
+                  <p className="text-xs uppercase tracking-wider mb-2" style={{ color: C.muted }}>Conta</p>
+                  <p style={{ color: C.text }}>{String((fichaDados.usuario as { email?: string })?.email ?? "—")}</p>
+                  <p className="text-xs mt-1" style={{ color: C.muted }}>
+                    Status: {(fichaDados.usuario as { statusAcesso?: string })?.statusAcesso} ·{" "}
+                    {(fichaDados.usuario as { ativo?: boolean })?.ativo ? "ativo" : "inativo"}
+                  </p>
+                </div>
+                {fichaDados.compra != null && (
+                  <div className="rounded-xl p-4" style={CARD}>
+                    <p className="text-xs uppercase tracking-wider mb-2" style={{ color: C.muted }}>Compra</p>
+                    <p style={{ color: C.text }}>
+                      {(fichaDados.compra as { status?: string }).status} · UTM {(fichaDados.compra as { utmSource?: string }).utmSource || "—"}
+                    </p>
+                  </div>
+                )}
+                <div className="rounded-xl p-4" style={CARD}>
+                  <p className="text-xs uppercase tracking-wider mb-2" style={{ color: C.muted }}>Jornada</p>
+                  <p style={{ color: C.text }}>
+                    {(fichaDados.jornada as { totalAnalises?: number })?.totalAnalises ?? 0} análises concluídas
+                  </p>
+                </div>
+                <div className="rounded-xl p-4" style={CARD}>
+                  <p className="text-xs uppercase tracking-wider mb-2" style={{ color: C.muted }}>Últimos e-mails</p>
+                  <ul className="space-y-1">
+                    {((fichaDados.emails as { template: string; status: string }[]) ?? []).slice(0, 5).map((e, i) => (
+                      <li key={i} className="text-xs flex justify-between" style={{ color: C.muted }}>
+                        <span>{e.template}</span>
+                        <span>{e.status}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <p style={{ color: C.muted }}>Não foi possível carregar a ficha.</p>
+            )}
           </div>
         </div>
       )}

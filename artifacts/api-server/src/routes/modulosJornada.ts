@@ -9,6 +9,7 @@ import {
 } from "@workspace/db";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { temAnalise } from "../lib/temAnaliseJornada";
+import { tryAwardJornadaModuloXp } from "../lib/jornadaXp";
 
 const router = Router();
 
@@ -198,10 +199,14 @@ router.post("/numerologia/concluir-analise", requireAuth, async (req: AuthReques
       return res.status(400).json({ error: "Cadastre sua data de nascimento no perfil antes de concluir." });
     }
 
+    const jaExistia = await temAnalise(usuarioId, "numerologia");
+
     await db
       .update(usuariosTable)
       .set({ numerologiaJornadaConcluida: true, atualizadoEm: new Date() })
       .where(eq(usuariosTable.id, usuarioId));
+
+    await tryAwardJornadaModuloXp(usuarioId, jaExistia);
 
     return res.json({ ok: true });
   } catch (err) {

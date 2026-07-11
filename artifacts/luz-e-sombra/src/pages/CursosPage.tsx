@@ -33,7 +33,7 @@ export default function CursosPage() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const [cursos, setCursos] = useState<Curso[]>([]);
-  const [loading, setLoading] = useState(FEATURE_FLAGS.SHOW_COURSES_CATALOG);
+  const [loading, setLoading] = useState<boolean>(FEATURE_FLAGS.SHOW_COURSES_CATALOG);
 
   useEffect(() => {
     if (!FEATURE_FLAGS.SHOW_COURSES_CATALOG) return;

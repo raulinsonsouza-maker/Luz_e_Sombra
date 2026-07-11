@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import {
-  Users, MessageSquare, GraduationCap, LayoutDashboard, Shield, Layers, Bell, Loader2, CheckCircle, AlertCircle, type LucideIcon,
+  Users, MessageSquare, GraduationCap, LayoutDashboard, Shield, Layers, Bell, Loader2, CheckCircle, AlertCircle,
+  CreditCard, Webhook, Mail, type LucideIcon,
 } from "lucide-react";
 import { BG, C, type Tab } from "./admin/shared";
 import { DashboardTab } from "./admin/DashboardTab";
@@ -11,6 +12,9 @@ import { ComunidadeTab } from "./admin/ComunidadeTab";
 import { EngajamentoTab } from "./admin/EngajamentoTab";
 import { ModulosJornadaTab } from "./admin/ModulosJornadaTab";
 import { CursosTab } from "./admin/CursosTab";
+import { ComprasTab } from "./admin/ComprasTab";
+import { WebhooksTab } from "./admin/WebhooksTab";
+import { EmailsTab } from "./admin/EmailsTab";
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function AdminPage() {
@@ -40,6 +44,9 @@ export default function AdminPage() {
   const TABS: { key: Tab; label: string; icon: LucideIcon }[] = [
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { key: "usuarios", label: "Usuários", icon: Users },
+    { key: "compras", label: "Compras", icon: CreditCard },
+    { key: "webhooks", label: "Webhooks", icon: Webhook },
+    { key: "emails", label: "E-mails", icon: Mail },
     { key: "comunidade", label: "Comunidade", icon: MessageSquare },
     { key: "engajamento", label: "Engajamento", icon: Bell },
     { key: "modulosJornada", label: "Módulos da Jornada", icon: Layers },
@@ -100,6 +107,9 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         {aba === "dashboard"  && <DashboardTab showMsg={showMsg} />}
         {aba === "usuarios"   && <UsuariosTab showMsg={showMsg} />}
+        {aba === "compras"    && <ComprasTab showMsg={showMsg} />}
+        {aba === "webhooks"   && <WebhooksTab />}
+        {aba === "emails"     && <EmailsTab />}
         {aba === "comunidade" && <ComunidadeTab showMsg={showMsg} />}
         {aba === "engajamento" && <EngajamentoTab showMsg={showMsg} />}
         {aba === "modulosJornada" && <ModulosJornadaTab showMsg={showMsg} />}

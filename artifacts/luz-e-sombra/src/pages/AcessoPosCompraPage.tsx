@@ -20,6 +20,7 @@ export default function AcessoPosCompraPage() {
     })();
   const [status, setStatus] = useState<"waiting" | "success" | "timeout">("waiting");
   const [mensagem, setMensagem] = useState("Confirmando seu pagamento...");
+  const [retryKey, setRetryKey] = useState(0);
   const startedAt = useRef(Date.now());
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function AcessoPosCompraPage() {
     }
 
     let cancelled = false;
+    startedAt.current = Date.now();
 
     async function poll() {
       while (!cancelled) {
@@ -55,7 +57,8 @@ export default function AcessoPosCompraPage() {
                 setAuth(authData.token, authData.user);
                 setStatus("success");
                 setMensagem("Pagamento confirmado! Entrando na plataforma...");
-                setTimeout(() => navigate("/dashboard"), 800);
+                const destino = authData.user?.primeiroAcesso ? "/jornada/traco" : "/dashboard";
+                setTimeout(() => navigate(destino), 800);
                 return;
               }
             }
@@ -72,7 +75,7 @@ export default function AcessoPosCompraPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, navigate]);
+  }, [token, navigate, retryKey]);
 
   return (
     <div
@@ -92,15 +95,29 @@ export default function AcessoPosCompraPage() {
         <p className="text-sm mb-6" style={{ color: "rgba(247,242,236,0.5)" }}>
           {mensagem}
         </p>
-        {status === "timeout" && (
-          <button
-            type="button"
-            onClick={() => navigate("/login")}
-            className="text-sm underline"
-            style={{ color: "#c8a56b" }}
-          >
-            Ir para o login
-          </button>
+        {status === "timeout" && token && (
+          <div className="flex flex-col gap-3 items-center">
+            <button
+              type="button"
+              onClick={() => {
+                setRetryKey((k) => k + 1);
+                setStatus("waiting");
+                setMensagem("Confirmando seu pagamento...");
+              }}
+              className="text-sm font-semibold px-4 py-2 rounded-xl"
+              style={{ background: "rgba(200,165,107,0.15)", color: "#c8a56b" }}
+            >
+              Verificar novamente
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/login")}
+              className="text-sm underline"
+              style={{ color: "#c8a56b" }}
+            >
+              Ir para o login
+            </button>
+          </div>
         )}
       </div>
     </div>

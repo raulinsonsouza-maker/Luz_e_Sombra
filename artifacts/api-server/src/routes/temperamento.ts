@@ -8,6 +8,9 @@ import {
   VERSAO_TEMPERAMENTO_ATUAL,
 } from "@workspace/temperamento-v1";
 
+import { tryAwardJornadaModuloXp } from "../lib/jornadaXp";
+import { temAnalise } from "../lib/temAnaliseJornada";
+
 const router = Router();
 
 router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
@@ -26,6 +29,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
       computed_at: computedAt,
       metadata: parsed.data.metadata,
     };
+    const jaExistia = await temAnalise(req.user!.id, "temperamento");
     const [row] = await db
       .insert(analiseTemperamento40Table)
       .values({
@@ -35,6 +39,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
         versao: VERSAO_TEMPERAMENTO_ATUAL,
       })
       .returning();
+    await tryAwardJornadaModuloXp(req.user!.id, jaExistia);
     return res.json({ id: row.id, ...resultado });
   } catch (err) {
     req.log?.error(err);

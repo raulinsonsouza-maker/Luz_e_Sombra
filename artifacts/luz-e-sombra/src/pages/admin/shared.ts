@@ -94,7 +94,7 @@ export interface Stats {
   usuarios: { total: number; ativos: number };
   posts: number; reacoes: number; cursos: number; analiseTraco: number;
 }
-export type Tab = "dashboard" | "usuarios" | "comunidade" | "engajamento" | "modulosJornada" | "cursos";
+export type Tab = "dashboard" | "usuarios" | "comunidade" | "engajamento" | "modulosJornada" | "cursos" | "compras" | "webhooks" | "emails";
 
 export function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();

@@ -14,6 +14,7 @@ import linguagensAmorRouter from "./linguagensAmor";
 import modulosJornadaRouter from "./modulosJornada";
 import funnelRouter from "./funnel";
 import webhooksCaktoRouter from "./webhooks/cakto";
+import adminOpsRouter from "./adminOps";
 
 const router: IRouter = Router();
 
@@ -21,6 +22,7 @@ router.use(healthRouter);
 router.use("/auth", authRouter);
 router.use("/funnel", funnelRouter);
 router.use("/webhooks", webhooksCaktoRouter);
+router.use("/admin", adminOpsRouter);
 router.use("/avaliacoes", avaliacoesRouter);
 router.use("/usuarios", usuariosRouter);
 router.use("/traco", tracoRouter);

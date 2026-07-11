@@ -10,6 +10,8 @@ import {
   tracoPessoaCreateSchema,
   tracoPessoaUpdateSchema,
 } from "../lib/schemas";
+import { tryAwardJornadaModuloXp } from "../lib/jornadaXp";
+import { temAnalise } from "../lib/temAnaliseJornada";
 import {
   aplicarFusaoTracoDiagnostico,
   diagnosticoEmocionalFusaoSchema,
@@ -484,10 +486,16 @@ router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) =>
       return res.status(400).json({ error: "Sem fotos para a pessoa selecionada" });
     }
 
+    const jaExistiaJornada = pessoaId === null && await temAnalise(req.user!.id, "traco");
+
     const [analise] = await db
       .insert(analiseTracoTable)
       .values({ usuarioId: req.user!.id, pessoaId, resultado: resultadoComMetadata })
       .returning();
+
+    if (pessoaId === null) {
+      await tryAwardJornadaModuloXp(req.user!.id, jaExistiaJornada);
+    }
 
     req.log?.info({
       usuarioId: req.user!.id,
