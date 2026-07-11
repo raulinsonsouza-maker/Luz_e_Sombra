@@ -40,6 +40,64 @@ async function uniqueUsername(base: string): Promise<string> {
   return `${base.slice(0, 16)}${randomUUID().slice(0, 8)}`;
 }
 
+// GET /api/funnel/check-email?email=...
+router.get("/check-email", async (req: Request, res: Response) => {
+  try {
+    const email = String(req.query.email ?? "")
+      .trim()
+      .toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "E-mail inválido" });
+    }
+
+    const [existing] = await db
+      .select({
+        id: usuariosTable.id,
+        ativo: usuariosTable.ativo,
+        statusAcesso: usuariosTable.statusAcesso,
+      })
+      .from(usuariosTable)
+      .where(eq(usuariosTable.email, email))
+      .limit(1);
+
+    if (!existing) {
+      return res.json({ available: true });
+    }
+
+    if (existing.ativo && existing.statusAcesso === "active") {
+      return res.json({
+        available: false,
+        status: "active",
+        message: "Este e-mail já possui acesso. Faça login.",
+      });
+    }
+
+    const [pendingCompra] = await db
+      .select({ checkoutToken: comprasCaktoTable.checkoutToken })
+      .from(comprasCaktoTable)
+      .where(eq(comprasCaktoTable.usuarioId, existing.id))
+      .limit(1);
+
+    if (pendingCompra) {
+      return res.json({
+        available: false,
+        status: "pending",
+        checkoutToken: pendingCompra.checkoutToken,
+        message: "Este e-mail já está cadastrado. Continue o pagamento ou faça login.",
+      });
+    }
+
+    return res.json({
+      available: false,
+      status: "registered",
+      message: "E-mail já cadastrado. Faça login ou use outro e-mail.",
+    });
+  } catch (error) {
+    req.log.error({ error }, "Erro ao verificar e-mail do funil");
+    return res.status(500).json({ error: "Erro ao verificar e-mail" });
+  }
+});
+
 // POST /api/funnel/register
 router.post("/register", async (req: Request, res: Response) => {
   try {

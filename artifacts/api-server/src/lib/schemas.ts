@@ -25,6 +25,14 @@ const usernameSchema = z
 
 const senhaSchema = z.string().min(6, "Senha deve ter pelo menos 6 caracteres");
 
+const senhaForteSchema = z
+  .string()
+  .min(8, "Senha deve ter pelo menos 8 caracteres")
+  .refine(
+    (v) => /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(v),
+    "Senha deve conter pelo menos 1 caractere especial",
+  );
+
 const emailOptionalSchema = z
   .string()
   .trim()
@@ -110,7 +118,7 @@ export const funnelRegisterSchema = z.object({
   nome: z.string().trim().min(2, "Nome é obrigatório"),
   email: emailRequiredSchema,
   telefone: z.string().trim().min(10, "Celular é obrigatório"),
-  senha: senhaSchema,
+  senha: senhaForteSchema,
   variant: z.enum(["control", "vsl"]).default("control"),
   utm: z
     .object({
