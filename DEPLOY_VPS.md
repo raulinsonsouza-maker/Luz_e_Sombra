@@ -181,6 +181,13 @@ LOG_LEVEL=info
 CORS_ORIGIN=https://app.seudominio.com
 OBJECT_STORAGE_DIR=/opt/luzesombra/storage
 
+# Resend (e-mails transacionais)
+RESEND_API_KEY=re_xxxxxxxx
+EMAIL_FROM="Portal Iluminando <contato@portaliluminando.com.br>"
+EMAIL_REPLY_TO=contato@portaliluminando.com.br
+APP_PUBLIC_URL=https://portaliluminando.com.br
+EMAIL_ENABLED=true
+
 BASE_PATH=/
 ```
 

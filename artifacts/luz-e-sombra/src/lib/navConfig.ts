@@ -49,6 +49,8 @@ export function isChromelessRoute(location: string): boolean {
     location === "/vsl" ||
     location === "/checkout" ||
     location === "/login" ||
+    location === "/esqueci-senha" ||
+    location === "/redefinir-senha" ||
     location === "/admin/login" ||
     location.startsWith("/admin")
   );

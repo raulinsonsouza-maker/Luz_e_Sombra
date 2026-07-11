@@ -10,6 +10,7 @@ import {
 import { eq } from "drizzle-orm";
 import { parseBody, funnelRegisterSchema } from "../lib/schemas";
 import { signToken } from "./auth";
+import { sendCheckoutWelcomeEmail } from "../lib/email";
 
 const router = Router();
 
@@ -169,6 +170,16 @@ router.post("/register", async (req: Request, res: Response) => {
       utmContent: utm?.content ?? null,
       utmTerm: utm?.term ?? null,
     });
+
+    sendCheckoutWelcomeEmail(
+      {
+        usuarioId: novoUsuario.id,
+        nome: nome.trim(),
+        email: emailNorm,
+        checkoutToken,
+      },
+      req.log,
+    );
 
     return res.status(201).json({
       checkoutToken,

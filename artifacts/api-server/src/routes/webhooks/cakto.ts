@@ -6,6 +6,7 @@ import {
   webhookEventosCaktoTable,
 } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
+import { sendAccessGrantedEmail, sendAccessRevokedEmail } from "../../lib/email";
 
 const router = Router();
 
@@ -99,7 +100,7 @@ async function activatePurchase(params: {
   email?: string | null;
   orderId?: string | null;
   paymentMethod?: string | null;
-}): Promise<boolean> {
+}): Promise<number | null> {
   let compraId: number | null = null;
   let usuarioId: number | null = null;
 
@@ -132,7 +133,7 @@ async function activatePurchase(params: {
     }
   }
 
-  if (!usuarioId) return false;
+  if (!usuarioId) return null;
 
   await db
     .update(usuariosTable)
@@ -152,13 +153,13 @@ async function activatePurchase(params: {
       .where(eq(comprasCaktoTable.id, compraId));
   }
 
-  return true;
+  return usuarioId;
 }
 
 async function revokePurchase(params: {
   checkoutToken?: string | null;
   email?: string | null;
-}): Promise<void> {
+}): Promise<{ usuarioId: number; email: string | null; nome: string } | null> {
   let usuarioId: number | null = null;
 
   if (params.checkoutToken) {
@@ -179,7 +180,15 @@ async function revokePurchase(params: {
     if (user) usuarioId = user.id;
   }
 
-  if (!usuarioId) return;
+  if (!usuarioId) return null;
+
+  const [usuario] = await db
+    .select({ id: usuariosTable.id, email: usuariosTable.email, nome: usuariosTable.nome })
+    .from(usuariosTable)
+    .where(eq(usuariosTable.id, usuarioId))
+    .limit(1);
+
+  if (!usuario) return null;
 
   await db
     .update(usuariosTable)
@@ -190,6 +199,8 @@ async function revokePurchase(params: {
     .update(comprasCaktoTable)
     .set({ status: "refunded", atualizadoEm: new Date() })
     .where(eq(comprasCaktoTable.usuarioId, usuarioId));
+
+  return { usuarioId: usuario.id, email: usuario.email, nome: usuario.nome };
 }
 
 // POST /api/webhooks/cakto
@@ -231,12 +242,35 @@ router.post("/cakto", async (req: Request, res: Response) => {
       normalizedType.includes("approved") ||
       normalizedType === "paid"
     ) {
-      await activatePurchase({ checkoutToken: ref, email, orderId, paymentMethod });
+      const usuarioId = await activatePurchase({ checkoutToken: ref, email, orderId, paymentMethod });
+      if (usuarioId) {
+        const [usuario] = await db
+          .select({
+            id: usuariosTable.id,
+            nome: usuariosTable.nome,
+            email: usuariosTable.email,
+          })
+          .from(usuariosTable)
+          .where(eq(usuariosTable.id, usuarioId))
+          .limit(1);
+        if (usuario?.email) {
+          sendAccessGrantedEmail(
+            { usuarioId: usuario.id, nome: usuario.nome, email: usuario.email },
+            req.log,
+          );
+        }
+      }
     } else if (
       normalizedType.includes("refund") ||
       normalizedType.includes("chargeback")
     ) {
-      await revokePurchase({ checkoutToken: ref, email });
+      const revoked = await revokePurchase({ checkoutToken: ref, email });
+      if (revoked?.email) {
+        sendAccessRevokedEmail(
+          { usuarioId: revoked.usuarioId, nome: revoked.nome, email: revoked.email },
+          req.log,
+        );
+      }
     }
 
     return res.json({ ok: true });

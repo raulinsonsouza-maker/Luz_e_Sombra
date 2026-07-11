@@ -2,8 +2,17 @@ import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { db } from "@workspace/db";
-import { usuariosTable } from "@workspace/db/schema";
-import { eq } from "drizzle-orm";
+import { usuariosTable, passwordResetTokensTable } from "@workspace/db/schema";
+import { eq, and, isNull, gt } from "drizzle-orm";
+import { parseBody, forgotPasswordSchema, resetPasswordSchema } from "../lib/schemas";
+import {
+  generateResetToken,
+  getResetTokenExpiry,
+  hashResetToken,
+  isResetRateLimited,
+  recordResetRequest,
+} from "../lib/passwordReset";
+import { sendPasswordResetEmail, sendPasswordChangedEmail } from "../lib/email";
 
 const router = Router();
 
@@ -138,6 +147,122 @@ router.get("/session", async (req: Request, res: Response) => {
     });
   } catch (error) {
     return res.status(401).json({ error: "Token inválido" });
+  }
+});
+
+const FORGOT_PASSWORD_OK = {
+  message: "Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.",
+};
+
+// POST /api/auth/forgot-password
+router.post("/forgot-password", async (req: Request, res: Response) => {
+  try {
+    const parsed = parseBody(forgotPasswordSchema, req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
+    }
+
+    const email = parsed.data.email;
+
+    if (isResetRateLimited(email)) {
+      return res.json(FORGOT_PASSWORD_OK);
+    }
+
+    const [usuario] = await db
+      .select({
+        id: usuariosTable.id,
+        nome: usuariosTable.nome,
+        email: usuariosTable.email,
+      })
+      .from(usuariosTable)
+      .where(eq(usuariosTable.email, email))
+      .limit(1);
+
+    if (!usuario?.email) {
+      return res.json(FORGOT_PASSWORD_OK);
+    }
+
+    recordResetRequest(email);
+    const rawToken = generateResetToken();
+    const tokenHash = hashResetToken(rawToken);
+
+    await db.insert(passwordResetTokensTable).values({
+      usuarioId: usuario.id,
+      tokenHash,
+      expiresAt: getResetTokenExpiry(),
+    });
+
+    sendPasswordResetEmail(
+      {
+        usuarioId: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+        token: rawToken,
+      },
+      req.log,
+    );
+
+    return res.json(FORGOT_PASSWORD_OK);
+  } catch (error) {
+    req.log.error({ error }, "Erro em forgot-password");
+    return res.status(500).json({ error: "Erro ao processar solicitação" });
+  }
+});
+
+// POST /api/auth/reset-password
+router.post("/reset-password", async (req: Request, res: Response) => {
+  try {
+    const parsed = parseBody(resetPasswordSchema, req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
+    }
+
+    const { token, novaSenha } = parsed.data;
+    const tokenHash = hashResetToken(token);
+
+    const [row] = await db
+      .select({
+        tokenId: passwordResetTokensTable.id,
+        usuarioId: passwordResetTokensTable.usuarioId,
+        nome: usuariosTable.nome,
+        email: usuariosTable.email,
+      })
+      .from(passwordResetTokensTable)
+      .innerJoin(usuariosTable, eq(passwordResetTokensTable.usuarioId, usuariosTable.id))
+      .where(
+        and(
+          eq(passwordResetTokensTable.tokenHash, tokenHash),
+          isNull(passwordResetTokensTable.usedAt),
+          gt(passwordResetTokensTable.expiresAt, new Date()),
+        ),
+      )
+      .limit(1);
+
+    if (!row?.email) {
+      return res.status(400).json({ error: "Link inválido ou expirado. Solicite um novo e-mail." });
+    }
+
+    const senhaHash = await bcrypt.hash(novaSenha, 10);
+
+    await db
+      .update(usuariosTable)
+      .set({ senha: senhaHash, atualizadoEm: new Date() })
+      .where(eq(usuariosTable.id, row.usuarioId));
+
+    await db
+      .update(passwordResetTokensTable)
+      .set({ usedAt: new Date() })
+      .where(eq(passwordResetTokensTable.id, row.tokenId));
+
+    sendPasswordChangedEmail(
+      { usuarioId: row.usuarioId, nome: row.nome, email: row.email },
+      req.log,
+    );
+
+    return res.json({ ok: true, message: "Senha redefinida com sucesso." });
+  } catch (error) {
+    req.log.error({ error }, "Erro em reset-password");
+    return res.status(500).json({ error: "Erro ao redefinir senha" });
   }
 });
 

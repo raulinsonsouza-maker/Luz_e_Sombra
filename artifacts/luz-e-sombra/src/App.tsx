@@ -8,6 +8,8 @@ import VslLandingPage from "@/pages/VslLandingPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import AcessoPosCompraPage from "@/pages/AcessoPosCompraPage";
 import LoginPage from "@/pages/LoginPage";
+import EsqueciSenhaPage from "@/pages/EsqueciSenhaPage";
+import RedefinirSenhaPage from "@/pages/RedefinirSenhaPage";
 import AdminLoginPage from "@/pages/AdminLoginPage";
 import HomePage from "@/pages/HomePage";
 import AvaliacaoPage from "@/pages/AvaliacaoPage";
@@ -56,6 +58,8 @@ function Router() {
         <Route path="/checkout" component={CheckoutPage} />
         <Route path="/acesso-pos-compra" component={AcessoPosCompraPage} />
         <Route path="/login" component={LoginPage} />
+        <Route path="/esqueci-senha" component={EsqueciSenhaPage} />
+        <Route path="/redefinir-senha" component={RedefinirSenhaPage} />
         <Route path="/admin/login" component={AdminLoginPage} />
         <Route path="/dashboard">
           <ProtectedRoute component={HomePage} />

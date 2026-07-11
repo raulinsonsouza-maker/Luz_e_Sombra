@@ -181,6 +181,12 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              <div className="flex justify-end">
+                <Link href="/esqueci-senha" className="text-xs font-medium text-brand-medium hover:text-brand-bronze transition-colors">
+                  Esqueci minha senha
+                </Link>
+              </div>
+
               {erro && (
                 <div className="flex items-start gap-3 p-4 rounded-xl animate-fadeIn"
                   style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)" }}>

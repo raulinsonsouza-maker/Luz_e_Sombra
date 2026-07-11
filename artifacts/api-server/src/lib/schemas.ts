@@ -114,6 +114,15 @@ const emailRequiredSchema = z
   .toLowerCase()
   .refine((v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), "E-mail inválido");
 
+export const forgotPasswordSchema = z.object({
+  email: emailRequiredSchema,
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().trim().min(16, "Token inválido"),
+  novaSenha: senhaForteSchema,
+});
+
 export const funnelRegisterSchema = z.object({
   nome: z.string().trim().min(2, "Nome é obrigatório"),
   email: emailRequiredSchema,
