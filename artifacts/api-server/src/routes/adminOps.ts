@@ -16,6 +16,7 @@ import {
   sendPaymentPendingReminderEmail,
   sendJourneyNudgeEmail,
 } from "../lib/email/retention";
+import { getKommoConfig, kommoLeadUrl } from "../lib/kommo";
 
 const router = Router();
 
@@ -173,6 +174,13 @@ router.get("/usuarios/:id/ficha", requireAdmin, async (req: AuthRequest, res: Re
 
     const totalAnalises = analisesConcluidas.filter((a) => a.concluida).length;
 
+    const kommoCfg = getKommoConfig();
+    const kommoLeadId = compra?.kommoLeadId ?? null;
+    const kommoUrl =
+      kommoLeadId && kommoCfg.subdomain
+        ? kommoLeadUrl(kommoCfg.subdomain, kommoLeadId)
+        : null;
+
     return res.json({
       usuario: {
         id: usuario.id,
@@ -185,6 +193,15 @@ router.get("/usuarios/:id/ficha", requireAdmin, async (req: AuthRequest, res: Re
         primeiroAcesso: usuario.primeiroAcesso,
       },
       compra: compra ?? null,
+      kommo: kommoLeadId
+        ? {
+            leadId: kommoLeadId,
+            contactId: compra?.kommoContactId ?? null,
+            lastEvent: compra?.kommoLastEvent ?? null,
+            lastSyncAt: compra?.kommoLastSyncAt ?? null,
+            url: kommoUrl,
+          }
+        : null,
       gamificacao: gam
         ? { xp: gam.xp, nivel: gam.nivel, streakDias: gam.streakDias, ultimoAcessoEm: gam.ultimoAcessoEm }
         : null,

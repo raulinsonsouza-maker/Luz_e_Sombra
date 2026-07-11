@@ -11,6 +11,9 @@ import { eq } from "drizzle-orm";
 import { parseBody, funnelRegisterSchema } from "../lib/schemas";
 import { signToken } from "./auth";
 import { sendCheckoutWelcomeEmail } from "../lib/email";
+import {
+  syncKommoOnRegister,
+} from "../lib/kommo";
 
 const router = Router();
 
@@ -225,6 +228,18 @@ router.post("/register", async (req: Request, res: Response) => {
         nome: nome.trim(),
         email: emailNorm,
         checkoutToken,
+      },
+      req.log,
+    );
+
+    syncKommoOnRegister(
+      {
+        usuarioId: novoUsuario.id,
+        nome: nome.trim(),
+        email: emailNorm,
+        telefone: telefone.trim(),
+        checkoutToken,
+        utm,
       },
       req.log,
     );

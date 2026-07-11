@@ -7,6 +7,10 @@ import {
 } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { sendAccessGrantedEmail, sendAccessRevokedEmail } from "../../lib/email";
+import {
+  syncKommoOnPaymentPaid,
+  syncKommoOnAccessRevoked,
+} from "../../lib/kommo";
 
 const router = Router();
 
@@ -249,6 +253,7 @@ router.post("/cakto", async (req: Request, res: Response) => {
             id: usuariosTable.id,
             nome: usuariosTable.nome,
             email: usuariosTable.email,
+            telefone: usuariosTable.telefone,
           })
           .from(usuariosTable)
           .where(eq(usuariosTable.id, usuarioId))
@@ -256,6 +261,16 @@ router.post("/cakto", async (req: Request, res: Response) => {
         if (usuario?.email) {
           sendAccessGrantedEmail(
             { usuarioId: usuario.id, nome: usuario.nome, email: usuario.email },
+            req.log,
+          );
+          syncKommoOnPaymentPaid(
+            {
+              usuarioId: usuario.id,
+              nome: usuario.nome,
+              email: usuario.email,
+              telefone: usuario.telefone,
+              checkoutToken: ref ?? undefined,
+            },
             req.log,
           );
         }
@@ -270,6 +285,7 @@ router.post("/cakto", async (req: Request, res: Response) => {
           { usuarioId: revoked.usuarioId, nome: revoked.nome, email: revoked.email },
           req.log,
         );
+        syncKommoOnAccessRevoked({ usuarioId: revoked.usuarioId }, req.log);
       }
     }
 

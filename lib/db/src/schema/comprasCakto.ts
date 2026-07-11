@@ -18,6 +18,10 @@ export const comprasCaktoTable = pgTable("compras_cakto", {
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
   atualizadoEm: timestamp("atualizado_em").notNull().defaultNow(),
   pagoEm: timestamp("pago_em"),
+  kommoLeadId: integer("kommo_lead_id"),
+  kommoContactId: integer("kommo_contact_id"),
+  kommoLastSyncAt: timestamp("kommo_last_sync_at"),
+  kommoLastEvent: text("kommo_last_event"),
 }, (table) => ({
   checkoutTokenUnique: unique("uq_compras_cakto_checkout_token").on(table.checkoutToken),
   usuarioIdx: index("idx_compras_cakto_usuario_id").on(table.usuarioId),
