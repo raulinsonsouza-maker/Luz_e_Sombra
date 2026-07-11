@@ -17,7 +17,9 @@ export async function fetchNotificacoesCount() {
       const data = await res.json();
       broadcast(data.count ?? 0);
     }
-  } catch {}
+  } catch {
+    void 0; // badge em background — não exibir toast
+  }
 }
 
 export function useNotificacoesCount() {

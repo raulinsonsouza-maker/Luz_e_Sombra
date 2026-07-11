@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import { toastApiError } from "@/lib/apiError";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import { AuthenticatedImage } from "@/components/AuthenticatedImage";
@@ -107,7 +108,9 @@ export default function ComunidadePage() {
     try {
       const res = await apiFetch("/comunidade");
       if (res.ok) setPosts(await res.json());
-    } catch {}
+    } catch {
+      toastApiError();
+    }
     setLoading(false);
   }
 
@@ -206,7 +209,9 @@ export default function ComunidadePage() {
     try {
       await apiFetch(`/comunidade/${id}`, { method: "DELETE" });
       setPosts(prev => prev.filter(p => p.id !== id));
-    } catch {}
+    } catch {
+      toastApiError();
+    }
     setDeletando(null);
   }
 

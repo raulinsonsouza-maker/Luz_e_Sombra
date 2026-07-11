@@ -15,6 +15,7 @@ import { requireAuth, AuthRequest } from "../lib/authMiddleware";
 import { minicursoCompletoParaUsuario } from "./modulosJornada";
 import { temAnalise } from "../lib/temAnaliseJornada";
 import { MISSOES_POR_DIA } from "../lib/missoesCuradas";
+import { awardXp, getOrCreateGamificacao } from "../lib/awardXp";
 
 const router = Router();
 
@@ -27,7 +28,7 @@ const NIVEIS = [
 ];
 
 function getNivelInfo(xp: number) {
-  return [...NIVEIS].reverse().find(n => xp >= n.xpMin) ?? NIVEIS[0];
+  return [...NIVEIS].reverse().find((n) => xp >= n.xpMin) ?? NIVEIS[0];
 }
 
 /** Índice 0..59 para MISSOES_POR_DIA (cicla após 60 dias). Base: cadastro do usuário. */
@@ -44,14 +45,6 @@ function diaJornada(criadoEm: Date | string | null | undefined, hoje: Date = new
 
 function getTodayStr() {
   return new Date().toISOString().split("T")[0];
-}
-
-async function getOrCreateGamificacao(usuarioId: number) {
-  let [gam] = await db.select().from(gamificacaoTable).where(eq(gamificacaoTable.usuarioId, usuarioId));
-  if (!gam) {
-    [gam] = await db.insert(gamificacaoTable).values({ usuarioId }).returning();
-  }
-  return gam;
 }
 
 async function ensureTodayMissions(usuarioId: number, today: string) {
@@ -207,39 +200,6 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
   }
 });
 
-router.post("/adicionar-xp", requireAuth, async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.user!.id;
-    const { xp, motivo } = req.body;
-    if (!xp || typeof xp !== "number" || xp <= 0) {
-      return res.status(400).json({ error: "XP inválido" });
-    }
-
-    const gam = await getOrCreateGamificacao(userId);
-    const newXp = gam.xp + xp;
-    const nivelInfo = getNivelInfo(newXp);
-    const leveledUp = nivelInfo.nivel > gam.nivel;
-
-    const [updated] = await db
-      .update(gamificacaoTable)
-      .set({ xp: newXp, nivel: nivelInfo.nivel, atualizadoEm: new Date() })
-      .where(eq(gamificacaoTable.usuarioId, userId))
-      .returning();
-
-    return res.json({
-      xp: updated.xp,
-      nivel: updated.nivel,
-      nomeNivel: nivelInfo.nome,
-      leveledUp,
-      xpGanho: xp,
-      motivo: motivo ?? "",
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Erro ao adicionar XP" });
-  }
-});
-
 router.post("/missoes/:id/concluir", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user!.id;
@@ -258,23 +218,15 @@ router.post("/missoes/:id/concluir", requireAuth, async (req: AuthRequest, res: 
       .set({ concluidaEm: new Date() })
       .where(eq(missoesDiariasTable.id, missaoId));
 
-    const gam = await getOrCreateGamificacao(userId);
-    const newXp = gam.xp + missao.xpRecompensa;
-    const nivelInfo = getNivelInfo(newXp);
-    const leveledUp = nivelInfo.nivel > gam.nivel;
-
-    await db
-      .update(gamificacaoTable)
-      .set({ xp: newXp, nivel: nivelInfo.nivel, atualizadoEm: new Date() })
-      .where(eq(gamificacaoTable.usuarioId, userId));
+    const result = await awardXp(userId, missao.xpRecompensa);
 
     return res.json({
       success: true,
-      xpGanho: missao.xpRecompensa,
-      totalXp: newXp,
-      nivel: nivelInfo.nivel,
-      nomeNivel: nivelInfo.nome,
-      leveledUp,
+      xpGanho: result.xpGanho,
+      totalXp: result.xp,
+      nivel: result.nivel,
+      nomeNivel: result.nomeNivel,
+      leveledUp: result.leveledUp,
     });
   } catch (err) {
     console.error(err);

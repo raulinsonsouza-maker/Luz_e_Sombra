@@ -5,6 +5,12 @@ import { fotosTracoTable, analiseTracoTable, pessoasAnaliseTable } from "@worksp
 import { eq, and, isNull, desc } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
 import {
+  parseBody,
+  tracoAnalisarEnvelopeSchema,
+  tracoPessoaCreateSchema,
+  tracoPessoaUpdateSchema,
+} from "../lib/schemas";
+import {
   aplicarFusaoTracoDiagnostico,
   diagnosticoEmocionalFusaoSchema,
   ESTRUTURAS_TRACO,
@@ -169,8 +175,11 @@ router.get("/pessoas", requireAuth, async (req: AuthRequest, res: Response) => {
 // ── POST /traco/pessoas ────────────────────────────────────────────────────────
 router.post("/pessoas", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const { nome, relacao, ordem } = req.body as { nome?: string; relacao?: string; ordem?: number };
-    if (!nome?.trim()) return res.status(400).json({ error: "Nome é obrigatório" });
+    const parsed = parseBody(tracoPessoaCreateSchema, req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
+    }
+    const { nome, relacao, ordem } = parsed.data;
 
     const existentes = await db
       .select({ id: pessoasAnaliseTable.id })
@@ -182,7 +191,7 @@ router.post("/pessoas", requireAuth, async (req: AuthRequest, res: Response) => 
 
     const [pessoa] = await db
       .insert(pessoasAnaliseTable)
-      .values({ usuarioId: req.user!.id, nome: nome.trim(), relacao: relacao?.trim() || null, ordem: ordem ?? existentes.length })
+      .values({ usuarioId: req.user!.id, nome, relacao: relacao?.trim() || null, ordem: ordem ?? existentes.length })
       .returning();
     return res.status(201).json(pessoa);
   } catch (err) {
@@ -195,13 +204,17 @@ router.post("/pessoas", requireAuth, async (req: AuthRequest, res: Response) => 
 router.put("/pessoas/:id", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const id = parseInt(String(req.params.id), 10);
-    const { nome, relacao } = req.body as { nome?: string; relacao?: string };
+    const parsed = parseBody(tracoPessoaUpdateSchema, req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
+    }
+    const { nome, relacao } = parsed.data;
     const [existing] = await db.select().from(pessoasAnaliseTable)
       .where(and(eq(pessoasAnaliseTable.id, id), eq(pessoasAnaliseTable.usuarioId, req.user!.id)));
     if (!existing) return res.status(404).json({ error: "Pessoa não encontrada" });
 
     const updates: Partial<typeof pessoasAnaliseTable.$inferInsert> = {};
-    if (nome?.trim()) updates.nome = nome.trim();
+    if (nome !== undefined) updates.nome = nome;
     if (relacao !== undefined) updates.relacao = relacao?.trim() || null;
 
     const [pessoa] = await db.update(pessoasAnaliseTable).set(updates).where(eq(pessoasAnaliseTable.id, id)).returning();
@@ -342,25 +355,19 @@ router.get("/fotos/:id/view", requireAuth, async (req: AuthRequest, res: Respons
 // ── POST /traco/analisar ───────────────────────────────────────────────────────
 router.post("/analisar", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
+    const envelope = parseBody(tracoAnalisarEnvelopeSchema, req.body);
+    if (!envelope.success) {
+      return res.status(400).json({ error: envelope.error, detalhes: envelope.detalhes });
+    }
     const {
       resultado,
       pessoaId: pessoaIdRaw,
       snapshotPessoaId: snapshotPessoaIdRaw,
       pessoaNome: pessoaNomeRaw,
       diagnosticoEmocional,
-    } = req.body as {
-      resultado?: Record<string, unknown>;
-      pessoaId?: unknown;
-      snapshotPessoaId?: unknown;
-      pessoaNome?: unknown;
-      diagnosticoEmocional?: unknown;
-    };
+    } = envelope.data;
 
-    if (!resultado || typeof resultado !== "object") {
-      return res.status(400).json({ error: "Resultado da análise não fornecido." });
-    }
-
-    const r = resultado as Record<string, unknown>;
+    const r = resultado;
     if (!r.estruturas || !r.estruturaPrincipal || !r.estruturaSecundaria) {
       return res.status(400).json({ error: "Resultado da análise incompleto ou inválido." });
     }

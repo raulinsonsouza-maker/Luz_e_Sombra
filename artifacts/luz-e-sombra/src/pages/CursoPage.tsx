@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { apiFetch } from "@/lib/auth";
+import { toastApiError } from "@/lib/apiError";
 import {
   ChevronLeft, Loader2, CheckCircle2, Circle, Play,
   BookOpen, Clock, ChevronRight, ExternalLink,
@@ -87,7 +88,9 @@ export default function CursoPage() {
           return { ...prev, aulas };
         });
       }
-    } catch {}
+    } catch {
+      toastApiError();
+    }
     setToggling(null);
   }
 

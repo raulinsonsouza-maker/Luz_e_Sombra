@@ -9,6 +9,7 @@ import PageIntroHeader from "@/components/PageIntroHeader";
 import AppPageShell from "@/components/AppPageShell";
 import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import { apiFetch } from "@/lib/auth";
+import { toastApiError } from "@/lib/apiError";
 
 // Icon map inline (avoids AreaIcon which uses brand-* classes)
 import {
@@ -105,7 +106,9 @@ function AvaliacaoContent() {
           const avaliacoes = await res.json();
           if (avaliacoes?.length > 0) { navigate(`/resultado/${avaliacoes[0].id}`); return; }
         }
-      } catch {}
+      } catch {
+        toastApiError();
+      }
       setCarregando(false);
     }
     verificar();

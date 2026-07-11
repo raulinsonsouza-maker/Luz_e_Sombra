@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { avaliacoesTable, usuariosTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
+import { createAvaliacaoSchema, parseBody } from "../lib/schemas";
 
 const router = Router();
 
@@ -49,22 +50,26 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
 router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const user = req.user!;
-    const body = req.body;
+    const parsed = parseBody(createAvaliacaoSchema, req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
+    }
+    const body = parsed.data;
 
     const [avaliacao] = await db.insert(avaliacoesTable).values({
       usuarioId: user.id,
-      plenitudeFelicidade: Number(body.plenitudeFelicidade),
-      espiritualidade: Number(body.espiritualidade),
-      saudeDisposicao: Number(body.saudeDisposicao),
-      desenvolvimentoIntelectual: Number(body.desenvolvimentoIntelectual),
-      equilibrioEmocional: Number(body.equilibrioEmocional),
-      familia: Number(body.familia),
-      desenvolvimentoAmoroso: Number(body.desenvolvimentoAmoroso),
-      vidaSocial: Number(body.vidaSocial),
-      realizacaoProposito: Number(body.realizacaoProposito),
-      recursosFinanceiros: Number(body.recursosFinanceiros),
-      contribuicaoSocial: Number(body.contribuicaoSocial),
-      criatividadeHobbyDiversao: Number(body.criatividadeHobbyDiversao),
+      plenitudeFelicidade: body.plenitudeFelicidade,
+      espiritualidade: body.espiritualidade,
+      saudeDisposicao: body.saudeDisposicao,
+      desenvolvimentoIntelectual: body.desenvolvimentoIntelectual,
+      equilibrioEmocional: body.equilibrioEmocional,
+      familia: body.familia,
+      desenvolvimentoAmoroso: body.desenvolvimentoAmoroso,
+      vidaSocial: body.vidaSocial,
+      realizacaoProposito: body.realizacaoProposito,
+      recursosFinanceiros: body.recursosFinanceiros,
+      contribuicaoSocial: body.contribuicaoSocial,
+      criatividadeHobbyDiversao: body.criatividadeHobbyDiversao,
     }).returning();
 
     return res.json(avaliacao);

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import { toastApiError } from "@/lib/apiError";
 import { profilePhotoViewResponseIsImageBody } from "@/lib/profilePhotoView";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
@@ -80,7 +81,9 @@ export default function MeuPerfilPage() {
     try {
       const res = await apiFetch("/gamificacao/progresso");
       if (res.ok) setProgresso(await res.json());
-    } catch {}
+    } catch {
+      toastApiError();
+    }
   }
 
   async function buscarFoto() {
@@ -93,7 +96,9 @@ export default function MeuPerfilPage() {
         if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
         return URL.createObjectURL(blob);
       });
-    } catch {}
+    } catch {
+      toastApiError();
+    }
   }
 
   async function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {

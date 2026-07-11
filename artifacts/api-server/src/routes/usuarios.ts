@@ -5,18 +5,19 @@ import { usuariosTable, avaliacoesTable, comunidadeTable, reacoesTable, cursosTa
 import { eq, count, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
 import { ObjectStorageService } from "../lib/objectStorage";
+import {
+  createUsuarioAdminSchema,
+  fotoPerfilObjectPathSchema,
+  parseBody,
+  updateMeSchema,
+  updateUsuarioAdminSchema,
+} from "../lib/schemas";
 
 const router = Router();
 const objectStorage = new ObjectStorageService();
 
-function validarUsername(u: string): boolean {
-  return /^[a-z0-9._-]{3,30}$/.test(u);
-}
 function validarSenha(s: string): boolean {
   return s.length >= 6;
-}
-function validarEmail(e: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 }
 
 // POST /api/usuarios/me/foto-perfil/upload-url — get presigned upload URL
@@ -34,10 +35,11 @@ router.post("/me/foto-perfil/upload-url", requireAuth, async (req: AuthRequest, 
 // PUT /api/usuarios/me/foto-perfil — save objectPath after upload
 router.put("/me/foto-perfil", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const { objectPath } = req.body as { objectPath?: string };
-    if (!objectPath?.startsWith("/objects/")) {
-      return res.status(400).json({ error: "objectPath inválido" });
+    const parsed = parseBody(fotoPerfilObjectPathSchema, req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error });
     }
+    const { objectPath } = parsed.data;
     await db.update(usuariosTable)
       .set({ fotoPerfil: objectPath, atualizadoEm: new Date() })
       .where(eq(usuariosTable.id, req.user!.id));
@@ -74,20 +76,19 @@ router.get("/me/foto-perfil/view", requireAuth, async (req: AuthRequest, res: Re
 // PUT /api/usuarios/me — update own profile (name, birth date, password)
 router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const { nome, dataNascimento, senhaAtual, novaSenha } = req.body as {
-      nome?: unknown; dataNascimento?: unknown;
-      senhaAtual?: unknown; novaSenha?: unknown;
-    };
+    const parsed = parseBody(updateMeSchema, req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
+    }
+    const { nome, dataNascimento, senhaAtual, novaSenha } = parsed.data;
     const updates: UsuarioUpdates = {};
 
     if (nome !== undefined) {
-      const nomeNorm = String(nome ?? "").trim();
-      if (!nomeNorm) return res.status(400).json({ error: "Nome não pode ser vazio" });
-      updates.nome = nomeNorm;
+      updates.nome = nome;
     }
 
     if (dataNascimento !== undefined) {
-      updates.dataNascimento = typeof dataNascimento === "string" ? dataNascimento || null : null;
+      updates.dataNascimento = dataNascimento;
     }
 
     if (novaSenha !== undefined && novaSenha !== "") {
@@ -96,11 +97,10 @@ router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {
       }
       const [currentUser] = await db.select().from(usuariosTable).where(eq(usuariosTable.id, req.user!.id)).limit(1);
       if (!currentUser) return res.status(404).json({ error: "Usuário não encontrado" });
-      const senhaCorreta = await bcrypt.compare(String(senhaAtual), currentUser.senha);
+      const senhaCorreta = await bcrypt.compare(senhaAtual, currentUser.senha);
       if (!senhaCorreta) return res.status(400).json({ error: "Senha atual incorreta" });
-      const novaSenhaStr = String(novaSenha);
-      if (!validarSenha(novaSenhaStr)) return res.status(400).json({ error: "Nova senha inválida. Use pelo menos 6 caracteres." });
-      updates.senha = await bcrypt.hash(novaSenhaStr, 10);
+      if (!validarSenha(novaSenha)) return res.status(400).json({ error: "Nova senha inválida. Use pelo menos 6 caracteres." });
+      updates.senha = await bcrypt.hash(novaSenha, 10);
     }
 
     if (Object.keys(updates).length === 0) {
@@ -180,27 +180,15 @@ router.get("/", requireAdmin, async (req: AuthRequest, res: Response) => {
 // POST /api/usuarios - Admin only
 router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const { username, senha, nome, email, dataNascimento, isAdmin } = req.body as {
-      username: unknown; senha: unknown; nome: unknown;
-      email: unknown; dataNascimento: unknown; isAdmin: unknown;
-    };
-    const usernameNorm = String(username ?? "").trim().toLowerCase();
-    const nomeNorm = String(nome ?? "").trim();
-    const senhaNorm = String(senha ?? "");
-    const emailNorm = typeof email === "string" ? email.trim().toLowerCase() : "";
-
-    if (!usernameNorm || !senhaNorm || !nomeNorm) {
-      return res.status(400).json({ error: "Username, senha e nome são obrigatórios" });
+    const parsed = parseBody(createUsuarioAdminSchema, req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
     }
-    if (!validarUsername(usernameNorm)) {
-      return res.status(400).json({ error: "Username inválido. Use 3-30 caracteres: letras minúsculas, números, ponto, hífen ou underline." });
-    }
-    if (!validarSenha(senhaNorm)) {
-      return res.status(400).json({ error: "Senha inválida. Use pelo menos 6 caracteres." });
-    }
-    if (emailNorm && !validarEmail(emailNorm)) {
-      return res.status(400).json({ error: "Email inválido." });
-    }
+    const { username, senha, nome, email, dataNascimento, isAdmin } = parsed.data;
+    const usernameNorm = username;
+    const nomeNorm = nome;
+    const senhaNorm = senha;
+    const emailNorm = email ?? "";
 
     const [existing] = await db.select().from(usuariosTable).where(eq(usuariosTable.username, usernameNorm)).limit(1);
     if (existing) {
@@ -220,7 +208,7 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
       senha: senhaHash,
       nome: nomeNorm,
       email: emailNorm || null,
-      dataNascimento: typeof dataNascimento === "string" ? dataNascimento || null : null,
+      dataNascimento: dataNascimento ?? null,
       isAdmin: isAdmin === true,
     }).returning({
       id: usuariosTable.id,
@@ -265,40 +253,34 @@ router.put("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
     const usuarioId = parseInt(String(req.params.id), 10);
     if (isNaN(usuarioId)) return res.status(400).json({ error: "ID inválido" });
 
-    const { nome, email, dataNascimento, ativo, isAdmin, senha, novaSenha, primeiroAcesso } = req.body as {
-      nome?: unknown; email?: unknown; dataNascimento?: unknown;
-      ativo?: unknown; isAdmin?: unknown; senha?: unknown;
-      novaSenha?: unknown; primeiroAcesso?: unknown;
-    };
+    const parsed = parseBody(updateUsuarioAdminSchema, req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
+    }
+    const { nome, email, dataNascimento, ativo, isAdmin, senha, novaSenha, primeiroAcesso } = parsed.data;
     const updates: UsuarioUpdates = {};
 
     if (nome !== undefined) {
-      const nomeNorm = String(nome).trim();
-      if (!nomeNorm) return res.status(400).json({ error: "Nome não pode ser vazio" });
-      updates.nome = nomeNorm;
+      updates.nome = nome;
     }
     if (email !== undefined) {
-      const emailNorm = String(email ?? "").trim().toLowerCase();
-      if (emailNorm && !validarEmail(emailNorm)) return res.status(400).json({ error: "Email inválido" });
-      updates.email = emailNorm || null;
+      updates.email = email;
     }
     if (dataNascimento !== undefined) {
-      updates.dataNascimento = typeof dataNascimento === "string" ? dataNascimento || null : null;
+      updates.dataNascimento = dataNascimento;
     }
-    if (typeof ativo === "boolean") updates.ativo = ativo;
-    if (typeof isAdmin === "boolean") {
+    if (ativo !== undefined) updates.ativo = ativo;
+    if (isAdmin !== undefined) {
       if (req.user!.id === usuarioId && !isAdmin) {
         return res.status(400).json({ error: "Você não pode remover seu próprio acesso de administrador" });
       }
       updates.isAdmin = isAdmin;
     }
-    if (typeof primeiroAcesso === "boolean") updates.primeiroAcesso = primeiroAcesso;
+    if (primeiroAcesso !== undefined) updates.primeiroAcesso = primeiroAcesso;
 
     const senhaParaAtualizar = senha ?? novaSenha;
-    if (senhaParaAtualizar !== undefined && senhaParaAtualizar !== null && senhaParaAtualizar !== "") {
-      const senhaStr = String(senhaParaAtualizar);
-      if (!validarSenha(senhaStr)) return res.status(400).json({ error: "Senha inválida. Use pelo menos 6 caracteres." });
-      updates.senha = await bcrypt.hash(senhaStr, 10);
+    if (senhaParaAtualizar !== undefined && senhaParaAtualizar !== "") {
+      updates.senha = await bcrypt.hash(senhaParaAtualizar, 10);
     }
 
     updates.atualizadoEm = new Date();

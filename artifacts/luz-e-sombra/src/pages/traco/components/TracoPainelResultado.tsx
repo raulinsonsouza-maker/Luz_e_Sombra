@@ -186,10 +186,11 @@ export function TracoPainelResultado({
   });
   const alvoAnalise = pessoaNome?.trim() ? pessoaNome.trim() : "Você";
   const terceiraPessoa = !!pessoaNome?.trim();
-  const temFusao = !!resultado.fusaoDiagnosticoEmocional;
-  const alinhamento = resultado.fusaoDiagnosticoEmocional?.alinhamentoFotosFormulario;
-  const baixaConcordancia = alinhamento != null && alinhamento < 55;
-  const sinaisConvergentes = resultado.fusaoDiagnosticoEmocional?.sinaisConvergentes?.slice(0, 2) ?? [];
+  const fusao = resultado.fusaoDiagnosticoEmocional as FusaoDiagnosticoEmocionalResposta | undefined;
+  const temFusao = !!fusao;
+  const alinhamento = fusao?.alinhamentoFotosFormulario;
+  const baixaConcordancia = typeof alinhamento === "number" && alinhamento < 55;
+  const sinaisConvergentes = (fusao?.sinaisConvergentes ?? []).slice(0, 2);
   const showAuditUi =
     import.meta.env.DEV || import.meta.env.VITE_TRACO_AUDIT_UI === "1";
   const [expandedAuditoria, setExpandedAuditoria] = useState(false);
@@ -252,7 +253,7 @@ export function TracoPainelResultado({
                   O {resultado.dominanteApelido}
                 </span>
               )}
-              {temFusao && alinhamento != null && (
+              {temFusao && typeof alinhamento === "number" && (
                 <span
                   className="text-xs px-3 py-1 rounded-full"
                   style={{
@@ -349,7 +350,7 @@ export function TracoPainelResultado({
               </p>
               {sinaisConvergentes.length > 0 && (
                 <ul className="mt-3 space-y-1">
-                  {sinaisConvergentes.map((s, i) => (
+                  {sinaisConvergentes.map((s: string, i: number) => (
                     <li key={i} className="text-xs flex gap-2" style={{ color: "rgba(247,242,236,0.5)" }}>
                       <span style={{ color: "rgba(109,185,109,0.6)" }}>·</span>
                       {s}

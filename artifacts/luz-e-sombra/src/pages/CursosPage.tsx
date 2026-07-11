@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import { toastApiError } from "@/lib/apiError";
 import { CursoCapa } from "@/components/CursoCapa";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
@@ -41,7 +42,9 @@ export default function CursosPage() {
     try {
       const res = await apiFetch("/cursos");
       if (res.ok) setCursos(await res.json());
-    } catch {}
+    } catch {
+      toastApiError();
+    }
     setLoading(false);
   }
 

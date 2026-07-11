@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import { toastApiError } from "@/lib/apiError";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import MissaoDiariaCard from "@/components/MissaoDiariaCard";
@@ -85,7 +86,9 @@ export default function MissoesPage() {
     try {
       const res = await apiFetch("/gamificacao/progresso");
       if (res.ok) setProgresso(await res.json());
-    } catch {}
+    } catch {
+      toastApiError();
+    }
     setCarregando(false);
   }
 

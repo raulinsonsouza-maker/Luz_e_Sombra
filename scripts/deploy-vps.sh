@@ -14,7 +14,7 @@
 #
 # Variáveis opcionais:
 #   APP_DIR=/caminho/do/clone     (padrão: /opt/luzesombra)
-#   SKIP_DB_PUSH=1                não roda drizzle-kit push (quando não mudou lib/db)
+#   SKIP_DB_PUSH=1                não roda drizzle-kit migrate (quando não mudou lib/db)
 #   SKIP_TESTS=1                  não roda testes do motor traco antes do build
 #   HEALTHCHECK_RETRIES=25        tentativas do curl ao healthz (padrão: 25)
 #   HEALTHCHECK_SLEEP=1           segundos entre tentativas (padrão: 1)
@@ -105,10 +105,10 @@ fi
 
 if [[ "$SKIP_DB_PUSH" == "1" ]]; then
   echo ""
-  echo "==> Pulando drizzle push (SKIP_DB_PUSH=1)"
+  echo "==> Pulando drizzle migrate (SKIP_DB_PUSH=1)"
 else
   echo ""
-  echo "==> drizzle-kit push (precisa de DATABASE_URL no .env)"
+  echo "==> drizzle-kit migrate (precisa de DATABASE_URL no .env)"
   if [[ ! -f .env ]]; then
     echo "Erro: arquivo .env não encontrado em $APP_DIR"
     exit 1
@@ -117,7 +117,13 @@ else
   # shellcheck disable=SC1091
   source ./.env
   set +a
-  "$PNPM" --filter @workspace/db push
+  if compgen -G "lib/db/drizzle/*.sql" >/dev/null; then
+    echo "   migrations SQL encontradas — drizzle-kit migrate"
+    "$PNPM" --filter @workspace/db migrate
+  else
+    echo "   sem migrations SQL versionadas — drizzle-kit push (schema sync)"
+    "$PNPM" --filter @workspace/db push
+  fi
 fi
 
 echo ""

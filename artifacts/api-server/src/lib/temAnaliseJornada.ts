@@ -74,7 +74,7 @@ export async function temAnalise(
         .from(usuariosTable)
         .where(eq(usuariosTable.id, usuarioId))
         .limit(1);
-      return r?.concluida === true;
+      return (r as { concluida?: boolean } | undefined)?.concluida === true;
     }
     default:
       return false;

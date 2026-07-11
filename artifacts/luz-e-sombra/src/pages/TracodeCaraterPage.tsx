@@ -239,7 +239,6 @@ export default function TracodeCaraterPage() {
     carregarDados(selectedPessoaId);
     const ent = readDiagnostico30RespostasEntrada(selectedPessoaId);
     setDiagnosticoCompleto(ent !== null && isDiagnostico30RespostasCompletas(ent));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPessoaId]);
 
   useEffect(() => {

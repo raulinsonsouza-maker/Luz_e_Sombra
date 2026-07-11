@@ -8,6 +8,7 @@ import PageIntroHeader from "@/components/PageIntroHeader";
 import AppPageShell from "@/components/AppPageShell";
 import DarkCard from "@/components/DarkCard";
 import { apiFetch } from "@/lib/auth";
+import { toastApiError } from "@/lib/apiError";
 
 interface Avaliacao {
   id: number;
@@ -56,7 +57,9 @@ export default function HistoricoPage() {
     try {
       const res = await apiFetch("/avaliacoes");
       if (res.ok) setAvaliacoes(await res.json());
-    } catch {}
+    } catch {
+      toastApiError();
+    }
     setCarregando(false);
   }
 
