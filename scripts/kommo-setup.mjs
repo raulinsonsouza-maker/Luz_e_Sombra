@@ -162,10 +162,10 @@ async function ensureCustomFields() {
 async function listBots() {
   try {
     const data = await api("GET", "/bots");
-    const bots = data._embedded?.bots ?? [];
-    console.log("\nSalesbots na conta:");
+    const bots = data._embedded?.items ?? data._embedded?.bots ?? [];
+    console.log("\nSalesbots na conta (API lista; criação só no painel):");
     for (const b of bots) {
-      console.log(`  - id=${b.id} name="${b.name}"`);
+      console.log(`  - id=${b.id} name="${b.name}" type=${b.type_functionality ?? "?"}`);
     }
     return bots;
   } catch (e) {
@@ -209,11 +209,11 @@ async function main() {
   }
 
   if (!env.KOMMO_BOT_WELCOME_ID || !env.KOMMO_BOT_PAID_ID) {
-    console.log("\n⚠ Crie os Salesbots na Kommo (WhatsApp Lite) e atualize os BOT_*_ID no .env.");
-    console.log("  Bot A: Boas-vindas cadastro");
-    console.log("  Bot B: Pagamento pendente (PIX)");
-    console.log("  Bot C: Acesso liberado");
-    console.log("  Depois configure Digital Pipeline: delays 2h e 24h em Pagamento pendente.");
+    console.log("\n⚠ Salesbots e Digital Pipeline são configurados SOMENTE no painel Kommo.");
+    console.log("  O Portal move leads entre etapas; o DP dispara WhatsApp ao entrar na etapa.");
+    console.log("  Crie no painel: PI - Boas-vindas, PI - PIX pendente, PI - Acesso liberado");
+    console.log("  Digital Pipeline: automatizar por etapa em Portal Iluminando (delays 2h/24h em Pendente).");
+    console.log("  KOMMO_TRIGGER_BOTS=false (padrão) — não dispare bots via API se usar DP.");
   }
 }
 

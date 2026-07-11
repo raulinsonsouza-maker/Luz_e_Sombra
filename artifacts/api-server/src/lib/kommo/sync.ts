@@ -133,7 +133,10 @@ async function syncKommoOnRegisterAsync(
     kommoLastEvent: "registered",
   });
 
-  await safeRunBot(cfg.botWelcomeId, result.leadId, log);
+  // WPP via Digital Pipeline ao entrar na etapa — API só dispara bot se KOMMO_TRIGGER_BOTS=true
+  if (cfg.triggerBotsViaApi) {
+    await safeRunBot(cfg.botWelcomeId, result.leadId, log);
+  }
 
   log?.info(
     {
@@ -211,7 +214,9 @@ async function syncKommoOnPaymentPaidAsync(
     kommoLastEvent: "paid",
   });
 
-  await safeRunBot(cfg.botPaidId, leadId, log);
+  if (cfg.triggerBotsViaApi) {
+    await safeRunBot(cfg.botPaidId, leadId, log);
+  }
 
   log?.info(
     { usuarioId: params.usuarioId, kommoLeadId: leadId, kommoUrl: kommoLeadUrl(cfg.subdomain, leadId) },

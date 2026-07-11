@@ -15,6 +15,8 @@ export type KommoConfig = {
   cfLoginUrl: number | null;
   cfEmail: number | null;
   cfUsuarioId: number | null;
+  /** Dispara Salesbots via API (default false — WPP via Digital Pipeline no painel). */
+  triggerBotsViaApi: boolean;
 };
 
 function parseIntEnv(name: string): number | null {
@@ -47,6 +49,7 @@ export function getKommoConfig(): KommoConfig {
     cfLoginUrl: parseIntEnv("KOMMO_CF_LOGIN_URL"),
     cfEmail: parseIntEnv("KOMMO_CF_EMAIL"),
     cfUsuarioId: parseIntEnv("KOMMO_CF_USUARIO_ID"),
+    triggerBotsViaApi: process.env.KOMMO_TRIGGER_BOTS === "true",
   };
 }
 
