@@ -19,7 +19,7 @@ import PageIntroHeader from "@/components/PageIntroHeader";
 import AppPageShell from "@/components/AppPageShell";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 import { FEATURE_FLAGS } from "@/lib/featureFlags";
-import { VideoEmBrevePlaceholder } from "@/components/VideoEmBrevePlaceholder";
+import { ModuloIntroTexto } from "@/components/ModuloIntroTexto";
 import { MinicursoEmbedido } from "@/components/MinicursoEmbedido";
 import {
   JORNADA_HUB_COPY,
@@ -408,7 +408,7 @@ export default function JornadaHubPage() {
 
         {/* 1 — Introdução */}
         <section className="mb-8">
-          <PassoBadge numero={1} titulo="Introdução" concluido={!!embedIntro} />
+          <PassoBadge numero={1} titulo="Introdução" />
           {embedIntro ? (
             <div className="aspect-video w-full rounded-xl overflow-hidden bg-black">
               <iframe
@@ -420,11 +420,13 @@ export default function JornadaHubPage() {
               />
             </div>
           ) : (
-            <VideoEmBrevePlaceholder
-              descricao={
-                copy?.introFallback ??
-                "Enquanto o vídeo não é publicado, você já pode fazer a análise abaixo e ver seu resultado."
+            <ModuloIntroTexto
+              paragrafos={
+                copy?.introTexto ?? [
+                  copy?.introFallback ?? modulo.descricaoIntro,
+                ]
               }
+              bullets={copy?.introBullets}
             />
           )}
         </section>

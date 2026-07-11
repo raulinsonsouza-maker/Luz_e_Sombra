@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
 import { ChevronLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Props = {
   to: string;
@@ -17,10 +18,10 @@ export default function NavBackButton({ to, label, className, variant = "default
         type="button"
         onClick={() => navigate(to)}
         aria-label={label}
-        className={
-          className ??
-          "w-9 h-9 rounded-xl flex items-center justify-center transition-all"
-        }
+        className={cn(
+          "w-9 h-9 rounded-xl flex items-center justify-center transition-all",
+          className,
+        )}
         style={{ background: "rgba(200,165,107,0.08)", color: "#c8a56b" }}
       >
         <ChevronLeft className="w-5 h-5" />
@@ -32,10 +33,10 @@ export default function NavBackButton({ to, label, className, variant = "default
     <button
       type="button"
       onClick={() => navigate(to)}
-      className={
-        className ??
-        "flex items-center gap-2 text-sm mb-6 transition-colors hover:opacity-100 opacity-90"
-      }
+      className={cn(
+        "flex items-center gap-2 text-sm mb-6 transition-colors hover:opacity-100 opacity-90",
+        className,
+      )}
       style={{ color: "rgba(200,165,107,0.65)" }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLElement).style.color = "#c8a56b";
