@@ -11,7 +11,7 @@ import {
   LpFaqSection,
   LpFinalCtaSection,
 } from "@/components/lp/LpOfferSections";
-import { VSL_UNLOCK_KEY, VSL_COPY, LP_GATE_PERCENT, formatLpPriceLabel, LP_PORTAL_NAME, LP_JOURNEY_NAME } from "@/lib/lpConfig";
+import { VSL_UNLOCK_KEY, VSL_COPY, LP_GATE_PERCENT, formatLpPriceLabel, LP_PORTAL_NAME, LP_JOURNEY_NAME, LP_CTA_LOGIN } from "@/lib/lpConfig";
 import { trackLpEvent } from "@/lib/lpAnalytics";
 import SignupModal from "@/components/funnel/SignupModal";
 import { captureUtmsFromUrl } from "@/lib/utm";
@@ -71,23 +71,36 @@ export default function VslLandingPage() {
           borderBottom: "1px solid rgba(200,165,107,0.12)",
         }}
       >
-        <div className="max-w-3xl mx-auto px-5 w-full flex items-center justify-between">
+        <div className="max-w-3xl mx-auto px-5 w-full flex items-center justify-between gap-3">
           <span className="font-tan-mon-cheri text-base" style={{ color: "#f7f2ec" }}>
             {LP_PORTAL_NAME}
           </span>
-          {unlocked && (
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              onClick={goCheckout}
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold"
+              onClick={() => navigate("/login")}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:bg-white/5"
               style={{
-                background: "linear-gradient(135deg, #9c7742, #c8a56b)",
-                color: "#fff",
+                border: "1px solid rgba(200,165,107,0.35)",
+                color: "rgba(200,165,107,0.9)",
               }}
             >
-              {VSL_COPY.navCta}
+              {LP_CTA_LOGIN}
             </button>
-          )}
+            {unlocked && (
+              <button
+                type="button"
+                onClick={goCheckout}
+                className="px-4 py-1.5 rounded-lg text-xs font-semibold"
+                style={{
+                  background: "linear-gradient(135deg, #9c7742, #c8a56b)",
+                  color: "#fff",
+                }}
+              >
+                {VSL_COPY.navCta}
+              </button>
+            )}
+          </div>
         </div>
       </nav>
 

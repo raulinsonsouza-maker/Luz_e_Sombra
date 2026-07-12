@@ -27,6 +27,7 @@ import {
   LP_JOURNEY_NAME,
   LP_CTA_NAV,
   LP_CTA_PRIMARY,
+  LP_CTA_LOGIN,
   LP_HERO,
   LP_GUARANTEE_DAYS,
   formatLpPrice,
@@ -119,30 +120,35 @@ export default function LandingPage() {
                 {label}
               </a>
             ))}
+          </nav>
+
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={goLogin}
-              className="px-4 py-2 rounded-lg text-xs font-medium transition-colors hover:bg-white/5"
-              style={{ color: "rgba(200,165,107,0.75)" }}
+              className="px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all hover:bg-white/5"
+              style={{
+                border: "1px solid rgba(200,165,107,0.35)",
+                color: "rgba(200,165,107,0.9)",
+              }}
             >
-              Entrar
+              {LP_CTA_LOGIN}
             </button>
-          </nav>
-
-          <button
-            type="button"
-            onClick={goCheckout}
-            className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold shrink-0 transition-all hover:-translate-y-0.5"
-            style={{
-              background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)",
-              color: "#fff",
-              boxShadow: "0 6px 24px rgba(200,165,107,0.35)",
-            }}
-          >
-            <span className="hidden sm:inline">{LP_CTA_NAV}</span>
-            <span className="sm:hidden">Começar</span>
-            <ArrowRight size={14} />
-          </button>
+            <button
+              type="button"
+              onClick={goCheckout}
+              className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all hover:-translate-y-0.5"
+              style={{
+                background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)",
+                color: "#fff",
+                boxShadow: "0 6px 24px rgba(200,165,107,0.35)",
+              }}
+            >
+              <span className="hidden sm:inline">{LP_CTA_NAV}</span>
+              <span className="sm:hidden">Começar</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
         </div>
       </header>
 

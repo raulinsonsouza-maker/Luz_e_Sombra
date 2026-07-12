@@ -33,6 +33,7 @@ export const LP_BILLING_LABEL = "Pagamento único";
 export const LP_GUARANTEE_DAYS = 7;
 export const LP_CTA_PRIMARY = "Começar minha jornada";
 export const LP_CTA_NAV = "Começar jornada";
+export const LP_CTA_LOGIN = "Entrar";
 
 /** Copy do hero da LP controle (/) */
 export const LP_HERO = {
