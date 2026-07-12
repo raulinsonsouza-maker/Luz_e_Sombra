@@ -8,6 +8,7 @@ export const JORNADA_MODULE_NAV = {
   traco: { hub: "/jornada/traco", backLabel: "Traço de Caráter" },
   roda: { hub: "/jornada/roda", backLabel: "Roda da Vida" },
   numerologia: { hub: "/jornada/numerologia", backLabel: "Numerologia" },
+  dossie: { hub: "/jornada/dossie", backLabel: "Dossiê de Vida" },
 } as const;
 
 export type JornadaModuleSlug = keyof typeof JORNADA_MODULE_NAV;
@@ -123,6 +124,26 @@ export const JORNADA_HUB_COPY: Record<
     novaAnaliseLabel: "Atualizar data no perfil",
     verResultadoLabel: "Ver meu mapa",
   },
+  dossie: {
+    introFallback:
+      "Síntese final da fase Iniciante: todas as análises cruzadas num retrato claro de como você funciona, onde trava e o que priorizar.",
+    introTexto: [
+      "O Dossiê de Vida é o resultado integrado da sua jornada Iniciante. Ele cruza Traço de Caráter, Temperamento, Linguagens do Amor, Roda da Vida, Numerologia e Diagnóstico Emocional em um único mapa.",
+      "Não é mais uma análise isolada: é a leitura de como esses padrões se reforçam, onde divergem e o que você precisa entender sobre si para agir com clareza.",
+      "Quanto mais análises você completou, mais preciso fica o cruzamento. Ao abrir seu dossiê, você vê panorama funcional, pontos-chave e ações prioritárias para este momento.",
+    ],
+    introBullets: [
+      "Cruzamento de todas as análises da jornada",
+      "Linguagem funcional: como você opera, não metáforas vagas",
+      "Mapa claro do que entender e o que fazer agora",
+    ],
+    analiseTitulo: "Seu Dossiê Integrado",
+    analiseDescricaoSem:
+      "Complete pelo menos 4 análises da jornada para gerar o cruzamento. Quanto mais fontes, mais preciso o retrato.",
+    analiseDescricaoCom: "Seu dossiê integrado está pronto com base nas análises concluídas.",
+    novaAnaliseLabel: "Atualizar dossiê",
+    verResultadoLabel: "Abrir meu dossiê",
+  },
 };
 
 export function hrefComPessoa(hrefAnalise: string, pessoaId: number | null | undefined): string {
@@ -140,7 +161,7 @@ export function hrefVerResultado(
     slug === "traco" || slug === "linguagens-amor"
       ? hrefComPessoa(hrefAnalise, pessoaId ?? null)
       : hrefAnalise;
-  if (slug === "roda" || slug === "numerologia") return base.split("?")[0] ?? hrefAnalise;
+  if (slug === "roda" || slug === "numerologia" || slug === "dossie") return base.split("?")[0] ?? hrefAnalise;
   const sep = base.includes("?") ? "&" : "?";
   return `${base}${sep}ver=resultado`;
 }
@@ -151,6 +172,7 @@ export function hrefNovaAnalise(
   pessoaId?: number | null,
 ): string {
   if (slug === "numerologia") return "/perfil";
+  if (slug === "dossie") return "/quem-sou-eu?atualizar=1";
   const base =
     slug === "traco" || slug === "linguagens-amor"
       ? hrefComPessoa(hrefAnalise, pessoaId ?? null)

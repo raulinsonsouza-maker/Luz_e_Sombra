@@ -191,6 +191,7 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
         roda: !!avaliacao,
         linguagensAmor: !!linguagensRow,
         numerologia: numerologiaConcluida,
+        dossie: await temAnalise(userId, "dossie"),
         minicursoConcluido,
       },
     });

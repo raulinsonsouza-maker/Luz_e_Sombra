@@ -20,12 +20,15 @@ import {
   parseTemperamentoFromApi,
   parseLinguagensFromApi,
   parseDiagnosticoEmocional,
+  contarFontesDisponiveis,
+  FONTES_MINIMAS_DOSSIE,
   NOME_ESTRUTURA,
   type AvaliacaoDossie,
   type TracoDossie,
   type TemperamentoDossie,
   type LinguagensDossie,
 } from "@/lib/dossieIntegrado";
+import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import { normalizarObjetoTextos } from "@workspace/copy-voz";
 import {
   Loader2, Sparkles, Heart, Star, Compass,
@@ -148,7 +151,7 @@ const ESTRUTURAS_RAW: Record<string, {
     padraoProfundo: "Você foi moldado(a) por uma necessidade de conexão e pertencimento. Nutre o outro como forma de linguagem natural, e frequentemente se esquece de nutrir a si mesmo com a mesma intensidade.",
     sombra: "O medo de abandono e a necessidade de ser necessário podem criar dependências emocionais que drenam. Aprender a receber é seu maior desafio.",
     dominancias: ["Empatia visceral e genuína", "Capacidade de criar pertencimento", "Calor humano que transforma ambientes", "Lealdade profunda nas relações"],
-    relacionamento: "Você ama com intensidade e muitas vezes se perde no outro. Relações saudáveis exigem que você cultive uma base interna sólida antes de buscar preenchimento no outro.",
+    relacionamento: "Você investe profundamente nas relações. O desafio é cultivar base interna antes de buscar sustentação só no outro.",
   },
   psicopata: {
     nome: "Psicopata",
@@ -363,6 +366,42 @@ export default function QuemSouEuPage() {
     setLoading(false);
   }
 
+  useEffect(() => {
+    if (!user || loading) return;
+    const semDadosLocal = !traco && !avaliacao && !user.dataNascimento && !temperamento && !linguagens;
+    if (semDadosLocal) return;
+
+    let vidaNumLocal: number | null = null;
+    if (user.dataNascimento) {
+      try {
+        const v = calcularNumerodeVida(formatarDataBrasileira(user.dataNascimento));
+        vidaNumLocal = v?.valor ?? null;
+      } catch { /* ignore */ }
+    }
+
+    const input = {
+      primeiroNome: user.nome.split(" ")[0],
+      vidaNum: vidaNumLocal,
+      expressaoNum: null,
+      almaNum: null,
+      personalidadeNum: null,
+      anoPessoalNum: null,
+      traco,
+      temperamento,
+      linguagens,
+      avaliacao,
+      diagnosticoEmocional: parseDiagnosticoEmocional(traco, diagRow),
+      idade: user.dataNascimento ? Math.max(0, new Date().getFullYear() - Number(user.dataNascimento.slice(0, 4))) : null,
+    };
+    const fontes = contarFontesDisponiveis(input);
+    if (fontes < FONTES_MINIMAS_DOSSIE) return;
+
+    void apiFetch("/modulos-jornada/dossie/concluir-analise", {
+      method: "POST",
+      body: JSON.stringify({ fontesDisponiveis: fontes }),
+    }).catch(() => {});
+  }, [user, loading, traco, temperamento, linguagens, avaliacao, diagRow]);
+
   if (!user) return null;
 
   const primeiroNome = user.nome.split(" ")[0];
@@ -416,7 +455,7 @@ export default function QuemSouEuPage() {
     : null;
   const semDados = !traco && !avaliacao && !vidaNum && !temperamento && !linguagens;
 
-  const dossie = gerarDossieIntegrado({
+  const dossieInput = {
     primeiroNome,
     vidaNum,
     expressaoNum,
@@ -429,7 +468,9 @@ export default function QuemSouEuPage() {
     avaliacao,
     diagnosticoEmocional: parseDiagnosticoEmocional(traco, diagRow),
     idade,
-  });
+  };
+
+  const dossie = gerarDossieIntegrado(dossieInput);
 
   const insights = dossie.cruzamentos;
   const orientacoes = dossie.acoesPrioritarias;
@@ -457,12 +498,12 @@ export default function QuemSouEuPage() {
 
       <div className="max-w-lg mx-auto px-4 pt-6 space-y-5">
         <div className="flex items-center justify-between gap-3">
-          <NavBackButton to="/perfil" label="Perfil" className="mb-0" />
+          <NavBackButton to={JORNADA_MODULE_NAV.dossie.hub} label="Jornada" className="mb-0" />
           <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.3)" }}>
             {anoAtual}
           </span>
         </div>
-        <PageIntroHeader eyebrow="Dossiê de Vida" titulo="Quem sou eu" subtitulo="Visão integrada da sua jornada" className="mb-2" />
+        <PageIntroHeader eyebrow="6º passo · Dossiê de Vida" titulo="Quem sou eu" subtitulo="Síntese integrada da fase Iniciante — como você funciona, o que sustenta seus padrões e o que priorizar agora" className="mb-2" />
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
@@ -614,6 +655,53 @@ export default function QuemSouEuPage() {
                   Complete sua data de nascimento, Traço de Caráter, Temperamento, Linguagens do Amor, Roda da Vida e Diagnóstico Emocional para o cruzamento integrado completo.
                 </p>
               </div>
+            )}
+
+            {/* ── PANORAMA FUNCIONAL ── */}
+            {dossie.panoramaFuncional && (
+              <SecaoCard titulo="Como Você Funciona" subtitulo="Panorama integrado de todas as análises" icone={Brain}>
+                <DossieLabel num="0" label="Leitura Operacional" />
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.75)" }}>
+                  {dossie.panoramaFuncional}
+                </p>
+              </SecaoCard>
+            )}
+
+            {/* ── PONTOS-CHAVE ── */}
+            {dossie.pontosChave.length > 0 && (
+              <SecaoCard titulo="O Que Você Precisa Entender" subtitulo="Síntese clara em pontos objetivos" icone={Target}>
+                <div className="space-y-3">
+                  {dossie.pontosChave.map((p, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <span
+                        className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
+                        style={{ background: "rgba(200,165,107,0.15)", color: "#c8a56b" }}
+                      >
+                        {i + 1}
+                      </span>
+                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)" }}>{p}</p>
+                    </div>
+                  ))}
+                </div>
+              </SecaoCard>
+            )}
+
+            {/* ── MAPA DE ENTENDIMENTO ── */}
+            {dossie.mapaEntendimento.length > 0 && (
+              <SecaoCard titulo="Mapa de Entendimento" subtitulo="Dimensões da sua operação no mundo" icone={Compass}>
+                <div className="space-y-4">
+                  {dossie.mapaEntendimento.map((item) => (
+                    <div
+                      key={item.titulo}
+                      className="rounded-xl p-4"
+                      style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(200,165,107,0.1)" }}
+                    >
+                      <p className="text-xs font-semibold mb-2" style={{ color: "rgba(200,165,107,0.75)" }}>{item.titulo}</p>
+                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>{item.texto}</p>
+                    </div>
+                  ))}
+                </div>
+              </SecaoCard>
             )}
 
             {/* ── SEU MOMENTO ATUAL — ANO PESSOAL ── */}

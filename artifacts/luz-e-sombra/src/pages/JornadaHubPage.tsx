@@ -172,6 +172,61 @@ async function carregarPreviewAnalise(
           badge: `Vida ${vida.valor}`,
         };
       }
+      case "dossie": {
+        const [tracoRes, tempRes, lingRes, avalRes] = await Promise.all([
+          apiFetch("/traco/analise"),
+          apiFetch("/temperamento/ultimo"),
+          apiFetch("/linguagens-amor/ultimo"),
+          apiFetch("/avaliacoes"),
+        ]);
+        let fontes = 0;
+        const chips: { label: string; valor: string }[] = [];
+        if (tracoRes.ok) {
+          const row = await tracoRes.json();
+          const r = row?.resultado;
+          if (r?.estruturaPrincipal) {
+            fontes++;
+            chips.push({
+              label: "Traço",
+              valor: `${NOME_ESTRUTURA[r.estruturaPrincipal] ?? r.estruturaPrincipal}`,
+            });
+          }
+        }
+        if (tempRes.ok) {
+          const row = await tempRes.json();
+          if (row?.resultado?.perfil?.primario) {
+            fontes++;
+            chips.push({ label: "Temperamento", valor: String(row.resultado.perfil.primario).toLowerCase() });
+          }
+        }
+        if (lingRes.ok) {
+          const row = await lingRes.json();
+          if (row?.resultado) {
+            fontes++;
+            chips.push({ label: "Linguagens", valor: "mapeadas" });
+          }
+        }
+        if (avalRes.ok) {
+          const lista = await avalRes.json();
+          if (Array.isArray(lista) && lista.length > 0) {
+            fontes++;
+            chips.push({ label: "Roda da Vida", valor: "12 áreas" });
+          }
+        }
+        if (usuario?.dataNascimento) {
+          fontes++;
+          chips.push({ label: "Numerologia", valor: "ativa" });
+        }
+        return {
+          titulo: "Dossiê de Vida",
+          linha:
+            fontes >= 4
+              ? `${fontes} análises prontas para cruzamento integrado. Abra o dossiê para ver como tudo se conecta.`
+              : `${fontes} de 4 análises mínimas concluídas. Complete mais etapas para um cruzamento mais completo.`,
+          badge: fontes >= 4 ? "Pronto para síntese" : `${fontes}/4 fontes`,
+          chips: chips.slice(0, 4),
+        };
+      }
       default:
         return null;
     }
@@ -268,6 +323,8 @@ export default function JornadaHubPage() {
   const modulo = useMemo(() => lista.find((m) => m.slug === slug), [lista, slug]);
   const copy = slug ? JORNADA_HUB_COPY[slug] : undefined;
 
+  const isCapstone = slug === "dossie";
+
   useEffect(() => {
     if (!slug) {
       setPreview(null);
@@ -276,6 +333,7 @@ export default function JornadaHubPage() {
     const deveCarregar =
       multiPessoa ||
       modulo?.analiseConcluida ||
+      isCapstone ||
       (slug === "numerologia" && modulo?.status === "active" && !!user?.dataNascimento);
     if (!deveCarregar) {
       setPreview(null);
@@ -291,7 +349,7 @@ export default function JornadaHubPage() {
       setPreview(p);
       setPreviewLoading(false);
     });
-  }, [slug, modulo?.analiseConcluida, modulo?.status, multiPessoa, selectedPessoaId, pessoaAtiva?.nome, user]);
+  }, [slug, modulo?.analiseConcluida, modulo?.status, multiPessoa, selectedPessoaId, pessoaAtiva?.nome, user, isCapstone]);
 
   async function adicionarPessoa() {
     setAddErro(null);
@@ -323,6 +381,7 @@ export default function JornadaHubPage() {
   }, [lista, modulo]);
 
   const minicursoDisponivel =
+    !isCapstone &&
     FEATURE_FLAGS.SHOW_COURSES_CATALOG &&
     (modulo?.minicursoDisponivel ??
       (modulo?.cursoVinculadoId != null && (modulo?.minicursoProgresso?.total ?? 0) > 0));
@@ -464,7 +523,7 @@ export default function JornadaHubPage() {
               />
             )}
 
-            {multiPessoa || modulo.analiseConcluida ? (
+            {multiPessoa || modulo.analiseConcluida || isCapstone ? (
               <>
                 {previewLoading ? (
                   <div className="flex items-center gap-2 py-4">
@@ -591,7 +650,8 @@ export default function JornadaHubPage() {
           </div>
         </section>
 
-        {/* 3 — Minicurso */}
+        {/* 3 — Minicurso (capstone não tem minicurso) */}
+        {!isCapstone && (
         <section className="mb-8">
           <PassoBadge
             numero={3}
@@ -651,6 +711,28 @@ export default function JornadaHubPage() {
             />
           )}
         </section>
+        )}
+
+        {/* Capstone — resultado da fase */}
+        {isCapstone && modulo.analiseConcluida && (
+          <section className="mb-8">
+            <div
+              className="rounded-2xl p-6 flex flex-col items-center text-center gap-3"
+              style={{
+                background: "linear-gradient(135deg, rgba(93,185,122,0.1) 0%, rgba(200,165,107,0.08) 100%)",
+                border: "1px solid rgba(93,185,122,0.25)",
+              }}
+            >
+              <Sparkles className="w-8 h-8" style={{ color: "#5db97a" }} />
+              <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>
+                Fase Iniciante concluída
+              </p>
+              <p className="text-xs leading-relaxed max-w-sm" style={{ color: "rgba(247,242,236,0.5)" }}>
+                Seu Dossiê de Vida integra todas as análises desta fase. Você pode reabri-lo quando quiser para revisar o cruzamento.
+              </p>
+            </div>
+          </section>
+        )}
 
         {/* Próximo passo — só quando faz sentido */}
         {moduloTotalmenteConcluido && proximoHub && (

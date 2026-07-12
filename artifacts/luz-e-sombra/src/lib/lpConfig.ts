@@ -230,8 +230,8 @@ export const LP_MODULES: LpModuleItem[] = [
   },
   {
     icon: Sparkles,
-    title: "Quem Sou Eu",
-    desc: "Síntese final da jornada: numerologia, traço e roda da vida cruzados num retrato integrado.",
+    title: "Dossiê de Vida",
+    desc: "6º passo da jornada: cruzamento funcional de todas as análises — como você opera, onde trava e o que priorizar.",
   },
 ];
 

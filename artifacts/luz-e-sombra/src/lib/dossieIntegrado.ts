@@ -144,11 +144,17 @@ export interface DossieIntegrado {
   sinteseIdentidade: string | null;
   assinaturaIntegrada: string | null;
   perguntaCentral: string | null;
+  panoramaFuncional: string | null;
+  pontosChave: string[];
+  mapaEntendimento: { titulo: string; texto: string }[];
   cruzamentos: CruzamentoDossie[];
   acoesPrioritarias: string[];
   diagnosticoEmocional: DiagnosticoEmocionalFase1 | null;
   matrizFontes: MatrizFonte[];
 }
+
+/** Mínimo de fontes para concluir o dossiê na jornada. */
+export const FONTES_MINIMAS_DOSSIE = 4;
 
 // ── Constantes de cruzamento ─────────────────────────────────────────────────
 
@@ -210,31 +216,31 @@ const ANO_AREAS_CONEXAO: Record<number, Partial<Record<AreaVida, string>>> = {
 
 const VIDA_TRACO: Record<string, Record<string, string>> = {
   psicopata: {
-    "8": "Dois sistemas de poder convergem: Caminho 8 Realizador com estrutura Psicopata. Quando alinhados, a capacidade de impacto é extraordinária. Quando não, o poder pode se tornar um escudo contra a intimidade genuína. A pergunta é: o que você está construindo serve a quem além de você?",
-    "1": "Caminho 1 Pioneiro com estrutura Psicopata: combinação de liderança pura. Você tem o instinto, o magnetismo e a visão. O que separa o potencial da realização plena é a disposição de ser vulnerável, de liderar não apenas com força, mas com humanidade.",
+    "8": "Dois sistemas de poder convergem: Caminho 8 com estrutura Psicopata. Quando alinhados, sua capacidade de impacto e realização é alta. Quando desalinhados, o comando pode virar escudo contra vulnerabilidade e vínculo. A pergunta operacional: o que você constrói serve a quem além de você?",
+    "1": "Caminho 1 com estrutura Psicopata: liderança, magnetismo e visão no mesmo pacote. O que separa potencial de resultado sustentável é integrar fragilidade ao comando — liderar com presença, não só com força.",
     default:
-      "Caminho de Vida com estrutura Psicopata: você move o mundo com competência e presença. O desafio é integrar o coração ao comando, porque os resultados mais duradouros vêm de poder que carrega propósito.",
+      "Caminho de Vida com estrutura Psicopata: você move cenários com competência e presença. O desafio é integrar emoção e necessidade ao comando, porque resultados duradouros pedem confiança, não só performance.",
   },
   oral: {
-    "2": "Caminho 2 no Diplomata com estrutura Oral cria um campo magnético de cuidado. Você nasceu para criar conexões, mas o risco é confundir cuidar dos outros com cuidar de si.",
-    "6": "Caminho 6 Guardião com estrutura Oral: dois sistemas de cuidado sobrepostos. A pergunta central é: quem cuida de você enquanto você cuida do mundo?",
+    "2": "Caminho 2 com estrutura Oral: dois padrões de vínculo sobrepostos. Você lê relações com precisão, mas pode confundir cuidar do outro com sustentar a si.",
+    "6": "Caminho 6 com estrutura Oral: responsabilidade relacional em dobro. A pergunta central: quem sustenta você enquanto você sustenta o ambiente?",
     default:
-      "Conexão é sua linguagem primária corporal e numérica. O desafio é garantir que os vínculos sejam recíprocos, não apenas um canal de dar.",
+      "Conexão é sua linguagem primária corporal e numérica. O desafio é garantir reciprocidade — vínculo que também te nutre, não só canal de entrega.",
   },
   rigido: {
-    "8": "Caminho 8 Realizador com estrutura Rígida: poucos têm essa combinação de poder e integridade. O desafio mais profundo é a flexibilidade, nem toda grande conquista exige sacrifício total.",
+    "8": "Caminho 8 com estrutura Rígida: poder e integridade juntos. Poucos combinam realização e padrão assim. O ponto de expansão é flexibilidade emocional sem perder competência.",
     default:
-      "Você entrega com qualidade e confiabilidade. O convite é descobrir que pode ser real, com falhas e incertezas, e ainda assim ser digno(a) de amor e respeito.",
+      "Você entrega com qualidade e confiabilidade. O convite é permitir imperfeição e emoção sem sentir que perde valor ou controle.",
   },
   esquizoide: {
-    "7": "Dois sistemas de profundidade: Caminho do Sábio e estrutura do Pensador. O risco é ficar tão dentro da mente que o mundo real se torna secundário.",
+    "7": "Dois sistemas de profundidade: Caminho do Sábio e estrutura Esquizóide. O risco é a mente ficar tão rica que o contato real e o corpo presente ficam em segundo plano.",
     default:
-      "Processa o mundo com profundidade incomum. A inteligência precisa de pontes para o tangível para criar impacto.",
+      "Processa o mundo com profundidade incomum. A inteligência precisa de pontes para o tangível para gerar impacto fora da cabeça.",
   },
   masoquista: {
-    "4": "Caminho 4 Construtor com estrutura Masoquista: persistência que beira o sobre-humano. O perigo está em suportar o que não deveria ser suportado.",
+    "4": "Caminho 4 com estrutura Masoquista: persistência acima da média. O perigo é suportar o que deveria ser nomeado, limitado ou recusado.",
     default:
-      "Força silenciosa real e impressionante, construída como resposta a um mundo que nem sempre honrou sua voz. Agora é hora de descobrir o que acontece quando você fala.",
+      "Força silenciosa construída como resposta a um ambiente que nem sempre honrou sua voz. O próximo passo é testar o que muda quando você expressa antes de acumular.",
   },
 };
 
@@ -259,11 +265,11 @@ const TRACO_TEMPERAMENTO: Record<string, Record<string, string>> = {
   },
   rigido: {
     MELANCOLICO:
-      "Rígido no corpo com Melancólico no temperamento: responsabilidade e profundidade se somam. Você carrega muito, mas a perfeição pode virar prisão se não houver espaço para erro e prazer.",
+      "Rígido no corpo com Melancólico no temperamento: responsabilidade e profundidade se somam. Você carrega muito; a perfeição pode virar prisão se não houver espaço para erro e descanso.",
     COLERICO:
       "Corpo Rígido com temperamento que acelera: alta capacidade de entrega, risco de burnout. A disciplina precisa incluir pausas sem culpa.",
     default:
-      "Estrutura Rígida com temperamento que define o ritmo interno. O corpo segura; a alma pede o que o corpo ainda não autoriza sentir.",
+      "Estrutura Rígida com temperamento que define o ritmo interno. O corpo segura; o sistema pede o que o corpo ainda não autoriza sentir ou expressar.",
   },
   esquizoide: {
     MELANCOLICO:
@@ -282,27 +288,27 @@ const TRACO_TEMPERAMENTO: Record<string, Record<string, string>> = {
 const TRACO_LINGUAGEM: Record<string, Partial<Record<string, string>>> = {
   psicopata: {
     servicos:
-      "Corpo Psicopata com linguagem de Atos de Serviço: você demonstra amor fazendo, resolvendo, entregando. O outro pode precisar de palavras ou tempo, não apenas de resultados.",
+      "Corpo Psicopata com linguagem de Atos de Serviço: você demonstra vínculo fazendo, resolvendo, entregando. O outro pode precisar de palavras ou tempo, não apenas de resultados.",
     palavras:
-      "Psicopata no corpo, Palavras de Afirmação no amor: há tensão entre controlar a narrativa e receber afirmação genuína. Deixar-se elogiar sem desconfiar pode ser trabalho de cura.",
+      "Psicopata no corpo, Palavras de Afirmação na relação: há tensão entre controlar a narrativa e receber validação genuína. Receber feedback sem desconfiar pode ser trabalho de integração.",
     tempo:
       "Presença corporal de comando com necessidade de Tempo de Qualidade: você pode estar fisicamente perto e emocionalmente em modo de gestão. Presença sem agenda é o antídoto.",
     toque:
-      "Couraça estratégica com Toque como linguagem: o corpo pode resistir ao afeto enquanto a alma pede contato. A integração começa com toque seguro e consentido, sem performance.",
+      "Couraça estratégica com Toque como linguagem: o corpo pode resistir ao contato enquanto o sistema pede proximidade. A integração começa com toque seguro e consentido, sem performance.",
   },
   oral: {
     tempo:
       "Estrutura Oral com Tempo de Qualidade: presença atenta é oxigênio emocional. Ausência ou distração do outro ativa feridas de abandono mais rápido do que conflito.",
     presentes:
-      "Oral com Presentes: símbolos de cuidado importam tanto quanto a consistência. Um gesto tangível diz \"eu te vi\" de forma que palavras vazias não conseguem.",
+      "Oral com Presentes: símbolos de cuidado importam tanto quanto a consistência. Um gesto tangível comunica \"fui visto(a)\" de forma que palavras vazias não conseguem.",
     default:
-      "O corpo Oral busca pertencimento; a linguagem do amor revela o canal exato. Alinhar como você pede e como o outro oferece reduz a sensação de \"não sou amado(a)\".",
+      "O corpo Oral busca pertencimento; a linguagem revela o canal exato. Alinhar como você pede e como o outro oferece reduz a sensação de vínculo insuficiente.",
   },
   rigido: {
     servicos:
-      "Rígido no corpo com Atos de Serviço: amar é fazer e cumprir. O convite é receber cuidado sem sentir que deve retribuir imediatamente com desempenho.",
+      "Rígido no corpo com Atos de Serviço: cuidar é fazer e cumprir. O convite é receber apoio sem sentir que deve retribuir imediatamente com desempenho.",
     default:
-      "Corpo que sustenta encontra linguagem do amor, observe se você expressa afeto por dever e não por prazer.",
+      "Corpo que sustenta encontra linguagem relacional — observe se você expressa afeto por dever e não por escolha consciente.",
   },
 };
 
@@ -397,7 +403,7 @@ function montarDiagnostico(input: DossieInput): DiagnosticoEmocionalFase1 | null
     const passos: string[] = [];
     if (traco?.perguntaTransformacao) passos.push(traco.perguntaTransformacao.replace(/\?$/, "") + "?");
     if (temperamento?.perguntaCrescimento) passos.push(temperamento.perguntaCrescimento);
-    if (linguagens?.desalinhamento?.ativo) passos.push("Alinhar como você pede amor com como você o expressa, converse sobre isso com quem importa.");
+    if (linguagens?.desalinhamento?.ativo) passos.push("Alinhar como você pede apoio com como você o expressa — converse sobre isso com quem importa.");
     if (passos.length < 3) {
       passos.push(
         "Registrar gatilhos emocionais por 7 dias e observar repetição de padrão",
@@ -484,7 +490,7 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
         (temperamento.sinteseHumana
           ? `${temperamento.sinteseHumana.split(".")[0]}. `
           : "") +
-        `Quando essas três leituras apontam na mesma direção, sua capacidade de impacto é rara, o trabalho é garantir que o coração acompanhe a velocidade.`,
+        `Quando essas três leituras apontam na mesma direção, sua capacidade de impacto é rara — o trabalho é alinhar velocidade de ação com regulação emocional e vínculo.`,
       icone: "spark",
       relevancia: 100,
     });
@@ -526,10 +532,10 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
     const texto =
       mapa?.[linguagens.receberPrincipal] ??
       mapa?.default ??
-      `O corpo revela ${NOME_ESTRUTURA[estrutura]}; para se sentir amado(a), você pede ${LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal}. ` +
-        `A integração passa por alinhar couraça corporal com o canal emocional que realmente enche seu tanque.`;
+      `O corpo revela ${NOME_ESTRUTURA[estrutura]}; para se sentir sustentado(a), você pede ${LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal}. ` +
+        `A integração passa por alinhar couraça corporal com o canal relacional que realmente recarrega seu sistema.`;
     pushCruzamento(lista, {
-      titulo: `Corpo ${NOME_ESTRUTURA[estrutura]} × Linguagem ${LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal}`,
+      titulo: `Corpo ${NOME_ESTRUTURA[estrutura]} × Canal relacional ${LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal}`,
       corpo: texto,
       icone: "heart",
       relevancia: 85,
@@ -539,13 +545,13 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
   // 5. Desalinhamento linguagens × relações
   if (linguagens?.desalinhamento?.ativo && avaliacao) {
     pushCruzamento(lista, {
-      titulo: "Como Você Pede × Como Você Expressa Amor",
+      titulo: "Como Você Pede × Como Você Expressa Vínculo",
       corpo:
         linguagens.desalinhamento.texto +
         (avaliacao.desenvolvimentoAmoroso <= 6
-          ? `Com vida amorosa em ${avaliacao.desenvolvimentoAmoroso}/10, esse desalinhamento pode estar ativo nas relações, não por falta de amor, mas por linguagens diferentes sem tradução consciente.`
+          ? ` Com vida amorosa em ${avaliacao.desenvolvimentoAmoroso}/10, esse desalinhamento pode estar ativo nas relações — não por falta de intenção, mas por canais diferentes sem tradução consciente.`
           : ""),
-      icone: "heart",
+      icone: "zap",
       relevancia: 82,
     });
   }
@@ -557,18 +563,18 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
     let corpo = `${nomeTemp} tende a expressar afeto de um jeito; sua linguagem principal de expressão é ${nomeLing}. `;
     if (temperamento.primario === "COLERICO" && linguagens.expressarPrincipal === "servicos") {
       corpo +=
-        "Amar é fazer e entregar, coerente com quem resolve. O outro pode precisar ouvir ou receber tempo, não apenas resultados.";
+        "Demonstrar vínculo é fazer e entregar — coerente com quem resolve. O outro pode precisar ouvir ou receber tempo, não apenas resultados.";
     } else if (temperamento.primario === "SANGUINEO" && linguagens.expressarPrincipal === "tempo") {
       corpo +=
-        "Você expressa amor com presença viva e energia social, quando o tempo de qualidade é genuíno, seu temperamento amplifica a conexão.";
+        "Você expressa vínculo com presença viva e energia social; quando o tempo de qualidade é genuíno, seu temperamento amplifica a conexão.";
     } else {
       corpo +=
-        "Quando expressão e temperamento estão alinhados, o outro sente autenticidade; quando não, pode parecer que você ama de um jeito e age de outro.";
+        "Quando expressão e temperamento estão alinhados, o outro sente autenticidade; quando não, pode parecer que você se importa de um jeito e age de outro.";
     }
     pushCruzamento(lista, {
       titulo: `${nomeTemp} × Expressão por ${nomeLing}`,
       corpo,
-      icone: "heart",
+      icone: "zap",
       relevancia: 78,
     });
   }
@@ -678,9 +684,9 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
   // 14. Síntese linguagens
   if (linguagens?.combinacao) {
     pushCruzamento(lista, {
-      titulo: "Seu Perfil Afetivo Integrado",
+      titulo: "Seu Perfil Relacional Integrado",
       corpo: linguagens.combinacao,
-      icone: "heart",
+      icone: "zap",
       relevancia: 65,
     });
   }
@@ -722,7 +728,7 @@ function montarSinteseIdentidade(input: DossieInput): string | null {
   }
   if (linguagens?.receberPrincipal) {
     partes.push(
-      `e pede amor principalmente por ${LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal}`,
+      `e pede vínculo principalmente por ${LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal}`,
     );
   }
   return partes.length ? partes.join(", ").replace(/, ([^,]*)$/, " e $1") + "." : null;
@@ -771,7 +777,7 @@ function gerarAcoes(input: DossieInput, cruzamentos: CruzamentoDossie[]): string
   }
 
   if (linguagens?.desalinhamento?.ativo) {
-    acoes.push("Conversar com alguém próximo sobre como você pede amor versus como você o demonstra.");
+    acoes.push("Conversar com alguém próximo sobre como você pede apoio versus como você o demonstra.");
   }
 
   if (traco?.perguntaTransformacao) {
@@ -838,7 +844,183 @@ function montarMatriz(input: DossieInput): MatrizFonte[] {
   ];
 }
 
+function montarPanoramaFuncional(input: DossieInput, cruzamentos: CruzamentoDossie[]): string | null {
+  const { primeiroNome, traco, temperamento, linguagens, avaliacao, vidaNum } = input;
+  if (!traco && !temperamento && !vidaNum) return null;
+
+  const partes: string[] = [];
+  const nomeEst = traco?.estruturaPrincipal
+    ? NOME_ESTRUTURA[traco.estruturaPrincipal] ?? traco.estruturaPrincipal
+    : null;
+
+  if (nomeEst && temperamento?.arquetipo) {
+    partes.push(
+      `${primeiroNome} opera com estrutura corporal ${nomeEst} e temperamento ${temperamento.arquetipo}. ` +
+        `O corpo define como você se protege e sustenta; o temperamento define ritmo, decisão e estilo de vínculo.`,
+    );
+  } else if (nomeEst) {
+    partes.push(
+      `${primeiroNome} tem como eixo corporal a estrutura ${nomeEst} — isso organiza postura, regulação emocional e como você aparece no mundo.`,
+    );
+  } else if (temperamento?.arquetipo) {
+    partes.push(`${primeiroNome} se move com temperamento ${temperamento.arquetipo}, que orienta reação, comunicação e prioridades.`);
+  }
+
+  if (vidaNum && NUMEROS_DE_VIDA[vidaNum]) {
+    partes.push(
+      `Na numerologia, o Caminho ${vidaNum} (${NUMEROS_DE_VIDA[vidaNum].arquetipo}) indica o tipo de desafio e realização que atravessa sua vida.`,
+    );
+  }
+
+  if (linguagens?.receberPrincipal) {
+    partes.push(
+      `Nas relações, você recarrega energia principalmente por ${LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal}` +
+        (linguagens.desalinhamento?.ativo
+          ? ", mas expressa vínculo por outro canal — isso gera ruído relacional até ser nomeado."
+          : "."),
+    );
+  }
+
+  if (avaliacao) {
+    const menor = areasOrdenadas(avaliacao)[0];
+    const maior = areasOrdenadas(avaliacao).at(-1);
+    if (menor && maior) {
+      partes.push(
+        `Na Roda da Vida, ${AREAS_LABELS[menor.key]} (${menor.val}/10) pede atenção agora; ${AREAS_LABELS[maior.key]} (${maior.val}/10) é onde você já tem tração.`,
+      );
+    }
+  }
+
+  if (traco?.leituraEmocionalDeclarada) {
+    partes.push(traco.leituraEmocionalDeclarada.split(".")[0] + ".");
+  } else if (cruzamentos[0]) {
+    partes.push(cruzamentos[0].corpo.split(".")[0] + ".");
+  }
+
+  return partes.length ? partes.join(" ") : null;
+}
+
+function montarPontosChave(input: DossieInput, cruzamentos: CruzamentoDossie[]): string[] {
+  const { traco, temperamento, linguagens, avaliacao, vidaNum } = input;
+  const pontos: string[] = [];
+
+  if (traco?.estruturaPrincipal) {
+    const nome = NOME_ESTRUTURA[traco.estruturaPrincipal] ?? traco.estruturaPrincipal;
+    pontos.push(`Seu padrão corporal dominante é ${nome} (${traco.estruturas[traco.estruturaPrincipal] ?? ""}%) — define como você regula emoção, postura e proteção.`);
+    if (traco.estruturaSecundaria) {
+      const sec = NOME_ESTRUTURA[traco.estruturaSecundaria] ?? traco.estruturaSecundaria;
+      pontos.push(`A estrutura secundária ${sec} modula o dominante e explica tensões internas recorrentes.`);
+    }
+    if (traco.fraseIdentidade) pontos.push(traco.fraseIdentidade);
+  }
+
+  if (temperamento?.arquetipo) {
+    pontos.push(
+      `Temperamento ${temperamento.arquetipo}: orienta velocidade de decisão, estilo de comunicação e como você reage sob pressão.`,
+    );
+    if (temperamento.pontoCego) pontos.push(`Ponto cego: ${temperamento.pontoCego}`);
+  }
+
+  if (vidaNum && NUMEROS_DE_VIDA[vidaNum]) {
+    const v = NUMEROS_DE_VIDA[vidaNum];
+    pontos.push(`Caminho de Vida ${vidaNum} (${v.arquetipo}): ${v.essencia?.split(".")[0] ?? v.missao?.split(".")[0] ?? "missão central da sua trajetória"}.`);
+  }
+
+  if (linguagens?.receberPrincipal) {
+    pontos.push(
+      `Para se sentir sustentado(a) nas relações, você precisa de ${LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal}.`,
+    );
+    if (linguagens.desalinhamento?.ativo) {
+      pontos.push("Há desalinhamento entre como você pede e como você expressa vínculo — isso precisa ser conversado, não apenas sentido.");
+    }
+  }
+
+  if (avaliacao) {
+    const menor = areasOrdenadas(avaliacao)[0];
+    if (menor && menor.val < 7) {
+      pontos.push(`Prioridade de vida agora: ${AREAS_LABELS[menor.key]} (${menor.val}/10) — área com maior gap entre desejo e realidade.`);
+    }
+  }
+
+  if (traco?.perguntaTransformacao) {
+    pontos.push(`Pergunta de integração: ${traco.perguntaTransformacao}`);
+  } else if (cruzamentos[0]) {
+    pontos.push(`Foco de reflexão: ${cruzamentos[0].titulo}.`);
+  }
+
+  const vistos = new Set<string>();
+  return pontos.filter((p) => {
+    if (vistos.has(p)) return false;
+    vistos.add(p);
+    return true;
+  }).slice(0, 7);
+}
+
+function montarMapaEntendimento(input: DossieInput): { titulo: string; texto: string }[] {
+  const { traco, temperamento, linguagens, avaliacao, diagnosticoEmocional } = input;
+  const mapa: { titulo: string; texto: string }[] = [];
+
+  if (traco?.sinteseHumana || traco?.mensagemTerapeutica) {
+    mapa.push({
+      titulo: "Como você funciona no cotidiano",
+      texto: traco.sinteseHumana ?? traco.mensagemTerapeutica ?? "",
+    });
+  } else if (traco?.estruturaPrincipal) {
+    mapa.push({
+      titulo: "Como você funciona no cotidiano",
+      texto: `Estrutura ${NOME_ESTRUTURA[traco.estruturaPrincipal]}: padrão de regulação corporal e emocional que organiza como você aparece, entrega e se protege.`,
+    });
+  }
+
+  if (temperamento?.sinteseHumana) {
+    mapa.push({
+      titulo: "Como você decide e se relaciona",
+      texto: temperamento.sinteseHumana,
+    });
+  }
+
+  if (linguagens?.sinteseHumana || linguagens?.combinacao) {
+    mapa.push({
+      titulo: "Como você pede e oferece vínculo",
+      texto: linguagens.sinteseHumana ?? linguagens.combinacao ?? "",
+    });
+  }
+
+  if (avaliacao) {
+    const urgente = areasOrdenadas(avaliacao).slice(0, 2);
+    mapa.push({
+      titulo: "Onde sua vida pede atenção",
+      texto: urgente
+        .map((a) => `${AREAS_LABELS[a.key]}: ${a.val}/10`)
+        .join(" · ") + ". Áreas com nota mais baixa indicam onde energia está drenando ou parada.",
+    });
+  }
+
+  if (diagnosticoEmocional?.padroesPct) {
+    const dom = Object.entries(diagnosticoEmocional.padroesPct).sort((a, b) => b[1] - a[1])[0];
+    if (dom) {
+      mapa.push({
+        titulo: "Padrão emocional dominante",
+        texto: `Maior ativação em ${dom[0]} (${Math.round(dom[1] * 100)}%). Isso cruza com a leitura corporal e explica reações automáticas em vínculo, controle ou proteção.`,
+      });
+    }
+  }
+
+  if (traco?.couracaCorporal) {
+    mapa.push({
+      titulo: "Mecanismo de proteção",
+      texto: traco.couracaCorporal,
+    });
+  }
+
+  return mapa.slice(0, 5);
+}
+
 // ── API pública ────────────────────────────────────────────────────────────────
+
+export function contarFontesDisponiveis(input: DossieInput): number {
+  return montarMatriz(input).filter((f) => f.disponivel).length;
+}
 
 export function gerarDossieIntegrado(input: DossieInput): DossieIntegrado {
   const cruzamentos = gerarCruzamentos(input);
@@ -851,6 +1033,9 @@ export function gerarDossieIntegrado(input: DossieInput): DossieIntegrado {
     sinteseIdentidade: montarSinteseIdentidade(input),
     assinaturaIntegrada: montarAssinatura(input),
     perguntaCentral,
+    panoramaFuncional: montarPanoramaFuncional(input, cruzamentos),
+    pontosChave: montarPontosChave(input, cruzamentos),
+    mapaEntendimento: montarMapaEntendimento(input),
     cruzamentos,
     acoesPrioritarias: gerarAcoes(input, cruzamentos),
     diagnosticoEmocional: montarDiagnostico(input),

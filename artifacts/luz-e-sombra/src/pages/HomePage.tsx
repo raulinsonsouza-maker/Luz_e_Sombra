@@ -48,6 +48,7 @@ interface Progresso {
     roda: boolean;
     numerologia: boolean;
     linguagensAmor?: boolean;
+    dossie?: boolean;
   };
 }
 
@@ -112,10 +113,11 @@ export default function HomePage() {
         progresso.jornada.linguagensAmor === true,
         progresso.jornada.roda,
         progresso.jornada.numerologia,
+        progresso.jornada.dossie === true,
       ].filter(Boolean).length
     : 0;
 
-  const TOTAL_ETAPAS_INICIANTE = 5;
+  const TOTAL_ETAPAS_INICIANTE = 6;
 
   const moduloAtivo = modulosJornada.find((m) => m.status === "active");
 
@@ -187,11 +189,11 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Dossiê integrado */}
-        {etapasInicianteConcluidas >= 2 && (
+        {/* Dossiê integrado — passo 6 da jornada */}
+        {etapasInicianteConcluidas >= 4 && progresso?.jornada.dossie !== true && (
           <button
             type="button"
-            onClick={() => navigate("/quem-sou-eu")}
+            onClick={() => navigate("/jornada/dossie")}
             className="w-full rounded-3xl p-5 mb-4 text-left transition-all active:scale-[0.99]"
             style={{
               background: "linear-gradient(135deg, rgba(93,185,122,0.08) 0%, rgba(200,165,107,0.06) 100%)",
@@ -207,10 +209,12 @@ export default function HomePage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold mb-1" style={{ color: "#f7f2ec" }}>
-                  Seu Dossiê — Quem Sou Eu
+                  Dossiê de Vida — 6º passo
                 </p>
                 <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
-                  Você já concluiu {etapasInicianteConcluidas} análises. Veja como elas se conectam num mapa integrado.
+                  {etapasInicianteConcluidas >= 5
+                    ? "Fase Iniciante quase completa. Abra o dossiê para ver o cruzamento de todas as análises."
+                    : `${etapasInicianteConcluidas} análises prontas. Continue a jornada para desbloquear a síntese integrada.`}
                 </p>
               </div>
               <ChevronRight className="w-4 h-4 shrink-0 mt-1" style={{ color: "rgba(93,185,122,0.6)" }} />

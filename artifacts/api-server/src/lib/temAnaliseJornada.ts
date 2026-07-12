@@ -76,6 +76,14 @@ export async function temAnalise(
         .limit(1);
       return (r as { concluida?: boolean } | undefined)?.concluida === true;
     }
+    case "dossie": {
+      const [r] = await dbConn
+        .select({ concluida: usuariosTable.dossieJornadaConcluida })
+        .from(usuariosTable)
+        .where(eq(usuariosTable.id, usuarioId))
+        .limit(1);
+      return (r as { concluida?: boolean } | undefined)?.concluida === true;
+    }
     default:
       return false;
   }

@@ -18,6 +18,8 @@ export const usuariosTable = pgTable("usuarios", {
   isAdmin: boolean("is_admin").notNull().default(false),
   /** true após o utilizador concluir a análise numerológica na jornada (passo 5). */
   numerologiaJornadaConcluida: boolean("numerologia_jornada_concluida").notNull().default(false),
+  /** true após visualizar o Dossiê de Vida integrado na jornada (passo 6). */
+  dossieJornadaConcluida: boolean("dossie_jornada_concluida").notNull().default(false),
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
   atualizadoEm: timestamp("atualizado_em").notNull().defaultNow(),
 });

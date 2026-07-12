@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Crown,
   Hash,
+  FileText,
 } from "lucide-react";
 
 interface ModuloApi {
@@ -41,6 +42,7 @@ const XP_POR_SLUG: Record<string, number> = {
   "linguagens-amor": 60,
   roda: 50,
   numerologia: 40,
+  dossie: 80,
 };
 
 function iconePorSlug(slug: string) {
@@ -55,6 +57,8 @@ function iconePorSlug(slug: string) {
       return Target;
     case "numerologia":
       return Hash;
+    case "dossie":
+      return FileText;
     default:
       return Layers;
   }

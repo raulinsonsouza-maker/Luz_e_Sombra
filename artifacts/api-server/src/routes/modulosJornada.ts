@@ -13,7 +13,7 @@ import { tryAwardJornadaModuloXp } from "../lib/jornadaXp";
 
 const router = Router();
 
-export const SLUGS_MODULO_JORNADA = ["traco", "temperamento", "linguagens-amor", "roda", "numerologia"] as const;
+export const SLUGS_MODULO_JORNADA = ["traco", "temperamento", "linguagens-amor", "roda", "numerologia", "dossie"] as const;
 export type SlugModuloJornada = (typeof SLUGS_MODULO_JORNADA)[number];
 
 function hrefAnalise(slug: string): string {
@@ -28,6 +28,8 @@ function hrefAnalise(slug: string): string {
       return "/avaliacao";
     case "numerologia":
       return "/numerologia";
+    case "dossie":
+      return "/quem-sou-eu";
     default:
       return "/jornada";
   }
@@ -174,6 +176,43 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
   } catch (err) {
     req.log?.error(err);
     return res.status(500).json({ error: "Erro ao listar módulos da jornada." });
+  }
+});
+
+// POST /modulos-jornada/dossie/concluir-analise — marca passo 6 concluído na jornada
+router.post("/dossie/concluir-analise", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const usuarioId = req.user!.id;
+    const lista = await buildModulosJornadaLista(usuarioId);
+    const dossie = lista.find((m) => m.slug === "dossie");
+    if (!dossie) {
+      return res.status(404).json({ error: "Módulo dossiê não configurado." });
+    }
+    if (dossie.status === "locked") {
+      return res.status(403).json({ error: "Conclua os módulos anteriores da jornada para desbloquear o Dossiê de Vida." });
+    }
+
+    const fontesMinimas = Number((req.body as { fontesDisponiveis?: number })?.fontesDisponiveis ?? 0);
+    if (fontesMinimas < 4) {
+      return res.status(400).json({
+        error: "Complete pelo menos 4 análises da jornada para gerar o dossiê integrado.",
+        fontesMinimas: 4,
+      });
+    }
+
+    const jaExistia = await temAnalise(usuarioId, "dossie");
+
+    await db
+      .update(usuariosTable)
+      .set({ dossieJornadaConcluida: true, atualizadoEm: new Date() })
+      .where(eq(usuariosTable.id, usuarioId));
+
+    await tryAwardJornadaModuloXp(usuarioId, jaExistia);
+
+    return res.json({ ok: true });
+  } catch (err) {
+    req.log?.error(err);
+    return res.status(500).json({ error: "Erro ao concluir o Dossiê de Vida na jornada." });
   }
 });
 
