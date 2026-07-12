@@ -11,6 +11,21 @@ function firstName(nome: string): string {
   return firstNameFromFullName(nome);
 }
 
+export function buildBoasVindasMessage(ctx: KommoMessageContext): string {
+  const name = firstName(ctx.nome);
+  const checkout = ctx.checkoutUrl ?? "";
+  return `Oi, ${name}!
+
+Seu cadastro na Jornada Da Sombra à Luz está confirmado.
+
+Falta só concluir o pagamento para liberar o acesso completo ao Portal Iluminando — trilhas, módulos e acompanhamento da sua evolução.
+
+Enviamos o link por e-mail também.
+
+👇 Finalize seu acesso aqui:
+${checkout}`;
+}
+
 export function buildPixPendenteMessage(ctx: KommoMessageContext): string {
   const name = firstName(ctx.nome);
   const checkout = ctx.checkoutUrl ?? "";

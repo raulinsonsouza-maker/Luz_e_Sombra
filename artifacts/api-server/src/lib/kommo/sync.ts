@@ -4,16 +4,9 @@ import { eq } from "drizzle-orm";
 import type { Logger } from "pino";
 import { getKommoConfig, isKommoConfigured, kommoLeadUrl } from "./config";
 import { sendKommoWelcome, sendKommoWhatsApp } from "./dispatch";
-import { buildAcessoLiberadoMessage, buildPixPendenteMessage } from "./messages";
+import { buildAcessoLiberadoMessage, buildBoasVindasMessage, buildPixPendenteMessage } from "./messages";
 import { normalizeBrazilPhoneE164 } from "./phone";
 import { setLeadCustomFields, updateLeadStage, upsertLeadFromFunnel } from "./leads";
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/** Aguarda o DP disparar boas-vindas e abrir o canal WPP antes de mover para pendente. */
-const WELCOME_DP_DELAY_MS = Number.parseInt(process.env.KOMMO_WELCOME_DP_DELAY_MS ?? "12000", 10) || 12000;
 
 export type KommoUtm = {
   source?: string;
@@ -148,7 +141,7 @@ async function syncKommoOnRegisterAsync(
     kommoLastEvent: "registered",
   });
 
-  // Boas-vindas: DP na entrada só para leads do widget WPP; cadastro via API usa Salesbot.
+  // Boas-vindas: Salesbot abre WPP; se houver talk, reforça via Talks API com texto dinâmico.
   if (cfg.triggerBotsViaApi && result.created) {
     if (cfg.welcomeViaDp) {
       log?.debug(
@@ -156,8 +149,20 @@ async function syncKommoOnRegisterAsync(
         "Boas-vindas via Salesbot — API não suporta etapa de entrada (DP)",
       );
     }
-    await sendKommoWelcome(result.leadId, log);
-    await sleep(WELCOME_DP_DELAY_MS);
+    const welcomeText = checkoutUrl
+      ? buildBoasVindasMessage({
+          nome: params.nome,
+          checkoutUrl,
+          loginUrl,
+          email: params.email,
+        })
+      : undefined;
+    await sendKommoWelcome({
+      leadId: result.leadId,
+      contactId: result.contactId,
+      text: welcomeText,
+      log,
+    });
   } else if (cfg.triggerBotsViaApi && !result.created) {
     log?.debug(
       { usuarioId: params.usuarioId, kommoLeadId: result.leadId },

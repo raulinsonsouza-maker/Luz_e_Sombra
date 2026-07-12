@@ -1,7 +1,8 @@
 import { getKommoConfig } from "./config";
 import { kommoRequest } from "./client";
-import { updateContactPhoneMobile } from "./contacts";
+import { updateContactFromRegistration, updateContactPhoneMobile } from "./contacts";
 import { firstNameFromFullName } from "./phone";
+import { findTalkByContactId } from "./talks";
 
 type CustomFieldValue = { field_id: number; values: Array<{ value: string | number }> };
 
@@ -129,11 +130,11 @@ function parseLeadCreateResponse(data: { id?: number; _embedded?: KommoEmbeddedL
   return leadId;
 }
 
-/** Contato sem lead ativo — prioriza o mais antigo (ID menor), que costuma ter canal WPP vinculado. */
+/** Contato sem lead ativo — prioriza quem já tem canal WPP (talk), senão cria contato novo. */
 export async function findOrphanContactByPhone(phoneE164: string): Promise<number | null> {
   const cfg = getKommoConfig();
   const contacts = await listContactsByPhone(phoneE164);
-  const orphans: number[] = [];
+  const orphans: Array<{ contactId: number; hasTalk: boolean }> = [];
 
   for (const contact of contacts) {
     let hasActiveLead = false;
@@ -146,12 +147,17 @@ export async function findOrphanContactByPhone(phoneE164: string): Promise<numbe
       hasActiveLead = true;
       break;
     }
-    if (!hasActiveLead) orphans.push(contact.contactId);
+    if (hasActiveLead) continue;
+
+    const talk = await findTalkByContactId(contact.contactId);
+    orphans.push({ contactId: contact.contactId, hasTalk: !!talk });
   }
 
-  if (orphans.length === 0) return null;
-  orphans.sort((a, b) => a - b);
-  return orphans[0] ?? null;
+  const withTalk = orphans.filter((o) => o.hasTalk);
+  if (withTalk.length === 0) return null;
+
+  withTalk.sort((a, b) => a.contactId - b.contactId);
+  return withTalk[0]?.contactId ?? null;
 }
 
 async function pickLeadByPhone(phoneE164: string): Promise<{ leadId: number; contactId: number } | null> {
@@ -233,7 +239,11 @@ async function createLeadWithExistingContact(
 
   const leadId = parseLeadCreateResponse(data);
 
-  await updateContactPhoneMobile(contactId, input.phoneE164);
+  await updateContactFromRegistration(contactId, {
+    nome: input.nome,
+    email: input.email,
+    phoneE164: input.phoneE164,
+  });
   return { leadId, contactId, created: true };
 }
 

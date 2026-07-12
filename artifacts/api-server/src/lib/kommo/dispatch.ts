@@ -2,16 +2,22 @@ import type { Logger } from "pino";
 import { runSalesbot } from "./bots";
 import { KommoApiError } from "./client";
 import { getKommoConfig } from "./config";
-import { sendTalkMessageToLead } from "./talks";
+import { sendTalkMessage, sendTalkMessageToLead, findTalkForLead, waitForTalk } from "./talks";
 
-async function safeRunBot(botId: number | null, leadId: number, log?: Logger): Promise<void> {
-  if (!botId) return;
+async function safeRunBot(
+  botId: number | null,
+  leadId: number,
+  log?: Logger,
+): Promise<boolean> {
+  if (!botId) return false;
   try {
     await runSalesbot(botId, leadId);
+    log?.debug({ leadId, botId }, "Salesbot Kommo disparado");
+    return true;
   } catch (error) {
     if (error instanceof KommoApiError && error.status === 400) {
       log?.warn({ leadId, botId, error: error.message }, "Salesbot Kommo não disparado (pode já estar ativo)");
-      return;
+      return false;
     }
     throw error;
   }
@@ -44,8 +50,44 @@ export async function sendKommoWhatsApp(
   });
 }
 
-export async function sendKommoWelcome(leadId: number, log?: Logger): Promise<void> {
+export async function sendKommoWelcome(
+  params: {
+    leadId: number;
+    contactId?: number | null;
+    text?: string;
+    log?: Logger;
+  },
+): Promise<boolean> {
   const cfg = getKommoConfig();
-  if (!cfg.triggerBotsViaApi) return;
-  await safeRunBot(cfg.botWelcomeId, leadId, log);
+  if (!cfg.triggerBotsViaApi) return false;
+
+  const existingTalk = await findTalkForLead(params.leadId, params.contactId);
+  if (existingTalk && params.text) {
+    await sendTalkMessage(existingTalk.talk_id, params.text);
+    params.log?.info(
+      { leadId: params.leadId, talkId: existingTalk.talk_id },
+      "Boas-vindas enviada via Talks API (canal WPP existente)",
+    );
+    return true;
+  }
+
+  const botRan = await safeRunBot(cfg.botWelcomeId, params.leadId, params.log);
+  const talk = await waitForTalk(params.leadId, params.contactId, {
+    attempts: 10,
+    delayMs: 3000,
+  });
+
+  if (talk) {
+    params.log?.info(
+      { leadId: params.leadId, talkId: talk.talk_id, viaBot: botRan },
+      "Canal WPP aberto — boas-vindas pelo Salesbot",
+    );
+    return true;
+  }
+
+  params.log?.warn(
+    { leadId: params.leadId, contactId: params.contactId, viaBot: botRan },
+    "Canal WPP não aberto — vincule WhatsApp no contato no Kommo",
+  );
+  return false;
 }
