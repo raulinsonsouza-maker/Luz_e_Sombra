@@ -332,7 +332,7 @@ test("perfil físico humano sem números", () => {
   assert.ok(!r.perfilFisicoNarrado.includes("máscara"));
 });
 
-test("narrativa v3 — interpretação enxuta sem COMBOS nem perfilUnico", () => {
+test("narrativa v4 — interpretação enxuta sem COMBOS nem perfilUnico", () => {
   const r = gerarNarrativa({
     engine: mkEngine({
       rigido: 31,
@@ -355,14 +355,37 @@ test("narrativa v3 — interpretação enxuta sem COMBOS nem perfilUnico", () =>
 
   const paragrafos = r.interpretacao.split(/\n\n+/).filter(Boolean);
   assert.ok(paragrafos.length <= 3, `esperado ≤3 parágrafos, obteve ${paragrafos.length}`);
-  assert.equal(r.versaoNarrativa, "traco_narrativa_v3");
+  assert.equal(r.versaoNarrativa, "traco_narrativa_v4");
   assert.ok(r.perguntaTransformacao && r.perguntaTransformacao.length > 10);
   assert.ok(!r.interpretacao.includes(r.perguntaTransformacao));
   if (r.perfilUnico) {
     assert.ok(!r.interpretacao.includes(r.perfilUnico.slice(0, 40)));
   }
-  const comboRigidoOral = "o coração que controla o coração que anseia";
+  const comboRigidoOral = "necessidade de vínculo (Oral) gerida pela organização rígida";
   assert.ok(!r.interpretacao.toLowerCase().includes(comboRigidoOral.slice(0, 30)));
+});
+
+test("narrativa v4 — tom funcional sem linguagem romântica", () => {
+  const r = gerarNarrativa({
+    engine: mkEngine(
+      { rigido: 31, oral: 24, masoquista: 20, psicopata: 14, esquizoide: 11 },
+      { estruturaPrincipal: "rigido", estruturaSecundaria: "oral" },
+    ),
+  });
+  const texto = [
+    r.interpretacao,
+    r.mensagemTerapeutica,
+    r.perfilUnico,
+    r.ferida,
+    r.fraseIdentidade,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const proibidos = ["coração que", "amor verdadeiro", "amar profundamente", "ser amado", "ser tocado pela vida"];
+  for (const p of proibidos) {
+    assert.ok(!texto.includes(p), `texto contém linguagem romântica: "${p}"`);
+  }
 });
 
 test("rigido+oral — leituraEmocionalDeclarada com vínculo e controle", () => {
@@ -412,9 +435,9 @@ test("adaptarVozNarrativa — preserva palavras acentuadas e frases naturais", a
   const t = adaptarVozNarrativa(r, "Marcia");
   assert.ok(t.sinteseHumana?.includes("questionário"), `síntese: ${t.sinteseHumana}`);
   assert.ok(!t.sinteseHumana?.includes("question dela"), `síntese corrompida: ${t.sinteseHumana}`);
-  assert.ok(t.mensagemTerapeutica?.includes("coração"), `mensagem: ${t.mensagemTerapeutica}`);
+  assert.ok(t.mensagemTerapeutica?.includes("competência"), `mensagem: ${t.mensagemTerapeutica}`);
   assert.ok(!t.mensagemTerapeutica?.includes("cora delação"), `mensagem corrompida: ${t.mensagemTerapeutica}`);
-  assert.ok(t.mensagemTerapeutica?.includes("é a maior riqueza"), `mensagem: ${t.mensagemTerapeutica}`);
+  assert.ok(t.mensagemTerapeutica?.includes("sensibilidade"), `mensagem: ${t.mensagemTerapeutica}`);
   assert.ok(!t.mensagemTerapeutica?.includes("é a a maior"), `duplicação: ${t.mensagemTerapeutica}`);
 });
 

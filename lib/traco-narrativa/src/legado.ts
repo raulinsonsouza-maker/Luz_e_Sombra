@@ -22,7 +22,7 @@ function limparInterpretacao(texto: string): string {
   return paragrafos.join("\n\n");
 }
 
-/** Limpa texto de resultados guardados antes da narrativa v3. */
+/** Limpa texto de resultados guardados antes da narrativa v4. */
 export function sanitizarResultadoLegado(resultado: ResultadoAnalise): ResultadoAnalise {
   if (resultado.versaoNarrativa === VERSAO_NARRATIVA) return resultado;
   const out = { ...resultado };

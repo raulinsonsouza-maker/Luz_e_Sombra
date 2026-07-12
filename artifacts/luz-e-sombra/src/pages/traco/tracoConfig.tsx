@@ -26,7 +26,7 @@ export const ESTRUTURAS_CONFIG: Record<
   },
   oral: {
     nome: "Oral",
-    descricaoCurta: "Profundamente humano. Sente, conecta e nutre com o coração aberto.",
+    descricaoCurta: "Profundamente humano. Sente, conecta e nutre com abertura relacional.",
     descricaoLonga:
       "A estrutura Oral tem uma capacidade extraordinária de sentir o outro. São pessoas que nutrem, que se importam genuinamente, que constroem vínculos de calor real. A saudade, a melancolia e o desejo de pertencer fazem parte de uma riqueza emocional sem igual. O caminho é aprender a receber tanto quanto oferecem.",
     cor: "#5b9bd5",
@@ -37,7 +37,7 @@ export const ESTRUTURAS_CONFIG: Record<
     nome: "Psicopata",
     descricaoCurta: "Natural na liderança. Estratégico, persuasivo e orientado ao poder.",
     descricaoLonga:
-      "A estrutura Psicopata possui um magnetismo e uma capacidade de influência raros. São líderes natos, estrategistas brilhantes, com uma visão clara do que querem. O desafio está em abrir o coração para a vulnerabilidade e descobrir que a força real não precisa de controle.",
+      "A estrutura Psicopata possui um magnetismo e uma capacidade de influência raros. São líderes natos, estrategistas brilhantes, com uma visão clara do que querem. O desafio está em integrar vulnerabilidade à liderança e descobrir que a força real não precisa de controle constante.",
     cor: "#e07b39",
     corBg: "rgba(224,123,57,0.08)",
     corBorder: "rgba(224,123,57,0.3)",
@@ -55,7 +55,7 @@ export const ESTRUTURAS_CONFIG: Record<
     nome: "Rígido",
     descricaoCurta: "Estruturado e realizador. Busca excelência com disciplina e presença.",
     descricaoLonga:
-      "A estrutura Rígida possui organização, comprometimento e uma capacidade de realizar que inspira. São pessoas confiáveis, prezam a qualidade em tudo que fazem e têm uma presença impactante. O caminho é abrir espaço para o coração, deixar o controle de lado e permitir ser tocado pela vida.",
+      "A estrutura Rígida possui organização, comprometimento e uma capacidade de realizar que inspira. São pessoas confiáveis, prezam a qualidade em tudo que fazem e têm uma presença impactante. O caminho é flexibilizar o controle emocional, permitir vulnerabilidade e integrar o que sente sem perder a competência.",
     cor: "#c8a56b",
     corBg: "rgba(200,165,107,0.08)",
     corBorder: "rgba(200,165,107,0.3)",

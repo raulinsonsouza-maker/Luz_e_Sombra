@@ -75,7 +75,7 @@ export function montarCouracaCorporal(
     partes.push("Compressão vertical indica pressão acumulada, muitas vezes lealdade ou autocobrança guardadas no corpo.");
   }
   if (eixos.indiceExpansao > 0.45 && principal === "psicopata") {
-    partes.push("Expansão superior: presença que ocupa espaço, com coração ainda em processo de abertura.");
+    partes.push("Expansão superior: presença que ocupa espaço, com vulnerabilidade ainda em processo de integração.");
   }
   if (partes.length === 0) {
     return `O fluxo energético de ${T.NOMES[principal].toLowerCase()} circula de forma relativamente equilibrada entre ação e sentimento.`;

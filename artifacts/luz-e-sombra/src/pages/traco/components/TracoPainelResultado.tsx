@@ -503,7 +503,7 @@ export function TracoPainelResultado({
         resultado.recurso ||
         (resultado.pontosCuidadoPrioritarios?.length ?? 0) > 0 ||
         resultado.perguntaTransformacao) && (
-        <Capitulo numero={2} titulo="O que dói e o que cura" defaultOpen>
+        <Capitulo numero={2} titulo="Como o padrão se formou e o que sustenta" defaultOpen>
           <div className="grid md:grid-cols-2 gap-4">
             {resultado.ferida && (
               <div
@@ -511,7 +511,7 @@ export function TracoPainelResultado({
                 style={{ background: "rgba(155,143,222,0.05)", border: "1px solid rgba(155,143,222,0.18)" }}
               >
                 <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(155,143,222,0.6)" }}>
-                  Ferida central
+                  Origem do padrão
                 </p>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
                   {resultado.ferida}
@@ -524,7 +524,7 @@ export function TracoPainelResultado({
                 style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.18)" }}
               >
                 <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.6)" }}>
-                  Recurso / dom
+                  Recurso natural
                 </p>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
                   {resultado.recurso}

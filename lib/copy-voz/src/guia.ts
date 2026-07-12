@@ -4,6 +4,9 @@ export const VOZ_REGRAS = {
   proibido: ["—"] as const,
   citacao: '"..."',
   preferir: "em vez de",
+  /** Traço de Caráter: explicar como a pessoa funciona, não metáforas românticas. */
+  tracoEvitar: ["amar foi punido", "amor verdadeiro", "ser tocado pela vida", "maior riqueza do coração"] as const,
+  tracoPreferir: ["padrão adaptativo", "como o corpo aprendeu a operar", "mecanismo de proteção", "função no cotidiano"] as const,
 } as const;
 
 /** Substituições PT-PT → PT-BR (ordem importa: frases longas primeiro). */
