@@ -1,0 +1,18 @@
+{
+  "0": {
+    "question": [
+      {
+        "handler": "show",
+        "params": {
+          "type": "text",
+          "value": "Oi, {{contact.name}}!\n\nSeu cadastro na Jornada Da Sombra à Luz está confirmado.\n\nFalta só concluir o pagamento para liberar o acesso completo ao Portal Iluminando — trilhas, módulos e acompanhamento da sua evolução.\n\nEnviamos o link por e-mail também.\n\n👇 Finalize seu acesso aqui:\n{{lead.cf.1350222}}"
+        }
+      },
+      {
+        "handler": "action",
+        "params": { "name": "stop", "params": {} }
+      }
+    ],
+    "answer": []
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "0": {
+    "question": [
+      {
+        "handler": "show",
+        "params": {
+          "type": "text",
+          "value": "Oi, {{contact.name}}!\n\nÚltimo lembrete: sua vaga no Portal Iluminando ainda está disponível.\n\nQuem conclui o pagamento hoje tem acesso imediato a todas as trilhas e módulos da jornada.\n\nNão deixa para depois — é só um clique:\n\n👇 Finalizar agora:\n{{lead.cf.1350222}}"
+        }
+      },
+      {
+        "handler": "action",
+        "params": { "name": "stop", "params": {} }
+      }
+    ],
+    "answer": []
+  }
+}

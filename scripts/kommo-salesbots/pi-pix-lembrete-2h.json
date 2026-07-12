@@ -1,0 +1,18 @@
+{
+  "0": {
+    "question": [
+      {
+        "handler": "show",
+        "params": {
+          "type": "text",
+          "value": "{{contact.name}}, tudo bem?\n\nSua vaga na Jornada Da Sombra à Luz ainda está reservada.\n\nSe já pagou, pode ignorar — a confirmação às vezes demora alguns minutos.\n\nSe ainda não finalizou, garanta seu acesso agora:\n\n👇 Link do checkout:\n{{lead.cf.1350222}}"
+        }
+      },
+      {
+        "handler": "action",
+        "params": { "name": "stop", "params": {} }
+      }
+    ],
+    "answer": []
+  }
+}

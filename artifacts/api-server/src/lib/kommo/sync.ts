@@ -2,11 +2,18 @@ import { db } from "@workspace/db";
 import { comprasCaktoTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import type { Logger } from "pino";
-import { runSalesbot } from "./bots";
 import { getKommoConfig, isKommoConfigured, kommoLeadUrl } from "./config";
-import { KommoApiError } from "./client";
+import { sendKommoWelcome, sendKommoWhatsApp } from "./dispatch";
+import { buildAcessoLiberadoMessage, buildPixPendenteMessage } from "./messages";
 import { normalizeBrazilPhoneE164 } from "./phone";
 import { setLeadCustomFields, updateLeadStage, upsertLeadFromFunnel } from "./leads";
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Aguarda o DP disparar boas-vindas e abrir o canal WPP antes de mover para pendente. */
+const WELCOME_DP_DELAY_MS = Number.parseInt(process.env.KOMMO_WELCOME_DP_DELAY_MS ?? "12000", 10) || 12000;
 
 export type KommoUtm = {
   source?: string;
@@ -24,6 +31,7 @@ async function persistKommoSync(
     kommoLeadId: number;
     kommoContactId?: number | null;
     kommoLastEvent: KommoLastEvent;
+    resetReminders?: boolean;
   },
 ): Promise<void> {
   try {
@@ -34,6 +42,9 @@ async function persistKommoSync(
         kommoContactId: data.kommoContactId ?? null,
         kommoLastSyncAt: new Date(),
         kommoLastEvent: data.kommoLastEvent,
+        ...(data.resetReminders
+          ? { kommoReminder2hSentAt: null, kommoReminder24hSentAt: null }
+          : {}),
         atualizadoEm: new Date(),
       })
       .where(eq(comprasCaktoTable.usuarioId, usuarioId));
@@ -49,6 +60,19 @@ async function getStoredLeadId(usuarioId: number): Promise<number | null> {
     .where(eq(comprasCaktoTable.usuarioId, usuarioId))
     .limit(1);
   return row?.kommoLeadId ?? null;
+}
+
+async function getStoredKommoEvent(usuarioId: number): Promise<KommoLastEvent | null> {
+  const [row] = await db
+    .select({ kommoLastEvent: comprasCaktoTable.kommoLastEvent })
+    .from(comprasCaktoTable)
+    .where(eq(comprasCaktoTable.usuarioId, usuarioId))
+    .limit(1);
+  const event = row?.kommoLastEvent;
+  if (event === "registered" || event === "pending" || event === "paid" || event === "revoked") {
+    return event;
+  }
+  return null;
 }
 
 function registerStatusId(): number {
@@ -68,19 +92,6 @@ function buildUrls(checkoutToken?: string) {
     ? `${publicUrl}/checkout?token=${encodeURIComponent(checkoutToken)}`
     : undefined;
   return { loginUrl, checkoutUrl };
-}
-
-async function safeRunBot(botId: number | null, leadId: number, log?: Logger): Promise<void> {
-  if (!botId) return;
-  try {
-    await runSalesbot(botId, leadId);
-  } catch (error) {
-    if (error instanceof KommoApiError && error.status === 400) {
-      log?.warn({ leadId, botId, error: error.message }, "Salesbot Kommo não disparado (pode já estar ativo)");
-      return;
-    }
-    throw error;
-  }
 }
 
 async function syncKommoOnRegisterAsync(
@@ -133,9 +144,54 @@ async function syncKommoOnRegisterAsync(
     kommoLastEvent: "registered",
   });
 
-  // WPP via Digital Pipeline ao entrar na etapa — API só dispara bot se KOMMO_TRIGGER_BOTS=true
-  if (cfg.triggerBotsViaApi) {
-    await safeRunBot(cfg.botWelcomeId, result.leadId, log);
+  // Boas-vindas: DP (Novo cadastro) abre o WPP no Lite; API só se welcomeViaDp=false.
+  if (cfg.triggerBotsViaApi && result.created) {
+    if (cfg.welcomeViaDp) {
+      log?.debug(
+        { usuarioId: params.usuarioId, kommoLeadId: result.leadId, delayMs: WELCOME_DP_DELAY_MS },
+        "Boas-vindas via Digital Pipeline — aguardando antes de mover para pendente",
+      );
+      await sleep(WELCOME_DP_DELAY_MS);
+    } else {
+      await sendKommoWelcome(result.leadId, log);
+    }
+  } else if (cfg.triggerBotsViaApi && !result.created) {
+    log?.debug(
+      { usuarioId: params.usuarioId, kommoLeadId: result.leadId },
+      "Lead Kommo já existia — boas-vindas não reenviada",
+    );
+  }
+
+  const pendingId = cfg.statusPagamentoPendente;
+  if (pendingId && result.created) {
+    await updateLeadStage(result.leadId, pendingId);
+    await persistKommoSync(params.usuarioId, {
+      kommoLeadId: result.leadId,
+      kommoContactId: result.contactId,
+      kommoLastEvent: "pending",
+      resetReminders: true,
+    });
+
+    if (cfg.triggerBotsViaApi && checkoutUrl) {
+      const pixText = buildPixPendenteMessage({
+        nome: params.nome,
+        checkoutUrl,
+        loginUrl,
+        email: params.email,
+      });
+      await sendKommoWhatsApp({
+        leadId: result.leadId,
+        contactId: result.contactId,
+        text: pixText,
+        waitForTalk: true,
+        log,
+      });
+    }
+
+    log?.debug(
+      { usuarioId: params.usuarioId, kommoLeadId: result.leadId, statusId: pendingId },
+      "Lead em Pagamento pendente — PIX e lembretes via Talks API",
+    );
   }
 
   log?.info(
@@ -201,6 +257,8 @@ async function syncKommoOnPaymentPaidAsync(
     return;
   }
 
+  const previousEvent = await getStoredKommoEvent(params.usuarioId);
+
   await updateLeadStage(leadId, cfg.statusPago);
   await setLeadCustomFields(leadId, {
     loginUrl,
@@ -214,8 +272,20 @@ async function syncKommoOnPaymentPaidAsync(
     kommoLastEvent: "paid",
   });
 
-  if (cfg.triggerBotsViaApi) {
-    await safeRunBot(cfg.botPaidId, leadId, log);
+  if (cfg.triggerBotsViaApi && previousEvent !== "paid") {
+    const acessoText = buildAcessoLiberadoMessage({
+      nome: params.nome,
+      checkoutUrl,
+      loginUrl,
+      email: params.email,
+    });
+    await sendKommoWhatsApp({
+      leadId,
+      text: acessoText,
+      log,
+    });
+  } else if (cfg.triggerBotsViaApi && previousEvent === "paid") {
+    log?.debug({ usuarioId: params.usuarioId, kommoLeadId: leadId }, "Pagamento já sincronizado — WPP não reenviado");
   }
 
   log?.info(

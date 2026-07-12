@@ -5,6 +5,7 @@ import {
   firstNameFromFullName,
 } from "../phone.js";
 import { buildLeadComplexPayloadForTest, parseLeadComplexResponseForTest } from "../leads.js";
+import { buildPixPendenteMessage, buildAcessoLiberadoMessage } from "../messages.js";
 
 describe("kommo phone", () => {
   it("normaliza celular BR para E.164", () => {
@@ -55,9 +56,11 @@ describe("kommo leads/complex payload", () => {
     const contact = embedded.contacts[0]!;
     assert.equal(contact.first_name, "Maria");
 
-    const fields = contact.custom_fields_values as Array<{ field_code: string }>;
+    const fields = contact.custom_fields_values as Array<{ field_code: string; values?: Array<{ enum_code?: string }> }>;
     assert.ok(fields.some((f) => f.field_code === "EMAIL"));
-    assert.ok(fields.some((f) => f.field_code === "PHONE"));
+    const phoneField = fields.find((f) => f.field_code === "PHONE");
+    assert.ok(phoneField);
+    assert.equal(phoneField?.values?.[0]?.enum_code, "MOB");
 
     delete process.env.KOMMO_PIPELINE_ID;
     delete process.env.KOMMO_CF_CHECKOUT_URL;
@@ -68,5 +71,27 @@ describe("kommo leads/complex payload", () => {
     const parsed = parseLeadComplexResponseForTest([{ id: 6945514, contact_id: 17705710 }]);
     assert.equal(parsed.leadId, 6945514);
     assert.equal(parsed.contactId, 17705710);
+  });
+});
+
+describe("kommo messages", () => {
+  it("monta mensagem PIX pendente com primeiro nome e checkout", () => {
+    const text = buildPixPendenteMessage({
+      nome: "Maria Silva",
+      checkoutUrl: "https://portaliluminando.com.br/checkout?token=abc",
+    });
+    assert.ok(text.includes("Oi, Maria!"));
+    assert.ok(text.includes("checkout?token=abc"));
+  });
+
+  it("monta mensagem acesso liberado com email e login", () => {
+    const text = buildAcessoLiberadoMessage({
+      nome: "Maria Silva",
+      email: "maria@example.com",
+      loginUrl: "https://portaliluminando.com.br/login",
+    });
+    assert.ok(text.includes("Maria, pagamento confirmado"));
+    assert.ok(text.includes("maria@example.com"));
+    assert.ok(text.includes("/login"));
   });
 });

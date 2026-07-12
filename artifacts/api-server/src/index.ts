@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { startKommoReminderCron } from "./lib/kommo/reminders";
 import { seedAdminIfNeeded } from "./lib/seed";
 
 const rawPort = process.env["PORT"];
@@ -18,6 +19,7 @@ if (Number.isNaN(port) || port <= 0) {
 
 async function start() {
   await seedAdminIfNeeded();
+  startKommoReminderCron(logger);
 
   app.listen(port, (err) => {
     if (err) {

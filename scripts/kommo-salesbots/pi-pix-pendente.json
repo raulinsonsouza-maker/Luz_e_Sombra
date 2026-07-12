@@ -1,0 +1,18 @@
+{
+  "0": {
+    "question": [
+      {
+        "handler": "show",
+        "params": {
+          "type": "text",
+          "value": "Oi, {{contact.name}}!\n\nSeu cadastro está confirmado — falta só o pagamento para liberar o acesso completo ao Portal Iluminando.\n\nPIX ou cartão: aprovação na hora e você já entra na Jornada Da Sombra à Luz.\n\n👇 Concluir pagamento agora:\n{{lead.cf.1350222}}"
+        }
+      },
+      {
+        "handler": "action",
+        "params": { "name": "stop", "params": {} }
+      }
+    ],
+    "answer": []
+  }
+}

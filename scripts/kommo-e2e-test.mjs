@@ -33,9 +33,9 @@ const PORTAL = "https://portaliluminando.com.br";
 const KOMMO_BASE = `https://${kommoSubdomain}.kommo.com/api/v4`;
 
 const CFG = {
-  pipelineId: Number(kommoEnv.KOMMO_PIPELINE_ID ?? 14099787),
-  statusNovo: Number(kommoEnv.KOMMO_STATUS_NOVO_CADASTRO ?? 108842047),
-  statusPago: Number(kommoEnv.KOMMO_STATUS_PAGO ?? 108842055),
+  pipelineId: Number(kommoEnv.KOMMO_PIPELINE_ID ?? 14098755),
+  statusNovo: Number(kommoEnv.KOMMO_STATUS_NOVO_CADASTRO ?? 108834247),
+  statusPago: Number(kommoEnv.KOMMO_STATUS_PAGO ?? 142),
   statusPerdido: Number(kommoEnv.KOMMO_STATUS_PERDIDO ?? 143),
 };
 

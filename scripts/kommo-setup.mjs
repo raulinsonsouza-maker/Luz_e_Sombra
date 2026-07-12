@@ -195,12 +195,15 @@ async function main() {
     KOMMO_STATUS_PAGO: String(stages["Pago / Acesso liberado"] ?? findStageId(stages, WON_STATUS_NAMES) ?? ""),
     KOMMO_STATUS_PERDIDO: String(findStageId(stages, LOST_STATUS_NAMES) ?? ""),
     KOMMO_BOT_WELCOME_ID: String(pickBot(["boas-vindas", "welcome", "cadastro"]) || ""),
-    KOMMO_BOT_PENDING_ID: String(pickBot(["pendente", "pix", "pending"]) || ""),
+    KOMMO_BOT_PENDING_ID: String(pickBot(["pix pendente"]) || pickBot(["pendente", "pix", "pending"]) || ""),
+    KOMMO_BOT_PENDING_2H_ID: String(pickBot(["lembrete 2h", "2h"]) || ""),
+    KOMMO_BOT_PENDING_24H_ID: String(pickBot(["lembrete 24h", "24h"]) || ""),
     KOMMO_BOT_PAID_ID: String(pickBot(["acesso", "pago", "paid", "liberado"]) || ""),
     KOMMO_CF_CHECKOUT_URL: String(cf.CHECKOUT_URL ?? ""),
     KOMMO_CF_LOGIN_URL: String(cf.LOGIN_URL ?? ""),
     KOMMO_CF_EMAIL: String(cf.EMAIL_CADASTRO ?? ""),
     KOMMO_CF_USUARIO_ID: String(cf.USUARIO_ID ?? ""),
+    KOMMO_TRIGGER_BOTS: "true",
   };
 
   console.log("\n# Cole na VPS (/opt/luzesombra/.env) — KOMMO_API_TOKEN separado\n");
@@ -209,11 +212,20 @@ async function main() {
   }
 
   if (!env.KOMMO_BOT_WELCOME_ID || !env.KOMMO_BOT_PAID_ID) {
-    console.log("\n⚠ Salesbots e Digital Pipeline são configurados SOMENTE no painel Kommo.");
-    console.log("  O Portal move leads entre etapas; o DP dispara WhatsApp ao entrar na etapa.");
-    console.log("  Crie no painel: PI - Boas-vindas, PI - PIX pendente, PI - Acesso liberado");
-    console.log("  Digital Pipeline: automatizar por etapa em Portal Iluminando (delays 2h/24h em Pendente).");
-    console.log("  KOMMO_TRIGGER_BOTS=false (padrão) — não dispare bots via API se usar DP.");
+    console.log("\n⚠ Importe os JSONs em scripts/kommo-salesbots/ — veja README.md");
+    console.log("  Bots: PI - Boas-vindas, PI - PIX pendente, PI - PIX lembrete 2h/24h, PI - Acesso liberado");
+  } else {
+    console.log("\n✓ JSONs de importação: scripts/kommo-salesbots/");
+    console.log("  Rode: node scripts/kommo-salesbots/kommo-salesbots-verify.mjs");
+    console.log("\n✓ WhatsApp Lite: mensagens type=text (sem botões). Links inline {{lead.cf.1350222}}");
+    console.log("  Use KOMMO_TRIGGER_BOTS=true — API dispara Boas-vindas + Acesso liberado.");
+    console.log("  PIX + lembretes 2h/24h: configurar no DP da etapa Pagamento pendente.");
+    console.log("  No painel: remova bots do DP em Novo cadastro e Pago (evita duplicata).");
+    console.log("\n  Placeholders nos Salesbots:");
+    console.log("    {{contact.name}}           — primeiro nome");
+    if (cf.CHECKOUT_URL) console.log(`    {{lead.cf.${cf.CHECKOUT_URL}}}  — link checkout`);
+    if (cf.LOGIN_URL) console.log(`    {{lead.cf.${cf.LOGIN_URL}}}     — link login`);
+    if (cf.EMAIL_CADASTRO) console.log(`    {{lead.cf.${cf.EMAIL_CADASTRO}}}   — e-mail cadastro`);
   }
 }
 

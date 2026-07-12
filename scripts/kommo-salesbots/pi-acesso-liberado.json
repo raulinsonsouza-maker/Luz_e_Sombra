@@ -1,0 +1,18 @@
+{
+  "0": {
+    "question": [
+      {
+        "handler": "show",
+        "params": {
+          "type": "text",
+          "value": "{{contact.name}}, pagamento confirmado!\n\nSeu acesso ao Portal Iluminando está LIBERADO.\n\nEntre com o e-mail {{lead.cf.1350226}} e a senha que você criou.\n\nDentro do portal: sua jornada completa de autoconhecimento, no seu ritmo.\n\n👇 Acessar agora:\n{{lead.cf.1350224}}"
+        }
+      },
+      {
+        "handler": "action",
+        "params": { "name": "stop", "params": {} }
+      }
+    ],
+    "answer": []
+  }
+}

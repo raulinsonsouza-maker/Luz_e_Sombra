@@ -22,6 +22,8 @@ export const comprasCaktoTable = pgTable("compras_cakto", {
   kommoContactId: integer("kommo_contact_id"),
   kommoLastSyncAt: timestamp("kommo_last_sync_at"),
   kommoLastEvent: text("kommo_last_event"),
+  kommoReminder2hSentAt: timestamp("kommo_reminder_2h_sent_at"),
+  kommoReminder24hSentAt: timestamp("kommo_reminder_24h_sent_at"),
 }, (table) => ({
   checkoutTokenUnique: unique("uq_compras_cakto_checkout_token").on(table.checkoutToken),
   usuarioIdx: index("idx_compras_cakto_usuario_id").on(table.usuarioId),
