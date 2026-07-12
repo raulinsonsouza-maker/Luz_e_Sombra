@@ -7,7 +7,7 @@ import {
   computarCompatibilidade,
   entradaLinguagensAmorSchema,
   entradaCompatibilidadeSchema,
-  VERSAO_LINGUAGENS_AMOR_V2,
+  VERSAO_LINGUAGENS_AMOR_V3,
   type ResultadoLinguagensAmorComputado,
 } from "@workspace/cinco-linguagens-amor";
 
@@ -93,7 +93,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
     const parsed = entradaLinguagensAmorSchema.safeParse(bodyRest);
     if (!parsed.success) {
       return res.status(400).json({
-        error: "Corpo inválido: são necessárias as 30 escolhas (R01–E15, a/b) e metadados opcionais.",
+        error: "Corpo inválido: são necessárias as 20 escolhas principais (R01–R20, a/b) e metadados opcionais.",
         detalhes: parsed.error.flatten(),
       });
     }
@@ -128,7 +128,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
         linguagemPrincipal: comp.principal,
         linguagemSecundaria: comp.secundaria,
         resultado,
-        versao: VERSAO_LINGUAGENS_AMOR_V2,
+        versao: VERSAO_LINGUAGENS_AMOR_V3,
       })
       .returning();
 

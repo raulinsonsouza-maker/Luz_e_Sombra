@@ -72,6 +72,10 @@ export interface TemperamentoDossie {
   sinteseHumana?: string;
   perguntaCrescimento?: string;
   pontoCego?: string;
+  trechoRelacoes?: string;
+  trechoTrabalho?: string;
+  scoreE?: number;
+  estabilidadeEmocional?: number;
   dimensoesLegiveis?: { label: string; pct: number; insight?: string }[];
 }
 
@@ -681,6 +685,24 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
     });
   }
 
+  if (temperamento?.trechoRelacoes) {
+    pushCruzamento(lista, {
+      titulo: "Temperamento nas relações",
+      corpo: temperamento.trechoRelacoes,
+      icone: "heart",
+      relevancia: 66,
+    });
+  }
+
+  if (temperamento?.trechoTrabalho) {
+    pushCruzamento(lista, {
+      titulo: "Temperamento no trabalho",
+      corpo: temperamento.trechoTrabalho,
+      icone: "zap",
+      relevancia: 64,
+    });
+  }
+
   // 14. Síntese linguagens
   if (linguagens?.combinacao) {
     pushCruzamento(lista, {
@@ -1052,6 +1074,10 @@ export function parseTemperamentoFromApi(row: { resultado?: unknown } | null): T
   if (!primario) return null;
   const secundario = (perfil?.secundario as TemperamentoCodigo) ?? primario;
   const tipo = (perfil?.tipo as TipoPerfil) ?? "DOMINANTE";
+  const scores = r.scores as Record<string, unknown> | undefined;
+  const analise = r.analiseAprofundada as { id: string; paragrafos: string[] }[] | undefined;
+  const secRel = analise?.find((s) => s.id === "relacoes");
+  const secTrab = analise?.find((s) => s.id === "trabalho");
   return {
     primario,
     secundario: perfil?.secundario as string | undefined,
@@ -1059,6 +1085,10 @@ export function parseTemperamentoFromApi(row: { resultado?: unknown } | null): T
     sinteseHumana: r.sinteseHumana as string | undefined,
     perguntaCrescimento: r.perguntaCrescimento as string | undefined,
     pontoCego: r.pontoCego as string | undefined,
+    trechoRelacoes: secRel?.paragrafos[0],
+    trechoTrabalho: secTrab?.paragrafos[0],
+    scoreE: scores?.scoreE as number | undefined,
+    estabilidadeEmocional: scores?.estabilidadeEmocional as number | undefined,
     dimensoesLegiveis: r.dimensoesLegiveis as TemperamentoDossie["dimensoesLegiveis"],
   };
 }

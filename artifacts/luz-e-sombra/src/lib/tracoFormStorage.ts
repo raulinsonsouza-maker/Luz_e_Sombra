@@ -8,7 +8,7 @@ import { getStoredUser } from "@/lib/auth";
 
 export const LEGACY_STORAGE_DIAGNOSTICO_30 = "luz_diagnostico_emocional_30_v1";
 const DIAG_PREFIX = "luz_diagnostico_emocional_30_v1";
-const LINGUAGENS_DRAFT_PREFIX = "luz_linguagens_amor_v2_draft";
+const LINGUAGENS_DRAFT_PREFIX = "luz_linguagens_amor_v3_draft";
 
 /** Remove resíduos do antigo questionário de 20 (evita confusão com o diagnóstico de 30). */
 export function purgeQuestionario20Storage(): void {

@@ -8,7 +8,10 @@ export type LinguagemAmor =
 
 export type LadoEscolha = "a" | "b";
 
-export type BlocoQuestionario = "receber" | "expressar";
+export type BlocoQuestionario = "receber" | "expressar" | "desempate";
+
+export type IntensidadePerfil = "forte" | "moderada" | "equilibrada";
+export type ConfiancaLabel = "alta" | "media" | "baixa";
 
 export interface ParForcado {
   id: string;
@@ -41,6 +44,8 @@ export interface DimensaoPerfil {
   secundaria: LinguagemAmor;
   terciaria: LinguagemAmor;
   anti: LinguagemAmor;
+  /** Empate numérico entre 1º e 2º (antes de desempate). */
+  empatePrincipal?: boolean;
 }
 
 export type AlertaQualidade =
@@ -52,11 +57,14 @@ export type AlertaQualidade =
 
 export interface MetricasQualidade {
   confianca: number;
+  confiancaLabel: ConfiancaLabel;
+  intensidade: IntensidadePerfil;
   alertas: AlertaQualidade[];
   perfilEquilibradoReceber: boolean;
   perfilEquilibradoExpressar: boolean;
   gapReceber: number;
   gapExpressar: number;
+  desempateUsado: boolean;
 }
 
 export interface Desalinhamento {
@@ -76,7 +84,42 @@ export interface PerfilLinguagemDetalhe {
   dicaParaParceiro: string;
 }
 
+/** Blocos narrativos v3 — cada um com função única, sem repetição. */
+export interface NarrativaV3 {
+  veredito: string;
+  abertura: string;
+  mecanismo: string;
+  cenas: [string, string, string];
+  feridaPadrao: string;
+  sinalDeAlerta: string;
+  dinamicaPar: string;
+  cartaParceiro: string;
+  planoSeteDias: string[];
+  linguagemAnti: string;
+  confiancaNarrativa: string;
+  espelhoExpressar?: string;
+  ponteComunicacao?: string;
+}
+
 export interface ResultadoLinguagensAmorComputado {
+  versao: "linguagens_amor_v3";
+  receber: DimensaoPerfil;
+  expressar: DimensaoPerfil;
+  expressarCompleto: boolean;
+  desalinhamento: Desalinhamento;
+  metricas: MetricasQualidade;
+  narrativa: NarrativaV3;
+  distribuicao: RankingItem[];
+  perfilEquilibrado: boolean;
+  /** Campos legacy derivados de receber */
+  principal: LinguagemAmor;
+  secundaria: LinguagemAmor;
+  pontuacoes: PontuacaoPorLinguagem;
+  ranking: RankingItem[];
+}
+
+/** Resultado v2 legado (exibição de histórico). */
+export interface ResultadoLinguagensAmorV2 {
   versao: "linguagens_amor_v2";
   receber: DimensaoPerfil;
   expressar: DimensaoPerfil;
@@ -93,7 +136,6 @@ export interface ResultadoLinguagensAmorComputado {
   recomendacoes: string[];
   reflexaoAmor: string;
   perfilEquilibrado: boolean;
-  /** Campos legacy derivados de receber */
   principal: LinguagemAmor;
   secundaria: LinguagemAmor;
   pontuacoes: PontuacaoPorLinguagem;
@@ -123,7 +165,18 @@ export interface ResultadoCompatibilidade {
   resumoHumano: string;
   pontesParaA: string[];
   pontesParaB: string[];
+  mapaCruzamento?: string;
+  friccaoProvavel?: string;
   matchARecebeBExpressa: boolean;
   matchBRecebeAExpressa: boolean;
+}
+
+/** Avaliação parcial após bloco core — usada pelo frontend para decidir desempate. */
+export interface AvaliacaoDesempate {
+  necessario: boolean;
+  linguagemA: LinguagemAmor;
+  linguagemB: LinguagemAmor;
+  gap: number;
+  confianca: number;
 }
 

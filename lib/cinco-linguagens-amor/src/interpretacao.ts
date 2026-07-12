@@ -36,5 +36,5 @@ export function textoParPrincipalSecundaria(
   }
   const lp = LABEL_LINGUAGEM[principal].toLowerCase();
   const ls = LABEL_LINGUAGEM[secundaria].toLowerCase();
-  return `Seu coração fala duas línguas com força:${lp}na frente e${ls}logo atrás. Não escolha entre elas, relações que duram costumam nutrir as duas, não só a primeira da lista.`;
+  return `Seu coração fala duas línguas com força: ${lp} na frente e ${ls} logo atrás. Não escolha entre elas, relações que duram costumam nutrir as duas, não só a primeira da lista.`;
 }

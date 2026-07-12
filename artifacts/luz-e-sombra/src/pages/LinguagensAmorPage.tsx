@@ -11,35 +11,47 @@ import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import {
   PARES_RECEBER,
   PARES_EXPRESSAR,
+  TOTAL_CORE,
+  CODIGOS_RECEBER,
   entradaLinguagensAmorSchema,
   tituloBloco,
+  avaliarNecessidadeDesempate,
+  paresDesempatePara,
   type ParForcado,
 } from "@workspace/cinco-linguagens-amor";
 import LinguagensPainelResultado, { type ResultadoLinguagensUi } from "./linguagens-amor/LinguagensPainelResultado";
 import LinguagensSeletorPessoa, { type PessoaAnalise } from "./linguagens-amor/LinguagensSeletorPessoa";
 import LinguagensCruzamento from "./linguagens-amor/LinguagensCruzamento";
 
-const TOTAL = 30;
-const BLOCO1 = 15;
 const LING_NAV = JORNADA_MODULE_NAV["linguagens-amor"];
 
-type Fase = "intro" | "perguntas" | "enviando" | "resultado";
+type FaseQuiz = "core" | "desempate" | "expressar";
+type Fase = "intro" | FaseQuiz | "enviando" | "resultado";
 
 type DraftPersist = {
   pessoaId: number | null;
-  bloco: 0 | 1;
+  faseQuiz: FaseQuiz;
   qIndex: number;
   answers: Record<string, "a" | "b">;
+  paresDesempateIds: string[];
   startedAt: number;
 };
 
-function resetEstadoPerfil(): {
-  answers: Record<string, "a" | "b">;
-  bloco: 0 | 1;
-  qIndex: number;
-  startedAt: number;
-} {
-  return { answers: {}, bloco: 0, qIndex: 0, startedAt: Date.now() };
+const MARCO_MSG: Record<number, string> = {
+  5: "Você está indo bem — continue com calma.",
+  10: "Metade do caminho. Cada escolha conta.",
+  15: "Quase lá — faltam poucas perguntas.",
+  20: "Última pergunta principal!",
+};
+
+function resetEstadoPerfil() {
+  return {
+    answers: {} as Record<string, "a" | "b">,
+    faseQuiz: "core" as FaseQuiz,
+    qIndex: 0,
+    paresDesempateIds: [] as string[],
+    startedAt: Date.now(),
+  };
 }
 
 export default function LinguagensAmorPage() {
@@ -47,9 +59,10 @@ export default function LinguagensAmorPage() {
   const search = useSearch();
   const { status, user } = useAuth();
   const [fase, setFase] = useState<Fase>("intro");
-  const [bloco, setBloco] = useState<0 | 1>(0);
+  const [faseQuiz, setFaseQuiz] = useState<FaseQuiz>("core");
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, "a" | "b">>({});
+  const [paresDesempate, setParesDesempate] = useState<ParForcado[]>([]);
   const [startedAt, setStartedAt] = useState(() => Date.now());
   const [erro, setErro] = useState<string | null>(null);
   const [msgIntro, setMsgIntro] = useState<string | null>(null);
@@ -80,8 +93,9 @@ export default function LinguagensAmorPage() {
     setErro(null);
     setMsgIntro(null);
     setAnswers(next.answers);
-    setBloco(next.bloco);
+    setFaseQuiz(next.faseQuiz);
     setQIndex(next.qIndex);
+    setParesDesempate([]);
     setStartedAt(next.startedAt);
     setFase("intro");
   }, []);
@@ -103,10 +117,24 @@ export default function LinguagensAmorPage() {
     setSelectedPessoaId(pessoaIdFromUrl);
   }, [pessoaIdFromUrl, resetPerfilAtivo]);
 
-  const paresBloco: ParForcado[] = bloco === 0 ? PARES_RECEBER : PARES_EXPRESSAR;
-  const parAtual = paresBloco[qIndex];
-  const indiceGlobal = bloco === 0 ? qIndex + 1 : BLOCO1 + qIndex + 1;
-  const progresso = fase === "perguntas" ? indiceGlobal / TOTAL : 0;
+  const paresAtivos: ParForcado[] =
+    faseQuiz === "core" ? PARES_RECEBER : faseQuiz === "desempate" ? paresDesempate : PARES_EXPRESSAR;
+
+  const parAtual = paresAtivos[qIndex];
+  const totalAtual = paresAtivos.length;
+  const indiceGlobal =
+    faseQuiz === "core"
+      ? qIndex + 1
+      : faseQuiz === "desempate"
+        ? TOTAL_CORE + qIndex + 1
+        : TOTAL_CORE + paresDesempate.length + qIndex + 1;
+  const totalGlobal =
+    faseQuiz === "expressar"
+      ? TOTAL_CORE + paresDesempate.length + PARES_EXPRESSAR.length
+      : faseQuiz === "desempate"
+        ? TOTAL_CORE + paresDesempate.length
+        : TOTAL_CORE;
+  const progresso = totalAtual > 0 ? (qIndex + 1) / totalAtual : 0;
 
   useEffect(() => {
     if (status === "unauthenticated") navigate("/login");
@@ -180,10 +208,16 @@ export default function LinguagensAmorPage() {
         const d = JSON.parse(raw) as DraftPersist;
         if (d.pessoaId === selectedPessoaId && d.answers && typeof d.qIndex === "number") {
           setAnswers(typeof d.answers === "object" ? d.answers : {});
-          setBloco(d.bloco === 1 ? 1 : 0);
-          setQIndex(Math.min(BLOCO1 - 1, Math.max(0, d.qIndex)));
+          setFaseQuiz(d.faseQuiz ?? "core");
+          setQIndex(Math.max(0, d.qIndex));
           setStartedAt(typeof d.startedAt === "number" ? d.startedAt : Date.now());
-          setFase("perguntas");
+          if (d.paresDesempateIds?.length) {
+            const aval = avaliarNecessidadeDesempate(d.answers);
+            if (aval) {
+              setParesDesempate(paresDesempatePara(aval.linguagemA, aval.linguagemB));
+            }
+          }
+          setFase(d.faseQuiz ?? "core");
           return;
         }
       }
@@ -191,19 +225,28 @@ export default function LinguagensAmorPage() {
       /* ignore */
     }
     const t = Date.now();
-    setAnswers({});
-    setBloco(0);
+    const next = resetEstadoPerfil();
+    setAnswers(next.answers);
+    setFaseQuiz("core");
     setQIndex(0);
+    setParesDesempate([]);
     setStartedAt(t);
     try {
       localStorage.setItem(
         draftKey(selectedPessoaId),
-        JSON.stringify({ pessoaId: selectedPessoaId, bloco: 0, qIndex: 0, answers: {}, startedAt: t } satisfies DraftPersist),
+        JSON.stringify({
+          pessoaId: selectedPessoaId,
+          faseQuiz: "core",
+          qIndex: 0,
+          answers: {},
+          paresDesempateIds: [],
+          startedAt: t,
+        } satisfies DraftPersist),
       );
     } catch {
       /* ignore */
     }
-    setFase("perguntas");
+    setFase("core");
   }, [selectedPessoaId, draftKey]);
 
   const refazer = useCallback(() => {
@@ -225,35 +268,60 @@ export default function LinguagensAmorPage() {
       const next = resetEstadoPerfil();
       setResultadoApi(null);
       setAnswers(next.answers);
-      setBloco(next.bloco);
-      setQIndex(next.qIndex);
+      setFaseQuiz("core");
+      setQIndex(0);
+      setParesDesempate([]);
       setStartedAt(next.startedAt);
-      setFase("perguntas");
+      setFase("core");
     }
   }, [status, search, selectedPessoaId, draftKey, carregarUltimoServidor]);
 
   useEffect(() => {
-    if (fase !== "perguntas") return;
-    const draft: DraftPersist = { pessoaId: selectedPessoaId, bloco, qIndex, answers, startedAt };
+    if (fase === "intro" || fase === "resultado" || fase === "enviando") return;
+    const draft: DraftPersist = {
+      pessoaId: selectedPessoaId,
+      faseQuiz,
+      qIndex,
+      answers,
+      paresDesempateIds: paresDesempate.map((p) => p.id),
+      startedAt,
+    };
     try {
       localStorage.setItem(draftKey(selectedPessoaId), JSON.stringify(draft));
     } catch {
       /* ignore */
     }
-  }, [fase, selectedPessoaId, bloco, qIndex, answers, startedAt, draftKey]);
+  }, [fase, faseQuiz, selectedPessoaId, qIndex, answers, paresDesempate, startedAt, draftKey]);
+
+  function avancarAposCore(novas: Record<string, "a" | "b">) {
+    const aval = avaliarNecessidadeDesempate(novas);
+    if (aval) {
+      const pares = paresDesempatePara(aval.linguagemA, aval.linguagemB);
+      setParesDesempate(pares);
+      setFaseQuiz("desempate");
+      setQIndex(0);
+      setFase("desempate");
+      return;
+    }
+    void enviar(novas);
+  }
 
   function escolher(lado: "a" | "b") {
     if (!parAtual) return;
     const novas = { ...answers, [parAtual.id]: lado };
     setAnswers(novas);
 
-    if (qIndex < BLOCO1 - 1) {
+    if (qIndex < totalAtual - 1) {
       setQIndex((i) => i + 1);
       return;
     }
-    if (bloco === 0) {
-      setBloco(1);
-      setQIndex(0);
+
+    if (faseQuiz === "core") {
+      avancarAposCore(novas);
+      return;
+    }
+    if (faseQuiz === "desempate") {
+      void enviar(novas);
       return;
     }
     void enviar(novas);
@@ -266,7 +334,7 @@ export default function LinguagensAmorPage() {
       metadata: {
         tempo_total_segundos: Math.max(0, Math.floor((Date.now() - startedAt) / 1000)),
         idioma: "pt-BR",
-        versao_questionario: "2.0",
+        versao_questionario: "3.0",
       },
     });
     if (!parsed.success) {
@@ -283,12 +351,12 @@ export default function LinguagensAmorPage() {
       const data = await res.json().catch(() => ({}));
       if (selectedPessoaId !== pessoaIdAtStart) {
         setErro("A pessoa selecionada mudou durante o envio. Tente novamente.");
-        setFase("perguntas");
+        setFase(faseQuiz);
         return;
       }
       if (!res.ok) {
         setErro((data as { error?: string }).error ?? "Erro ao enviar.");
-        setFase("perguntas");
+        setFase(faseQuiz);
         return;
       }
       localStorage.removeItem(draftKey(pessoaIdAtStart));
@@ -303,9 +371,15 @@ export default function LinguagensAmorPage() {
     } catch {
       if (selectedPessoaId === pessoaIdAtStart) {
         setErro("Falha de rede.");
-        setFase("perguntas");
+        setFase(faseQuiz);
       }
     }
+  }
+
+  function iniciarExpressar() {
+    setFaseQuiz("expressar");
+    setQIndex(0);
+    setFase("expressar");
   }
 
   function voltar() {
@@ -313,9 +387,14 @@ export default function LinguagensAmorPage() {
       setQIndex((i) => i - 1);
       return;
     }
-    if (bloco === 1) {
-      setBloco(0);
-      setQIndex(BLOCO1 - 1);
+    if (faseQuiz === "desempate") {
+      setFaseQuiz("core");
+      setFase("core");
+      setQIndex(TOTAL_CORE - 1);
+      return;
+    }
+    if (faseQuiz === "expressar") {
+      setFase("resultado");
       return;
     }
     setFase("intro");
@@ -343,16 +422,27 @@ export default function LinguagensAmorPage() {
   }
 
   const subtituloPerguntas = useMemo(() => {
-    const tit = tituloBloco(bloco === 0 ? "receber" : "expressar");
-    return `${indiceGlobal} de ${TOTAL} · ${tit}`;
-  }, [bloco, indiceGlobal]);
+    const tit =
+      faseQuiz === "core"
+        ? tituloBloco("receber")
+        : faseQuiz === "desempate"
+          ? tituloBloco("desempate")
+          : tituloBloco("expressar");
+    return `${indiceGlobal} de ${totalGlobal} · ${tit}`;
+  }, [faseQuiz, indiceGlobal, totalGlobal]);
+
+  const marcoMsg = faseQuiz === "core" ? MARCO_MSG[qIndex + 1] : null;
 
   const bg = "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)";
+
+  const podeAprofundarExpressar =
+    !resultadoApi?.expressarCompleto &&
+    CODIGOS_RECEBER.every((id) => answers[id] !== undefined);
 
   if (fase === "resultado" && resultadoApi) {
     const subtituloResultado = nomeResultado
       ? `Perfil de ${nomeResultado}`
-      : "Seu mapa de receber e expressar amor";
+      : "Seu mapa de receber amor";
     return (
       <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
         <MobileTopBar titulo="Linguagens do amor" subtitulo={subtituloResultado} />
@@ -371,6 +461,7 @@ export default function LinguagensAmorPage() {
             resultado={resultadoApi}
             nomePessoa={nomeResultado}
             onRefazer={refazer}
+            onIniciarExpressar={podeAprofundarExpressar ? iniciarExpressar : undefined}
           />
 
           <div
@@ -430,7 +521,7 @@ export default function LinguagensAmorPage() {
   if (fase === "intro") {
     return (
       <div className="min-h-screen pb-28 px-4 pt-8" style={{ background: bg }}>
-        <MobileTopBar titulo="5 Linguagens do Amor" subtitulo="Questionário v2" />
+        <MobileTopBar titulo="5 Linguagens do Amor" subtitulo="Questionário" />
         <div className="max-w-lg mx-auto px-4">
           <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} />
           <Heart className="w-12 h-12 mb-6 hidden md:block" style={{ color: "#c8a56b" }} />
@@ -453,14 +544,12 @@ export default function LinguagensAmorPage() {
           />
 
           <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.55)" }}>
-            Cada pessoa sente e demonstra amor de um jeito diferente. Em dois blocos de 15 escolhas, você descobre
-            como prefere <strong style={{ color: "rgba(200,165,107,0.8)" }}>receber</strong> e como costuma{" "}
-            <strong style={{ color: "rgba(200,165,107,0.8)" }}>expressar</strong> afeto, o tanque emocional de Gary
-            Chapman.
+            Descubra como você se sente amado(a) nas cinco linguagens de Gary Chapman. Em cada par, escolha a frase
+            que mais combina com você — são {TOTAL_CORE} escolhas principais, com perguntas extras só se o perfil
+            estiver empatado.
           </p>
           <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(247,242,236,0.45)" }}>
-            Em cada par, escolha a frase que mais combina com você. São {TOTAL} escolhas no total. Não há certo ou
-            errado.
+            Depois do resultado, você pode opcionalmente descobrir como demonstra amor. Não há certo ou errado.
           </p>
 
           {msgIntro && (
@@ -499,20 +588,26 @@ export default function LinguagensAmorPage() {
       <MobileTopBar titulo="Linguagens do amor" subtitulo={subtituloPerguntas} />
       <div className="max-w-lg mx-auto px-4">
         <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} />
-        {bloco === 1 && qIndex === 0 && (
+        {faseQuiz === "desempate" && qIndex === 0 && (
           <div
-            className="mb-4 p-3 rounded-xl text-xs text-center"
-            style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.2)", color: "rgba(247,242,236,0.6)" }}
+            className="mb-4 p-3 rounded-xl text-xs text-center leading-relaxed"
+            style={{ background: "rgba(155,143,222,0.08)", border: "1px solid rgba(155,143,222,0.2)", color: "rgba(247,242,236,0.65)" }}
           >
-            Bloco 2 de 2. Agora: como você demonstra amor
+            Suas duas linguagens principais estão muito próximas. Mais {paresDesempate.length} perguntas para afinar
+            seu perfil.
           </div>
+        )}
+        {marcoMsg && (
+          <p className="text-xs text-center mb-3 italic" style={{ color: "rgba(200,165,107,0.55)" }}>
+            {marcoMsg}
+          </p>
         )}
         <div className="flex items-center justify-between mb-4">
           <button type="button" onClick={voltar} className="text-xs" style={{ color: "rgba(200,165,107,0.65)" }}>
             Voltar
           </button>
           <span className="text-[11px] tabular-nums" style={{ color: "rgba(247,242,236,0.35)" }}>
-            {indiceGlobal} / {TOTAL}
+            {indiceGlobal} / {totalGlobal}
           </span>
         </div>
         <div className="h-2 rounded-full mb-8 overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
@@ -528,33 +623,33 @@ export default function LinguagensAmorPage() {
         {erro && <p className="text-sm mb-4 text-red-400/90">{erro}</p>}
 
         {parAtual && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
               O que é mais verdadeiro para você?
             </p>
             <button
               type="button"
               onClick={() => escolher("a")}
-              className="w-full text-left p-5 rounded-2xl text-sm leading-relaxed transition-all"
+              className="w-full text-left p-5 rounded-2xl text-sm leading-relaxed transition-all hover:border-[rgba(200,165,107,0.35)]"
               style={{
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(200,165,107,0.18)",
                 color: "#f7f2ec",
               }}
             >
-              A — {parAtual.textoA}
+              {parAtual.textoA}
             </button>
             <button
               type="button"
               onClick={() => escolher("b")}
-              className="w-full text-left p-5 rounded-2xl text-sm leading-relaxed transition-all"
+              className="w-full text-left p-5 rounded-2xl text-sm leading-relaxed transition-all hover:border-[rgba(200,165,107,0.35)]"
               style={{
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(200,165,107,0.18)",
                 color: "#f7f2ec",
               }}
             >
-              B — {parAtual.textoB}
+              {parAtual.textoB}
             </button>
           </div>
         )}

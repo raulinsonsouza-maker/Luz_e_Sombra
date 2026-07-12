@@ -2,18 +2,39 @@ import { useMemo, useState, type ReactNode } from "react";
 import {
   ChevronDown,
   ChevronUp,
-  Heart,
   Sparkles,
   Target,
   TrendingUp,
   AlertCircle,
-  User,
+  BookOpen,
+  Zap,
 } from "lucide-react";
 import type { TemperamentoCodigo } from "@workspace/temperamento-v1";
+import { NOME_TEMPERAMENTO } from "@workspace/temperamento-v1";
 import { labelTipoPerfil, TEMPERAMENTO_VISUAL } from "./temperamentoConfig";
-import { enriquecerResultadoTemperamento, type ResultadoTemperamentoUi } from "./enriquecerResultado";
+import {
+  enriquecerResultadoTemperamento,
+  isResultadoLegado,
+  type ResultadoTemperamentoUi,
+} from "./enriquecerResultado";
 
 const GOLD = "#c8a56b";
+
+function BarraEixo({ label, valor, cor }: { label: string; valor: number; cor: string }) {
+  return (
+    <div>
+      <div className="flex justify-between text-xs mb-1.5">
+        <span style={{ color: "rgba(247,242,236,0.65)" }}>{label}</span>
+        <span className="tabular-nums" style={{ color: cor }}>
+          {valor}%
+        </span>
+      </div>
+      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+        <div className="h-full rounded-full transition-all" style={{ width: `${valor}%`, background: cor }} />
+      </div>
+    </div>
+  );
+}
 
 function Capitulo({
   numero,
@@ -66,8 +87,10 @@ function Capitulo({
 
 export default function TemperamentoPainelResultado({
   resultado: raw,
+  onRefazer,
 }: {
   resultado: ResultadoTemperamentoUi;
+  onRefazer?: () => void;
 }) {
   const r = useMemo(() => enriquecerResultadoTemperamento(raw), [raw]);
   const perfil = r.perfil;
@@ -76,15 +99,39 @@ export default function TemperamentoPainelResultado({
   const pct = r.scores?.temperamentos_percentuais;
   const visP = primario ? TEMPERAMENTO_VISUAL[primario] : null;
   const IconP = visP?.icon;
+  const legado = isResultadoLegado(r);
+
+  const scoreE = r.scores?.scoreE ?? Math.round((r.scores?.dimensoes?.ENG?.bruto ?? 50));
+  const scoreEstab = r.scores?.estabilidadeEmocional ?? Math.round(100 - (r.scores?.scoreN ?? 50));
 
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
 
-  const tituloPerfil =
-    primario && secundario && perfil?.tipo ? perfil.arquetipo : perfil?.arquetipo ?? "";
+  const tituloPerfil = primario && secundario && perfil?.tipo ? perfil.arquetipo : perfil?.arquetipo ?? "";
+  const mostraCombo = Boolean(r.combo || r.comboNarrativa) && primario !== secundario;
 
   return (
     <div className="space-y-5">
-      {/* Capítulo 1 — Quem você é */}
+      {legado && (
+        <div
+          className="rounded-xl px-4 py-3 text-sm"
+          style={{ background: "rgba(155,143,222,0.08)", border: "1px solid rgba(155,143,222,0.2)" }}
+        >
+          <p style={{ color: "rgba(247,242,236,0.78)" }}>
+            Atualizámos o teste: versão mais curta e análise mais profunda. Refazer leva cerca de 3 minutos.
+          </p>
+          {onRefazer && (
+            <button
+              type="button"
+              className="mt-2 text-xs font-semibold underline"
+              style={{ color: "#c8a56b" }}
+              onClick={onRefazer}
+            >
+              Refazer questionário
+            </button>
+          )}
+        </div>
+      )}
+
       <Capitulo numero={1} titulo="Quem você é" subtitulo="Sua essência temperamental">
         {visP && IconP && perfil && (
           <div
@@ -94,10 +141,6 @@ export default function TemperamentoPainelResultado({
               border: `1px solid ${visP.corBorder}`,
             }}
           >
-            <div
-              className="absolute -top-10 -right-10 w-36 h-36 rounded-full opacity-20 blur-2xl pointer-events-none"
-              style={{ background: visP.cor }}
-            />
             <div className="flex items-start gap-3 mb-4 relative">
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
@@ -112,76 +155,123 @@ export default function TemperamentoPainelResultado({
                 <h1 className="font-tan-mon-cheri text-xl md:text-2xl" style={{ color: "#f7f2ec" }}>
                   {tituloPerfil}
                 </h1>
-                {pct && primario && (
-                  <p className="text-xs mt-1 tabular-nums" style={{ color: "rgba(247,242,236,0.45)" }}>
-                    {visP.nome} · {pct[primario]}% do seu perfil
-                  </p>
+                {secundario && primario !== secundario && (
+                  <span
+                    className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full"
+                    style={{ background: "rgba(200,165,107,0.12)", color: "rgba(200,165,107,0.85)" }}
+                  >
+                    com traço {NOME_TEMPERAMENTO[secundario]}
+                  </span>
                 )}
               </div>
             </div>
 
             {perfil.frase_sintese && (
-              <p className="text-base italic font-tan-mon-cheri mb-4 relative" style={{ color: "rgba(247,242,236,0.85)" }}>
+              <p className="text-base italic font-tan-mon-cheri mb-4" style={{ color: "rgba(247,242,236,0.85)" }}>
                 «{perfil.frase_sintese}»
               </p>
             )}
 
             {r.sinteseHumana && (
-              <p className="text-sm leading-relaxed mb-4 relative font-medium" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.85 }}>
+              <p className="text-sm leading-relaxed mb-4 font-medium" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.85 }}>
                 {r.sinteseHumana}
               </p>
             )}
-
-            {r.portraitIdentidade && (
-              <p className="text-sm leading-relaxed relative" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.9 }}>
-                {r.portraitIdentidade}
-              </p>
-            )}
           </div>
         )}
+
+        <div className="space-y-3 pt-1">
+          <BarraEixo label="Energia social" valor={Math.round(scoreE)} cor={visP?.cor ?? GOLD} />
+          <BarraEixo label="Estabilidade emocional" valor={Math.round(scoreEstab)} cor="#6db96d" />
+        </div>
 
         {(r.tracosMarcantes?.length ?? 0) > 0 && (
-          <div>
-            <p className="text-[10px] tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.45)" }}>
-              O que mais te define
-            </p>
-            <ul className="space-y-2">
-              {r.tracosMarcantes!.map((t) => (
-                <li
-                  key={t}
-                  className="flex gap-2 text-sm leading-relaxed rounded-xl px-4 py-3"
-                  style={{ background: "rgba(255,255,255,0.03)", color: "rgba(247,242,236,0.65)" }}
-                >
-                  <Sparkles className="w-4 h-4 shrink-0 mt-0.5" style={{ color: visP?.cor ?? GOLD }} />
-                  {t}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {r.empateProximo && primario && visP && (
-          <p className="text-xs px-3 py-2 rounded-lg" style={{ color: "rgba(155,143,222,0.85)", background: "rgba(155,143,222,0.08)" }}>
-            Você tem dois temperamentos bem próximos. Mesmo assim, {visP.nome} é o dominante para entender quem você é hoje.
-          </p>
+          <ul className="space-y-2 pt-2">
+            {r.tracosMarcantes!.map((t) => (
+              <li
+                key={t}
+                className="flex gap-2 text-sm leading-relaxed rounded-xl px-4 py-3"
+                style={{ background: "rgba(255,255,255,0.03)", color: "rgba(247,242,236,0.65)" }}
+              >
+                <Sparkles className="w-4 h-4 shrink-0 mt-0.5" style={{ color: visP?.cor ?? GOLD }} />
+                {t}
+              </li>
+            ))}
+          </ul>
         )}
       </Capitulo>
 
-      {/* Capítulo 2 — No dia a dia */}
-      {r.noDiaADia && (
-        <Capitulo numero={2} titulo="Como você funciona no dia a dia" subtitulo="Pensamento e ação">
-          <div className="flex gap-3">
-            <User className="w-5 h-5 shrink-0 mt-0.5" style={{ color: visP?.cor ?? GOLD }} />
+      {mostraCombo && (
+        <Capitulo numero={2} titulo="A dinâmica do seu perfil" subtitulo="Primário e secundário">
+          {r.comboNarrativa && (
             <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.9 }}>
-              {r.noDiaADia}
+              {r.comboNarrativa}
             </p>
+          )}
+          {r.combo && (
+            <div className="grid gap-3">
+              <div className="rounded-xl p-4" style={{ background: "rgba(109,185,109,0.06)", border: "1px solid rgba(109,185,109,0.2)" }}>
+                <p className="text-[10px] tracking-widest uppercase mb-1" style={{ color: "rgba(109,185,109,0.65)" }}>
+                  Força da combinação
+                </p>
+                <p className="text-sm" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
+                  {r.combo.forca}
+                </p>
+              </div>
+              <div className="rounded-xl p-4" style={{ background: "rgba(224,123,57,0.06)", border: "1px solid rgba(224,123,57,0.2)" }}>
+                <p className="text-[10px] tracking-widest uppercase mb-1" style={{ color: "rgba(224,123,57,0.65)" }}>
+                  Tensão interna
+                </p>
+                <p className="text-sm" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
+                  {r.combo.tensao}
+                </p>
+              </div>
+              <div className="rounded-xl p-4" style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.15)" }}>
+                <p className="text-[10px] tracking-widest uppercase mb-1 flex items-center gap-1" style={{ color: "rgba(200,165,107,0.55)" }}>
+                  <Zap className="w-3 h-3" />
+                  Onde isso brilha
+                </p>
+                <p className="text-sm" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
+                  {r.combo.contexto}
+                </p>
+              </div>
+            </div>
+          )}
+        </Capitulo>
+      )}
+
+      {(r.analiseAprofundada?.length ?? 0) > 0 && (
+        <Capitulo numero={mostraCombo ? 3 : 2} titulo="Análise aprofundada" subtitulo="Leitura profissional do seu perfil">
+          <div className="space-y-8">
+            {r.analiseAprofundada!.map((sec) => (
+              <section key={sec.id}>
+                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: GOLD }}>
+                  <BookOpen className="w-4 h-4 shrink-0 opacity-70" />
+                  {sec.titulo}
+                </h3>
+                <div className="space-y-3">
+                  {sec.paragrafos.map((p, i) => (
+                    <p
+                      key={`${sec.id}-${i}`}
+                      className="text-sm leading-relaxed"
+                      style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.9 }}
+                    >
+                      {p}
+                    </p>
+                  ))}
+                </div>
+              </section>
+            ))}
           </div>
         </Capitulo>
       )}
 
-      {/* Capítulo 3 — Dom e ponto cego */}
       {(r.seuDom || r.pontoCego) && (
-        <Capitulo numero={3} titulo="Seu dom e seu ponto cego" defaultOpen>
+        <Capitulo
+          numero={(r.analiseAprofundada?.length ? (mostraCombo ? 4 : 3) : mostraCombo ? 3 : 2) as number}
+          titulo="Resumo: dom e ponto cego"
+          defaultOpen={false}
+        >
           <div className="grid md:grid-cols-2 gap-3">
             {r.seuDom && (
               <div
@@ -215,9 +305,12 @@ export default function TemperamentoPainelResultado({
         </Capitulo>
       )}
 
-      {/* Capítulo 4 — Crescimento */}
       {(r.passoPratico || r.perguntaCrescimento) && (
-        <Capitulo numero={4} titulo="Para crescer a partir daqui" defaultOpen>
+        <Capitulo
+          numero={5}
+          titulo="Para crescer a partir daqui"
+          defaultOpen={false}
+        >
           {r.passoPratico && (
             <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
               {r.passoPratico}
@@ -243,7 +336,6 @@ export default function TemperamentoPainelResultado({
         </Capitulo>
       )}
 
-      {/* Detalhes opcionais — percentuais */}
       {pct && primario && (
         <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.1)" }}>
           <button
@@ -252,7 +344,7 @@ export default function TemperamentoPainelResultado({
             className="w-full flex items-center justify-between px-5 py-3 text-left text-xs"
             style={{ background: "rgba(30,24,18,0.4)", color: "rgba(247,242,236,0.4)" }}
           >
-            <span>Ver os outros temperamentos no seu perfil</span>
+            <span>Ver percentuais dos 4 temperamentos</span>
             {detalhesAbertos ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {detalhesAbertos && (
@@ -282,10 +374,6 @@ export default function TemperamentoPainelResultado({
                     </div>
                   );
                 })}
-              <p className="text-[10px] pt-2 flex items-center gap-1.5" style={{ color: "rgba(247,242,236,0.3)" }}>
-                <Heart className="w-3 h-3" />
-                Os percentuais apoiam a leitura. O foco está em quem você é, não nos números.
-              </p>
             </div>
           )}
         </div>

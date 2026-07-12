@@ -143,6 +143,18 @@ function chaveCombo(a: TemperamentoCodigo, b: TemperamentoCodigo): string {
   return [a, b].sort().join("_");
 }
 
+export function comboParaPar(primario: TemperamentoCodigo, secundario: TemperamentoCodigo) {
+  return COMBO[chaveCombo(primario, secundario)];
+}
+
+export function comboNarrativaParaPar(primario: TemperamentoCodigo, secundario: TemperamentoCodigo): string | undefined {
+  return COMBO_NARRATIVA[chaveCombo(primario, secundario)];
+}
+
+export function dadosTemperamento(t: TemperamentoCodigo): CamadasTemperamento {
+  return DADOS[t];
+}
+
 export function arquetipoFrasePorTemperamento(t: TemperamentoCodigo): {
   arquetipo: string;
   frase_sintese: string;
@@ -249,32 +261,44 @@ export function montarSinteseHumana(opts: {
   temperamentos_percentuais: Record<TemperamentoCodigo, number>;
   empateProximo: boolean;
   frase_sintese: string;
+  scoreE?: number;
+  scoreN?: number;
 }): string {
-  const { tipo, primario, secundario, temperamentos_percentuais, empateProximo, frase_sintese } = opts;
+  const { tipo, primario, secundario, empateProximo, frase_sintese, scoreE, scoreN } = opts;
   const np = NOME_TEMPERAMENTO[primario];
   const ns = NOME_TEMPERAMENTO[secundario];
 
+  const eixo =
+    scoreE !== undefined && scoreN !== undefined
+      ? ` Energia social ${Math.round(scoreE)}%, estabilidade emocional ${Math.round(100 - scoreN)}%.`
+      : "";
+
   if (empateProximo) {
-    return `${frase_sintese} Seu perfil equilibra ${np} e ${ns} quase na mesma medida. Mesmo assim, ${np} é o temperamento dominante para entender quem você é.`;
+    return `${frase_sintese}${eixo} Seu perfil equilibra ${np} e ${ns} quase na mesma medida; ${np} é o dominante para entender seu padrão hoje.`;
   }
   if (tipo === "DUPLO") {
-    return `${frase_sintese} Seu temperamento dominante é ${np}. É por essa lente que você pensa, age e se relaciona no dia a dia.`;
+    return `${frase_sintese}${eixo} Você combina ${np} com traço forte de ${ns}: dois estilos que se alternam conforme o contexto.`;
   }
   if (tipo === "DOMINANTE" || tipo === "ATIPICO") {
-    return `${frase_sintese} Seu jeito de ser é claramente ${np}. Os outros temperamentos aparecem como matiz, não como concorrência.`;
+    return `${frase_sintese}${eixo} Seu jeito de ser é claramente ${np}, com os outros temperamentos como matiz.`;
   }
-  return `${frase_sintese} Você é principalmente ${np}, com traços de ${ns} colorindo seu dia a dia.`;
+  return `${frase_sintese}${eixo} Você é principalmente ${np}, com ${ns} colorindo seu dia a dia.`;
 }
 
 function montarPortraitIdentidade(opts: {
   primario: TemperamentoCodigo;
   secundario: TemperamentoCodigo;
   tipo: TipoPerfil;
+  scoreE?: number;
+  scoreN?: number;
 }): string {
-  const d = DADOS[opts.primario];
   const np = NOME_TEMPERAMENTO[opts.primario];
-
-  return `${d.motorInterno} Como ${np}, isso define bastante como você se move no mundo: o que te energiza, o que te frustra e o que as pessoas mais sentem em você.`;
+  if (opts.scoreE !== undefined && opts.scoreN !== undefined) {
+    const estabilidade = Math.round(100 - opts.scoreN);
+    return `Como ${np}, você organiza energia e emoção de um jeito próprio: ${Math.round(opts.scoreE)}% de inclinação social e ${estabilidade}% de estabilidade emocional. Isso explica o que te move, o que te desgasta e o que os outros mais percebem em você.`;
+  }
+  const d = DADOS[opts.primario];
+  return `${d.motorInterno.split(".")[0]}. Como ${np}, isso molda como você se move no mundo.`;
 }
 
 function extrairPassoPratico(texto: string): string {

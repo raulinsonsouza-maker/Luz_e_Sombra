@@ -1,7 +1,6 @@
 import { normalizarObjetoTextos } from "@workspace/copy-voz";
 import {
   extrairPerguntaCrescimento,
-  montarNarrativaV3,
   sanitizarTituloTemperamentoLegado,
   type RelatorioSecao,
 } from "@workspace/temperamento-v1";
@@ -9,6 +8,7 @@ import type { Dimensao, TemperamentoCodigo, TipoPerfil } from "@workspace/temper
 
 export type ResultadoTemperamentoUi = Record<string, unknown> & {
   versaoNarrativa?: string;
+  versao?: string;
   perfil?: {
     tipo?: TipoPerfil;
     primario?: TemperamentoCodigo;
@@ -19,12 +19,14 @@ export type ResultadoTemperamentoUi = Record<string, unknown> & {
   scores?: {
     dimensoes?: Record<Dimensao, { bruto: number; normalizado: number }>;
     temperamentos_percentuais?: Record<TemperamentoCodigo, number>;
+    scoreE?: number;
+    scoreN?: number;
+    estabilidadeEmocional?: number;
   };
   confiabilidade?: number;
   empateProximo?: boolean;
   sinteseHumana?: string;
   portraitIdentidade?: string;
-  noDiaADia?: string;
   seuDom?: string;
   pontoCego?: string;
   comboNarrativa?: string;
@@ -34,6 +36,7 @@ export type ResultadoTemperamentoUi = Record<string, unknown> & {
   perguntaCrescimento?: string;
   insightsDimensao?: string[];
   combo?: { forca: string; tensao: string; contexto: string };
+  analiseAprofundada?: RelatorioSecao[];
   relatorioInterno?: {
     titulo?: string;
     secoes?: RelatorioSecao[];
@@ -47,23 +50,10 @@ function secao(
   return rel?.secoes?.find((s) => s.id === id);
 }
 
-function normFromScores(raw: ResultadoTemperamentoUi): Record<Dimensao, number> | undefined {
-  if (!raw.scores?.dimensoes) return undefined;
-  return {
-    ENG: raw.scores.dimensoes.ENG?.normalizado ?? 0,
-    SOC: raw.scores.dimensoes.SOC?.normalizado ?? 0,
-    DOM: raw.scores.dimensoes.DOM?.normalizado ?? 0,
-    EST: raw.scores.dimensoes.EST?.normalizado ?? 0,
-    PRO: raw.scores.dimensoes.PRO?.normalizado ?? 0,
-  };
-}
-
 export function enriquecerResultadoTemperamento(raw: ResultadoTemperamentoUi): ResultadoTemperamentoUi {
   const perfil = raw.perfil;
   const primario = perfil?.primario;
   const secundario = perfil?.secundario;
-  const pct = raw.scores?.temperamentos_percentuais;
-  const norm = normFromScores(raw);
 
   let base = raw;
 
@@ -85,24 +75,6 @@ export function enriquecerResultadoTemperamento(raw: ResultadoTemperamentoUi): R
     }
   }
 
-  if (primario && secundario && pct && norm && perfil?.tipo && perfil.frase_sintese) {
-    const narrativa = montarNarrativaV3({
-      tipo: perfil.tipo,
-      primario,
-      secundario,
-      temperamentos_percentuais: pct,
-      norm,
-      empateProximo: Boolean(base.empateProximo),
-      frase_sintese: perfil.frase_sintese,
-    });
-    return normalizarObjetoTextos({
-      ...base,
-      ...narrativa,
-      combo: undefined,
-      comboNarrativa: undefined,
-    });
-  }
-
   const passo = secao(base.relatorioInterno, "passo");
   const passoTexto = passo?.paragrafos[0] ?? "";
 
@@ -113,5 +85,11 @@ export function enriquecerResultadoTemperamento(raw: ResultadoTemperamentoUi): R
 }
 
 export function textoSecao(raw: ResultadoTemperamentoUi, id: string): string | undefined {
+  const daAnalise = raw.analiseAprofundada?.find((s) => s.id === id);
+  if (daAnalise) return daAnalise.paragrafos.join("\n\n");
   return secao(raw.relatorioInterno, id)?.paragrafos.join("\n\n");
+}
+
+export function isResultadoLegado(raw: ResultadoTemperamentoUi): boolean {
+  return raw.versaoNarrativa !== "temperamento_v4" && !raw.analiseAprofundada?.length;
 }

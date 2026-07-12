@@ -41,8 +41,8 @@ test("storageKeyDiagnostico30 sem userId usa formato legado", () => {
 });
 
 test("storageKeyLinguagensAmorDraft distingue Eu, pessoa e userId", () => {
-  assert.equal(storageKeyLinguagensAmorDraft(null, 7), "luz_linguagens_amor_v2_draft_u7_eu");
-  assert.equal(storageKeyLinguagensAmorDraft(5, 7), "luz_linguagens_amor_v2_draft_u7_p5");
+  assert.equal(storageKeyLinguagensAmorDraft(null, 7), "luz_linguagens_amor_v3_draft_u7_eu");
+  assert.equal(storageKeyLinguagensAmorDraft(5, 7), "luz_linguagens_amor_v3_draft_u7_p5");
 });
 
 test("clearPessoaLocalStorage remove diagnóstico e draft de linguagens da pessoa", () => {
@@ -65,14 +65,14 @@ test("clearPessoaLocalStorage remove diagnóstico e draft de linguagens da pesso
 
   mem[storageKeyDiagnostico30(3, 1)] = "{}";
   mem[storageKeyLinguagensAmorDraft(3, 1)] = "{}";
-  mem["luz_linguagens_amor_v2_draft_3"] = "{}";
+  mem["luz_linguagens_amor_v3_draft_3"] = "{}";
   mem[storageKeyDiagnostico30(null, 1)] = "keep";
 
   clearPessoaLocalStorage(3, 1);
 
   assert.equal(mem[storageKeyDiagnostico30(3, 1)], undefined);
   assert.equal(mem[storageKeyLinguagensAmorDraft(3, 1)], undefined);
-  assert.equal(mem["luz_linguagens_amor_v2_draft_3"], undefined);
+  assert.equal(mem["luz_linguagens_amor_v3_draft_3"], undefined);
   assert.equal(mem[storageKeyDiagnostico30(null, 1)], "keep");
 
   Object.defineProperty(globalThis, "localStorage", { value: orig, configurable: true });

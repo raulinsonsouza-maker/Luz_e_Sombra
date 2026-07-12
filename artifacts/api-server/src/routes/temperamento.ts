@@ -18,7 +18,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
     const parsed = entradaTemperamentoSchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        error: "Corpo inválido: são necessárias as 24 escolhas (a ou b) e metadados opcionais.",
+        error: "Corpo inválido: são necessárias as 16 respostas (sim ou não) e metadados opcionais.",
         detalhes: parsed.error.flatten(),
       });
     }

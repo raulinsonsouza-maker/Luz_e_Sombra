@@ -4,6 +4,7 @@ import {
   LABEL_LINGUAGEM,
   perfilDetalhe,
   type LinguagemAmor,
+  type NarrativaV3,
 } from "@workspace/cinco-linguagens-amor";
 import type { PerfilLinguagemDetalhe } from "@workspace/cinco-linguagens-amor";
 import { normalizarObjetoTextos } from "@workspace/copy-voz";
@@ -12,6 +13,9 @@ export type ResultadoLinguagensUi = {
   versao?: string;
   principal?: LinguagemAmor;
   secundaria?: LinguagemAmor;
+  expressarCompleto?: boolean;
+  narrativa?: NarrativaV3;
+  distribuicao?: { linguagem?: string; pontos?: number; pct?: number }[];
   sinteseHumana?: string;
   tanqueEmocional?: string;
   perfilPrincipal?: PerfilLinguagemDetalhe;
@@ -26,7 +30,12 @@ export type ResultadoLinguagensUi = {
   interpretacaoPar?: string;
   interpretacaoPrincipal?: string;
   desalinhamento?: { ativo?: boolean; texto?: string };
-  metricas?: { confianca?: number; alertas?: string[] };
+  metricas?: {
+    confianca?: number;
+    confiancaLabel?: string;
+    intensidade?: string;
+    alertas?: string[];
+  };
   receber?: {
     principal?: LinguagemAmor;
     secundaria?: LinguagemAmor;
@@ -46,7 +55,7 @@ function chavePar(a: LinguagemAmor, b: LinguagemAmor): string {
 
 function combinacaoTexto(p: LinguagemAmor, s: LinguagemAmor): string {
   if (p === s) {
-    return "Seu perfil concentra-se numa linguagem dominante. Invista nela com intenção e peça explicitamente o que enche seu tanque emocional.";
+    return "Seu perfil concentra-se numa linguagem dominante. Invista nela com intenção e peça explicitamente o que enche seu coração.";
   }
   return (
     COMBINACAO_PAR[chavePar(p, s)] ??
@@ -64,7 +73,7 @@ function sinteseLegado(p: LinguagemAmor, s: LinguagemAmor, pct?: number): string
   const ls = LABEL_LINGUAGEM[s].toLowerCase();
   const forte = (pct ?? 0) >= 35;
   if (forte) {
-    return `${c.essencia}Sua segunda linguagem,${ls}, complementa o tanque, quando as duas aparecem na relação, você se sente plenamente nutrido(a).`;
+    return `${c.essencia} Sua segunda linguagem, ${ls}, complementa o perfil — quando as duas aparecem na relação, você se sente plenamente nutrido(a).`;
   }
   return `${c.essencia} Você também responde fortemente a ${ls}: relações que misturam as duas linguagens costumam durar mais e doer menos.`;
 }
@@ -84,8 +93,12 @@ function adaptarTerceira(texto: string, nome: string): string {
     .replace(/\bti\b/g, nome);
 }
 
+export function isV3(r: ResultadoLinguagensUi): boolean {
+  return r.versao === "linguagens_amor_v3" || !!r.narrativa?.veredito;
+}
+
 export function isV2(r: ResultadoLinguagensUi): boolean {
-  return r.versao === "linguagens_amor_v2" || (!!r.receber && !!r.expressar);
+  return r.versao === "linguagens_amor_v2" || (!!r.receber && !!r.expressar && !isV3(r));
 }
 
 /** Preenche campos v2 a partir do motor quando o resultado guardado é v1. */
@@ -93,6 +106,35 @@ export function enriquecerResultado(
   raw: ResultadoLinguagensUi,
   nomePessoa?: string | null,
 ): ResultadoLinguagensUi {
+  const v3 = isV3(raw);
+  if (v3) {
+    let out: ResultadoLinguagensUi = { ...raw };
+    if (nomePessoa?.trim() && out.narrativa) {
+      const nome = nomePessoa.trim().split(/\s+/)[0]!;
+      const n = out.narrativa;
+      out = {
+        ...out,
+        narrativa: {
+          ...n,
+          veredito: adaptarTerceira(n.veredito, nome),
+          abertura: adaptarTerceira(n.abertura, nome),
+          mecanismo: adaptarTerceira(n.mecanismo, nome),
+          cenas: n.cenas.map((c) => adaptarTerceira(c, nome)) as NarrativaV3["cenas"],
+          feridaPadrao: adaptarTerceira(n.feridaPadrao, nome),
+          sinalDeAlerta: adaptarTerceira(n.sinalDeAlerta, nome),
+          dinamicaPar: adaptarTerceira(n.dinamicaPar, nome),
+          cartaParceiro: adaptarTerceira(n.cartaParceiro, nome),
+          planoSeteDias: n.planoSeteDias.map((d) => adaptarTerceira(d, nome)),
+          linguagemAnti: adaptarTerceira(n.linguagemAnti, nome),
+          confiancaNarrativa: adaptarTerceira(n.confiancaNarrativa, nome),
+          espelhoExpressar: n.espelhoExpressar ? adaptarTerceira(n.espelhoExpressar, nome) : undefined,
+          ponteComunicacao: n.ponteComunicacao ? adaptarTerceira(n.ponteComunicacao, nome) : undefined,
+        },
+      };
+    }
+    return normalizarObjetoTextos(out);
+  }
+
   const v2 = isV2(raw);
   const principal = (v2 ? raw.receber?.principal : raw.principal) as LinguagemAmor | undefined;
   const secundaria = (v2 ? raw.receber?.secundaria : raw.secundaria) as LinguagemAmor | undefined;
@@ -118,7 +160,7 @@ export function enriquecerResultado(
         sinteseLegado(principal, secundaria ?? principal, pctTop),
       tanqueEmocional:
         out.tanqueEmocional ??
-        `Seu tanque emocional enche principalmente com ${LABEL_LINGUAGEM[principal].toLowerCase()}. ${CONTEUDO_LINGUAGEM[principal].comoSeSenteAmado}`,
+        `Seu coração enche principalmente com ${LABEL_LINGUAGEM[principal].toLowerCase()}. ${CONTEUDO_LINGUAGEM[principal].comoSeSenteAmado}`,
       combinacao:
         out.combinacao ??
         (secundaria ? combinacaoTexto(principal, secundaria) : undefined),

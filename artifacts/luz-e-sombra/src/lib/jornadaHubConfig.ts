@@ -50,17 +50,17 @@ export const JORNADA_HUB_COPY: Record<
     introFallback:
       "Descubra como você pensa, age e se relaciona. Colérico, Sanguíneo, Melancólico e Fleumático em um mapa claro sobre quem você é.",
     introTexto: [
-      "O temperamento é a base de como você reage ao mundo: velocidade de decisão, intensidade emocional, necessidade de rotina ou de novidade. Colérico, Sanguíneo, Melancólico e Fleumático não são rótulos — são lentes para entender seus padrões naturais.",
-      "O questionário apresenta 24 pares de afirmações. Em cada um, escolha a opção que mais combina com você, sem pensar demais. O resultado mostra seu perfil dominante e secundário, com orientações práticas para relações, trabalho e autoconhecimento.",
-      "Leva cerca de 5 minutos. Seja honesto consigo: não existe temperamento melhor, existe o seu mapa real.",
+      "O temperamento é a base de como você reage ao mundo: velocidade de decisão, intensidade emocional, necessidade de rotina ou de novidade. Colérico, Sanguíneo, Melancólico e Fleumático não são rótulos, são lentes para entender seus padrões naturais.",
+      "O questionário tem 16 afirmações Sim/Não. Responda pelo que é mais verdadeiro na maior parte do tempo, não só hoje. O resultado mostra seu perfil dominante, traço secundário e uma análise aprofundada para relações, trabalho e crescimento.",
+      "Leva cerca de 3 minutos. Não existe temperamento melhor, existe o seu mapa real.",
     ],
     introBullets: [
       "Perfil dominante e secundário entre os 4 temperamentos",
-      "Como você decide, se comunica e lida com pressão",
-      "Aplicação prática em relações e no dia a dia",
+      "Eixos de energia social e estabilidade emocional",
+      "Análise aprofundada para relações, trabalho e autoconhecimento",
     ],
     analiseTitulo: "Questionário de Temperamento",
-    analiseDescricaoSem: "24 escolhas entre duas opções, cerca de 5 minutos. Em cada par, escolha o que mais combina com você.",
+    analiseDescricaoSem: "16 afirmações Sim/Não, cerca de 3 minutos. Responda com sinceridade.",
     analiseDescricaoCom: "Seu mapa temperamental já foi gerado.",
     novaAnaliseLabel: "Refazer questionário",
     verResultadoLabel: "Ver meu perfil",

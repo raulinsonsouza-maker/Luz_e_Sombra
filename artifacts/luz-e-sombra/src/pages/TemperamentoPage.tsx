@@ -10,33 +10,39 @@ import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import TemperamentoPainelResultado from "@/pages/temperamento/TemperamentoPainelResultado";
 import type { ResultadoTemperamentoUi } from "@/pages/temperamento/enriquecerResultado";
 import {
-  gerarOrdemPares,
-  TOTAL_PARES,
+  gerarOrdemItens,
+  TOTAL_ITENS,
   entradaTemperamentoSchema,
-  parPorId,
-  type ParForcadoTemperamento,
+  itemPorId,
+  VERSAO_TEMPERAMENTO_ATUAL,
+  type ItemTemperamento,
+  type RespostaSimNao,
 } from "@workspace/temperamento-v1";
 
-const STORAGE_KEY = "luz_temperamento_v2_draft";
-const TOTAL = TOTAL_PARES;
+const STORAGE_KEY = "luz_temperamento_v3_draft";
+const TOTAL = TOTAL_ITENS;
 const TEMP_NAV = JORNADA_MODULE_NAV.temperamento;
 
 type Fase = "intro" | "perguntas" | "enviando" | "resultado";
 
 type DraftPersist = {
   ordemIds: string[];
-  answers: Record<string, "a" | "b">;
+  answers: Record<string, RespostaSimNao>;
   qIndex: number;
   startedAt: number;
 };
 
-function paresFromIds(ids: string[]): ParForcadoTemperamento[] {
-  return ids.map((id) => parPorId(id)!);
+function itensFromIds(ids: string[]): ItemTemperamento[] {
+  return ids.map((id) => itemPorId(id)!);
 }
 
-function primeiroIndiceSemResposta(ids: string[], answers: Record<string, "a" | "b">): number {
+function primeiroIndiceSemResposta(ids: string[], answers: Record<string, RespostaSimNao>): number {
   const i = ids.findIndex((id) => answers[id] === undefined);
   return i === -1 ? Math.max(0, ids.length - 1) : i;
+}
+
+function contarRespostas(answers: Record<string, RespostaSimNao>): number {
+  return Object.keys(answers).filter((k) => answers[k] === "sim" || answers[k] === "nao").length;
 }
 
 export default function TemperamentoPage() {
@@ -46,7 +52,7 @@ export default function TemperamentoPage() {
   const [fase, setFase] = useState<Fase>("intro");
   const [ordemIds, setOrdemIds] = useState<string[]>([]);
   const [qIndex, setQIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, "a" | "b">>({});
+  const [answers, setAnswers] = useState<Record<string, RespostaSimNao>>({});
   const [startedAt, setStartedAt] = useState<number>(() => Date.now());
   const [erro, setErro] = useState<string | null>(null);
   const [resultadoApi, setResultadoApi] = useState<ResultadoTemperamentoUi | null>(null);
@@ -57,9 +63,26 @@ export default function TemperamentoPage() {
     if (status === "unauthenticated") navigate("/login");
   }, [status, navigate]);
 
-  const paresOrdenados = useMemo(() => paresFromIds(ordemIds), [ordemIds]);
-  const parAtual = paresOrdenados[qIndex];
+  const itensOrdenados = useMemo(() => itensFromIds(ordemIds), [ordemIds]);
+  const itemAtual = itensOrdenados[qIndex];
   const progresso = fase === "perguntas" && ordemIds.length === TOTAL ? (qIndex + 1) / TOTAL : 0;
+
+  const iniciarNovo = useCallback(() => {
+    const novo = gerarOrdemItens();
+    const ids = novo.map((i) => i.id);
+    setOrdemIds(ids);
+    setAnswers({});
+    setQIndex(0);
+    const t = Date.now();
+    setStartedAt(t);
+    const draft: DraftPersist = { ordemIds: ids, answers: {}, qIndex: 0, startedAt: t };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    } catch {
+      /* ignore */
+    }
+    setFase("perguntas");
+  }, []);
 
   const iniciarOuRecuperar = useCallback(() => {
     setMsgIntro(null);
@@ -83,21 +106,8 @@ export default function TemperamentoPage() {
     } catch {
       /* ignore */
     }
-    const novo = gerarOrdemPares();
-    const ids = novo.map((p) => p.id);
-    setOrdemIds(ids);
-    setAnswers({});
-    setQIndex(0);
-    const t = Date.now();
-    setStartedAt(t);
-    const draft: DraftPersist = { ordemIds: ids, answers: {}, qIndex: 0, startedAt: t };
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-    } catch {
-      /* ignore */
-    }
-    setFase("perguntas");
-  }, []);
+    iniciarNovo();
+  }, [iniciarNovo]);
 
   const carregarUltimoServidor = useCallback(async () => {
     setMsgIntro(null);
@@ -135,15 +145,9 @@ export default function TemperamentoPage() {
       } catch {
         /* ignore */
       }
-      const novo = gerarOrdemPares();
-      const ids = novo.map((p) => p.id);
-      setOrdemIds(ids);
-      setAnswers({});
-      setQIndex(0);
-      setStartedAt(Date.now());
-      setFase("perguntas");
+      iniciarNovo();
     }
-  }, [status, search, carregarUltimoServidor]);
+  }, [status, search, carregarUltimoServidor, iniciarNovo]);
 
   useEffect(() => {
     if (fase !== "perguntas" || ordemIds.length !== TOTAL) return;
@@ -155,13 +159,13 @@ export default function TemperamentoPage() {
     }
   }, [fase, ordemIds, answers, qIndex, startedAt]);
 
-  async function enviar(ans: Record<string, "a" | "b">) {
+  async function enviar(ans: Record<string, RespostaSimNao>) {
     const parsed = entradaTemperamentoSchema.safeParse({
       answers: ans,
       metadata: {
         tempo_total_segundos: Math.max(0, Math.floor((Date.now() - startedAt) / 1000)),
         idioma: "pt-BR",
-        versao_questionario: "2.0",
+        versao_questionario: VERSAO_TEMPERAMENTO_ATUAL,
       },
     });
     if (!parsed.success) {
@@ -177,7 +181,7 @@ export default function TemperamentoPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setErro((data as { error?: string }).error ?? "Erro ao enviar.");
+        setErro((data as { error?: string }).error ?? "Erro ao enviar. Tenta de novo.");
         setFase("perguntas");
         return;
       }
@@ -185,17 +189,17 @@ export default function TemperamentoPage() {
       setResultadoApi(data as ResultadoTemperamentoUi);
       setFase("resultado");
     } catch {
-      setErro("Falha de rede.");
+      setErro("Falha de rede. As tuas respostas estão guardadas localmente.");
       setFase("perguntas");
     }
   }
 
-  function escolher(lado: "a" | "b") {
-    if (!parAtual) return;
-    const novas = { ...answers, [parAtual.id]: lado };
+  function escolher(resposta: RespostaSimNao) {
+    if (!itemAtual) return;
+    const novas = { ...answers, [itemAtual.id]: resposta };
     setAnswers(novas);
     if (qIndex < TOTAL - 1) {
-      setQIndex((i) => i + 1);
+      setTimeout(() => setQIndex((i) => i + 1), 120);
       return;
     }
     void enviar(novas);
@@ -210,6 +214,23 @@ export default function TemperamentoPage() {
   }
 
   const bg = "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)";
+
+  function draftLabel(): string {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const d = JSON.parse(raw) as DraftPersist;
+        if (Array.isArray(d.ordemIds) && d.ordemIds.length === TOTAL) {
+          const n = contarRespostas(d.answers ?? {});
+          if (n > 0) return `Continuar onde parei (${n}/${TOTAL})`;
+          return "Continuar onde parei";
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    return "Começar";
+  }
 
   if (fase === "resultado" && resultadoApi) {
     const qf = resultadoApi.quality_flag as string | undefined;
@@ -261,7 +282,7 @@ export default function TemperamentoPage() {
   if (fase === "intro") {
     return (
       <div className="min-h-screen pb-28" style={{ background: bg }}>
-        <MobileTopBar titulo="Temperamento" subtitulo="Escolha forçada · v2" />
+        <MobileTopBar titulo="Temperamento" subtitulo="16 afirmações · ~3 min" />
         <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
           <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} />
           <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
@@ -271,8 +292,8 @@ export default function TemperamentoPage() {
             Quem você é por dentro
           </h1>
           <p className="text-sm leading-relaxed mb-2" style={{ color: "rgba(247,242,236,0.55)" }}>
-            Em cada par, escolha a frase que <strong>mais combina com você</strong> na maior parte do tempo.
-            São {TOTAL} escolhas rápidas, sem escala nem notas. Não há resposta certa.
+            Para cada afirmação, responda <strong>Sim</strong> ou <strong>Não</strong> pelo que é mais verdadeiro na{" "}
+            <strong>maior parte do tempo</strong>, não só hoje. São {TOTAL} perguntas rápidas.
           </p>
           <p className="text-xs leading-relaxed mb-8" style={{ color: "rgba(247,242,236,0.38)" }}>
             O progresso guarda-se automaticamente neste dispositivo se saíres a meio.
@@ -280,7 +301,11 @@ export default function TemperamentoPage() {
           {msgIntro && (
             <div
               className="rounded-xl px-3 py-2.5 text-sm mb-4"
-              style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.22)", color: "rgba(247,242,236,0.85)" }}
+              style={{
+                background: "rgba(200,165,107,0.08)",
+                border: "1px solid rgba(200,165,107,0.22)",
+                color: "rgba(247,242,236,0.85)",
+              }}
             >
               {msgIntro}
             </div>
@@ -294,20 +319,7 @@ export default function TemperamentoPage() {
             }}
             onClick={iniciarOuRecuperar}
           >
-            {(() => {
-              try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                  const d = JSON.parse(raw) as DraftPersist;
-                  if (Array.isArray(d.ordemIds) && d.ordemIds.length === TOTAL) {
-                    return "Continuar onde parei";
-                  }
-                }
-              } catch {
-                /* ignore */
-              }
-              return "Começar";
-            })()}
+            {draftLabel()}
             <ArrowRight className="w-4 h-4" />
           </button>
           <button
@@ -352,7 +364,7 @@ export default function TemperamentoPage() {
     );
   }
 
-  if (!parAtual || ordemIds.length !== TOTAL) {
+  if (!itemAtual || ordemIds.length !== TOTAL) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm" style={{ background: bg, color: "#f7f2ec" }}>
         A carregar…
@@ -362,7 +374,7 @@ export default function TemperamentoPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: bg }}>
-      <MobileTopBar titulo="Temperamento" subtitulo={`${qIndex + 1} de ${TOTAL}`} />
+      <MobileTopBar titulo="Temperamento" subtitulo={`${qIndex + 1} de ${TOTAL} · ~3 min`} />
       <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
         <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} />
 
@@ -385,36 +397,57 @@ export default function TemperamentoPage() {
           />
         </div>
 
-        {erro && <p className="text-sm mb-4 text-red-300">{erro}</p>}
+        {erro && (
+          <div className="mb-4 space-y-2">
+            <p className="text-sm text-red-300">{erro}</p>
+            {contarRespostas(answers) === TOTAL && (
+              <button
+                type="button"
+                className="text-xs underline"
+                style={{ color: "rgba(200,165,107,0.8)" }}
+                onClick={() => void enviar(answers)}
+              >
+                Tentar enviar de novo
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="space-y-6">
           <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
-            O que é mais verdadeiro para você?
+            Na maior parte do tempo…
           </p>
-          <button
-            type="button"
-            onClick={() => escolher("a")}
-            className="w-full text-left p-5 rounded-2xl text-sm leading-relaxed transition-all active:scale-[0.99]"
-            style={{
-              background: answers[parAtual.id] === "a" ? "rgba(200,165,107,0.12)" : "rgba(255,255,255,0.05)",
-              border: `1px solid ${answers[parAtual.id] === "a" ? "rgba(200,165,107,0.35)" : "rgba(200,165,107,0.18)"}`,
-              color: "#f7f2ec",
-            }}
-          >
-            A — {parAtual.textoA}
-          </button>
-          <button
-            type="button"
-            onClick={() => escolher("b")}
-            className="w-full text-left p-5 rounded-2xl text-sm leading-relaxed transition-all active:scale-[0.99]"
-            style={{
-              background: answers[parAtual.id] === "b" ? "rgba(200,165,107,0.12)" : "rgba(255,255,255,0.05)",
-              border: `1px solid ${answers[parAtual.id] === "b" ? "rgba(200,165,107,0.35)" : "rgba(200,165,107,0.18)"}`,
-              color: "#f7f2ec",
-            }}
-          >
-            B — {parAtual.textoB}
-          </button>
+          <p className="text-base leading-relaxed" style={{ color: "#f7f2ec", lineHeight: 1.75 }}>
+            {itemAtual.texto}
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              aria-pressed={answers[itemAtual.id] === "sim"}
+              onClick={() => escolher("sim")}
+              className="py-4 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98] min-h-[48px]"
+              style={{
+                background: answers[itemAtual.id] === "sim" ? "rgba(200,165,107,0.18)" : "rgba(255,255,255,0.05)",
+                border: `1px solid ${answers[itemAtual.id] === "sim" ? "rgba(200,165,107,0.45)" : "rgba(200,165,107,0.2)"}`,
+                color: "#f7f2ec",
+              }}
+            >
+              Sim
+            </button>
+            <button
+              type="button"
+              aria-pressed={answers[itemAtual.id] === "nao"}
+              onClick={() => escolher("nao")}
+              className="py-4 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98] min-h-[48px]"
+              style={{
+                background: answers[itemAtual.id] === "nao" ? "rgba(200,165,107,0.18)" : "rgba(255,255,255,0.05)",
+                border: `1px solid ${answers[itemAtual.id] === "nao" ? "rgba(200,165,107,0.45)" : "rgba(200,165,107,0.2)"}`,
+                color: "#f7f2ec",
+              }}
+            >
+              Não
+            </button>
+          </div>
         </div>
       </div>
     </div>
