@@ -385,6 +385,37 @@ test("rigido+oral — leituraEmocionalDeclarada com vínculo e controle", () => 
 
   assert.ok(r.leituraEmocionalDeclarada?.includes("vínculo"));
   assert.ok(r.leituraEmocionalDeclarada?.includes("controle"));
+  assert.ok(r.leituraEmocionalDeclarada?.includes("destacam-se vínculo"));
+  assert.ok(r.leituraEmocionalDeclarada?.includes("couraça de rígido"));
+  assert.ok(!r.leituraEmocionalDeclarada?.includes("destacam-sevínculo"));
+  assert.ok(!r.leituraEmocionalDeclarada?.includes("deoral"));
+});
+
+test("adaptarVozNarrativa — preserva palavras acentuadas e frases naturais", async () => {
+  const { adaptarVozNarrativa } = await import("../voz.js");
+  const r = gerarNarrativa({
+    engine: mkEngine(
+      { rigido: 31, oral: 23, masoquista: 20, psicopata: 14, esquizoide: 12 },
+      { estruturaPrincipal: "rigido", estruturaSecundaria: "oral" },
+    ),
+    fusao: {
+      versaoMatriz: "fusao_v2",
+      alinhamentoFotosFormulario: 96,
+      assertividadeLeitura: 80,
+      pesoFormulario: 0.25,
+      padroesEmocionaisNormalizados: { vinculo: 0.42, controle: 0.38 },
+      vetorFormularioEstruturas: {},
+      sinaisConvergentes: [],
+      sinteseIntegrada: "",
+    },
+  });
+  const t = adaptarVozNarrativa(r, "Marcia");
+  assert.ok(t.sinteseHumana?.includes("questionário"), `síntese: ${t.sinteseHumana}`);
+  assert.ok(!t.sinteseHumana?.includes("question dela"), `síntese corrompida: ${t.sinteseHumana}`);
+  assert.ok(t.mensagemTerapeutica?.includes("coração"), `mensagem: ${t.mensagemTerapeutica}`);
+  assert.ok(!t.mensagemTerapeutica?.includes("cora delação"), `mensagem corrompida: ${t.mensagemTerapeutica}`);
+  assert.ok(t.mensagemTerapeutica?.includes("é a maior riqueza"), `mensagem: ${t.mensagemTerapeutica}`);
+  assert.ok(!t.mensagemTerapeutica?.includes("é a a maior"), `duplicação: ${t.mensagemTerapeutica}`);
 });
 
 test("adaptarVozNarrativa Leticia — sem você nos campos principais", async () => {

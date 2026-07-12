@@ -72,7 +72,7 @@ export async function analyzeTracoDeCarater(
     estruturasSomenteFotos,
   });
 
-  if (opts.pessoaNome?.trim()) {
+  if (opts.pessoaId != null && opts.pessoaNome?.trim()) {
     resultado = adaptarVozNarrativa(resultado, opts.pessoaNome.trim());
   }
 

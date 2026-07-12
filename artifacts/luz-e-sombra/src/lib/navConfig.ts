@@ -23,6 +23,7 @@ export const NAV_PRIMARY: NavItem[] = [
   { href: "/dashboard", label: "Início", icon: Home },
   { href: "/jornada", label: "Jornada", icon: Map, description: "Sua trilha de auto-conhecimento" },
   { href: "/comunidade", label: "Comunidade", icon: Users2 },
+  { href: "/cursos", label: "Cursos", icon: GraduationCap, description: "Trilhas guiadas (em breve)" },
 ];
 
 /** Ferramentas e avaliações — agrupadas no menu «Explorar». */

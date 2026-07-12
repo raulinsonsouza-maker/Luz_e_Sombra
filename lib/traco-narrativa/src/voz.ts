@@ -19,6 +19,9 @@ const CAMPOS_TEXTO: (keyof ResultadoAnalise)[] = [
   "dorLivro",
 ];
 
+/** Palavra em português (inclui acentos — \w não cobre ç, ã, etc.). */
+const PAL = String.raw`[\p{L}\p{M}]+`;
+
 function primeiroNome(nome: string): string {
   return nome.trim().split(/\s+/)[0] ?? nome;
 }
@@ -26,44 +29,44 @@ function primeiroNome(nome: string): string {
 function adaptarTextoTerceira(texto: string, nome: string, generoFeminino?: boolean): string {
   const pronome = generoFeminino ? "ela" : "ele";
   const possessivo = generoFeminino ? "dela" : "dele";
-  const objeto = generoFeminino ? "a" : "o";
   const reflexivo = generoFeminino ? "se" : "se";
 
   let t = texto;
-  t = t.replace(/\bVocê\b/g, nome);
-  t = t.replace(/\bvocê\b/g, pronome);
-  t = t.replace(/\bSua (\w+)/g, `A $1 ${possessivo}`);
-  t = t.replace(/\bsua (\w+)/g, `a $1 ${possessivo}`);
-  t = t.replace(/\bSeu (\w+)/g, `O $1 ${possessivo}`);
-  t = t.replace(/\bseu (\w+)/g, `o $1 ${possessivo}`);
-  t = t.replace(/\bSuas (\w+)/g, `As $1 ${possessivo}`);
-  t = t.replace(/\bsuas (\w+)/g, `as $1 ${possessivo}`);
-  t = t.replace(/\bSeus (\w+)/g, `Os $1 ${possessivo}`);
-  t = t.replace(/\bseus (\w+)/g, `os $1 ${possessivo}`);
-  t = t.replace(/\bsua\b/g, possessivo);
-  t = t.replace(/\bseu\b/g, possessivo);
-  t = t.replace(/\bsuas\b/g, possessivo);
-  t = t.replace(/\bseus\b/g, possessivo);
-  t = t.replace(/\bte\b/g, reflexivo);
-  t = t.replace(/\bTi\b/g, nome);
-  t = t.replace(/\bti\b/g, nome);
-  t = t.replace(/\bconsigo\b/g, `com ${pronome}`);
-  t = t.replace(/\bsi mesmo\b/g, `${pronome} mesmo`);
-  t = t.replace(/\bSi\b/g, nome);
-  t = t.replace(/\bsi\b/g, nome);
-  t = t.replace(/\bcontigo\b/g, `com ${pronome}`);
-  t = t.replace(/\bpara você\b/gi, `para ${pronome}`);
-  t = t.replace(/\bPara você\b/g, `Para ${pronome}`);
-  t = t.replace(/\bquem você é\b/gi, `quem ${pronome} é`);
-  t = t.replace(/\bo que você\b/gi, `o que ${pronome}`);
-  t = t.replace(/\bO que você\b/g, `O que ${pronome}`);
-  t = t.replace(/\bE você\b/g, `E ${pronome}`);
-  t = t.replace(/\be você\b/g, `e ${pronome}`);
-  t = t.replace(/\bquando você\b/gi, `quando ${pronome}`);
-  t = t.replace(/\bQuando você\b/g, `Quando ${pronome}`);
-  t = t.replace(/\bse sente\b/g, "se sente");
-  t = t.replace(new RegExp(`\\b${nome} mesmo\\b`, "g"), `${pronome} mesmo`);
-  void objeto;
+  t = t.replace(/\bVocê\b/gu, nome);
+  t = t.replace(/\bvocê\b/gu, pronome);
+  t = t.replace(/é a sua/giu, "é a");
+  t = t.replace(/é o seu/giu, "é o");
+  t = t.replace(new RegExp(`\\bSua (${PAL})`, "gu"), `A $1 ${possessivo}`);
+  t = t.replace(new RegExp(`\\bsua (${PAL})`, "gu"), `a $1 ${possessivo}`);
+  t = t.replace(new RegExp(`\\bSeu (${PAL})`, "gu"), `O $1 ${possessivo}`);
+  t = t.replace(new RegExp(`\\bseu (${PAL})`, "gu"), `o $1 ${possessivo}`);
+  t = t.replace(new RegExp(`\\bSuas (${PAL})`, "gu"), `As $1 ${possessivo}`);
+  t = t.replace(new RegExp(`\\bsuas (${PAL})`, "gu"), `as $1 ${possessivo}`);
+  t = t.replace(new RegExp(`\\bSeus (${PAL})`, "gu"), `Os $1 ${possessivo}`);
+  t = t.replace(new RegExp(`\\bseus (${PAL})`, "gu"), `os $1 ${possessivo}`);
+  t = t.replace(/\bsua\b/gu, possessivo);
+  t = t.replace(/\bseu\b/gu, possessivo);
+  t = t.replace(/\bsuas\b/gu, possessivo);
+  t = t.replace(/\bseus\b/gu, possessivo);
+  t = t.replace(/\bte\b/gu, reflexivo);
+  t = t.replace(/\bTi\b/gu, nome);
+  t = t.replace(/\bti\b/gu, nome);
+  t = t.replace(/\bconsigo\b/gu, `com ${pronome}`);
+  t = t.replace(/\bsi mesmo\b/gu, `${pronome} mesmo`);
+  t = t.replace(/\bSi\b/gu, nome);
+  t = t.replace(/\bsi\b/gu, nome);
+  t = t.replace(/\bcontigo\b/gu, `com ${pronome}`);
+  t = t.replace(/\bpara você\b/giu, `para ${pronome}`);
+  t = t.replace(/\bPara você\b/gu, `Para ${pronome}`);
+  t = t.replace(/\bquem você é\b/giu, `quem ${pronome} é`);
+  t = t.replace(/\bo que você\b/giu, `o que ${pronome}`);
+  t = t.replace(/\bO que você\b/gu, `O que ${pronome}`);
+  t = t.replace(/\bE você\b/gu, `E ${pronome}`);
+  t = t.replace(/\be você\b/gu, `e ${pronome}`);
+  t = t.replace(/\bquando você\b/giu, `quando ${pronome}`);
+  t = t.replace(/\bQuando você\b/gu, `Quando ${pronome}`);
+  t = t.replace(/\bse sente\b/gu, "se sente");
+  t = t.replace(new RegExp(`\\b${nome} mesmo\\b`, "gu"), `${pronome} mesmo`);
   return t;
 }
 

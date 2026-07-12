@@ -12,6 +12,7 @@ import {
   Zap,
   Map,
   Users2,
+  GraduationCap,
   Sparkles,
   FileText,
 } from "lucide-react";
@@ -60,6 +61,7 @@ function saudacao() {
 const QUICK_ACTIONS = [
   { label: "Comunidade", sub: "Espaço compartilhado", icon: Users2, href: "/comunidade" },
   { label: "Jornada", sub: "Sua trilha", icon: Map, href: "/jornada" },
+  { label: "Cursos", sub: "Em breve", icon: GraduationCap, href: "/cursos" },
 ] as const;
 
 export default function HomePage() {
@@ -76,10 +78,6 @@ export default function HomePage() {
       return;
     }
     if (status === "loading") return;
-    if (user?.primeiroAcesso) {
-      navigate("/jornada/traco");
-      return;
-    }
     buscarDados();
   }, [status, user]);
 
@@ -342,7 +340,7 @@ export default function HomePage() {
           <p className="text-xs font-semibold tracking-wider uppercase mb-3" style={{ color: "rgba(200,165,107,0.5)" }}>
             Explorar
           </p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {QUICK_ACTIONS.map(({ label, sub, icon: Icon, href }) => (
               <button
                 key={href}

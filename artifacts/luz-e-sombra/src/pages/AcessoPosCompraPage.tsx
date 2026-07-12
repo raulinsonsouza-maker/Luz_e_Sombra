@@ -57,8 +57,7 @@ export default function AcessoPosCompraPage() {
                 setAuth(authData.token, authData.user);
                 setStatus("success");
                 setMensagem("Pagamento confirmado! Entrando na plataforma...");
-                const destino = authData.user?.primeiroAcesso ? "/jornada/traco" : "/dashboard";
-                setTimeout(() => navigate(destino), 800);
+                setTimeout(() => navigate("/dashboard"), 800);
                 return;
               }
             }

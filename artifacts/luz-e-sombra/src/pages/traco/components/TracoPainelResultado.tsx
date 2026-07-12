@@ -202,6 +202,14 @@ export function TracoPainelResultado({
       ? resultado.interpretacao.split(/\n+/).filter(Boolean)
       : [];
 
+  const demaisTracos = useMemo(() => {
+    const principal = resultado.estruturaPrincipal;
+    const secundaria = resultado.estruturaSecundaria;
+    return (Object.entries(resultado.estruturas) as [keyof EstruturasPct, number][])
+      .filter(([key]) => key !== principal && key !== secundaria)
+      .sort(([, a], [, b]) => b - a);
+  }, [resultado.estruturas, resultado.estruturaPrincipal, resultado.estruturaSecundaria]);
+
   return (
     <div id="resultado-traco" className="space-y-5">
       <div className="flex items-center gap-4 mb-2">
@@ -308,6 +316,40 @@ export function TracoPainelResultado({
                   {ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].nome}{" "}
                   ({resultado.estruturas[resultado.estruturaSecundaria]}%)
                 </span>
+              </div>
+            )}
+
+            {demaisTracos.length > 0 && (
+              <div
+                className="mb-3 pt-3"
+                style={{ borderTop: "1px solid rgba(200,165,107,0.12)" }}
+              >
+                <p
+                  className="text-xs tracking-widest uppercase mb-2"
+                  style={{ color: "rgba(200,165,107,0.4)" }}
+                >
+                  Demais traços
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {demaisTracos.map(([key, pct]) => {
+                    const cfg = ESTRUTURAS_CONFIG[key];
+                    return (
+                      <span
+                        key={key}
+                        className="text-xs px-2.5 py-1 rounded-full"
+                        style={{
+                          color: cfg.cor,
+                          background: cfg.corBg,
+                          border: `1px solid ${cfg.corBorder}`,
+                          opacity: 0.92,
+                        }}
+                      >
+                        {cfg.nome}{" "}
+                        <span style={{ opacity: 0.85 }}>({pct}%)</span>
+                      </span>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -421,17 +463,30 @@ export function TracoPainelResultado({
                 .sort(([, a], [, b]) => b - a)
                 .map(([key, pct]) => {
                   const cfg = ESTRUTURAS_CONFIG[key];
-                  const isPrimary = key === resultado.estruturaPrincipal;
+                  const isPrincipal = key === resultado.estruturaPrincipal;
+                  const isSecundaria = key === resultado.estruturaSecundaria;
+                  const isDestaque = isPrincipal || isSecundaria;
                   return (
                     <div key={key}>
                       <div className="flex justify-between text-xs mb-1">
-                        <span style={{ color: isPrimary ? cfg.cor : "rgba(247,242,236,0.45)" }}>{cfg.nome}</span>
-                        <span style={{ color: isPrimary ? cfg.cor : "rgba(247,242,236,0.4)" }}>{pct}%</span>
+                        <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.45)" }}>
+                          {cfg.nome}
+                          {isPrincipal && (
+                            <span className="ml-1.5 opacity-70">· principal</span>
+                          )}
+                          {isSecundaria && (
+                            <span className="ml-1.5 opacity-70">· secundária</span>
+                          )}
+                        </span>
+                        <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.4)" }}>{pct}%</span>
                       </div>
                       <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
                         <div
                           className="h-full rounded-full"
-                          style={{ width: `${pct}%`, background: isPrimary ? cfg.cor : `${cfg.cor}66` }}
+                          style={{
+                            width: `${pct}%`,
+                            background: isDestaque ? cfg.cor : `${cfg.cor}66`,
+                          }}
                         />
                       </div>
                     </div>

@@ -38,7 +38,7 @@ export default function LoginPage() {
     setCarregando(true);
     const result = await login(username.trim().toLowerCase(), password);
     if (result.ok) {
-      navigate(result.primeiroAcesso ? "/jornada/traco" : "/dashboard");
+      navigate("/dashboard");
       return;
     }
     if (result.code === "pagamento_pendente") {

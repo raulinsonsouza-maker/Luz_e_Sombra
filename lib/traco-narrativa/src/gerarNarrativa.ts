@@ -190,7 +190,7 @@ function construirInterpretacao(
 
   if (incluirTensao) {
     blocos.push(
-      `Entre${T.NOMES[principal]}e${T.NOMES[secundaria]}há uma tensão viva no cotidiano, não um defeito, mas um convite à integração.`,
+      `Entre ${T.NOMES[principal]} e ${T.NOMES[secundaria]} há uma tensão viva no cotidiano, não um defeito, mas um convite à integração.`,
     );
   } else if (pctP - pctS < 12) {
     blocos.push(
