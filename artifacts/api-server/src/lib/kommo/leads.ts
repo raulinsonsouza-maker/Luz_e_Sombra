@@ -122,13 +122,36 @@ export async function findContactByPhone(phoneE164: string): Promise<{ contactId
   return { contactId: contact.contactId, leadId: contact.leadIds[0] ?? null };
 }
 
-/** Contato sem lead — prioriza o mais antigo (ID menor), que costuma ter canal WPP vinculado. */
+function parseLeadCreateResponse(data: { id?: number; _embedded?: KommoEmbeddedLeads }): number {
+  if (data.id) return data.id;
+  const leadId = data._embedded?.leads?.[0]?.id;
+  if (!leadId) throw new Error("Kommo não retornou lead_id ao criar lead");
+  return leadId;
+}
+
+/** Contato sem lead ativo — prioriza o mais antigo (ID menor), que costuma ter canal WPP vinculado. */
 export async function findOrphanContactByPhone(phoneE164: string): Promise<number | null> {
+  const cfg = getKommoConfig();
   const contacts = await listContactsByPhone(phoneE164);
-  const orphans = contacts.filter((contact) => contact.leadIds.length === 0);
+  const orphans: number[] = [];
+
+  for (const contact of contacts) {
+    let hasActiveLead = false;
+    for (const leadId of contact.leadIds) {
+      const lead = await kommoRequest<{ status_id?: number; is_deleted?: boolean }>({
+        path: `/leads/${leadId}`,
+      });
+      if (lead.is_deleted) continue;
+      if (cfg.statusPerdido && lead.status_id === cfg.statusPerdido) continue;
+      hasActiveLead = true;
+      break;
+    }
+    if (!hasActiveLead) orphans.push(contact.contactId);
+  }
+
   if (orphans.length === 0) return null;
-  orphans.sort((a, b) => a.contactId - b.contactId);
-  return orphans[0]?.contactId ?? null;
+  orphans.sort((a, b) => a - b);
+  return orphans[0] ?? null;
 }
 
 async function pickLeadByPhone(phoneE164: string): Promise<{ leadId: number; contactId: number } | null> {
@@ -192,7 +215,7 @@ async function createLeadWithExistingContact(
   const cfg = getKommoConfig();
   const customFields = buildCustomFields(input.customFields);
 
-  const data = await kommoRequest<{ id?: number }>({
+  const data = await kommoRequest<{ id?: number; _embedded?: KommoEmbeddedLeads }>({
     method: "POST",
     path: "/leads",
     body: [
@@ -208,8 +231,7 @@ async function createLeadWithExistingContact(
     ],
   });
 
-  const leadId = Array.isArray(data) ? data[0]?.id : data.id;
-  if (!leadId) throw new Error("Kommo não retornou lead_id ao vincular contato existente");
+  const leadId = parseLeadCreateResponse(data);
 
   await updateContactPhoneMobile(contactId, input.phoneE164);
   return { leadId, contactId, created: true };
