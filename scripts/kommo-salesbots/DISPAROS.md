@@ -16,10 +16,10 @@ Link: https://leticiabemvideos.kommo.com/settings/pipeline/leads/14098755
 
 ## Painel Kommo
 
-### Etapa de leads de entrada — MANTER gatilho
+### Etapa de leads de entrada — MANTER gatilho (só widget WPP)
 
-- **PI - Boas-vindas** — *Quando criado nesta etapa* (como no print)
-- Fonte WhatsApp `5519994703684` pode alimentar esta etapa
+- **PI - Boas-vindas** — *Quando criado nesta etapa* (leads que entram pelo WhatsApp)
+- Cadastros do **Portal via API** criam em **Contato inicial** e disparam boas-vindas pelo **Salesbot** (API não aceita etapa de entrada)
 
 ### Demais etapas — sem gatilhos de bot
 

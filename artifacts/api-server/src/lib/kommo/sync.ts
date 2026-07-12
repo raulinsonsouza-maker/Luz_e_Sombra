@@ -75,9 +75,13 @@ async function getStoredKommoEvent(usuarioId: number): Promise<KommoLastEvent | 
   return null;
 }
 
+/**
+ * Etapa de leads de entrada (incoming) não aceita POST/PATCH via API Kommo.
+ * Cadastros do Portal criam em Contato inicial; DP na entrada é só para widget WPP.
+ */
 function registerStatusId(): number {
   const cfg = getKommoConfig();
-  return cfg.statusNovoCadastro ?? cfg.statusPagamentoPendente ?? 0;
+  return cfg.statusPagamentoPendente ?? cfg.statusNovoCadastro ?? 0;
 }
 
 function pendingStatusId(): number | null {
@@ -144,17 +148,16 @@ async function syncKommoOnRegisterAsync(
     kommoLastEvent: "registered",
   });
 
-  // Boas-vindas: DP (Novo cadastro) abre o WPP no Lite; API só se welcomeViaDp=false.
+  // Boas-vindas: DP na entrada só para leads do widget WPP; cadastro via API usa Salesbot.
   if (cfg.triggerBotsViaApi && result.created) {
     if (cfg.welcomeViaDp) {
       log?.debug(
-        { usuarioId: params.usuarioId, kommoLeadId: result.leadId, delayMs: WELCOME_DP_DELAY_MS },
-        "Boas-vindas via Digital Pipeline — aguardando antes de mover para pendente",
+        { usuarioId: params.usuarioId, kommoLeadId: result.leadId },
+        "Boas-vindas via Salesbot — API não suporta etapa de entrada (DP)",
       );
-      await sleep(WELCOME_DP_DELAY_MS);
-    } else {
-      await sendKommoWelcome(result.leadId, log);
     }
+    await sendKommoWelcome(result.leadId, log);
+    await sleep(WELCOME_DP_DELAY_MS);
   } else if (cfg.triggerBotsViaApi && !result.created) {
     log?.debug(
       { usuarioId: params.usuarioId, kommoLeadId: result.leadId },
@@ -164,7 +167,10 @@ async function syncKommoOnRegisterAsync(
 
   const pendingId = cfg.statusPagamentoPendente;
   if (pendingId && result.created) {
-    await updateLeadStage(result.leadId, pendingId);
+    const createStatusId = registerStatusId();
+    if (createStatusId !== pendingId) {
+      await updateLeadStage(result.leadId, pendingId);
+    }
     await persistKommoSync(params.usuarioId, {
       kommoLeadId: result.leadId,
       kommoContactId: result.contactId,
