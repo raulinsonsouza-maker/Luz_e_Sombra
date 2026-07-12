@@ -1,12 +1,16 @@
 import { useLocation } from "wouter";
 import type { LucideIcon } from "lucide-react";
-import { Home, Map, Users2, User } from "lucide-react";
+import { Home, Map, Users2, User, GraduationCap } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { isChromelessRoute } from "@/lib/navConfig";
 
-const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
+const NAV_LEFT: { href: string; label: string; icon: typeof Home }[] = [
   { href: "/dashboard", label: "Início", icon: Home },
   { href: "/comunidade", label: "Comunidade", icon: Users2 },
+];
+
+const NAV_RIGHT: { href: string; label: string; icon: typeof Home }[] = [
+  { href: "/cursos", label: "Cursos", icon: GraduationCap },
   { href: "/perfil", label: "Perfil", icon: User },
 ];
 
@@ -60,12 +64,11 @@ export default function BottomNav() {
       }}
     >
       <div className="max-w-lg mx-auto flex items-end pt-2 pb-4 px-1">
-        <div className="flex-1 flex justify-center items-end min-w-0">
-          <SideItem href={NAV_ITEMS[0].href} label={NAV_ITEMS[0].label} icon={NAV_ITEMS[0].icon} />
-        </div>
-        <div className="flex-1 flex justify-center items-end min-w-0">
-          <SideItem href={NAV_ITEMS[1].href} label={NAV_ITEMS[1].label} icon={NAV_ITEMS[1].icon} />
-        </div>
+        {NAV_LEFT.map((item) => (
+          <div key={item.href} className="flex-1 flex justify-center items-end min-w-0">
+            <SideItem href={item.href} label={item.label} icon={item.icon} />
+          </div>
+        ))}
 
         <div className="flex-1 flex justify-center items-end min-w-0 pb-0.5">
           <div className="-mt-6 flex justify-center">
@@ -108,9 +111,11 @@ export default function BottomNav() {
           </div>
         </div>
 
-        <div className="flex-1 flex justify-center items-end min-w-0">
-          <SideItem href={NAV_ITEMS[2].href} label={NAV_ITEMS[2].label} icon={NAV_ITEMS[2].icon} />
-        </div>
+        {NAV_RIGHT.map((item) => (
+          <div key={item.href} className="flex-1 flex justify-center items-end min-w-0">
+            <SideItem href={item.href} label={item.label} icon={item.icon} />
+          </div>
+        ))}
       </div>
     </nav>
   );
