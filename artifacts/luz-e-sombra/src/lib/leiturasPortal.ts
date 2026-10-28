@@ -1,20 +1,33 @@
-import { comporLeitura, type LeituraPortal } from "@workspace/copy-voz";
+import { comporLeitura, type LeituraPortal, type PecaLeitura } from "@workspace/copy-voz";
 
-function pedacos(...partes: Array<string | readonly string[] | null | undefined>): string[] {
-  const out: string[] = [];
+function item(rotulo: string, texto?: string | null): PecaLeitura | null {
+  const t = (texto ?? "").trim();
+  return t ? { rotulo, texto: t } : null;
+}
+
+function lista(...partes: Array<PecaLeitura | readonly PecaLeitura[] | null | undefined>): PecaLeitura[] {
+  const out: PecaLeitura[] = [];
   for (const parte of partes) {
     if (!parte) continue;
-    const lista = Array.isArray(parte) ? parte : [parte];
-    for (const item of lista) {
-      const texto = item?.trim();
-      if (texto) out.push(texto);
+    const itens = Array.isArray(parte) ? parte : [parte];
+    for (const peca of itens) {
+      if (typeof peca === "string") {
+        if (peca.trim()) out.push(peca.trim());
+      } else if (peca.texto?.trim()) {
+        out.push({ rotulo: peca.rotulo, texto: peca.texto.trim() });
+      }
     }
   }
   return out;
 }
 
-function ou(partes: string[], fallback: string): string | string[] {
+function ou(partes: PecaLeitura[], fallback: string): PecaLeitura | PecaLeitura[] {
   return partes.length ? partes : fallback;
+}
+
+function comTitulo(rotulo: string, textos: Array<string | null | undefined>): PecaLeitura[] {
+  const limpos = textos.map((t) => (t ?? "").trim()).filter(Boolean);
+  return limpos.map((texto, i) => (i === 0 ? { rotulo, texto } : texto));
 }
 
 type PerfilNumero = {
@@ -31,13 +44,17 @@ type PerfilNumero = {
 export function leituraNumerologia(perfil: PerfilNumero | null | undefined): LeituraPortal | null {
   if (!perfil?.essencia && !perfil?.descricao) return null;
   return comporLeitura({
-    quemVoceE: pedacos(perfil.essencia, perfil.descricao, perfil.missao),
+    quemVoceE: lista(
+      item("Essência", perfil.essencia),
+      item("O retrato", perfil.descricao),
+      item("A missão", perfil.missao),
+    ),
     noDiaADia: ou(
-      pedacos(perfil.carreira, perfil.relacionamentos),
+      lista(item("No trabalho", perfil.carreira), item("Nas relações", perfil.relacionamentos)),
       "Olhe para o trabalho e para as relações desta semana e veja onde esse número aparece.",
     ),
     sombra: ou(
-      pedacos(perfil.sombra, perfil.desafios),
+      lista(item("O excesso", perfil.sombra), comTitulo("O que pede cuidado", perfil.desafios ?? [])),
       "A sombra deste número é o excesso do próprio talento, quando ele vira hábito sem consciência.",
     ),
     oQueFazer: perfil.afirmacao
@@ -61,25 +78,25 @@ type TemperamentoUi = {
 export function leituraTemperamento(r: TemperamentoUi | null | undefined): LeituraPortal | null {
   if (!r?.sinteseHumana && !r?.portraitIdentidade && !r?.analiseAprofundada?.length) return null;
   const analise = (r.analiseAprofundada ?? []).flatMap((sec) =>
-    [sec.titulo, ...(sec.paragrafos ?? [])].filter((p): p is string => Boolean(p?.trim())),
+    comTitulo(sec.titulo?.trim() || "A leitura", sec.paragrafos ?? []),
   );
   return comporLeitura({
-    quemVoceE: pedacos(r.portraitIdentidade, r.sinteseHumana, analise),
+    quemVoceE: lista(item("O retrato", r.portraitIdentidade), item("Em uma frase", r.sinteseHumana), analise),
     noDiaADia: ou(
-      pedacos(
-        r.tracosMarcantes?.length ? r.tracosMarcantes.join(" · ") : "",
-        r.comboNarrativa,
-        r.combo?.forca,
-        r.combo?.contexto,
+      lista(
+        item("O que marca você", r.tracosMarcantes?.length ? r.tracosMarcantes.join(" · ") : ""),
+        item("Os dois juntos", r.comboNarrativa),
+        item("A força da combinação", r.combo?.forca),
+        item("Onde isso aparece", r.combo?.contexto),
       ),
       "Repare no ritmo com que você entra nas conversas e nas tarefas de hoje.",
     ),
     sombra: ou(
-      pedacos(r.pontoCego, r.combo?.tensao),
+      lista(item("O ponto cego", r.pontoCego), item("A tensão", r.combo?.tensao)),
       "O ponto cego é o talento usado no automático, quando você não percebe o efeito nos outros.",
     ),
     oQueFazer: ou(
-      pedacos(r.passoPratico, r.perguntaCrescimento),
+      lista(item("O passo", r.passoPratico), r.perguntaCrescimento),
       "Faça uma pausa de um minuto antes da próxima decisão apressada.",
     ),
   });
@@ -103,17 +120,22 @@ export function leituraLinguagens(narr: NarrativaAmor | null | undefined): Leitu
   if (!narr?.veredito && !narr?.abertura) return null;
   const cenas = Array.isArray(narr.cenas) ? narr.cenas : narr.cenas ? [narr.cenas] : [];
   return comporLeitura({
-    quemVoceE: pedacos(narr.veredito, narr.abertura, narr.mecanismo, narr.dinamicaPar),
+    quemVoceE: lista(
+      narr.veredito,
+      item("Por onde isso começa", narr.abertura),
+      item("Como funciona", narr.mecanismo),
+      item("Vocês dois", narr.dinamicaPar),
+    ),
     noDiaADia: ou(
-      pedacos(cenas, narr.espelhoExpressar, narr.ponteComunicacao),
+      lista(comTitulo("Uma cena", cenas), item("Como você expressa", narr.espelhoExpressar), item("Como pedir", narr.ponteComunicacao)),
       "Pense na última vez em que você se sentiu amada ou invisível. A forma importa tanto quanto a intenção.",
     ),
     sombra: ou(
-      pedacos(narr.feridaPadrao, narr.linguagemAnti),
+      lista(item("A ferida", narr.feridaPadrao), item("O que não alcança", narr.linguagemAnti)),
       "A sombra é esperar que o outro adivinhe a linguagem que te alcança.",
     ),
     oQueFazer: ou(
-      pedacos(narr.planoSeteDias, narr.cartaParceiro),
+      lista(narr.planoSeteDias, item("A carta", narr.cartaParceiro)),
       "Diga a uma pessoa próxima, em uma frase, o que faz você se sentir amada.",
     ),
   });
@@ -132,13 +154,16 @@ export function leituraRoda(
   };
   return comporLeitura({
     quemVoceE: "Sua roda mostra onde a vida está mais cheia e onde pede cuidado. A média não conta a história inteira. As áreas falam.",
-    noDiaADia: ordenadas.map((a) => `${a.titulo} (${a.valor}/10): ${primeiraFrase(a.interpretacao)}`),
+    noDiaADia: ordenadas.map((a) => ({
+      rotulo: `${a.titulo} · ${a.valor}/10`,
+      texto: primeiraFrase(a.interpretacao),
+    })),
     sombra: foco.map((a) => {
       const frase = primeiraFrase(a.interpretacao);
       const resto = a.interpretacao.slice(frase.length).trim();
-      return resto ? `${a.titulo} pede atenção. ${resto}` : `${a.titulo} pede atenção.`;
+      return { rotulo: a.titulo, texto: resto || `${a.titulo} pede atenção.` };
     }),
-    oQueFazer: foco.map((a) => `${a.titulo}: ${a.acao}`),
+    oQueFazer: foco.map((a) => ({ rotulo: a.titulo, texto: a.acao })),
   });
 }
 
@@ -151,16 +176,17 @@ export function leituraDossie(dossie: {
   perguntaCentral?: string | null;
 } | null): LeituraPortal | null {
   if (!dossie?.sinteseIdentidade && !dossie?.panoramaFuncional) return null;
+  const quem = lista(item("A síntese", dossie.sinteseIdentidade), item("A assinatura", dossie.assinaturaIntegrada));
   return comporLeitura({
-    quemVoceE: pedacos(dossie.sinteseIdentidade, dossie.assinaturaIntegrada),
+    quemVoceE: quem.length ? quem : (dossie.panoramaFuncional || "Este retrato junta o que os seus testes mostram."),
     noDiaADia: ou(
-      pedacos(dossie.panoramaFuncional, dossie.pontosChave),
+      lista(item("O panorama", dossie.panoramaFuncional), comTitulo("O que se destaca", dossie.pontosChave ?? [])),
       "Olhe para esta semana e veja em qual área da vida esse retrato apareceu de verdade.",
     ),
     sombra: dossie.perguntaCentral
       || "A sombra do dossiê é usar o mapa para se cobrar, em vez de se entender.",
     oQueFazer: ou(
-      pedacos(dossie.acoesPrioritarias),
+      lista(dossie.acoesPrioritarias),
       "Escolha uma ação desta leitura e coloque na agenda de amanhã.",
     ),
   });

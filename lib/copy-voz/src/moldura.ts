@@ -10,8 +10,16 @@ export const MOLDURA = {
 
 export type SlotId = (typeof MOLDURA.secoes)[number]["id"];
 
+/** Um pedaço da leitura. O rótulo vira o título curto acima do texto. */
+export type ItemLeitura = {
+  rotulo?: string;
+  texto: string;
+};
+
+export type PecaLeitura = string | ItemLeitura;
+
 /** Um texto corrido ou vários pedaços. Cada pedaço vira um parágrafo na tela. */
-export type ConteudoSlot = string | readonly string[];
+export type ConteudoSlot = PecaLeitura | readonly PecaLeitura[];
 
 export type SlotsLeitura = Record<SlotId, ConteudoSlot>;
 
@@ -20,6 +28,7 @@ export type SecaoLeitura = {
   titulo: string;
   texto: string;
   paragrafos: string[];
+  itens: ItemLeitura[];
 };
 
 export type LeituraPortal = {

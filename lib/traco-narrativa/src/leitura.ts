@@ -1,9 +1,22 @@
-import { comporLeitura, type LeituraPortal } from "@workspace/copy-voz";
+import { comporLeitura, type LeituraPortal, type PecaLeitura } from "@workspace/copy-voz";
 import type { ResultadoAnalise } from "./types.js";
 import * as T from "./tabelas.js";
 
-function pedacos(...partes: Array<string | null | undefined>): string[] {
-  return partes.map((p) => (p ?? "").trim()).filter(Boolean);
+function item(rotulo: string, texto?: string | null): PecaLeitura | null {
+  const t = (texto ?? "").trim();
+  return t ? { rotulo, texto: t } : null;
+}
+
+function lista(partes: Array<PecaLeitura | null | undefined>): PecaLeitura[] {
+  return partes.filter((parte): parte is PecaLeitura => {
+    if (parte == null) return false;
+    if (typeof parte === "string") return parte.trim().length > 0;
+    return parte.texto.trim().length > 0;
+  });
+}
+
+function ou(partes: PecaLeitura[], fallback: string): PecaLeitura | PecaLeitura[] {
+  return partes.length ? partes : fallback;
 }
 
 /** A ferida da infância fica só em "A sombra". Aqui ela sai do começo da interpretação. */
@@ -22,8 +35,11 @@ function semFerida(texto: string | undefined, ferida?: string): string[] {
     .filter(Boolean);
 }
 
-function ou(partes: string[], fallback: string): string | string[] {
-  return partes.length ? partes : fallback;
+function rotuloInterpretacao(texto: string, indice: number): string {
+  if (/tensão viva/i.test(texto)) return "A tensão entre os traços";
+  if (/intensidade próxima/i.test(texto)) return "Os dois no mesmo grau";
+  if (/Não foi possível validar/i.test(texto)) return "Sobre as fotos";
+  return indice === 0 ? "Como isso se formou" : "O que isso mostra";
 }
 
 /** A leitura longa do traço, encaixada na moldura. A pontuação não entra aqui. */
@@ -46,24 +62,44 @@ export function leituraDoTraco(resultado: {
   const nome = T.NOMES[resultado.estruturaPrincipal];
   const dia = resultado.dinamicaFuncional;
   const estilo = resultado.estiloComunicacao;
+  const leitura = semFerida(resultado.interpretacao, resultado.ferida).map((texto, indice) => ({
+    rotulo: rotuloInterpretacao(texto, indice),
+    texto,
+  }));
   return comporLeitura({
-    quemVoceE: pedacos(
+    quemVoceE: lista([
       nome ? `O traço que mais aparece em você é ${nome}.` : "",
-      resultado.fraseIdentidade,
-      ...semFerida(resultado.interpretacao, resultado.ferida),
-      resultado.perfilUnico,
-      resultado.recurso,
-    ),
+      item("Em uma frase", resultado.fraseIdentidade),
+      ...leitura,
+      item("Os dois traços juntos", resultado.perfilUnico),
+      item("O que já é seu", resultado.recurso),
+    ]),
     noDiaADia: ou(
-      pedacos(dia?.trabalho, dia?.relacoes, dia?.decisoes, dia?.energia, estilo?.descricao, estilo?.emRelacoes),
+      lista([
+        item("No trabalho", dia?.trabalho),
+        item("Nas relações", dia?.relacoes),
+        item("Nas decisões", dia?.decisoes),
+        item("Sua energia", dia?.energia),
+        item("Como você se comunica", estilo?.descricao),
+        item("Com as pessoas", estilo?.emRelacoes),
+      ]),
       "Observe hoje um momento em que esse traço conduz sua reação antes de você escolher.",
     ),
     sombra: ou(
-      pedacos(resultado.ferida, resultado.dorLivro, dia?.sombra, dia?.estresse),
+      lista([
+        item("A ferida", resultado.ferida),
+        item("O que ainda dói", resultado.dorLivro),
+        item("No automático", dia?.sombra),
+        item("Quando a pressão sobe", dia?.estresse),
+      ]),
       "A sombra deste traço é a dor que ele aprendeu a carregar. Ela não define quem você é.",
     ),
     oQueFazer: ou(
-      pedacos(resultado.mensagemTerapeutica, ...(resultado.recomendacoesPraticas ?? []), resultado.perguntaTransformacao),
+      lista([
+        item("Por onde começar", resultado.mensagemTerapeutica),
+        ...(resultado.recomendacoesPraticas ?? []),
+        resultado.perguntaTransformacao,
+      ]),
       "Escolha um gesto pequeno hoje que use o talento deste traço, sem tentar virar outra pessoa.",
     ),
   });

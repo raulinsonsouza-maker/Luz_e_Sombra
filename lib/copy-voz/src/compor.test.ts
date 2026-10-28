@@ -64,6 +64,15 @@ describe("comporLeitura", () => {
     assert.match(leitura.secoes[2]!.texto, /não define/);
   });
 
+  it("guarda o título curto do pedaço", () => {
+    const leitura = comporLeitura({
+      ...SLOTS,
+      noDiaADia: [{ rotulo: "No trabalho", texto: "Você precisa de silêncio para render." }],
+    });
+    assert.equal(leitura.secoes[1]?.itens[0]?.rotulo, "No trabalho");
+    assert.match(leitura.secoes[1]!.texto, /silêncio/);
+  });
+
   it("mantém os nomes dos cinco traços", () => {
     const leitura = comporLeitura({
       ...SLOTS,
