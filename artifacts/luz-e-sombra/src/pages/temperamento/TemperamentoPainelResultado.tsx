@@ -12,6 +12,8 @@ import {
 import type { TemperamentoCodigo } from "@workspace/temperamento-v1";
 import { NOME_TEMPERAMENTO } from "@workspace/temperamento-v1";
 import { labelTipoPerfil, TEMPERAMENTO_VISUAL } from "./temperamentoConfig";
+import LeituraBlocos from "@/components/LeituraBlocos";
+import { leituraTemperamento } from "@/lib/leiturasPortal";
 import {
   enriquecerResultadoTemperamento,
   isResultadoLegado,
@@ -109,8 +111,11 @@ export default function TemperamentoPainelResultado({
   const tituloPerfil = primario && secundario && perfil?.tipo ? perfil.arquetipo : perfil?.arquetipo ?? "";
   const mostraCombo = Boolean(r.combo || r.comboNarrativa) && primario !== secundario;
 
+  const leitura = leituraTemperamento(r);
+
   return (
     <div className="space-y-5">
+      {leitura && <LeituraBlocos leitura={leitura} />}
       {legado && (
         <div
           className="rounded-xl px-4 py-3 text-sm"
@@ -132,7 +137,7 @@ export default function TemperamentoPainelResultado({
         </div>
       )}
 
-      <Capitulo numero={1} titulo="Quem você é" subtitulo="Sua essência temperamental">
+      <Capitulo numero={1} titulo="Seu perfil" subtitulo="Nome e eixos">
         {visP && IconP && perfil && (
           <div
             className="rounded-2xl p-6 relative overflow-hidden"
@@ -165,18 +170,6 @@ export default function TemperamentoPainelResultado({
                 )}
               </div>
             </div>
-
-            {perfil.frase_sintese && (
-              <p className="text-base italic font-tan-mon-cheri mb-4" style={{ color: "rgba(247,242,236,0.85)" }}>
-                «{perfil.frase_sintese}»
-              </p>
-            )}
-
-            {r.sinteseHumana && (
-              <p className="text-sm leading-relaxed mb-4 font-medium" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.85 }}>
-                {r.sinteseHumana}
-              </p>
-            )}
           </div>
         )}
 
@@ -184,157 +177,7 @@ export default function TemperamentoPainelResultado({
           <BarraEixo label="Energia social" valor={Math.round(scoreE)} cor={visP?.cor ?? GOLD} />
           <BarraEixo label="Estabilidade emocional" valor={Math.round(scoreEstab)} cor="#6db96d" />
         </div>
-
-        {(r.tracosMarcantes?.length ?? 0) > 0 && (
-          <ul className="space-y-2 pt-2">
-            {r.tracosMarcantes!.map((t) => (
-              <li
-                key={t}
-                className="flex gap-2 text-sm leading-relaxed rounded-xl px-4 py-3"
-                style={{ background: "rgba(255,255,255,0.03)", color: "rgba(247,242,236,0.65)" }}
-              >
-                <Sparkles className="w-4 h-4 shrink-0 mt-0.5" style={{ color: visP?.cor ?? GOLD }} />
-                {t}
-              </li>
-            ))}
-          </ul>
-        )}
       </Capitulo>
-
-      {mostraCombo && (
-        <Capitulo numero={2} titulo="A dinâmica do seu perfil" subtitulo="Primário e secundário">
-          {r.comboNarrativa && (
-            <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.9 }}>
-              {r.comboNarrativa}
-            </p>
-          )}
-          {r.combo && (
-            <div className="grid gap-3">
-              <div className="rounded-xl p-4" style={{ background: "rgba(109,185,109,0.06)", border: "1px solid rgba(109,185,109,0.2)" }}>
-                <p className="text-[10px] tracking-widest uppercase mb-1" style={{ color: "rgba(109,185,109,0.65)" }}>
-                  Força da combinação
-                </p>
-                <p className="text-sm" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
-                  {r.combo.forca}
-                </p>
-              </div>
-              <div className="rounded-xl p-4" style={{ background: "rgba(224,123,57,0.06)", border: "1px solid rgba(224,123,57,0.2)" }}>
-                <p className="text-[10px] tracking-widest uppercase mb-1" style={{ color: "rgba(224,123,57,0.65)" }}>
-                  Tensão interna
-                </p>
-                <p className="text-sm" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
-                  {r.combo.tensao}
-                </p>
-              </div>
-              <div className="rounded-xl p-4" style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.15)" }}>
-                <p className="text-[10px] tracking-widest uppercase mb-1 flex items-center gap-1" style={{ color: "rgba(200,165,107,0.55)" }}>
-                  <Zap className="w-3 h-3" />
-                  Onde isso brilha
-                </p>
-                <p className="text-sm" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
-                  {r.combo.contexto}
-                </p>
-              </div>
-            </div>
-          )}
-        </Capitulo>
-      )}
-
-      {(r.analiseAprofundada?.length ?? 0) > 0 && (
-        <Capitulo numero={mostraCombo ? 3 : 2} titulo="Análise aprofundada" subtitulo="Leitura profissional do seu perfil">
-          <div className="space-y-8">
-            {r.analiseAprofundada!.map((sec) => (
-              <section key={sec.id}>
-                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: GOLD }}>
-                  <BookOpen className="w-4 h-4 shrink-0 opacity-70" />
-                  {sec.titulo}
-                </h3>
-                <div className="space-y-3">
-                  {sec.paragrafos.map((p, i) => (
-                    <p
-                      key={`${sec.id}-${i}`}
-                      className="text-sm leading-relaxed"
-                      style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.9 }}
-                    >
-                      {p}
-                    </p>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        </Capitulo>
-      )}
-
-      {(r.seuDom || r.pontoCego) && (
-        <Capitulo
-          numero={(r.analiseAprofundada?.length ? (mostraCombo ? 4 : 3) : mostraCombo ? 3 : 2) as number}
-          titulo="Resumo: dom e ponto cego"
-          defaultOpen={false}
-        >
-          <div className="grid md:grid-cols-2 gap-3">
-            {r.seuDom && (
-              <div
-                className="rounded-xl p-4"
-                style={{ background: "rgba(109,185,109,0.06)", border: "1px solid rgba(109,185,109,0.2)" }}
-              >
-                <p className="text-[10px] tracking-widest uppercase mb-2 flex items-center gap-1.5" style={{ color: "rgba(109,185,109,0.65)" }}>
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  Seu dom
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
-                  {r.seuDom}
-                </p>
-              </div>
-            )}
-            {r.pontoCego && (
-              <div
-                className="rounded-xl p-4"
-                style={{ background: "rgba(224,123,57,0.06)", border: "1px solid rgba(224,123,57,0.2)" }}
-              >
-                <p className="text-[10px] tracking-widest uppercase mb-2 flex items-center gap-1.5" style={{ color: "rgba(224,123,57,0.65)" }}>
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  Onde você pode tropeçar
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
-                  {r.pontoCego}
-                </p>
-              </div>
-            )}
-          </div>
-        </Capitulo>
-      )}
-
-      {(r.passoPratico || r.perguntaCrescimento) && (
-        <Capitulo
-          numero={5}
-          titulo="Para crescer a partir daqui"
-          defaultOpen={false}
-        >
-          {r.passoPratico && (
-            <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.68)", lineHeight: 1.85 }}>
-              {r.passoPratico}
-            </p>
-          )}
-          {r.perguntaCrescimento && (
-            <div
-              className="rounded-xl p-5 text-center flex flex-col items-center gap-2"
-              style={{
-                background: "linear-gradient(135deg, rgba(200,165,107,0.08) 0%, rgba(30,24,18,0.4) 100%)",
-                border: "1px solid rgba(200,165,107,0.2)",
-              }}
-            >
-              <Target className="w-4 h-4" style={{ color: GOLD }} />
-              <p className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
-                Pergunta para refletir
-              </p>
-              <p className="text-sm italic font-tan-mon-cheri" style={{ color: "rgba(247,242,236,0.82)" }}>
-                {r.perguntaCrescimento}
-              </p>
-            </div>
-          )}
-        </Capitulo>
-      )}
 
       {pct && primario && (
         <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.1)" }}>

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import { CATALOGO } from "@workspace/copy-voz";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import {
@@ -106,7 +107,7 @@ export default function JornadaPage() {
           <PageIntroHeader
             eyebrow="Sua Jornada"
             titulo="Cada etapa revela"
-            subtitulo="Uma nova versão sua."
+            subtitulo={CATALOGO.jornada.intro}
           />
           {progresso && (
             <p className="text-sm mt-3" style={{ color: "rgba(247,242,236,0.45)" }}>

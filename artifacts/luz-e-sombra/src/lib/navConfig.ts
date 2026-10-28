@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { CATALOGO } from "@workspace/copy-voz";
 import {
   Home,
   Users2,
@@ -28,7 +29,7 @@ export const NAV_PRIMARY: NavItem[] = [
 
 /** Ferramentas e avaliações — agrupadas no menu «Explorar». */
 export const NAV_TOOLS: NavItem[] = [
-  { href: "/jornada/traco", label: "Traço de Caráter", icon: Layers, description: "Leitura corporal Reich/Lowen" },
+  { href: "/jornada/traco", label: "Traço de Caráter", icon: Layers, description: CATALOGO.jornada.tracoMenu },
   { href: "/jornada/roda", label: "Avaliação", icon: Target, description: "Roda da Vida e diagnósticos" },
   { href: "/jornada/numerologia", label: "Numerologia", icon: Hash, description: "Mapa numerológico pessoal" },
   { href: "/missoes", label: "Missões", icon: Flame, description: "Desafios e gamificação" },

@@ -77,12 +77,12 @@ export function computarCompatibilidade(
 
   if (!matchARecebeBExpressa) {
     pontesParaA.push(
-      `${nomeB} pode aprender a oferecer mais ${LABEL_LINGUAGEM[perfilA.receber.principal].toLowerCase()} — é o que mais enche seu coração.`,
+      `${nomeB} pode aprender a oferecer mais ${LABEL_LINGUAGEM[perfilA.receber.principal].toLowerCase()}, é o que mais enche seu coração.`,
     );
   }
   if (!matchBRecebeAExpressa) {
     pontesParaB.push(
-      `Você pode oferecer mais ${LABEL_LINGUAGEM[b.receber.principal].toLowerCase()} para ${nomeB} — é o que mais enche o coração dela(e).`,
+      `Você pode oferecer mais ${LABEL_LINGUAGEM[b.receber.principal].toLowerCase()} para ${nomeB}, é o que mais enche o coração dela(e).`,
     );
   }
 
@@ -90,8 +90,8 @@ export function computarCompatibilidade(
 
   const friccaoProvavel =
     matchARecebeBExpressa && matchBRecebeAExpressa
-      ? "Conflitos tendem a surgir por rotina, não por incompatibilidade de linguagens — cuidem dos gestos pequenos."
-      : `Fricção típica: ${nomeA} sente falta de ${LABEL_LINGUAGEM[perfilA.receber.principal].toLowerCase()} enquanto ${nomeB} oferece ${LABEL_LINGUAGEM[b.expressar.principal].toLowerCase()} — e vice-versa. Ninguém está errado; estão falando dialetos diferentes.`;
+      ? "Conflitos tendem a surgir por rotina, não por incompatibilidade de linguagens, cuidem dos gestos pequenos."
+      : `Fricção típica: ${nomeA} sente falta de ${LABEL_LINGUAGEM[perfilA.receber.principal].toLowerCase()} enquanto ${nomeB} oferece ${LABEL_LINGUAGEM[b.expressar.principal].toLowerCase()}, e vice-versa. Ninguém está errado; estão falando dialetos diferentes.`;
 
   let resumoHumano: string;
   if (matchARecebeBExpressa && matchBRecebeAExpressa) {

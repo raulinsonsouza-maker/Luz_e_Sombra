@@ -4,12 +4,14 @@ import { useAuth } from "@/context/AuthContext";
 import {
   Calendar, TrendingUp, Heart, Briefcase, DollarSign, Activity,
   AlertCircle, Brain, Lightbulb, ChevronRight, Sparkles,
-  User, Star, Zap, Shield, Eye, Hash, BookOpen, Compass, Quote, ExternalLink, Lock,
+  User, Star, Zap, Shield, Eye, Hash, BookOpen, Compass, ExternalLink, Lock,
 } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 import { useJornadaModulo } from "@/hooks/useJornadaModulo";
 
-import { ANOS_UNIVERSAIS, ANOS_PESSOAIS, COMBINACOES, NUMEROS_DE_VIDA } from "@/lib/numerologia-data";
+import { ANOS_UNIVERSAIS, ANOS_PESSOAIS, COMBINACOES, NUMEROS_DE_VIDA, type AnaliseNumero } from "@/lib/numerologia-data";
+import LeituraBlocos from "@/components/LeituraBlocos";
+import { leituraNumerologia } from "@/lib/leiturasPortal";
 import MobileTopBar from "@/components/MobileTopBar";
 import NavBackButton from "@/components/NavBackButton";
 import PageIntroHeader from "@/components/PageIntroHeader";
@@ -28,6 +30,28 @@ import {
 } from "@/lib/numerologia-utils";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function perfilDoAno(interp: AnaliseNumero) {
+  return {
+    essencia: interp.essencia,
+    descricao: interp.descricao,
+    missao: interp.detalhado,
+    carreira: interp.temas.carreira,
+    relacionamentos: interp.temas.relacionamentos,
+    sombra: interp.desafios.join(". "),
+    afirmacao: interp.praticasSugeridas?.join(" "),
+  };
+}
+
+function perfilDoMes(mes: MesPessoal) {
+  return {
+    essencia: mes.descricao,
+    descricao: mes.profundidade,
+    missao: mes.reflexao,
+    sombra: mes.evitar.join(". "),
+    afirmacao: mes.acoes.join(" "),
+  };
+}
 
 function NumBadge({ n, size = "lg" }: { n: number; size?: "sm" | "md" | "lg" | "xl" }) {
   const s = { sm: "w-10 h-10 text-lg", md: "w-14 h-14 text-2xl", lg: "w-20 h-20 text-4xl", xl: "w-28 h-28 text-6xl" }[size];
@@ -205,32 +229,16 @@ export default function NumerologiaPage() {
               </div>
             </div>
 
-            {/* Essence */}
-            <div className="p-6 rounded-2xl mb-6"
-              style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.08), rgba(156,119,66,0.05))", border: "1px solid rgba(200,165,107,0.3)" }}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-4 h-px bg-brand-gold" />
-                <span className="text-xs tracking-widest uppercase text-brand-gold font-semibold">Essência</span>
+            {leituraNumerologia(numerodeVidaInfo) && (
+              <div className="mb-6">
+                <LeituraBlocos leitura={leituraNumerologia(numerodeVidaInfo)!} />
               </div>
-              <p className="text-on-darker leading-relaxed">{numerodeVidaInfo.essencia}</p>
-            </div>
+            )}
 
-            {/* Mission */}
-            <div className="p-5 rounded-xl mb-6"
-              style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
-              <div className="flex items-center gap-2 mb-2">
-                <Compass className="w-4 h-4 text-brand-gold" />
-                <span className="text-xs tracking-widest uppercase text-on-dark-soft font-semibold">Missão de Vida</span>
-              </div>
-              <p className="text-on-darker leading-relaxed text-sm">{numerodeVidaInfo.missao}</p>
-            </div>
-
-            <p className="text-on-darker text-sm leading-relaxed mb-6">{numerodeVidaInfo.descricao}</p>
+            <p className="text-on-darker text-sm leading-relaxed mb-6">{numerodeVidaInfo.palavrasChave.join(" · ")}</p>
 
             {/* 4 life areas */}
             <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <InfoCard icon={Briefcase} label="Carreira e Propósito">{numerodeVidaInfo.carreira}</InfoCard>
-              <InfoCard icon={Heart} label="Relacionamentos">{numerodeVidaInfo.relacionamentos}</InfoCard>
               <InfoCard icon={Activity} label="Saúde e Corpo">{numerodeVidaInfo.saude}</InfoCard>
               <InfoCard icon={Star} label="Espiritualidade">{numerodeVidaInfo.espiritualidade}</InfoCard>
             </div>
@@ -302,7 +310,11 @@ export default function NumerologiaPage() {
                 <p className="text-sm text-on-dark-muted leading-relaxed mb-4">
                   Como você se expressa no mundo e os talentos que manifesta naturalmente, sua "máscara" mais elevada.
                 </p>
-                <p className="text-sm text-on-darker leading-relaxed">{expressaoInfo.essencia}</p>
+                {leituraNumerologia(expressaoInfo) && (
+                  <div className="mb-4">
+                    <LeituraBlocos leitura={leituraNumerologia(expressaoInfo)!} />
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-2 mt-4">
                   {expressaoInfo.palavrasChave.slice(0, 4).map((p, i) => <Tag key={i}>{p}</Tag>)}
                 </div>
@@ -322,7 +334,11 @@ export default function NumerologiaPage() {
                 <p className="text-sm text-on-dark-muted leading-relaxed mb-4">
                   O que você deseja profundamente no íntimo, sua motivação mais oculta, o que move sua alma.
                 </p>
-                <p className="text-sm text-on-darker leading-relaxed">{almaInfo.essencia}</p>
+                {leituraNumerologia(almaInfo) && (
+                  <div className="mb-4">
+                    <LeituraBlocos leitura={leituraNumerologia(almaInfo)!} />
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-2 mt-4">
                   {almaInfo.palavrasChave.slice(0, 4).map((p, i) => <Tag key={i}>{p}</Tag>)}
                 </div>
@@ -403,7 +419,11 @@ export default function NumerologiaPage() {
                   <p className="text-xs font-mono text-on-dark-soft/60 mt-1">{anoPessoal.passos}</p>
                 </div>
               </div>
-              {interp && <p className="text-sm text-on-darker leading-relaxed">{interp.essencia || interp.descricao}</p>}
+              {interp && leituraNumerologia(perfilDoAno(interp)) && (
+                <div className="mb-2">
+                  <LeituraBlocos leitura={leituraNumerologia(perfilDoAno(interp))!} />
+                </div>
+              )}
             </div>
             <div className="p-6 rounded-2xl"
               style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
@@ -429,14 +449,8 @@ export default function NumerologiaPage() {
                 <p className="text-on-dark font-medium">{interp.titulo}</p>
               </div>
             </div>
-            <div className="p-6 rounded-2xl mb-6"
-              style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.2)" }}>
-              <p className="text-on-darker leading-relaxed text-sm whitespace-pre-line">{interp.detalhado}</p>
-            </div>
             <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <InfoCard icon={Briefcase} label="Carreira">{interp.temas.carreira}</InfoCard>
               <InfoCard icon={DollarSign} label="Finanças">{interp.temas.financas}</InfoCard>
-              <InfoCard icon={Heart} label="Relacionamentos">{interp.temas.relacionamentos}</InfoCard>
               <InfoCard icon={Activity} label="Saúde">{interp.temas.saude}</InfoCard>
             </div>
             {interp.temas.desenvolvimento && (
@@ -448,18 +462,6 @@ export default function NumerologiaPage() {
               </div>
             )}
             <div className="grid md:grid-cols-2 gap-4 mb-4">
-              {interp.desafios.length > 0 && (
-                <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
-                  <h3 className="font-semibold text-on-dark text-sm mb-3">Desafios do Ano</h3>
-                  <ul className="space-y-1.5">
-                    {interp.desafios.map((d, i) => (
-                      <li key={i} className="text-xs text-on-darker flex items-start gap-2">
-                        <span className="text-brand-gold/60 mt-0.5">·</span><span>{d}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
               {interp.areasDeAtencao && interp.areasDeAtencao.length > 0 && (
                 <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
                   <h3 className="font-semibold text-on-dark text-sm mb-3">Áreas de Atenção</h3>
@@ -473,18 +475,6 @@ export default function NumerologiaPage() {
                 </div>
               )}
             </div>
-            {interp.praticasSugeridas && interp.praticasSugeridas.length > 0 && (
-              <div className="p-5 rounded-xl mb-4" style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.2)" }}>
-                <h3 className="font-semibold text-on-dark text-sm mb-3">Práticas Recomendadas</h3>
-                <div className="grid md:grid-cols-2 gap-x-6 gap-y-1.5">
-                  {interp.praticasSugeridas.map((p, i) => (
-                    <div key={i} className="flex items-start gap-2 text-xs text-on-darker">
-                      <span className="text-brand-gold mt-0.5 flex-shrink-0">·</span><span>{p}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
             {interp.afirmacoes && interp.afirmacoes.length > 0 && (
               <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.25)" }}>
                 <h3 className="font-semibold text-on-dark text-sm mb-3">Afirmações do Ano</h3>
@@ -571,7 +561,7 @@ export default function NumerologiaPage() {
               Seu Caminho de Vida <strong>{resultado.numerodeVida}</strong> encontra a energia do Ano Pessoal <strong>{anoPessoal.reduzido}</strong> e do Ano Universal <strong>{anoUniversal.reduzido}</strong>.
               Cada ciclo anual amplifica ou desafia aspectos específicos do seu Caminho de Vida.
               Considere como as qualidades do seu número <strong>{resultado.numerodeVida}</strong> ({resultado.numerodeVidaInfo?.arquetipo})
-              podem ser expressas através da energia do ano: {interp?.descricao}
+              podem ser expressas neste ciclo anual.
             </p>
           </div>
         )}
@@ -607,23 +597,12 @@ export default function NumerologiaPage() {
                 <NumBadge n={mes.reduzido} size="sm" />
               </div>
 
-              {/* Short description */}
-              <p className="text-sm text-on-darker leading-relaxed mb-4">{mes.descricao}</p>
+              {leituraNumerologia(perfilDoMes(mes)) && (
+                <div className="mb-4">
+                  <LeituraBlocos leitura={leituraNumerologia(perfilDoMes(mes))!} />
+                </div>
+              )}
 
-              {/* Deep insight */}
-              <div className="p-4 rounded-xl mb-4"
-                style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.15)" }}>
-                <p className="text-xs text-on-darker leading-relaxed">{mes.profundidade}</p>
-              </div>
-
-              {/* Reflection question */}
-              <div className="flex items-start gap-3 p-4 rounded-xl mb-4"
-                style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.25)" }}>
-                <Quote className="w-4 h-4 text-brand-gold flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-on-darker leading-relaxed italic">{mes.reflexao}</p>
-              </div>
-
-              {/* Areas */}
               {mes.areas.length > 0 && (
                 <div className="mb-4">
                   <p className="text-xs font-semibold tracking-wider uppercase text-brand-gold mb-2">Áreas em destaque</p>
@@ -633,33 +612,6 @@ export default function NumerologiaPage() {
                 </div>
               )}
 
-              {/* Actions */}
-              {mes.acoes.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-xs font-semibold tracking-wider uppercase text-brand-gold mb-2">Ações recomendadas</p>
-                  <ul className="space-y-1.5">
-                    {mes.acoes.map((a, i) => (
-                      <li key={i} className="text-xs text-on-darker flex items-start gap-2">
-                        <span className="text-brand-gold mt-0.5 flex-shrink-0">·</span><span>{a}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Avoid */}
-              {mes.evitar.length > 0 && (
-                <div className="pt-3" style={{ borderTop: "1px solid rgba(200,165,107,0.1)" }}>
-                  <p className="text-xs font-semibold tracking-wider uppercase text-on-dark-soft/60 mb-2">O que evitar</p>
-                  <ul className="space-y-1.5">
-                    {mes.evitar.map((e, i) => (
-                      <li key={i} className="text-xs text-on-dark-muted flex items-start gap-2">
-                        <span className="text-on-dark-soft mt-0.5 flex-shrink-0">·</span><span>{e}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           ))}
         </div>

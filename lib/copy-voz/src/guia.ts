@@ -1,7 +1,7 @@
-/** Regras editoriais para copy user-facing (PT-BR, você). */
+/** Regras editoriais para copy user-facing (PT-BR, você). A moldura e o catálogo vivem ao lado. */
 export const VOZ_REGRAS = {
   pessoa: "você",
-  proibido: ["—"] as const,
+  proibido: ["—", "chakra", "couraça", "plexo"] as const,
   citacao: '"..."',
   preferir: "em vez de",
   /** Traço de Caráter: explicar como a pessoa funciona, não metáforas românticas. */

@@ -9,5 +9,6 @@ export type {
 
 export { VERSAO_NARRATIVA } from "./constants.js";
 export { gerarNarrativa, type GerarNarrativaInput } from "./gerarNarrativa.js";
+export { leituraDoTraco } from "./leitura.js";
 export { adaptarVozNarrativa } from "./voz.js";
 export { sanitizarResultadoLegado, isResultadoLegado } from "./legado.js";

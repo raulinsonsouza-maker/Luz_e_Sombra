@@ -17,45 +17,45 @@ export const ESTRUTURAS_CONFIG: Record<
 > = {
   esquizoide: {
     nome: "Esquizóide",
-    descricaoCurta: "Vive no reino das ideias. Criativo, sensível e profundamente introspectivo.",
+    descricaoCurta: "Criatividade e imaginação. Você vive muito por dentro e enxerga o que ainda não está visível.",
     descricaoLonga:
-      "A estrutura Esquizóide carrega uma inteligência singular e uma visão de mundo única. Estas pessoas habitam o universo das ideias com brilhantismo, possuem profundidade filosófica e uma criatividade que nasce da solidão como fonte. O desafio está em trazer essa riqueza interior para o contato real com o mundo.",
+      "No Esquizoide, a fase é a gestação e a dor é a rejeição. O talento é criar e imaginar. Você não precisa virar uma pessoa mais extrovertida. Precisa trazer, aos poucos, essa riqueza para o contato real. A leitura completa mostra como isso acontece no seu corpo e no seu dia.",
     cor: "#9b8fde",
     corBg: "rgba(155,143,222,0.08)",
     corBorder: "rgba(155,143,222,0.3)",
   },
   oral: {
     nome: "Oral",
-    descricaoCurta: "Profundamente humano. Sente, conecta e nutre com abertura relacional.",
+    descricaoCurta: "Comunicação e afeto. Você sente o outro e cria vínculo com facilidade.",
     descricaoLonga:
-      "A estrutura Oral tem uma capacidade extraordinária de sentir o outro. São pessoas que nutrem, que se importam genuinamente, que constroem vínculos de calor real. A saudade, a melancolia e o desejo de pertencer fazem parte de uma riqueza emocional sem igual. O caminho é aprender a receber tanto quanto oferecem.",
+      "No Oral, a fase é a amamentação e a dor é o abandono. O talento é falar, cuidar e aproximar. O caminho não é deixar de sentir. É aprender a receber também, sem se esvaziar. A análise detalhada descreve esse movimento na sua vida.",
     cor: "#5b9bd5",
     corBg: "rgba(91,155,213,0.08)",
     corBorder: "rgba(91,155,213,0.3)",
   },
   psicopata: {
     nome: "Psicopata",
-    descricaoCurta: "Natural na liderança. Estratégico, persuasivo e orientado ao poder.",
+    descricaoCurta: "Liderança e negociação. Você organiza o espaço e move as pessoas.",
     descricaoLonga:
-      "A estrutura Psicopata possui um magnetismo e uma capacidade de influência raros. São líderes natos, estrategistas brilhantes, com uma visão clara do que querem. O desafio está em integrar vulnerabilidade à liderança e descobrir que a força real não precisa de controle constante.",
+      "No Psicopata, a fase vai de 1 a 2,5 anos e a dor é de manipulação e controle. O talento é liderar e negociar. Força, aqui, não pede controle o tempo todo. A leitura longa mostra onde isso te protege e onde te afasta.",
     cor: "#e07b39",
     corBg: "rgba(224,123,57,0.08)",
     corBorder: "rgba(224,123,57,0.3)",
   },
   masoquista: {
     nome: "Masoquista",
-    descricaoCurta: "Resiliente e leal. Suporta tudo com uma força interna impressionante.",
+    descricaoCurta: "Planejamento, resistência e força. Você sustenta o que os outros soltam.",
     descricaoLonga:
-      "A estrutura Masoquista carrega uma lealdade, uma resistência e uma capacidade de suportar que poucos possuem. Estas pessoas são presença certa nas horas difíceis, têm profundidade emocional e uma força que nasce da dor transformada. O caminho é aprender que a vida também pode ser leveza e expansão, não só resistência.",
+      "No Masoquista, a fase é o desfralde e a dor é a humilhação e a crítica. O talento é planejar, resistir e permanecer. Você não precisa carregar tudo para ter valor. A análise detalhada mostra essa força e o custo de usá-la o tempo inteiro.",
     cor: "#6db96d",
     corBg: "rgba(109,185,109,0.08)",
     corBorder: "rgba(109,185,109,0.3)",
   },
   rigido: {
     nome: "Rígido",
-    descricaoCurta: "Estruturado e realizador. Busca excelência com disciplina e presença.",
+    descricaoCurta: "Execução, dinamismo e capricho. Você entrega e mantém o padrão.",
     descricaoLonga:
-      "A estrutura Rígida possui organização, comprometimento e uma capacidade de realizar que inspira. São pessoas confiáveis, prezam a qualidade em tudo que fazem e têm uma presença impactante. O caminho é flexibilizar o controle emocional, permitir vulnerabilidade e integrar o que sente sem perder a competência.",
+      "No Rígido, a fase vai de 3,5 a 5 anos e a dor é a traição e a exclusão afetiva. O talento é executar com precisão. Competência não exige esconder o que você sente. A leitura completa aprofunda esse jeito de funcionar.",
     cor: "#c8a56b",
     corBg: "rgba(200,165,107,0.08)",
     corBorder: "rgba(200,165,107,0.3)",

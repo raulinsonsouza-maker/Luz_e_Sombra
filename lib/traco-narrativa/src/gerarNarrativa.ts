@@ -277,7 +277,7 @@ function estiloComunicacaoModulado(
 }
 
 const PADRAO_CONTENCAO_RIGIDA =
-  "O corpo apresenta organização e simetria notáveis, com contenção emocional perceptível. Não é colapso buscando sustentação, mas couraça funcional que mantém tudo no lugar. Há tensão discreta na cintura e região dorsal, sugerindo compressão crônica mais do que flacidez oral.";
+  "O corpo apresenta organização e simetria notáveis, com contenção emocional perceptível. Não é colapso buscando sustentação, mas proteção funcional que mantém tudo no lugar. Há tensão discreta na cintura e região dorsal, sugerindo compressão crônica mais do que flacidez oral.";
 
 function resolverPadraoPostural(
   principal: EstruturaTraco,

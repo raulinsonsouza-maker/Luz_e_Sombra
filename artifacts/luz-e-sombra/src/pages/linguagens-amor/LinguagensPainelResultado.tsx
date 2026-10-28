@@ -3,6 +3,8 @@ import { Copy, Check, Heart, Sparkles } from "lucide-react";
 import { LABEL_LINGUAGEM, type LinguagemAmor } from "@workspace/cinco-linguagens-amor";
 import { LINGUAGEM_VISUAL } from "./linguagensConfig";
 import { enriquecerResultado, isV2, isV3, type ResultadoLinguagensUi } from "./enriquecerResultado";
+import LeituraBlocos from "@/components/LeituraBlocos";
+import { leituraLinguagens } from "@/lib/leiturasPortal";
 
 export type { ResultadoLinguagensUi };
 
@@ -112,8 +114,11 @@ function PainelV3({
     });
   }
 
+  const leitura = leituraLinguagens(narr);
+
   return (
     <article className="space-y-8">
+      {leitura && <LeituraBlocos leitura={leitura} />}
       {/* Hero */}
       <header
         className="rounded-2xl p-6 md:p-7 relative overflow-hidden"
@@ -134,7 +139,7 @@ function PainelV3({
               {nomePessoa ? `Perfil de ${nomePessoa}` : "Sua linguagem principal"}
             </p>
             <h1 className="font-tan-mon-cheri text-xl md:text-2xl" style={{ color: "#f7f2ec" }}>
-              {narr.veredito}
+              {LABEL_LINGUAGEM[principal]}
             </h1>
           </div>
         </div>
@@ -153,7 +158,6 @@ function PainelV3({
             <Badge cor={LINGUAGEM_VISUAL[sec].cor}>+ {LABEL_LINGUAGEM[sec]}</Badge>
           )}
         </div>
-        <Prosa>{narr.abertura}</Prosa>
       </header>
 
       {/* Distribuição */}
@@ -169,111 +173,37 @@ function PainelV3({
         </div>
       )}
 
-      {/* Corpo narrativo */}
-      <div className="space-y-8 px-0.5">
-        <Secao titulo="Por que você é assim">
-          <Prosa>{narr.mecanismo}</Prosa>
-        </Secao>
-
-        <Secao titulo="Como isso aparece no seu dia a dia">
-          <ul className="space-y-3">
-            {narr.cenas.map((cena) => (
-              <li
-                key={cena.slice(0, 40)}
-                className="text-sm pl-4 border-l-2 leading-relaxed"
-                style={{ borderColor: "rgba(200,165,107,0.25)", color: "rgba(247,242,236,0.65)" }}
-              >
-                {cena}
-              </li>
-            ))}
-          </ul>
-        </Secao>
-
-        <Secao titulo="Quando o amor falta">
-          <Prosa>{narr.feridaPadrao}</Prosa>
-        </Secao>
-
-        {principal !== sec && sec && (
-          <Secao titulo="Suas duas linguagens juntas">
-            <Prosa>{narr.dinamicaPar}</Prosa>
-          </Secao>
-        )}
-
-        <Secao titulo="Carta para quem te ama">
-          <div
-            className="rounded-xl p-5 relative"
-            style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.15)" }}
-          >
-            <Prosa>{narr.cartaParceiro}</Prosa>
-            <button
-              type="button"
-              onClick={copiarCarta}
-              className="mt-4 flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg"
-              style={{ background: "rgba(200,165,107,0.12)", color: GOLD }}
-            >
-              {copiado ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              {copiado ? "Copiado!" : "Copiar carta"}
-            </button>
-          </div>
-        </Secao>
-
-        <Secao titulo="Plano de 7 dias">
-          <ul className="space-y-3">
-            {narr.planoSeteDias.map((dia, i) => (
-              <li key={dia} className="flex gap-3 items-start">
-                <span
-                  className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: "rgba(200,165,107,0.15)", color: GOLD }}
-                >
-                  {i + 1}
-                </span>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)" }}>
-                  {dia}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </Secao>
-
-        <Secao titulo="Sua linguagem menos natural">
-          <Prosa>{narr.linguagemAnti}</Prosa>
-        </Secao>
-
-        {narr.espelhoExpressar && (
-          <Secao titulo="O espelho: como você demonstra amor">
-            <Prosa>{narr.espelhoExpressar}</Prosa>
-            {narr.ponteComunicacao && <Prosa>{narr.ponteComunicacao}</Prosa>}
-          </Secao>
-        )}
-
-        {!resultado.expressarCompleto && onIniciarExpressar && (
-          <div
-            className="rounded-2xl p-5 text-center"
-            style={{ background: "rgba(155,143,222,0.06)", border: "1px solid rgba(155,143,222,0.2)" }}
-          >
-            <Heart className="w-5 h-5 mx-auto mb-2" style={{ color: "rgba(155,143,222,0.8)" }} />
-            <p className="text-sm mb-3" style={{ color: "rgba(247,242,236,0.6)" }}>
-              Quer descobrir como você demonstra amor? Mais 5 perguntas rápidas.
-            </p>
-            <button
-              type="button"
-              onClick={onIniciarExpressar}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold"
-              style={{ background: "rgba(155,143,222,0.2)", color: "rgba(200,190,255,0.95)" }}
-            >
-              Aprofundar perfil
-            </button>
-          </div>
-        )}
-
-        <div
-          className="rounded-xl p-4 flex gap-3"
-          style={{ background: "rgba(107,159,212,0.06)", border: "1px solid rgba(107,159,212,0.18)" }}
+      {narr.cartaParceiro && (
+        <button
+          type="button"
+          onClick={copiarCarta}
+          className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg"
+          style={{ background: "rgba(200,165,107,0.12)", color: GOLD }}
         >
-          <Sparkles className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "#6b9fd4" }} />
-          <Prosa>{narr.confiancaNarrativa}</Prosa>
+          {copiado ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+          {copiado ? "Copiado!" : "Copiar carta para quem te ama"}
+        </button>
+      )}
+
+      {!resultado.expressarCompleto && onIniciarExpressar && (
+        <div
+          className="rounded-2xl p-5 text-center"
+          style={{ background: "rgba(155,143,222,0.06)", border: "1px solid rgba(155,143,222,0.2)" }}
+        >
+          <Heart className="w-5 h-5 mx-auto mb-2" style={{ color: "rgba(155,143,222,0.8)" }} />
+          <p className="text-sm mb-3" style={{ color: "rgba(247,242,236,0.6)" }}>
+            Quer descobrir como você demonstra amor? Mais 5 perguntas rápidas.
+          </p>
+          <button
+            type="button"
+            onClick={onIniciarExpressar}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold"
+            style={{ background: "rgba(155,143,222,0.2)", color: "rgba(200,190,255,0.95)" }}
+          >
+            Aprofundar perfil
+          </button>
         </div>
-      </div>
+      )}
     </article>
   );
 }

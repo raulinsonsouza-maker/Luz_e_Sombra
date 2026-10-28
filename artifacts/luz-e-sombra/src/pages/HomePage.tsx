@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { mensagemDoDia } from "@/lib/mensagensDiarias";
+import { CATALOGO } from "@workspace/copy-voz";
 import MobileTopBar from "@/components/MobileTopBar";
 import MissaoDiariaCard from "@/components/MissaoDiariaCard";
 import { useConcluirMissao } from "@/hooks/useConcluirMissao";
@@ -146,6 +147,9 @@ export default function HomePage() {
               {primeiroNome}
             </h1>
             <div className="w-14 h-px mb-4 rounded-full" style={{ background: "linear-gradient(90deg, #c8a56b, rgba(200,165,107,0))" }} />
+            <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.72)" }}>
+              {CATALOGO.home.entrada}
+            </p>
             <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.52)" }}>
               {mensagemDoDia()}
             </p>

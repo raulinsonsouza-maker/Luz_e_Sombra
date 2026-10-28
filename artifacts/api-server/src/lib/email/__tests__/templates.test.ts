@@ -20,7 +20,7 @@ describe("email templates", () => {
       checkoutUrl: "https://portaliluminando.com.br/checkout?token=abc",
       loginUrl: LOGIN,
     });
-    assert.match(subject, /Bem-vindo/i);
+    assert.match(subject, /Bem-vinda/i);
     assert.match(subject, new RegExp(EMAIL_PORTAL_NAME));
     assert.match(html, /checkout\?token=abc/);
     assert.match(html, /\/login/);
@@ -35,7 +35,7 @@ describe("email templates", () => {
       loginUrl: LOGIN,
       jornadaUrl: JORNADA,
     });
-    assert.match(subject, /Pagamento confirmado/i);
+    assert.match(subject, /acesso está liberado/i);
     assert.match(html, /joao@test\.com/);
     assert.match(html, /Acessar minha conta/);
     assert.match(html, /\/login/);
@@ -67,7 +67,7 @@ describe("email templates", () => {
       checkoutUrl: "https://portaliluminando.com.br/checkout?token=xyz",
       loginUrl: LOGIN,
     });
-    assert.match(subject, /PIX|pendente/i);
+    assert.match(subject, /pagamento/i);
     assert.match(html, /checkout\?token=xyz/);
     assert.match(html, /\/login/);
   });

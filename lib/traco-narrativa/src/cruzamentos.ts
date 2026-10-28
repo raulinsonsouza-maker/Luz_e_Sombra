@@ -35,7 +35,7 @@ export function montarLeituraEmocionalDeclarada(
   const [p1, p2] = topPadroes(fusao);
   const l1 = LABEL_PADRAO[p1];
   const l2 = LABEL_PADRAO[p2];
-  return `No questionário, destacam-se ${l1} e ${l2}, isso conversa com a couraça de ${T.NOMES[principal].toLowerCase()} e com a influência de ${T.NOMES[secundaria].toLowerCase()} no dia a dia.`;
+  return `No questionário, destacam-se ${l1} e ${l2}, isso conversa com a proteção de ${T.NOMES[principal].toLowerCase()} e com a influência de ${T.NOMES[secundaria].toLowerCase()} no dia a dia.`;
 }
 
 export function montarContrasteFotosFormulario(

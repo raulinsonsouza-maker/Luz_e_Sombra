@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { format } from "date-fns";
+import LeituraBlocos from "@/components/LeituraBlocos";
+import { leituraRoda } from "@/lib/leiturasPortal";
 import { ptBR } from "date-fns/locale";
 import RadarChart from "@/components/RadarChart";
 import LineChart from "@/components/LineChart";
@@ -430,6 +432,12 @@ export default function ResultadoPage() {
     ? calcularMedia(todasAvaliacoes[todasAvaliacoes.length - 1])
     : null;
   const progresso = mediaInicial !== null ? media - mediaInicial : null;
+  const leitura = leituraRoda(
+    areasOrdenadas.map(({ area, valor }) => {
+      const info = getNivelInfo(area.id, valor);
+      return { titulo: area.titulo, interpretacao: info.interpretacao, acao: info.acao, valor };
+    }),
+  );
 
   return (
     <div
@@ -444,6 +452,7 @@ export default function ResultadoPage() {
           className="mb-2"
         />
         <PageIntroHeader eyebrow="Roda da Vida" titulo="Resultado" subtitulo="Leitura completa da sua avaliação" className="mb-2" />
+        {leitura && <LeituraBlocos leitura={leitura} />}
 
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <div className="rounded-3xl overflow-hidden"
@@ -604,10 +613,10 @@ export default function ResultadoPage() {
         {/* ── Deep area analysis ──────────────────────────────────────────── */}
         <DarkCard className="p-6 md:p-8">
           <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
-            Análise Profunda
+            Análise por área
           </p>
           <p className="text-sm mb-6" style={{ color: "rgba(247,242,236,0.4)" }}>
-            Áreas ordenadas por prioridade. As que mais pedem atenção aparecem primeiro.
+            As notas de cada área. A leitura completa está nos blocos acima.
           </p>
 
           <div className="space-y-4">
@@ -633,24 +642,11 @@ export default function ResultadoPage() {
                     </div>
                   </div>
 
-                  <div className="w-full rounded-full h-1.5 mb-4" style={{ background: "rgba(255,255,255,0.06)" }}>
+                  <div className="w-full rounded-full h-1.5" style={{ background: "rgba(255,255,255,0.06)" }}>
                     <div
                       className="h-1.5 rounded-full"
                       style={{ width: `${pct}%`, background: nivelInfo.cor }}
                     />
-                  </div>
-
-                  <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.65)" }}>
-                    {nivelInfo.interpretacao}
-                  </p>
-
-                  <div className="flex items-start gap-2.5 pt-3"
-                    style={{ borderTop: `1px solid ${nivelInfo.borderColor}` }}>
-                    <Zap className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: nivelInfo.cor }} />
-                    <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
-                      <span className="font-semibold" style={{ color: "rgba(247,242,236,0.75)" }}>Próximo passo: </span>
-                      {nivelInfo.acao}
-                    </p>
                   </div>
                 </div>
               );

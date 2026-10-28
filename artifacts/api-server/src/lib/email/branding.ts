@@ -1,6 +1,8 @@
-/** Nomes oficiais — alinhados ao frontend (lpConfig). */
-export const EMAIL_PORTAL_NAME = "Portal Iluminando";
-export const EMAIL_JOURNEY_NAME = "Jornada Da Sombra à Luz";
+import { MARCA } from "@workspace/copy-voz";
+
+/** Nomes oficiais — a mesma fonte da landing. */
+export const EMAIL_PORTAL_NAME = MARCA.portal;
+export const EMAIL_JOURNEY_NAME = MARCA.jornada;
 export const EMAIL_SUPPORT = "contato@portaliluminando.com.br";
 
 export function primeiroNome(nome: string): string {

@@ -10,7 +10,7 @@ export const SIGNIFICADOS_METAFISICOS: Record<number, string> = {
   4: "O número que representa o plano físico (da ação). É a chave da disciplina, do sentido prático e da organização. Simbolizado pelo quadrado, a base de praticamente todas as construções.",
   5: "O centro do plano da alma (dos sentimentos) e o epicentro da Tabela de Nascimento. É o número espiritual que representa o amor e a liberdade de expressão.",
   6: "O centro do plano mental (dos pensamentos). Representa a criatividade e a integração dos lobos esquerdo e direito do cérebro. Também representa o oposto — a destruição expressa como preocupação, stress, ansiedade e depressão.",
-  7: "O símbolo do templo, do corpo humano e dos seus sete chakras ou centros de poder. É o número do ensino e da aprendizagem, o número da experiência filosófica adquirida com sacrifício, transformando-se em sabedoria indelével.",
+  7: "O símbolo do templo, do corpo humano e dos seus sete centros de energia. É o número do ensino e da aprendizagem, o número da experiência filosófica adquirida com sacrifício, transformando-se em sabedoria indelével.",
   8: "O número espiritual mais ativo. Situado no extremo ativo do plano da alma, é o número da sabedoria expressa intuitivamente através de atitudes bondosas. Põe em foco a independência.",
   9: "O número triplo que se situa no extremo ativo do plano mental. Enquanto mente em ação, representa a ambição (físico), a responsabilidade (racional) e o idealismo (espiritual), combinando os atributos de cada um dos números anteriores.",
   0: "Símbolo místico que representa o nada (numerador) e o tudo (denominador). Indica o grau de misticismo espiritual inerente ao indivíduo. Possui uma espiritualidade inerente que deve ser reconhecida e desenvolvida.",

@@ -8,6 +8,7 @@ import PageIntroHeader from "@/components/PageIntroHeader";
 import MissaoDiariaCard from "@/components/MissaoDiariaCard";
 import { useConcluirMissao, type LevelUpInfo } from "@/hooks/useConcluirMissao";
 import { Flame, Trophy, Star, Zap, Sunrise, Crown, Target, Gem, Sparkles, Shield, Compass, Mountain, Award, type LucideIcon } from "lucide-react";
+import { CATALOGO } from "@workspace/copy-voz";
 
 interface Missao {
   id: number;
@@ -187,7 +188,7 @@ export default function MissoesPage() {
       )}
 
       <div className="max-w-lg mx-auto px-4 pt-6">
-        <PageIntroHeader eyebrow="Missões" titulo="Ações que transformam" subtitulo="Constância diária e conquistas da jornada" />
+        <PageIntroHeader eyebrow={CATALOGO.missoes.eyebrow} titulo={CATALOGO.missoes.titulo} subtitulo={CATALOGO.missoes.subtitulo} />
 
         {/* Tabs */}
         <div

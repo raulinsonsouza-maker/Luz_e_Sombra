@@ -12,6 +12,7 @@ import {
   Clock,
 } from "lucide-react";
 import { LABEL_LINGUAGEM, type LinguagemAmor } from "@workspace/cinco-linguagens-amor";
+import { CATALOGO } from "@workspace/copy-voz";
 import { tituloPerfilTemperamento, type TemperamentoCodigo, type TipoPerfil } from "@workspace/temperamento-v1";
 import MobileTopBar from "@/components/MobileTopBar";
 import NavBackButton from "@/components/NavBackButton";
@@ -103,7 +104,7 @@ async function carregarPreviewAnalise(
         if (!r?.estruturaPrincipal) return null;
         const nome = NOME_ESTRUTURA[r.estruturaPrincipal] ?? r.estruturaPrincipal;
         return {
-          titulo: r.dominanteApelido ?? nome,
+          titulo: nome,
           linha: r.fraseIdentidade ?? r.mensagemTerapeutica,
           badge: `${nome} · ${r.estruturas?.[r.estruturaPrincipal] ?? ""}%`.replace(" · %", ""),
         };
@@ -443,7 +444,7 @@ export default function JornadaHubPage() {
               Módulo bloqueado
             </h1>
             <p className="text-sm" style={{ color: "rgba(247,242,236,0.45)" }}>
-              Complete o módulo anterior na jornada para desbloquear este passo.
+              {CATALOGO.jornada.bloqueado}
             </p>
           </div>
         </div>

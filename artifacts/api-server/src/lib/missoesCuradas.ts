@@ -22,7 +22,7 @@ export const MISSOES_POR_DIA: ReadonlyArray<ReadonlyArray<MissaoCurada>> = [
   ],
   [
     { titulo: "Faça 5 minutos de respiração abdominal lenta", xp: P },
-    { titulo: "Identifique um gatilho que ativou seu sistema nervoso hoje", xp: R },
+    { titulo: "Perceba o que te deixou tenso hoje e anote o que aconteceu antes", xp: R },
     { titulo: "Beba um copo d'água em silêncio, sem celular", xp: O },
     { titulo: "Escreva sem filtro por 3 minutos sobre como você está se sentindo", xp: E },
   ],

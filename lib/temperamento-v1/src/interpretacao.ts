@@ -25,7 +25,7 @@ interface CamadasTemperamento {
 
 const DADOS: Record<TemperamentoCodigo, CamadasTemperamento> = {
   COLERICO: {
-    arquetipoTitulo: "O Executor",
+    arquetipoTitulo: "Colérico",
     fraseSintese: "Enquanto outros pensam, eu já terminei.",
     motorInterno:
       "Você precisa sentir que está avançando. Quando fica parado por muito tempo, algo dentro de você protesta, não por birra, mas porque sua natureza é construir, resolver e liderar. Com um objetivo claro na frente, você é imparável.",
@@ -41,7 +41,7 @@ const DADOS: Record<TemperamentoCodigo, CamadasTemperamento> = {
       "Seu próximo passo não é fazer mais, é fazer melhor. Aprenda a distinguir o que é urgente de verdade do que só parece urgente. Pergunta prática: \"O que eu perco quando ajo rápido demais?\"",
   },
   SANGUINEO: {
-    arquetipoTitulo: "O Catalisador",
+    arquetipoTitulo: "Sanguíneo",
     fraseSintese: "Onde eu estou, as coisas acontecem.",
     motorInterno:
       "Você ganha vida com pessoas, movimento e novidade. Sozinho por muito tempo ou preso na mesma rotina, você murcha. Quando o ambiente pulsa, sua energia sobe, e você levanta quem está ao redor junto.",
@@ -57,7 +57,7 @@ const DADOS: Record<TemperamentoCodigo, CamadasTemperamento> = {
       "Escolha menos projetos e termine o que importa. Crie rotinas simples para a fase chata, ela faz parte de qualquer conquista real. Pergunta prática: \"O que eu deixei incompleto que ainda me pesa?\"",
   },
   MELANCOLICO: {
-    arquetipoTitulo: "O Analista",
+    arquetipoTitulo: "Melancólico",
     fraseSintese: "Eu vejo o que ninguém vê, e isso é um fardo tanto quanto um dom.",
     motorInterno:
       "Você busca fazer as coisas direito, não por perfeccionismo vazio, mas porque sente que o mundo merece mais cuidado. Quando algo está mal feito ou superficial, incomoda de verdade. Essa exigência te torna excelente; também pode te paralisar.",
@@ -73,10 +73,10 @@ const DADOS: Record<TemperamentoCodigo, CamadasTemperamento> = {
       "Defina o que é \"bom o suficiente\" antes de começar. Pratique agir com informação incompleta em coisas de baixo risco. Pergunta prática: \"O que eu deixei de tentar por medo de errar?\"",
   },
   FLEUMATICO: {
-    arquetipoTitulo: "O Sustentador",
+    arquetipoTitulo: "Fleumático",
     fraseSintese: "Eu sou a razão pela qual as coisas continuam funcionando quando ninguém está olhando.",
     motorInterno:
-      "Você precisa de paz, previsibilidade e relações em ordem. Conflito desgasta, não porque seja fraco, mas porque seu sistema interno funciona melhor com harmonia. Sua força está em sustentar; o desafio é não confundir calma com ficar parado quando precisa mudar.",
+      "Você precisa de paz, previsibilidade e relações em ordem. Conflito desgasta, não porque você seja fraco, mas porque você funciona melhor com harmonia. Sua força está em sustentar; o desafio é não confundir calma com ficar parado quando precisa mudar.",
     padraoPensamento:
       "Você pensa nas pessoas envolvidas antes de decidir. Vê vários lados ao mesmo tempo, o que te torna um bom mediador, mas às vezes dificulta fechar uma escolha.",
     padraoAcao:

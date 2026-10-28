@@ -1,6 +1,8 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { RefreshCw, ChevronDown, ChevronUp, Info } from "lucide-react";
-import { sanitizarResultadoLegado, isResultadoLegado } from "@workspace/traco-narrativa";
+import { sanitizarResultadoLegado, isResultadoLegado, leituraDoTraco } from "@workspace/traco-narrativa";
+import { limparJargao } from "@workspace/copy-voz";
+import LeituraBlocos from "@/components/LeituraBlocos";
 import {
   ESTRUTURAS_CONFIG,
   FOTOS_CONFIG,
@@ -234,11 +236,15 @@ export function TracoPainelResultado({
         </p>
       )}
 
+      {estruturaPrincipal && (
+        <LeituraBlocos leitura={leituraDoTraco(resultado)} />
+      )}
+
       {/* Capítulo 1 — Quem é */}
       {configPrincipal && estruturaPrincipal && (
         <Capitulo
           numero={1}
-          titulo="Quem é"
+          titulo="Percentuais"
           subtitulo={`Resultado de ${alvoAnalise} · ${dataAnalise}`}
         >
           <div
@@ -249,18 +255,16 @@ export function TracoPainelResultado({
             }}
           >
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              {resultado.dominanteApelido && (
-                <span
-                  className="text-xs font-medium tracking-widest uppercase px-3 py-1.5 rounded-full"
-                  style={{
-                    background: configPrincipal.corBg,
-                    color: configPrincipal.cor,
-                    border: `1px solid ${configPrincipal.corBorder}`,
-                  }}
-                >
-                  O {resultado.dominanteApelido}
-                </span>
-              )}
+              <span
+                className="text-xs font-medium tracking-widest uppercase px-3 py-1.5 rounded-full"
+                style={{
+                  background: configPrincipal.corBg,
+                  color: configPrincipal.cor,
+                  border: `1px solid ${configPrincipal.corBorder}`,
+                }}
+              >
+                Traço {configPrincipal.nome}
+              </span>
               {temFusao && typeof alinhamento === "number" && (
                 <span
                   className="text-xs px-3 py-1 rounded-full"
@@ -293,12 +297,6 @@ export function TracoPainelResultado({
                 {resultado.estruturas[estruturaPrincipal]}%
               </div>
             </div>
-
-            {resultado.fraseIdentidade && (
-              <p className="text-sm leading-relaxed mb-3 italic" style={{ color: "rgba(247,242,236,0.7)" }}>
-                {resultado.fraseIdentidade}
-              </p>
-            )}
 
             {resultado.estruturaSecundaria && (
               <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -497,235 +495,6 @@ export function TracoPainelResultado({
         </Capitulo>
       )}
 
-      {/* Capítulo 2 — O que dói e o que cura */}
-      {(resultado.ferida ||
-        resultado.dorLivro ||
-        resultado.recurso ||
-        (resultado.pontosCuidadoPrioritarios?.length ?? 0) > 0 ||
-        resultado.perguntaTransformacao) && (
-        <Capitulo numero={2} titulo="Como o padrão se formou e o que sustenta" defaultOpen>
-          <div className="grid md:grid-cols-2 gap-4">
-            {resultado.ferida && (
-              <div
-                className="rounded-xl p-4"
-                style={{ background: "rgba(155,143,222,0.05)", border: "1px solid rgba(155,143,222,0.18)" }}
-              >
-                <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(155,143,222,0.6)" }}>
-                  Origem do padrão
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
-                  {resultado.ferida}
-                </p>
-              </div>
-            )}
-            {resultado.recurso && (
-              <div
-                className="rounded-xl p-4"
-                style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.18)" }}
-              >
-                <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.6)" }}>
-                  Recurso natural
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
-                  {resultado.recurso}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {resultado.dorLivro && (
-            <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.58)", lineHeight: 1.8 }}>
-              {resultado.dorLivro}
-            </p>
-          )}
-
-          {(resultado.pontosCuidadoPrioritarios?.length ?? 0) > 0 && (
-            <div>
-              <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(224,123,57,0.55)" }}>
-                Cuidados prioritários
-              </p>
-              <ul className="space-y-2">
-                {resultado.pontosCuidadoPrioritarios!.map((item, i) => (
-                  <li key={i} className="text-sm flex gap-2" style={{ color: "rgba(247,242,236,0.6)" }}>
-                    <span style={{ color: "#c8a56b" }}>→</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {resultado.perguntaTransformacao && (
-            <div
-              className="rounded-xl p-5 text-center"
-              style={{
-                background: "linear-gradient(135deg, rgba(200,165,107,0.08) 0%, rgba(30,24,18,0.4) 100%)",
-                border: "1px solid rgba(200,165,107,0.2)",
-              }}
-            >
-              <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
-                Pergunta de transformação
-              </p>
-              <p className="text-sm italic font-tan-mon-cheri" style={{ color: "rgba(247,242,236,0.78)" }}>
-                {resultado.perguntaTransformacao}
-              </p>
-            </div>
-          )}
-        </Capitulo>
-      )}
-
-      {/* Capítulo 3 — Cruza mente e corpo */}
-      {(resultado.leituraEmocionalDeclarada ||
-        resultado.contrasteFotosFormulario ||
-        resultado.perfilUnico ||
-        interpretacaoLegado.length > 0) && (
-        <Capitulo numero={3} titulo="Cruza mente e corpo" defaultOpen>
-          {resultado.leituraEmocionalDeclarada && (
-            <div>
-              <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
-                Emocional declarado
-              </p>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)" }}>
-                {resultado.leituraEmocionalDeclarada}
-              </p>
-            </div>
-          )}
-
-          {resultado.contrasteFotosFormulario && (
-            <div
-              className="rounded-xl p-4"
-              style={{ background: "rgba(224,123,57,0.04)", border: "1px solid rgba(224,123,57,0.15)" }}
-            >
-              <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(224,123,57,0.55)" }}>
-                Fotos vs. questionário
-              </p>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
-                {resultado.contrasteFotosFormulario}
-              </p>
-            </div>
-          )}
-
-          {resultado.perfilUnico && (
-            <div>
-              <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
-                O que torna este perfil único
-              </p>
-              {resultado.estruturaPrincipal && resultado.estruturaSecundaria && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span
-                    className="text-xs px-3 py-1 rounded-full"
-                    style={{
-                      background: configPrincipal?.corBg,
-                      color: configPrincipal?.cor,
-                      border: `1px solid ${configPrincipal?.corBorder}`,
-                    }}
-                  >
-                    {ESTRUTURAS_CONFIG[resultado.estruturaPrincipal].nome}
-                  </span>
-                  <span className="text-xs self-center" style={{ color: "rgba(200,165,107,0.4)" }}>
-                    +
-                  </span>
-                  <span
-                    className="text-xs px-3 py-1 rounded-full"
-                    style={{
-                      background: ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].corBg,
-                      color: ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].cor,
-                      border: `1px solid ${ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].corBorder}`,
-                    }}
-                  >
-                    {ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].nome}
-                  </span>
-                </div>
-              )}
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)", lineHeight: 1.8 }}>
-                {resultado.perfilUnico}
-              </p>
-            </div>
-          )}
-
-          {interpretacaoLegado.length > 0 && (
-            <div>
-              <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(247,242,236,0.35)" }}>
-                Contexto (versão anterior)
-              </p>
-              {interpretacaoLegado.map((p, i) => (
-                <p key={i} className="text-sm leading-relaxed mb-2" style={{ color: "rgba(247,242,236,0.5)" }}>
-                  {p}
-                </p>
-              ))}
-            </div>
-          )}
-        </Capitulo>
-      )}
-
-      {/* Capítulo 4 — No dia a dia */}
-      {resultado.dinamicaFuncional && (
-        <Capitulo numero={4} titulo="No dia a dia" subtitulo="Como as estruturas operam no cotidiano" defaultOpen={false}>
-          <div className="divide-y" style={{ borderColor: "rgba(200,165,107,0.07)" }}>
-            {[
-              { area: "Trabalho & desempenho", texto: resultado.dinamicaFuncional.trabalho },
-              { area: "Relacionamentos", texto: resultado.dinamicaFuncional.relacoes },
-              { area: "Gestão do estresse", texto: resultado.dinamicaFuncional.estresse },
-              { area: "Tomada de decisão", texto: resultado.dinamicaFuncional.decisoes },
-              { area: "Padrão de energia", texto: resultado.dinamicaFuncional.energia },
-              { area: "Zona de sombra", texto: resultado.dinamicaFuncional.sombra },
-            ].map(({ area, texto }) => (
-              <div key={area} className="py-4 first:pt-0">
-                <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.55)" }}>
-                  {area}
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)", lineHeight: 1.75 }}>
-                  {texto}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {resultado.estiloComunicacao && (
-            <div
-              className="rounded-xl p-4 mt-2"
-              style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.1)" }}
-            >
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <p className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
-                  Comunicação
-                </p>
-                <span
-                  className="text-xs px-2 py-0.5 rounded-full"
-                  style={{
-                    background: "rgba(200,165,107,0.1)",
-                    color: "#c8a56b",
-                    border: "1px solid rgba(200,165,107,0.2)",
-                  }}
-                >
-                  {resultado.estiloComunicacao.tipo}
-                </span>
-              </div>
-              <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.62)" }}>
-                {resultado.estiloComunicacao.descricao}
-              </p>
-              <div className="grid sm:grid-cols-2 gap-2">
-                {[
-                  { label: "Em grupos", texto: resultado.estiloComunicacao.emGrupos },
-                  { label: "Nas relações", texto: resultado.estiloComunicacao.emRelacoes },
-                  { label: "No conflito", texto: resultado.estiloComunicacao.emConflito },
-                  { label: "Sob tensão", texto: resultado.estiloComunicacao.emTensao },
-                ].map(({ label, texto }) => (
-                  <div key={label} className="rounded-lg p-3" style={{ background: "rgba(30,24,18,0.4)" }}>
-                    <p className="text-xs mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>
-                      {label}
-                    </p>
-                    <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.52)" }}>
-                      {texto}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </Capitulo>
-      )}
-
       {/* Capítulo 5 — O corpo fala */}
       {(resultado.caracteristicasFisicasObservadas?.length ||
         resultado.perfilFisicoNarrado ||
@@ -764,14 +533,14 @@ export function TracoPainelResultado({
               style={{ background: "rgba(155,143,222,0.04)", border: "1px solid rgba(155,143,222,0.15)" }}
             >
               <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(155,143,222,0.55)" }}>
-                Couraça corporal
+                Como o corpo se protege
               </p>
               <p className="text-sm leading-relaxed mb-2" style={{ color: "rgba(247,242,236,0.6)" }}>
-                {resultado.couracaCorporal}
+                {limparJargao(resultado.couracaCorporal)}
               </p>
               <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.42)" }}>
-                <span style={{ color: "rgba(200,165,107,0.6)" }}>Centro energético: </span>
-                {resultado.centroEnergetico}
+                <span style={{ color: "rgba(200,165,107,0.6)" }}>Onde isso se concentra: </span>
+                {limparJargao(resultado.centroEnergetico ?? "")}
                 {" · "}
                 {resultado.padraoEnergetico}
               </p>
@@ -808,49 +577,12 @@ export function TracoPainelResultado({
                         {FOTOS_CONFIG[tipo]?.label ?? tipo}
                       </p>
                       <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
-                        {obs}
+                        {limparJargao(obs)}
                       </p>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
-          )}
-        </Capitulo>
-      )}
-
-      {/* Capítulo 6 — Próximos passos */}
-      {(recomendacoes.length > 0 || resultado.mensagemTerapeutica) && (
-        <Capitulo numero={6} titulo="Próximos passos" defaultOpen>
-          {recomendacoes.length > 0 && (
-            <div className="space-y-3">
-              {recomendacoes.map((rec, i) => (
-                <div key={i} className="flex gap-3 items-start">
-                  <div
-                    className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 text-xs font-bold"
-                    style={{ background: "rgba(200,165,107,0.12)", color: "#c8a56b" }}
-                  >
-                    {i + 1}
-                  </div>
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
-                    {rec}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {resultado.mensagemTerapeutica && (
-            <div
-              className="rounded-xl p-5 text-center mt-2"
-              style={{
-                background: "linear-gradient(135deg, rgba(200,165,107,0.07) 0%, rgba(156,119,66,0.04) 100%)",
-                border: "1px solid rgba(200,165,107,0.2)",
-              }}
-            >
-              <p className="text-sm leading-relaxed italic font-tan-mon-cheri" style={{ color: "rgba(247,242,236,0.75)" }}>
-                {resultado.mensagemTerapeutica}
-              </p>
             </div>
           )}
         </Capitulo>

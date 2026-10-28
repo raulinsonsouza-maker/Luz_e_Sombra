@@ -19,23 +19,23 @@ function abertura(principal: LinguagemAmor, secundaria: LinguagemAmor, intensida
   const c = CONTEUDO_V3[principal];
   if (intensidade === "equilibrada" && principal !== secundaria) {
     const ls = LABEL_LINGUAGEM[secundaria].toLowerCase();
-    return `Seu coração responde com força tanto a ${lp} quanto a ${ls}. Você não precisa escolher entre elas — relações que duram costumam nutrir as duas, não só a primeira da lista. ${c.mecanismoEmocional.split(".")[0]}.`;
+    return `Seu coração responde com força tanto a ${lp} quanto a ${ls}. Você não precisa escolher entre elas, relações que duram costumam nutrir as duas, não só a primeira da lista. ${c.mecanismoEmocional.split(".")[0]}.`;
   }
   return `Para você, amor se mede principalmente em ${lp}. ${c.mecanismoEmocional}`;
 }
 
 function confiancaNarrativa(metricas: MetricasQualidade, receber: DimensaoPerfil): string {
   if (metricas.confiancaLabel === "alta" && metricas.intensidade === "forte") {
-    return "Seu perfil tem distância clara entre primeira e segunda linguagem. Isso indica um resultado sólido — use-o como ponto de partida para conversas e gestos concretos.";
+    return "Seu perfil tem distância clara entre primeira e segunda linguagem. Isso indica um resultado sólido, use-o como ponto de partida para conversas e gestos concretos.";
   }
   if (metricas.desempateUsado) {
     return "Refinamos seu perfil com perguntas extras porque as duas primeiras linguagens estavam muito próximas. O resultado agora reflete melhor suas escolhas.";
   }
   if (metricas.perfilEquilibradoReceber) {
-    return "Seu perfil é genuinamente bilíngue: duas linguagens competem com força parecida. Isso não é indecisão — é riqueza. Peça as duas na relação.";
+    return "Seu perfil é genuinamente bilíngue: duas linguagens competem com força parecida. Isso não é indecisão, é riqueza. Peça as duas na relação.";
   }
   if (metricas.confiancaLabel === "baixa") {
-    return "Algumas respostas indicam perfil difuso ou muito rápido. Considere refazer com mais calma se quiser mais precisão — mas o que você leu aqui já é um bom mapa para começar.";
+    return "Algumas respostas indicam perfil difuso ou muito rápido. Considere refazer com mais calma se quiser mais precisão, mas o que você leu aqui já é um bom mapa para começar.";
   }
   return `Seu perfil aponta com boa confiança para ${LABEL_LINGUAGEM[receber.principal].toLowerCase()}, com ${LABEL_LINGUAGEM[receber.secundaria].toLowerCase()} como complemento relevante.`;
 }
@@ -43,7 +43,7 @@ function confiancaNarrativa(metricas: MetricasQualidade, receber: DimensaoPerfil
 function textoDesalinhamento(receber: LinguagemAmor, expressar: LinguagemAmor): string {
   const lr = LABEL_LINGUAGEM[receber].toLowerCase();
   const le = LABEL_LINGUAGEM[expressar].toLowerCase();
-  return `Você precisa receber principalmente ${lr}, mas demonstra amor naturalmente em ${le}. Quem te ama pode estar falando a língua errada sem querer — não por falta de carinho, mas por desconhecer seu mapa. Compartilhe a carta abaixo e peça o gesto que enche você.`;
+  return `Você precisa receber principalmente ${lr}, mas demonstra amor naturalmente em ${le}. Quem te ama pode estar falando a língua errada sem querer, não por falta de carinho, mas por desconhecer seu mapa. Compartilhe a carta abaixo e peça o gesto que enche você.`;
 }
 
 export function montarBlocosNarrativa(input: {

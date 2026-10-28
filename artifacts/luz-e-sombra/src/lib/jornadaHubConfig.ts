@@ -1,3 +1,5 @@
+import { CATALOGO } from "@workspace/copy-voz";
+
 /** Raiz da trilha de jornada (hub de módulos). */
 export const JORNADA_ROOT = "/jornada";
 
@@ -13,7 +15,9 @@ export const JORNADA_MODULE_NAV = {
 
 export type JornadaModuleSlug = keyof typeof JORNADA_MODULE_NAV;
 
-/** Textos e rotas auxiliares por módulo da jornada (hub). */
+/** Textos e rotas auxiliares por módulo da jornada (hub).
+ * O modelo corporal do traço segue Reich e Lowen só como referência interna.
+ */
 export const JORNADA_HUB_COPY: Record<
   string,
   {
@@ -28,20 +32,11 @@ export const JORNADA_HUB_COPY: Record<
   }
 > = {
   traco: {
-    introFallback:
-      "Entenda como o seu corpo revela padrões de caráter. Reich, Lowen e a leitura integrada com o questionário emocional.",
-    introTexto: [
-      "O Traço de Caráter combina leitura corporal com um diagnóstico emocional profundo. Inspirado nas obras de Wilhelm Reich e Alexander Lowen, a análise observa como você ocupa o espaço, sustenta tensões e expressa emoções pelo corpo — padrões que muitas vezes operam no automático.",
-      "Você enviará fotos seguindo orientações simples e responderá a um questionário emocional estruturado. As duas leituras se cruzam para revelar traços de caráter, bloqueios recorrentes e caminhos de transformação com mais consciência.",
-      "Reserve cerca de 20 a 30 minutos em um lugar calmo. Ao final, seu relatório fica guardado aqui e pode ser refeito quando quiser aprofundar.",
-    ],
-    introBullets: [
-      "Padrões corporais ligados a Reich e Lowen",
-      "Cruzamento entre leitura visual e questionário emocional",
-      "Relatório personalizado com insights acionáveis",
-    ],
+    introFallback: CATALOGO.jornada.traco.introFallback,
+    introTexto: [...CATALOGO.jornada.traco.introTexto],
+    introBullets: [...CATALOGO.jornada.traco.introBullets],
     analiseTitulo: "Análise do Traço de Caráter",
-    analiseDescricaoSem: "Envie suas fotos e responda ao diagnóstico emocional. Leva cerca de 20–30 minutos.",
+    analiseDescricaoSem: CATALOGO.jornada.traco.analiseDescricaoSem,
     analiseDescricaoCom: "Sua leitura corporal e emocional já estão na conta.",
     novaAnaliseLabel: "Nova análise",
     verResultadoLabel: "Ver meu resultado",

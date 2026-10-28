@@ -8,6 +8,7 @@ import AppPageShell from "@/components/AppPageShell";
 import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import { parsePessoaIdFromSearch } from "@/lib/tracoFormStorage";
 import Diagnostico30Form from "@/pages/traco/components/Diagnostico30Form";
+import { CATALOGO } from "@workspace/copy-voz";
 
 export default function DiagnosticoEmocionalPage() {
   const [, navigate] = useLocation();
@@ -31,7 +32,7 @@ export default function DiagnosticoEmocionalPage() {
         <PageIntroHeader
           eyebrow="Traço de Caráter"
           titulo="Diagnóstico emocional"
-          subtitulo="Contexto emocional antes da leitura corporal"
+          subtitulo={CATALOGO.diagnostico.subtitulo}
           hiddenOnMobile
           className="mb-2"
         />

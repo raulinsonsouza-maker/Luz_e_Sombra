@@ -30,6 +30,8 @@ import {
 } from "@/lib/dossieIntegrado";
 import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import { normalizarObjetoTextos } from "@workspace/copy-voz";
+import LeituraBlocos from "@/components/LeituraBlocos";
+import { leituraDossie } from "@/lib/leiturasPortal";
 import {
   Loader2, Sparkles, Heart, Star, Compass,
   Zap, Shield, Brain, Eye, Target, TrendingUp, AlertCircle,
@@ -473,7 +475,6 @@ export default function QuemSouEuPage() {
   const dossie = gerarDossieIntegrado(dossieInput);
 
   const insights = dossie.cruzamentos;
-  const orientacoes = dossie.acoesPrioritarias;
   const diagnosticoEmocional = dossie.diagnosticoEmocional;
 
   const INSIGHT_ICONS: Record<string, React.ElementType> = {
@@ -657,35 +658,6 @@ export default function QuemSouEuPage() {
               </div>
             )}
 
-            {/* ── PANORAMA FUNCIONAL ── */}
-            {dossie.panoramaFuncional && (
-              <SecaoCard titulo="Como Você Funciona" subtitulo="Panorama integrado de todas as análises" icone={Brain}>
-                <DossieLabel num="0" label="Leitura Operacional" />
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.75)" }}>
-                  {dossie.panoramaFuncional}
-                </p>
-              </SecaoCard>
-            )}
-
-            {/* ── PONTOS-CHAVE ── */}
-            {dossie.pontosChave.length > 0 && (
-              <SecaoCard titulo="O Que Você Precisa Entender" subtitulo="Síntese clara em pontos objetivos" icone={Target}>
-                <div className="space-y-3">
-                  {dossie.pontosChave.map((p, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <span
-                        className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
-                        style={{ background: "rgba(200,165,107,0.15)", color: "#c8a56b" }}
-                      >
-                        {i + 1}
-                      </span>
-                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)" }}>{p}</p>
-                    </div>
-                  ))}
-                </div>
-              </SecaoCard>
-            )}
-
             {/* ── MAPA DE ENTENDIMENTO ── */}
             {dossie.mapaEntendimento.length > 0 && (
               <SecaoCard titulo="Mapa de Entendimento" subtitulo="Dimensões da sua operação no mundo" icone={Compass}>
@@ -793,26 +765,9 @@ export default function QuemSouEuPage() {
               <SecaoCard titulo="Quem Você É na Essência" subtitulo="Identidade e estrutura de caráter" icone={Compass}>
                 <DossieLabel num="II" label="Sua Natureza Fundamental" />
 
-                {/* Síntese integrada */}
-                {dossie.sinteseIdentidade && (
-                  <div
-                    className="rounded-2xl p-5 mb-5"
-                    style={{
-                      background: "linear-gradient(135deg, rgba(200,165,107,0.07) 0%, rgba(156,119,66,0.03) 100%)",
-                      border: "1px solid rgba(200,165,107,0.15)",
-                    }}
-                  >
-                    <p className="text-[10px] tracking-[0.25em] uppercase mb-3" style={{ color: "rgba(200,165,107,0.45)" }}>
-                      Síntese de Identidade
-                    </p>
-                    <p className="text-sm leading-relaxed mb-0" style={{ color: "rgba(247,242,236,0.75)" }}>
-                      {dossie.sinteseIdentidade}
-                    </p>
-                    {dossie.perguntaCentral && (
-                      <p className="text-xs italic mt-3 pt-3" style={{ color: "rgba(200,165,107,0.65)", borderTop: "1px solid rgba(200,165,107,0.1)" }}>
-                        {dossie.perguntaCentral}
-                      </p>
-                    )}
+                {leituraDossie(dossie) && (
+                  <div className="mb-5">
+                    <LeituraBlocos leitura={leituraDossie(dossie)!} />
                   </div>
                 )}
 
@@ -878,13 +833,6 @@ export default function QuemSouEuPage() {
                       </div>
                       <Shield className="w-5 h-5 shrink-0" style={{ color: `${estrutura.cor}50` }} />
                     </div>
-                    <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.65)" }}>
-                      {traco.interpretacao
-                        ? traco.interpretacao.slice(0, 420) + (traco.interpretacao.length > 420 ? "…" : "")
-                        : traco.sinteseHumana
-                          ? traco.sinteseHumana.slice(0, 420) + (traco.sinteseHumana.length > 420 ? "…" : "")
-                          : estrutura.padraoProfundo}
-                    </p>
                     <p className="text-[10px] font-bold tracking-[0.25em] uppercase mb-2" style={{ color: `${estrutura.cor}70` }}>
                       Dominâncias comportamentais
                     </p>
@@ -909,16 +857,6 @@ export default function QuemSouEuPage() {
                         ))}
                       </div>
                     )}
-                    {traco.mensagemTerapeutica && (
-                      <div
-                        className="mt-4 pt-4"
-                        style={{ borderTop: `1px solid ${estrutura.cor}20` }}
-                      >
-                        <p className="text-xs leading-relaxed italic" style={{ color: "rgba(247,242,236,0.45)" }}>
-                          "{traco.mensagemTerapeutica}"
-                        </p>
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -931,19 +869,9 @@ export default function QuemSouEuPage() {
                     <p className="text-[10px] tracking-widest uppercase mb-0.5" style={{ color: "rgba(91,155,213,0.6)" }}>
                       Temperamento
                     </p>
-                    <p className="font-tan-mon-cheri text-lg mb-2" style={{ color: "#5b9bd5" }}>
+                    <p className="font-tan-mon-cheri text-lg" style={{ color: "#5b9bd5" }}>
                       {temperamento.arquetipo ?? temperamento.primario}
                     </p>
-                    {temperamento.sinteseHumana && (
-                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
-                        {temperamento.sinteseHumana}
-                      </p>
-                    )}
-                    {temperamento.perguntaCrescimento && (
-                      <p className="text-xs mt-3 italic" style={{ color: "rgba(91,155,213,0.55)" }}>
-                        {temperamento.perguntaCrescimento}
-                      </p>
-                    )}
                   </div>
                 )}
 
@@ -956,15 +884,9 @@ export default function QuemSouEuPage() {
                     <p className="text-[10px] tracking-widest uppercase mb-0.5" style={{ color: "rgba(224,123,57,0.6)" }}>
                       Linguagens do Amor
                     </p>
-                    {linguagens.sinteseHumana ? (
-                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
-                        {linguagens.sinteseHumana}
-                      </p>
-                    ) : (
-                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
-                        Receber: {linguagens.receberPrincipal} · Expressar: {linguagens.expressarPrincipal}
-                      </p>
-                    )}
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
+                      Receber: {linguagens.receberPrincipal} · Expressar: {linguagens.expressarPrincipal}
+                    </p>
                   </div>
                 )}
               </SecaoCard>
@@ -1187,49 +1109,19 @@ export default function QuemSouEuPage() {
               </SecaoCard>
             )}
 
-            {/* ── ORIENTACAO PRECISA ── */}
-            {orientacoes.length > 0 && (
-              <SecaoCard titulo="Sua Bússola para Este Momento" subtitulo="Orientação precisa baseada em todos os seus dados" icone={Target}>
-                <DossieLabel num="VI" label="Ação com Propósito" />
-                <div className="space-y-3">
-                  {orientacoes.map((o, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-4 p-4 rounded-xl"
-                      style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.1)" }}
-                    >
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-tan-mon-cheri text-xs"
-                        style={{ background: "rgba(200,165,107,0.15)", color: "#c8a56b" }}
-                      >
-                        {i + 1}
-                      </div>
-                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)" }}>{o}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Afirmação do ano pessoal */}
-                {anoPessoalInfo?.afirmacoes && anoPessoalInfo.afirmacoes[0] && (
-                  <div
-                    className="mt-5 rounded-2xl p-5 text-center"
-                    style={{
-                      background: "linear-gradient(135deg, rgba(200,165,107,0.1) 0%, rgba(156,119,66,0.04) 100%)",
-                      border: "1px solid rgba(200,165,107,0.2)",
-                    }}
-                  >
-                    <Anchor className="w-4 h-4 mx-auto mb-3" style={{ color: "rgba(200,165,107,0.5)" }} />
-                    <p className="text-sm italic leading-relaxed" style={{ color: "rgba(200,165,107,0.85)" }}>
-                      {anoPessoalInfo.afirmacoes[0]}
-                    </p>
-                    {vidaInfo?.afirmacao && (
-                      <p className="text-xs italic leading-relaxed mt-2" style={{ color: "rgba(247,242,236,0.35)" }}>
-                        {vidaInfo.afirmacao}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </SecaoCard>
+            {anoPessoalInfo?.afirmacoes?.[0] && (
+              <div
+                className="rounded-2xl p-5 text-center"
+                style={{
+                  background: "linear-gradient(135deg, rgba(200,165,107,0.1) 0%, rgba(156,119,66,0.04) 100%)",
+                  border: "1px solid rgba(200,165,107,0.2)",
+                }}
+              >
+                <Anchor className="w-4 h-4 mx-auto mb-3" style={{ color: "rgba(200,165,107,0.5)" }} />
+                <p className="text-sm italic leading-relaxed" style={{ color: "rgba(200,165,107,0.85)" }}>
+                  {anoPessoalInfo.afirmacoes[0]}
+                </p>
+              </div>
             )}
 
             {/* ── FOOTER ── */}

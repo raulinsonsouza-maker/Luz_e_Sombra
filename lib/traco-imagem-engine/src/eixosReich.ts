@@ -10,7 +10,7 @@ export interface EixosReich {
   indiceFragmentacao: number;
 }
 
-/** Couraça segmental Reich/Lowen (tensão 0–1 por região). */
+/** Proteção segmental Reich/Lowen (tensão 0–1 por região). */
 export interface SegmentosReich {
   ocular: number;
   oral: number;
@@ -202,7 +202,7 @@ export function aplicarAjustesReich(
 
   if (eixos.indiceContencao > 0.6) {
     push("psicopata", -1.4, `Contenção organizada alta (${eixos.indiceContencao.toFixed(2)}) — teto psicopata.`);
-    push("rigido", 1.0, "Couraça rígida funcional reforça Rígido.");
+    push("rigido", 1.0, "Proteção rígida funcional reforça Rígido.");
   } else if (
     symm !== null &&
     symm > 0.86 &&
@@ -218,7 +218,7 @@ export function aplicarAjustesReich(
   if (eixos.indiceRetracao > 0.55 && eixos.indiceContencao < 0.45) {
     push("oral", 0.9, `Colapso/retração real (${eixos.indiceRetracao.toFixed(2)}) sem contenção rígida.`);
   } else if (eixos.indiceRetracao > 0.45 && eixos.indiceContencao >= 0.45) {
-    push("oral", -0.7, "Retração com contenção — leitura Oral atenuada (couraça rígida).");
+    push("oral", -0.7, "Retração com contenção — leitura Oral atenuada (proteção rígida).");
     push("rigido", 0.5, "Retração contida reforça organização rígida.");
   }
 

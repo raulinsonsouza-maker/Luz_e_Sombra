@@ -409,7 +409,7 @@ test("rigido+oral — leituraEmocionalDeclarada com vínculo e controle", () => 
   assert.ok(r.leituraEmocionalDeclarada?.includes("vínculo"));
   assert.ok(r.leituraEmocionalDeclarada?.includes("controle"));
   assert.ok(r.leituraEmocionalDeclarada?.includes("destacam-se vínculo"));
-  assert.ok(r.leituraEmocionalDeclarada?.includes("couraça de rígido"));
+  assert.ok(r.leituraEmocionalDeclarada?.includes("proteção de rígido"));
   assert.ok(!r.leituraEmocionalDeclarada?.includes("destacam-sevínculo"));
   assert.ok(!r.leituraEmocionalDeclarada?.includes("deoral"));
 });
