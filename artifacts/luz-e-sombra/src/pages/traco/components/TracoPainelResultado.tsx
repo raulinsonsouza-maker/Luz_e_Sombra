@@ -118,44 +118,56 @@ export interface TracoPainelResultadoProps {
   criadoEm?: string;
 }
 
+function lugarDoCentro(centro: string): string {
+  const lugar = centro.split(",")[0]?.trim();
+  return lugar || centro.trim();
+}
+
 function Capitulo({
-  numero,
   titulo,
   subtitulo,
   defaultOpen = true,
+  recolhivel = true,
   children,
 }: {
-  numero: number;
   titulo: string;
   subtitulo?: string;
   defaultOpen?: boolean;
+  recolhivel?: boolean;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const visivel = !recolhivel || open;
+  const cabecalho = (
+    <div className="w-full flex items-center justify-between px-6 py-4 text-left">
+      <div>
+        <h3 className="font-tan-mon-cheri text-base" style={{ color: "#c8a56b" }}>
+          {titulo}
+        </h3>
+        {subtitulo && (
+          <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.35)" }}>
+            {subtitulo}
+          </p>
+        )}
+      </div>
+      {recolhivel && (open ? <ChevronUp className="w-4 h-4 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 flex-shrink-0" />)}
+    </div>
+  );
   return (
     <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.12)" }}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-6 py-4 text-left"
-        style={{ background: "rgba(30,24,18,0.55)" }}
-      >
-        <div>
-          <p className="text-xs tracking-widest uppercase mb-0.5" style={{ color: "rgba(200,165,107,0.45)" }}>
-            Capítulo {numero}
-          </p>
-          <h3 className="font-tan-mon-cheri text-base" style={{ color: "#c8a56b" }}>
-            {titulo}
-          </h3>
-          {subtitulo && (
-            <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.35)" }}>
-              {subtitulo}
-            </p>
-          )}
-        </div>
-        {open ? <ChevronUp className="w-4 h-4 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 flex-shrink-0" />}
-      </button>
-      {open && (
+      {recolhivel ? (
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="w-full"
+          style={{ background: "rgba(30,24,18,0.55)" }}
+        >
+          {cabecalho}
+        </button>
+      ) : (
+        <div style={{ background: "rgba(30,24,18,0.55)" }}>{cabecalho}</div>
+      )}
+      {visivel && (
         <div className="px-6 py-5 space-y-4" style={{ background: "rgba(30,24,18,0.35)", borderTop: "1px solid rgba(200,165,107,0.08)" }}>
           {children}
         </div>
@@ -180,7 +192,6 @@ export function TracoPainelResultado({
   const estruturaPrincipal = resultado.estruturaPrincipal;
   const configPrincipal = estruturaPrincipal ? ESTRUTURAS_CONFIG[estruturaPrincipal] : null;
   const [expandedObs, setExpandedObs] = useState(false);
-  const [expandedDistrib, setExpandedDistrib] = useState(false);
   const dataAnalise = new Date(criadoEm ?? analise.criadoEm).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "long",
@@ -236,16 +247,11 @@ export function TracoPainelResultado({
         </p>
       )}
 
-      {estruturaPrincipal && (
-        <LeituraBlocos leitura={leituraDoTraco(resultado)} />
-      )}
-
-      {/* Capítulo 1 — Quem é */}
       {configPrincipal && estruturaPrincipal && (
         <Capitulo
-          numero={1}
           titulo="Percentuais"
           subtitulo={`Resultado de ${alvoAnalise} · ${dataAnalise}`}
+          recolhivel={false}
         >
           <div
             className="rounded-xl p-5"
@@ -446,62 +452,55 @@ export function TracoPainelResultado({
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={() => setExpandedDistrib((v) => !v)}
-            className="text-xs flex items-center gap-1"
-            style={{ color: "rgba(200,165,107,0.5)" }}
-          >
-            {expandedDistrib ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-            Ver distribuição completa
-          </button>
-          {expandedDistrib && (
-            <div className="space-y-3 pt-1">
-              {(Object.entries(resultado.estruturas) as [keyof EstruturasPct, number][])
-                .sort(([, a], [, b]) => b - a)
-                .map(([key, pct]) => {
-                  const cfg = ESTRUTURAS_CONFIG[key];
-                  const isPrincipal = key === resultado.estruturaPrincipal;
-                  const isSecundaria = key === resultado.estruturaSecundaria;
-                  const isDestaque = isPrincipal || isSecundaria;
-                  return (
-                    <div key={key}>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.45)" }}>
-                          {cfg.nome}
-                          {isPrincipal && (
-                            <span className="ml-1.5 opacity-70">· principal</span>
-                          )}
-                          {isSecundaria && (
-                            <span className="ml-1.5 opacity-70">· secundária</span>
-                          )}
-                        </span>
-                        <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.4)" }}>{pct}%</span>
-                      </div>
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${pct}%`,
-                            background: isDestaque ? cfg.cor : `${cfg.cor}66`,
-                          }}
-                        />
-                      </div>
+          <div className="space-y-3 pt-1">
+            {(Object.entries(resultado.estruturas) as [keyof EstruturasPct, number][])
+              .sort(([, a], [, b]) => b - a)
+              .map(([key, pct]) => {
+                const cfg = ESTRUTURAS_CONFIG[key];
+                const isPrincipal = key === resultado.estruturaPrincipal;
+                const isSecundaria = key === resultado.estruturaSecundaria;
+                const isDestaque = isPrincipal || isSecundaria;
+                return (
+                  <div key={key}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.45)" }}>
+                        {cfg.nome}
+                        {isPrincipal && (
+                          <span className="ml-1.5 opacity-70">· principal</span>
+                        )}
+                        {isSecundaria && (
+                          <span className="ml-1.5 opacity-70">· secundária</span>
+                        )}
+                      </span>
+                      <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.4)" }}>{pct}%</span>
                     </div>
-                  );
-                })}
-            </div>
-          )}
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${pct}%`,
+                          background: isDestaque ? cfg.cor : `${cfg.cor}66`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
         </Capitulo>
       )}
 
-      {/* Capítulo 5 — O corpo fala */}
+      {estruturaPrincipal && (
+        <LeituraBlocos leitura={leituraDoTraco(resultado)} />
+      )}
+
+      {/* O corpo fala */}
       {(resultado.caracteristicasFisicasObservadas?.length ||
         resultado.perfilFisicoNarrado ||
         resultado.couracaCorporal ||
         resultado.padraoPostural ||
         (resultado.observacoesPorFoto && Object.keys(resultado.observacoesPorFoto).length > 0)) && (
-        <Capitulo numero={5} titulo="O corpo fala" defaultOpen={false}>
+        <Capitulo titulo="O corpo fala" defaultOpen={false}>
           {resultado.caracteristicasFisicasObservadas &&
             resultado.caracteristicasFisicasObservadas.length > 0 && (
               <div className="flex flex-wrap gap-2">
@@ -535,15 +534,25 @@ export function TracoPainelResultado({
               <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(155,143,222,0.55)" }}>
                 Como o corpo se protege
               </p>
-              <p className="text-sm leading-relaxed mb-2" style={{ color: "rgba(247,242,236,0.6)" }}>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
                 {limparJargao(resultado.couracaCorporal)}
               </p>
-              <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.42)" }}>
-                <span style={{ color: "rgba(200,165,107,0.6)" }}>Onde isso se concentra: </span>
-                {limparJargao(resultado.centroEnergetico ?? "")}
-                {" · "}
-                {resultado.padraoEnergetico}
-              </p>
+              {(resultado.centroEnergetico || resultado.padraoEnergetico) && (
+                <div className="space-y-2 mt-3">
+                  {resultado.centroEnergetico && (
+                    <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
+                      <span style={{ color: "rgba(200,165,107,0.6)" }}>Onde isso se concentra: </span>
+                      {lugarDoCentro(limparJargao(resultado.centroEnergetico))}
+                    </p>
+                  )}
+                  {resultado.padraoEnergetico && (
+                    <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
+                      <span style={{ color: "rgba(200,165,107,0.6)" }}>Como a energia circula: </span>
+                      {limparJargao(resultado.padraoEnergetico)}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

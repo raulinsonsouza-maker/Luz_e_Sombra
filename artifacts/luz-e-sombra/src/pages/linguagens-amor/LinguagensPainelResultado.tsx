@@ -118,7 +118,6 @@ function PainelV3({
 
   return (
     <article className="space-y-8">
-      {leitura && <LeituraBlocos leitura={leitura} />}
       {/* Hero */}
       <header
         className="rounded-2xl p-6 md:p-7 relative overflow-hidden"
@@ -172,6 +171,8 @@ function PainelV3({
           <BarrasRanking ranking={ranking} destaque={principal} />
         </div>
       )}
+
+      {leitura && <LeituraBlocos leitura={leitura} />}
 
       {narr.cartaParceiro && (
         <button

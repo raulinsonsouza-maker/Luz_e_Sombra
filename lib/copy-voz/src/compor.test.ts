@@ -37,6 +37,33 @@ describe("comporLeitura", () => {
     assert.throws(() => comporLeitura({ ...SLOTS, oQueFazer: "   " }), /O que fazer com isso/);
   });
 
+  it("mantém cada pedaço em seu parágrafo", () => {
+    const leitura = comporLeitura({
+      ...SLOTS,
+      noDiaADia: ["No trabalho você precisa de silêncio.", "Em casa a conversa volta."],
+    });
+    assert.deepEqual(leitura.secoes[1]?.paragrafos, [
+      "No trabalho você precisa de silêncio.",
+      "Em casa a conversa volta.",
+    ]);
+    assert.equal(
+      leitura.secoes[1]?.texto,
+      "No trabalho você precisa de silêncio. Em casa a conversa volta.",
+    );
+  });
+
+  it("não repete um pedaço que já está dentro de outro", () => {
+    const leitura = comporLeitura({
+      ...SLOTS,
+      sombra: [
+        "A rejeição dói quando o silêncio se prolonga demais.",
+        "A rejeição dói quando o silêncio se prolonga demais. Ela não define quem você é.",
+      ],
+    });
+    assert.equal(leitura.secoes[2]?.paragrafos.length, 1);
+    assert.match(leitura.secoes[2]!.texto, /não define/);
+  });
+
   it("mantém os nomes dos cinco traços", () => {
     const leitura = comporLeitura({
       ...SLOTS,

@@ -10,12 +10,16 @@ export const MOLDURA = {
 
 export type SlotId = (typeof MOLDURA.secoes)[number]["id"];
 
-export type SlotsLeitura = Record<SlotId, string>;
+/** Um texto corrido ou vários pedaços. Cada pedaço vira um parágrafo na tela. */
+export type ConteudoSlot = string | readonly string[];
+
+export type SlotsLeitura = Record<SlotId, ConteudoSlot>;
 
 export type SecaoLeitura = {
   id: SlotId;
   titulo: string;
   texto: string;
+  paragrafos: string[];
 };
 
 export type LeituraPortal = {

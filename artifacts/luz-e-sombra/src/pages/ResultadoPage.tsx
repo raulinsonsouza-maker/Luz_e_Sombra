@@ -452,7 +452,6 @@ export default function ResultadoPage() {
           className="mb-2"
         />
         <PageIntroHeader eyebrow="Roda da Vida" titulo="Resultado" subtitulo="Leitura completa da sua avaliação" className="mb-2" />
-        {leitura && <LeituraBlocos leitura={leitura} />}
 
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <div className="rounded-3xl overflow-hidden"
@@ -616,7 +615,7 @@ export default function ResultadoPage() {
             Análise por área
           </p>
           <p className="text-sm mb-6" style={{ color: "rgba(247,242,236,0.4)" }}>
-            As notas de cada área. A leitura completa está nos blocos acima.
+            As notas de cada área. A leitura de cada uma vem logo abaixo.
           </p>
 
           <div className="space-y-4">
@@ -653,6 +652,8 @@ export default function ResultadoPage() {
             })}
           </div>
         </DarkCard>
+
+        {leitura && <LeituraBlocos leitura={leitura} />}
 
         {/* ── Evolution ───────────────────────────────────────────────────── */}
         {evolucaoData && (

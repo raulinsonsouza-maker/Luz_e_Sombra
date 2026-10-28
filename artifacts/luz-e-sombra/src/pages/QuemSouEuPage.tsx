@@ -765,12 +765,6 @@ export default function QuemSouEuPage() {
               <SecaoCard titulo="Quem Você É na Essência" subtitulo="Identidade e estrutura de caráter" icone={Compass}>
                 <DossieLabel num="II" label="Sua Natureza Fundamental" />
 
-                {leituraDossie(dossie) && (
-                  <div className="mb-5">
-                    <LeituraBlocos leitura={leituraDossie(dossie)!} />
-                  </div>
-                )}
-
                 {/* Número de Vida */}
                 {vidaNum && vidaInfo && (
                   <div className="mb-5">
@@ -887,6 +881,12 @@ export default function QuemSouEuPage() {
                     <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
                       Receber: {linguagens.receberPrincipal} · Expressar: {linguagens.expressarPrincipal}
                     </p>
+                  </div>
+                )}
+
+                {leituraDossie(dossie) && (
+                  <div className="mt-5">
+                    <LeituraBlocos leitura={leituraDossie(dossie)!} />
                   </div>
                 )}
               </SecaoCard>
