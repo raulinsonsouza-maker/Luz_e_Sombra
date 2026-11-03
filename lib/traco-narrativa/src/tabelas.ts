@@ -19,122 +19,152 @@ const APELIDOSS: Record<keyof EstruturasPct, string> = {
 };
 
 const FRASES_IDENTIDADE: Record<keyof EstruturasPct, string> = {
-  esquizoide: "Você pensa fundo e imagina caminhos que os outros ainda não veem. Esse talento nasceu cedo, na fase da gestação, junto com a dor da rejeição. O corpo costuma ser mais alongado. A análise abaixo mostra como isso vive em você, não um rótulo novo.",
-  oral: "Você sente o outro e comunica afeto com facilidade. Isso se forma na amamentação, do nascimento até cerca de 1 ano, quando a dor do abandono pede colo. O corpo tende a formas mais suaves. O que segue é a leitura completa desse jeito de funcionar.",
-  psicopata: "Você organiza, lidera e negocia. Essa força se forma entre 1 e 2,5 anos, quando a dor é de manipulação e controle. O corpo muitas vezes mostra ombros mais largos que o quadril. A leitura longa explica como isso aparece na sua vida, sem trocar o nome do traço.",
-  masoquista: "Você aguenta, planeja e sustenta. Isso se forma no desfralde, entre 2,5 e 3,5 anos, com a dor da humilhação e da crítica. O corpo tende a ser mais encorpado. A análise detalhada continua abaixo, no nome Masoquista, que é o modelo.",
-  rigido: "Você executa, capricha e mantém o ritmo. Isso se forma entre 3,5 e 5 anos, com a dor da traição e da exclusão afetiva. O corpo costuma ser harmônico, desenhado. O texto a seguir aprofunda o Rígido, sem apelido no lugar do traço.",
+  esquizoide:
+    "Você pensa fundo e imagina caminhos que muita gente ainda não enxerga. Na abordagem dos traços, esse jeito se associa à fase mais cedo da vida, quando a dor da rejeição pode ter ensinado a se proteger pela distância. O corpo costuma ser mais alongado. O que segue é a leitura desse jeito de funcionar, não um rótulo.",
+  oral:
+    "Você sente o outro e comunica afeto com facilidade. Na abordagem dos traços, isso se associa à amamentação, do nascimento até cerca de 1 ano, quando a dor do abandono pode ter pedido colo. O corpo tende a formas mais suaves. A leitura abaixo mostra como esse padrão pode aparecer na sua vida hoje.",
+  psicopata:
+    "Você organiza, lidera e negocia com naturalidade. Na abordagem dos traços, essa força se associa à fase entre 1 e 2,5 anos, quando a dor pode ter sido a de ser controlado ou de precisar controlar para se sentir seguro. O corpo muitas vezes mostra ombros mais largos que o quadril. A leitura longa explica como isso pode viver em você.",
+  masoquista:
+    "Você aguenta, planeja e sustenta. Na abordagem dos traços, isso se associa ao desfralde, entre 2,5 e 3,5 anos, quando a dor da crítica ou da humilhação pode ter ensinado a se proteger pelo silêncio e pela resistência. O corpo tende a ser mais encorpado. A análise detalhada continua abaixo, no nome Masoquista.",
+  rigido:
+    "Você executa, capricha e mantém o ritmo. Na abordagem dos traços, isso se associa à fase entre 3,5 e 5 anos, quando a dor da exclusão afetiva ou da traição do vínculo pode ter ensinado a se proteger pela excelência. O corpo costuma ser harmônico. O texto a seguir aprofunda o Rígido, sem apelido no lugar do traço.",
 };
 
 const PONTOS_FORTES: Record<keyof EstruturasPct, string[]> = {
-  esquizoide: ["Profundidade intelectual", "Criatividade singular", "Intuição aguçada", "Sensibilidade energética", "Pensamento original"],
-  oral: ["Empatia profunda", "Conexão genuína", "Generosidade", "Escuta ativa", "Calor humano"],
-  psicopata: ["Liderança natural", "Visão estratégica", "Poder de influência", "Determinação", "Carisma"],
-  masoquista: ["Resiliência extraordinária", "Lealdade inabalável", "Força silenciosa", "Comprometimento", "Compaixão nascida da dor"],
-  rigido: ["Disciplina", "Confiabilidade", "Excelência", "Organização", "Comprometimento"],
+  esquizoide: ["Profundidade de pensamento", "Criatividade singular", "Intuição aguçada", "Visão que conecta o que parece separado", "Pensamento original"],
+  oral: ["Empatia verdadeira", "Capacidade de criar vínculo", "Generosidade", "Escuta atenta", "Calor humano"],
+  psicopata: ["Liderança natural", "Visão de caminho", "Poder de influência", "Determinação", "Presença que organiza o ambiente"],
+  masoquista: ["Resistência duradoura", "Lealdade profunda", "Força silenciosa", "Comprometimento", "Compaixão nascida da experiência"],
+  rigido: ["Disciplina", "Confiabilidade", "Excelência", "Organização", "Comprometimento com o que promete"],
 };
 
 const PONTOS_ATENCAO: Record<keyof EstruturasPct, string[]> = {
-  esquizoide: ["Isolamento excessivo", "Desconexão corporal", "Dificuldade de presença", "Abstração como fuga"],
-  oral: ["Dependência afetiva", "Auto-abandono", "Dificuldade em receber", "Ansiedade relacional"],
-  psicopata: ["Negação da vulnerabilidade", "Necessidade de controle", "Distância emocional", "Impaciência"],
-  masoquista: ["Autocobrança severa", "Dificuldade em se expandir", "Ressentimento acumulado", "Rigidez interna"],
-  rigido: ["Perfeccionismo paralisante", "Rigidez emocional", "Dificuldade em ceder", "Emoção sob controle"],
+  esquizoide: ["Isolamento que vira prisão", "Dificuldade de estar presente no corpo", "Fugir para o pensamento quando a emoção chega", "Medo de ser visto de verdade"],
+  oral: ["Dar demais e ficar vazio", "Dificuldade de receber", "Medo de ficar sozinho", "Abandonar a si mesmo para cuidar do outro"],
+  psicopata: ["Dificuldade de mostrar fragilidade", "Controle que afasta", "Impaciência com o ritmo do outro", "Usar a força para não ser tocado"],
+  masoquista: ["Aguentar demais em silêncio", "Dificuldade de se expandir", "Ressentimento guardado", "Dizer sim quando o corpo pede não"],
+  rigido: ["Perfeccionismo que paralisa", "Dificuldade de se entregar", "Emoção sob controle constante", "Cobrar de si o que ninguém pediu"],
 };
 
 const FERIDAS: Record<keyof EstruturasPct, string> = {
-  esquizoide: "Você aprendeu cedo, ainda na gestação, que estar inteiro no mundo podia doer. A rejeição virou distância. Não é frieza. É o jeito que o corpo encontrou de se proteger antes mesmo de ter palavras.",
-  oral: "Do nascimento até cerca de 1 ano, o colo nem sempre chegou na hora. Você passou a buscar fora o que faltou. O abandono não te define. Ele explica por que receber ainda pode parecer perigoso.",
-  psicopata: "Entre 1 e 2,5 anos, confiar cedeu lugar a controlar. Você aprendeu a liderar e a negociar para não ficar por baixo. A força é real. O custo aparece quando ninguém pode te ver sem a estratégia.",
-  masoquista: "No desfralde, entre 2,5 e 3,5 anos, querer algo seu passou a custar crítica ou humilhação. Você ficou forte, fiel e capaz de aguentar. A vida também cabe leve. Aguentar tudo não é a única prova de valor.",
-  rigido: "Entre 3,5 e 5 anos, mostrar afeto passou a parecer traição ou exclusão. Você aprendeu a entregar, caprichar e manter a forma. Por dentro, o sentimento continua. Ele só espera permissão para aparecer sem perder o seu padrão.",
+  esquizoide:
+    "Na abordagem dos traços, a estrutura Esquizóide se associa a experiências muito cedo, ainda na gestação ou nos primeiros contatos com o mundo, em que existir plenamente pode ter parecido arriscado. A rejeição, a frieza ou a invasão podem ter ensinado a se proteger pela distância. Não é frieza. É um jeito antigo de cuidar de si, antes mesmo de haver palavras para isso. Observe se essa história faz sentido para a sua vida.",
+  oral:
+    "Na abordagem dos traços, a estrutura Oral se associa à fase do nascimento até cerca de 1 ano, quando o colo e a sustentação podem ter faltado ou chegado de forma irregular. A dor do abandono pode ter ensinado a buscar fora o que faltou por dentro. O abandono não define quem você é. Ele ajuda a entender por que receber ainda pode parecer difícil ou perigoso. Observe se essa experiência encontra eco na sua história.",
+  psicopata:
+    "Na abordagem dos traços, a estrutura Psicopata se associa à fase entre 1 e 2,5 anos, quando confiar pode ter custado caro e controlar o ambiente pode ter parecido a única forma de se sentir seguro. A dor de ser manipulado, interrompido ou forçado pode ter ensinado a liderar e a negociar para não ficar por baixo. A força é real. O custo aparece quando ninguém consegue te ver sem a estratégia. Observe se isso faz sentido para você.",
+  masoquista:
+    "Na abordagem dos traços, a estrutura Masoquista se associa ao desfralde, entre 2,5 e 3,5 anos, quando querer algo seu pode ter custado crítica, humilhação ou pressão para se adaptar. Você pode ter aprendido a ficar forte, fiel e capaz de aguentar. Aguentar tudo não precisa ser a única prova de valor. A vida também cabe leve. Observe se essa leitura encontra eco na sua história.",
+  rigido:
+    "Na abordagem dos traços, a estrutura Rígida se associa à fase entre 3,5 e 5 anos, quando demonstrar sentimento, confiar plenamente ou se entregar pode ter trazido frustração, rejeição ou sensação de não ser escolhido. Você pode ter aprendido a controlar melhor as emoções, a buscar reconhecimento pelo que realiza e a demonstrar valor sendo correto, competente e admirável. Por dentro, o sentimento continua. Ele só espera permissão para aparecer sem perder o seu padrão. Observe se essa história faz sentido para você.",
 };
 
 const RECURSOS: Record<keyof EstruturasPct, string> = {
-  esquizoide: "Uma mente capaz de criar mundos que ainda não existem. Uma visão que conecta o que parece separado.",
-  oral: "Capacidade de ler o outro antes da fala. Uma empatia que organiza o ambiente e sustenta vínculos reais.",
-  psicopata: "Uma presença que organiza e mobiliza o espaço ao redor. Influência que, quando enraizada, vira liderança consistente.",
-  masoquista: "Uma resistência que permanece quando tudo mais cede. Profundidade emocional transformada em lealdade e persistência.",
-  rigido: "Uma capacidade de realizar que transforma visão em resultado. Uma confiabilidade que ancora projetos e pessoas ao redor.",
+  esquizoide:
+    "O mesmo movimento que pode ter te afastado do mundo também desenvolveu uma mente capaz de criar o que ainda não existe. Você enxerga padrões, conecta ideias e imagina caminhos que outros não veem. Quando essa visão deixa de ser só proteção e passa a ser presença, ela vira um talento que o mundo realmente precisa.",
+  oral:
+    "O mesmo anseio que pode ter te feito buscar o outro demais também desenvolveu uma empatia rara. Você lê o ambiente antes da fala, aquece vínculos e sustenta pessoas. Quando essa generosidade deixa de esvaziar você e passa a nascer de um centro próprio, ela vira um recurso de conexão verdadeira.",
+  psicopata:
+    "O mesmo impulso que pode ter te feito controlar o ambiente também desenvolveu uma presença que organiza e mobiliza. Você vê o caminho, articula e faz as coisas andarem. Quando essa força deixa de ser só defesa e passa a incluir vulnerabilidade, ela vira liderança que inspira confiança de verdade.",
+  masoquista:
+    "O mesmo padrão que pode ter te feito aguentar demais também desenvolveu uma resistência que permanece quando muita coisa cede. Você é leal, profundo e capaz de sustentar. Quando essa força deixa de ser só compressão e passa a se expandir, ela vira persistência com espaço para prazer e leveza.",
+  rigido:
+    "O mesmo cuidado que pode ter te feito controlar a emoção também desenvolveu uma capacidade real de transformar visão em resultado. Você é confiável, organizado e entrega o que promete. Quando essa excelência deixa de ser só proteção e passa a conviver com fragilidade, ela vira competência com profundidade humana.",
 };
 
 const RECOMENDACOES: Record<keyof EstruturasPct, string[]> = {
   esquizoide: [
-    "Prática de ancoragem somática: pés descalços na terra por 10–15 minutos diários",
-    "Contato físico seguro e consistente, abraços, massagem, trabalho corporal",
-    "Expressão criativa que outros possam ver e receber (não só arquivar)",
-    "Terapia bioenergética, processo somático ou dança-movimento",
-    "Exercícios de enraizamento: agachamentos lentos, caminhada consciente",
+    "Escolha um momento do dia para sentir os pés no chão por alguns minutos, sem celular e sem tarefa.",
+    "Permita um contato simples e seguro com alguém de confiança, um abraço ou uma conversa presencial, em dose pequena.",
+    "Mostre algo que você criou a uma pessoa, em vez de guardar só para si.",
+    "Quando a vontade de sumir chegar, nomeie o que está sentindo antes de se fechar por completo.",
+    "Caminhe com atenção no corpo: passo, respiração, presença. Sem meta de desempenho.",
   ],
   oral: [
-    "Pratique receber cuidado sem se sentir em dívida ou desconfortável",
-    "Desenvolva estrutura própria: rotinas, limites claros, autocuidado consistente",
-    "Observe onde você dá mais do que recebe, e por quê continua dando",
-    "Trabalho de enraizamento em pernas e pés: squats, corrida, yoga",
-    "Identifique suas necessidades reais e pratique expressá-las diretamente",
+    "Pratique receber um cuidado pequeno sem imediatamente retribuir ou se sentir em dívida.",
+    "Monte uma rotina simples só sua: sono, alimentação, um tempo sem atender ninguém.",
+    "Observe onde você dá mais do que recebe e escolha uma situação para pedir algo concreto.",
+    "Diga em uma frase clara o que você precisa a alguém próximo.",
+    "Quando a solidão apertar, pergunte-se o que você mesmo pode oferecer a si agora, antes de buscar o outro.",
   ],
   psicopata: [
-    "Cultive espaços de vulnerabilidade segura, relações onde você não precisa performar",
-    "Pratique pedir ajuda e deixar que o outro contribua genuinamente",
-    "Exercícios de abertura do centro do corpo: yoga, bioenergética pélvica",
-    "Meditação e práticas de presença que desaceleram a atividade mental",
-    "Explore o que você sente quando não está no papel de líder ou executor",
+    "Escolha uma relação segura e mostre um limite ou uma necessidade real, sem estratégia.",
+    "Peça ajuda em algo que você conseguiria fazer sozinho, e permita que o outro contribua de verdade.",
+    "Reserve um momento sem agenda de conquista: só presença, sem impressionar.",
+    "Quando a impaciência subir, respire e escute a pessoa até o fim antes de responder.",
+    "Pergunte-se o que você sente quando não está no papel de quem lidera ou resolve.",
   ],
   masoquista: [
-    "Pratique pequenas expansões diárias: dizer não, expressar uma opinião, ocupar mais espaço",
-    "Trabalho corporal focado em liberação da região pélvica, quadril e lombar",
-    "Identifique onde você engole em vez de expressar, e pratique expressar com suavidade",
-    "Celebre progressos sem minimizá-los, o prazer é permitido",
-    "Psicoterapia ou bioenergética focada em desbloqueio da expressão",
+    "Diga não a uma cobrança pequena que você costumaria engolir em silêncio.",
+    "Expresse uma opinião simples em uma conversa, mesmo que cause um desconforto leve.",
+    "Celebre um progresso seu sem minimizar com 'não foi nada'.",
+    "Quando sentir vontade de aguentar sozinho, diga a alguém: 'isso está pesado para mim'.",
+    "Permita um prazer pequeno no dia, sem precisar merecer antes.",
   ],
   rigido: [
-    "Crie espaços sem agenda, onde não há nada a entregar, provar ou realizar",
-    "Pratique deixar as emoções aparecerem sem gerenciá-las imediatamente",
-    "Trabalho corporal que inclua movimento espontâneo: dança livre, bioenergética",
-    "Cultive relações onde você pode ser visto sem precisar performar perfeição",
-    "Explore o que aparece quando você para de controlar, com curiosidade, não julgamento",
+    "Escolha uma tarefa cotidiana e faça-a de forma suficientemente boa, sem buscar a versão perfeita.",
+    "Quando uma emoção aparecer, nomeie-a antes de organizar uma solução.",
+    "Aceite um cuidado ou uma ajuda sem imediatamente sentir que precisa retribuir.",
+    "Crie um espaço sem agenda: um tempo em que não há nada a entregar, provar ou realizar.",
+    "Permita-se ser visto em uma falha pequena por alguém de confiança, e observe o que acontece por dentro.",
   ],
 };
 
 const OBS_ROSTO: Record<keyof EstruturasPct, string> = {
-  esquizoide: "As feições apresentam uma qualidade distante e introspectiva. O olhar carrega profundidade que parece olhar além do presente, presente no espaço físico mas habitando outro lugar. A assimetria entre os lados do rosto é característica: cada lado parece guardar uma história diferente, como dois personagens coexistindo no mesmo corpo.",
-  oral: "O rosto transmite uma abertura emocional palpável, os traços são delicados e os olhos expressam vulnerabilidade genuína. Há uma qualidade de receptividade na expressão, como se o mundo pudesse ser sentido antes de ser interpretado. A boca e os olhos carregam o anseio de contato que define esta estrutura.",
-  psicopata: "A estrutura facial transmite presença imediata, o olhar é direto, penetrante, com uma qualidade natural de avaliação e comando. A mandíbula e o pescoço comunicam determinação. Há uma harmonia facial que serve ao magnetismo social: este rosto organiza o espaço ao redor antes de a pessoa falar.",
-  masoquista: "As feições guardam uma tensão suave mas perceptível, a mandíbula e o pescoço apresentam contratura característica de quem carrega muito internamente. Os olhos expressam profundidade e uma certa resignação que coexiste com força genuína. Há peso nas expressões que revela o acúmulo de não-dito.",
-  rigido: "O rosto é bem estruturado e organizado, com simetria marcante e traços equilibrados. A expressão é controlada e precisa, a emoção presente mas contida por uma compostura cuidadosa. Os olhos expressam inteligência e presença, mas há uma contenção que limita a expressão espontânea.",
+  esquizoide:
+    "O rosto pode transmitir recolhimento e vida interior. O olhar muitas vezes parece olhar além do momento presente, como se parte de você habitasse outro lugar. Não é ausência de sentimento: é um jeito de se proteger pela distância e pela profundidade.",
+  oral:
+    "O rosto pode transmitir abertura e receptividade. Os olhos e a expressão costumam comunicar o desejo de contato e de ser alcançado. Há uma qualidade de quem sente o mundo antes de interpretar, e isso aparece no jeito de se mostrar.",
+  psicopata:
+    "O rosto pode transmitir presença imediata. O olhar costuma ser direto e a expressão comunica determinação. Antes mesmo da fala, há uma qualidade de quem organiza o espaço e sabe se posicionar.",
+  masoquista:
+    "O rosto pode guardar uma tensão suave, como de quem carrega muito por dentro. Os olhos expressam profundidade e força, às vezes com um peso do que ainda não foi dito. Não é fraqueza: é contenção aprendida.",
+  rigido:
+    "O rosto pode parecer organizado e equilibrado. A expressão costuma ser composta, com emoção presente mas contida. Há inteligência e presença no olhar, e também um cuidado em não se entregar demais.",
 };
 
 const OBS_FRENTE: Record<keyof EstruturasPct, string> = {
-  esquizoide: "A silhueta frontal revela estreiteza e fragmentação. O corpo não flui com continuidade entre os segmentos, há quebras visuais que criam a impressão de peças separadas habitando o mesmo espaço. A desconexão entre tórax e membros inferiores é visível. Os ombros podem estar contraídos e a pelve parece retraída, como se o corpo buscasse ocupar o mínimo de espaço possível.",
-  oral: "O corpo apresenta colapso postural de cima para baixo: o peito cede, os ombros caem para frente, a cabeça avança além do eixo. O tônus muscular geral é baixo, não por fraqueza de caráter, mas porque seu corpo aprendeu que não havia suporte suficiente disponível. A estrutura inteira parece buscar um apoio externo que ainda não chegou de forma consistente.",
-  psicopata: "A silhueta frontal é dominada pela região superior: ombros largos e peito expandido criam uma presença imediata. A distribuição de massa concentra-se claramente acima da cintura. Os membros superiores são mais expressivos, os inferiores menos desenvolvidos em relação ao tronco. A postura comunica domínio e expansão antes de qualquer palavra.",
-  masoquista: "O corpo frontal é comprimido e denso. A largura é expressiva, quadril, tronco e coxas ocupam bastante espaço. A compressão vertical é perceptível: o pescoço parece curto, os ombros estão rebaixados, o tronco parece pressionado de cima para baixo. É um corpo que aprendeu a resistir em vez de expandir.",
-  rigido: "O corpo apresenta organização e simetria notáveis. As proporções entre ombros e quadril são equilibradas, a coluna está ereta, e os membros são simétricos. O tônus muscular está bem distribuído. Há uma beleza na estrutura que também é proteção, o corpo funciona bem porque aprendeu a se manter unido acima de tudo.",
+  esquizoide:
+    "De frente, o corpo pode parecer mais estreito e ocupar pouco espaço, como se buscasse se proteger ficando menos visível. Ombros e tronco podem comunicar recolhimento. A leitura corporal aqui é um apoio cuidadoso, não um diagnóstico.",
+  oral:
+    "De frente, o corpo pode comunicar abertura e, ao mesmo tempo, uma tendência a ceder: peito menos expandido, ombros que caem um pouco para frente, cabeça um pouco avançada. É como se ainda buscasse um apoio externo. Isso é observação, não sentença.",
+  psicopata:
+    "De frente, a presença costuma se concentrar na parte de cima: ombros e peito comunicam expansão e comando. A metade inferior pode parecer menos expressiva. O corpo fala de força e de movimento para frente, com cautela na leitura.",
+  masoquista:
+    "De frente, o corpo pode parecer mais denso e comprimido, com tronco e quadril ocupando espaço de forma resistente. Ombros podem estar rebaixados. É um corpo que aprendeu a sustentar, mais do que a se expandir. Observação, não rótulo.",
+  rigido:
+    "De frente, o corpo pode parecer organizado e simétrico, com proporções equilibradas e postura ereta. Há uma beleza na estrutura que também pode ser proteção: manter tudo no lugar. Lemos isso com cuidado, sem transformar aparência em destino.",
 };
 
 const OBS_LADO: Record<keyof EstruturasPct, string> = {
-  esquizoide: "O perfil lateral revela desengajamento postural: a pelve está retraída e há descontinuidade energética entre os segmentos. Não existe uma linha de força contínua do chão à cabeça, o corpo parece habitado de forma fragmentada, como se a presença não chegasse completamente a certas partes.",
-  oral: "A silhueta lateral evidencia o colapso para frente: cabeça e ombros projetam-se além do eixo corporal, o peito afunda, reduzindo o espaço respiratório. Há uma tendência ao encolhimento que reflete a busca por proteção e o baixo nível de carga energética geral. O corpo ainda aguarda ser sustentado.",
-  psicopata: "O perfil lateral é marcado pelo peito projetado para frente e pela cabeça erguida com queixo levemente elevado. A postura lateral comunica domínio e expansão ascendente. A energia sobe e vai para frente, o corpo diz 'estou aqui e estou no comando' antes de qualquer palavra.",
-  masoquista: "A lateral revela postura comprimida com ombros que caem para dentro e pelve encaixada, limitando a mobilidade. O centro do corpo parece bloqueado, a região do quadril e da lombar guarda tensão crônica. É um corpo que suporta peso invisível com uma consistência que revela força e limitação ao mesmo tempo.",
-  rigido: "O perfil lateral evidencia alinhamento preciso: cabeça, ombros e quadril formam um eixo vertical organizado. O corpo está ereto com uma certa rigidez, a postura perfeita demais revela a armadura invisível que mantém tudo no lugar. O controle postural é real e ao mesmo tempo é símbolo do controle emocional que esta estrutura carrega.",
+  esquizoide:
+    "De lado, o corpo pode parecer menos contínuo, como se a presença não chegasse por completo do chão à cabeça. Há uma qualidade de alguém que ainda está aprendendo a habitar o próprio corpo por inteiro.",
+  oral:
+    "De lado, pode aparecer a tendência a se inclinar para frente: cabeça e ombros um pouco além do eixo, peito menos aberto. O corpo comunica busca de apoio e de contato, com uma energia que pede sustentação.",
+  psicopata:
+    "De lado, peito e cabeça podem se projetar para frente, comunicando avanço e comando. A energia sobe e vai à frente. A leitura corporal sugere força na metade superior, com menos descida até os pés.",
+  masoquista:
+    "De lado, o corpo pode parecer comprimido, com ombros para dentro e mobilidade mais contida no centro. Há a impressão de alguém que carrega um peso invisível com consistência e, ao mesmo tempo, com pouco espaço para expandir.",
+  rigido:
+    "De lado, cabeça, ombros e quadril podem formar uma linha bem organizada. A postura ereta demais também pode revelar o cuidado de não se desorganizar. Controle postural e controle emocional muitas vezes caminham juntos neste padrão.",
 };
 
 const COMBO_POSTURAL_LEVE_ORAL =
-  "Há um traço de busca por vínculo no emocional, sem colapso postural dominante nas imagens.";
+  "Há também um traço de busca por vínculo no jeito de se mostrar, sem que o corpo pareça colapsado nas imagens.";
 
 const PERFIL_FISICO_HUMANO: Record<keyof EstruturasPct, string[]> = {
   esquizoide: [
-    "O corpo parece ocupar pouco espaço, há uma qualidade de recolhimento que convida à observação antes da ação.",
-    "A energia concentra-se na parte superior, como se a presença física ainda buscasse permissão para descer até os pés.",
+    "O corpo pode parecer ocupar pouco espaço, com um recolhimento que convida à observação antes da ação.",
+    "A presença parece se concentrar mais no pensamento do que nos pés, como se ainda pedisse permissão para habitar o chão.",
   ],
   oral: [
-    "O corpo comunica abertura emocional e receptividade, uma postura que busca contato e sustentação.",
+    "O corpo comunica abertura e receptividade, uma postura que busca contato e sustentação.",
     "Há suavidade nos traços e uma tendência a ceder espaço, como quem espera ser acolhido.",
   ],
   psicopata: [
-    "A presença corporal é imediata, o tronco e os ombros organizam o espaço ao redor antes de qualquer palavra.",
-    "A energia sobe e vai para frente, com força visível na metade superior do corpo.",
+    "A presença corporal é imediata: tronco e ombros organizam o espaço ao redor antes de qualquer palavra.",
+    "A força aparece mais na metade de cima, com movimento para frente e para cima.",
   ],
   masoquista: [
     "O corpo carrega densidade e peso, uma resistência silenciosa que revela quanto foi suportado por dentro.",
@@ -142,8 +172,8 @@ const PERFIL_FISICO_HUMANO: Record<keyof EstruturasPct, string[]> = {
   ],
   rigido: [
     "Seu corpo comunica organização e equilíbrio, uma presença ereta que mantém tudo no lugar com cuidado.",
-    "Há contenção perceptível: não é rigidez vazia, mas uma forma de se proteger mantendo a compostura.",
-    "As proporções parecem equilibradas e simétricas, sugerindo alguém que aprendeu a funcionar bem no mundo.",
+    "Há contenção perceptível: não é dureza vazia, mas uma forma de se proteger mantendo a compostura.",
+    "As proporções parecem equilibradas, sugerindo alguém que aprendeu a funcionar bem no mundo.",
   ],
 };
 
@@ -172,268 +202,372 @@ const SINTESE_TOQUE_SECUNDARIO: Record<keyof EstruturasPct, string> = {
 };
 
 const PADROES_POSTURAIS: Record<keyof EstruturasPct, string> = {
-  esquizoide: "Corpo estreito com segmentos visualmente desconectados. Os ombros contraem-se e a pelve fica retraída. As quebras na linha postural criam fragmentação, o corpo não habita a si mesmo por inteiro. Há uma qualidade de ausência parcial, como se só parte da pessoa estivesse presente.",
-  oral: "Colapso postural de cima para baixo: o peito afunda, os ombros caem para frente e a cabeça avança além do eixo. O corpo tem baixo tônus geral e pouco enraizamento nos membros inferiores, como se ainda buscasse o apoio externo que não chegou de forma suficiente.",
-  psicopata: "Expansão ascendente marcante: ombros largos, peito projetado, cabeça erguida comunicando comando natural. A vitalidade concentra-se na metade superior. As pernas e a pelve são relativamente menos expressivas, a energia sobe mas não desce completamente até o chão.",
-  masoquista: "Compressão descendente: o corpo parece pressionado de cima para baixo. Pescoço curto, ombros rebaixados, tronco largo e denso. A tensão crônica em quadris, lombar e coxas revela o acúmulo de energia que não encontra saída livre. Um corpo de resistência, não de fluxo.",
-  rigido: "Postura ereta e alinhada, com proporções equilibradas entre tórax e pelve. A organização corporal é notável, cabeça, ombros e quadril formam um eixo preciso. A rigidez é discreta mas presente: uma contenção do movimento que é símbolo da contenção emocional desta estrutura.",
+  esquizoide:
+    "O corpo pode parecer mais estreito e menos contínuo, com ombros recolhidos e pouco espaço ocupado. Há uma qualidade de ausência parcial, como se só parte da pessoa estivesse presente. A leitura corporal é um apoio, não uma sentença sobre quem você é.",
+  oral:
+    "O corpo pode comunicar colapso suave de cima para baixo: peito menos aberto, ombros para frente, cabeça um pouco avançada. Parece ainda buscar um apoio externo. Isso fala de necessidade de sustentação, não de fraqueza.",
+  psicopata:
+    "O corpo pode mostrar expansão na metade de cima: ombros largos, peito projetado, cabeça erguida. A vitalidade sobe e vai para frente. Pernas e base podem parecer menos expressivas. É um corpo de comando, e também de proteção.",
+  masoquista:
+    "O corpo pode parecer pressionado de cima para baixo: pescoço mais curto, ombros rebaixados, tronco denso. A tensão em quadris e lombar sugere o que foi guardado. É um corpo de resistência, que ainda pede espaço para expandir.",
+  rigido:
+    "O corpo pode parecer ereto e alinhado, com proporções equilibradas. A organização é notável. A contenção do movimento também pode espelhar a contenção emocional: manter a forma para não se desorganizar.",
 };
 
 const CENTROS: Record<keyof EstruturasPct, string> = {
-  esquizoide: "Cabeça e região cervical superior, a energia se concentra no pensamento e se isola do restante do corpo. O centro energético ainda busca permissão para descer.",
-  oral: "Tórax e garganta, onde se guarda o não-dito e a necessidade de contato e sustentação. O peito busca vínculo, mas o tônus postural ainda opera com baixa carga interna.",
-  psicopata: "Tórax superior, ombros e pescoço, região de poder, expansão e acumulação de carga. A energia é abundante mas não circula até a pelve e os pés.",
-  masoquista: "Quadril, lombar e coxas, onde a energia fica represada e comprimida em tensão crônica. O centro pede libertação que ainda não encontrou saída.",
-  rigido: "Tórax e centro emocional, onde o sentimento está presente mas bloqueado pela proteção da compostura. Você sente mais do que permite expressar no cotidiano.",
+  esquizoide: "Cabeça e nuca, onde o pensamento concentra a proteção e o corpo ainda pede permissão para ser habitado por inteiro.",
+  oral: "Peito e garganta, onde se guarda o não-dito e a necessidade de contato e sustentação.",
+  psicopata: "Peito, ombros e pescoço, região de poder e expansão, onde a força se acumula e nem sempre desce até os pés.",
+  masoquista: "Quadril, lombar e coxas, onde a tensão se acumula quando muito foi engolido e pouco foi expresso.",
+  rigido: "Peito e centro emocional, onde o sentimento está presente, mas protegido pela compostura.",
 };
 
 const PADROES_ENERGETICOS: Record<keyof EstruturasPct, string> = {
-  esquizoide: "A energia flui preferencialmente para a cabeça e se perde na abstração antes de alcançar o corpo físico. Seu corpo está cronicamente em alerta, raramente alcançando descanso pleno. Há pouco fluxo entre cognição e ação, entre pensar e sentir.",
-  oral: "O fluxo energético tem baixa voltagem geral. A carga se dissipa rapidamente porque você não retém energia com facilidade, há necessidade constante de recarga através do contato com o outro. Quando sozinho por muito tempo, a energia cai de forma perceptível.",
-  psicopata: "A energia corre em alta voltagem para a parte superior, tórax, cabeça, braços. Abaixo da cintura o fluxo diminui significativamente. A acumulação de carga na parte superior gera tensão crônica nos ombros, nuca e trapézio. Você precisa de descarga regular.",
-  masoquista: "A energia encontra bloqueios crônicos no nível pélvico e lombar. Quando a pressão acumula suficientemente, pode emergir como explosão emocional, adoecimento ou depressão. Você pede libertação e expansão que a estrutura ainda não aprendeu a permitir.",
-  rigido: "O fluxo energético é organizado e contido, corre por canais definidos mas raramente transborda. Disponível para ação e realização, o fluxo encontra barreiras quando precisa circular no campo emocional e relacional. A regulação emocional opera com restrições conscientes ou automáticas.",
+  esquizoide:
+    "A atenção tende a subir para o pensamento antes de chegar ao corpo. Você pode passar muito tempo alerta por dentro e pouco tempo em descanso pleno. O desafio é aproximar o que você pensa do que você sente e faz.",
+  oral:
+    "A energia costuma se esvaziar mais rápido e pedir recarga no contato com o outro. Sozinho por muito tempo, você pode sentir a vitalidade cair. O desafio é aprender a se reabastecer também por dentro, sem abandonar o vínculo.",
+  psicopata:
+    "A força sobe para peito, cabeça e braços. Abaixo da cintura, o fluxo pode diminuir. Ombros e nuca guardam tensão quando a descarga não acontece. Você precisa de saídas reais: movimento, verdade e descanso de performance.",
+  masoquista:
+    "A energia pode ficar presa no centro do corpo. Quando a pressão sobe demais, pode sair em explosão, cansaço profundo ou tristeza. O corpo pede expansão e expressão que a proteção ainda hesita em permitir.",
+  rigido:
+    "A energia costuma ser organizada e disponível para realizar. Encontra barreira quando precisa circular no sentimento e na relação. Você sente mais do que permite mostrar. O desafio é deixar o fluxo chegar onde o controle costuma fechar a porta.",
 };
 
 const MENSAGENS: Record<keyof EstruturasPct, string> = {
-  esquizoide: "Sua visão interior é um recurso real, não um defeito. Cada vez que você ancora presença no corpo e permite ser visto em pequenas doses, você aprende que existir aqui pode ser seguro. Isso não é performance: é integração gradual.",
-  oral: "Receber apoio não enfraquece sua função de cuidar. Quanto mais estrutura interna você constrói, mais consegue sustentar vínculos sem esvaziar. Pedir o que precisa é parte de como você funciona melhor, não uma falha.",
-  psicopata: "Sua força já está provada. O próximo passo é permitir que vulnerabilidade e liderança coexistam: mostrar limite e necessidade não reduz influência, aumenta confiança.",
-  masoquista: "Suportar não precisa ser sua única identidade. Expansão, prazer e leveza também cabem em você. Dizer não em pequenas doses reescreve o padrão corporal.",
-  rigido: "Sua competência é real e valiosa. Por baixo do controle existe sensibilidade que também precisa de espaço operacional. Relaxar não é perder padrão: é ampliar o que você consegue sentir e integrar sem desorganizar quem você é.",
+  esquizoide:
+    "Sua visão interior é um recurso real, não um defeito. Cada vez que você ancora presença no corpo e permite ser visto em doses pequenas, descobre que existir aqui pode ser mais seguro do que a proteção antiga sugeria. Isso não é performance: é integração gradual.",
+  oral:
+    "Receber apoio não enfraquece o seu jeito de cuidar. Quanto mais estrutura interna você constrói, mais consegue sustentar vínculos sem se esvaziar. Pedir o que precisa faz parte de como você funciona melhor, não de uma falha.",
+  psicopata:
+    "Sua força já está provada. O próximo passo é permitir que vulnerabilidade e liderança caminhem juntas: mostrar limite e necessidade não reduz influência. Aumenta confiança.",
+  masoquista:
+    "Suportar não precisa ser a sua única identidade. Expansão, prazer e leveza também cabem em você. Dizer não em doses pequenas reescreve o padrão antigo sem apagar a sua lealdade.",
+  rigido:
+    "Sua competência é real e valiosa. Por baixo do controle existe sensibilidade que também precisa de espaço. Relaxar não é perder padrão: é ampliar o que você consegue sentir e viver sem deixar de ser quem você é.",
 };
 
 const INTERPRETACOES: Record<keyof EstruturasPct, string[]> = {
   esquizoide: [
-    "Você habita um universo interior raro. Sua mente é um cosmos particular, cheio de conexões que poucos conseguem acompanhar. Há uma inteligência que transcende o ordinário, uma capacidade de ver padrões invisíveis para os outros, de criar mundos a partir do nada. Essa é sua maior riqueza e, ao mesmo tempo, seu maior isolamento.",
-    "A estrutura Esquizóide carrega a ferida mais primordial: o terror de existir. No corpo, isso se manifesta como uma desconexão entre partes, como se fragmentos de você vivessem em órbitas separadas. Os ombros tendem a retrair, a pelve a recuar, o corpo a fragmentar-se em segmentos que não conversam facilmente entre si. O trabalho é reunir esses fragmentos em uma identidade encarnada.",
-    "Sua relação com a solidão é complexa: ela é tanto fortaleza quanto prisão. O isolamento criativo, a profundidade intelectual, a sensibilidade extrema às energias ao redor, são dons reais que o mundo precisa. O desafio que a vida lhe apresenta é o mesmo de sempre: confiar que é seguro estar aqui, que você tem direito de existir plenamente, de ser visto.",
-    "Sua jornada de transformação passa obrigatoriamente pelo corpo. Enquanto a mente já habita mundos sofisticados, o corpo aguarda ser habitado com a mesma presença. Cada vez que você ancora sua vasta riqueza interior no aqui e agora, a experiência de ser você se torna mais inteira, mais real, mais sua.",
-    "A integração da estrutura Esquizóide não é sobre 'ser normal', é sobre trazer o universo interior para o contato com o mundo real. Quando a presença física começa a acompanhar a riqueza interna, surge uma pessoa de impacto genuíno: criativa, conectada e radicalmente autêntica.",
+    "Na abordagem dos traços, a estrutura Esquizóide se associa a experiências muito cedo, em que estar inteiro no mundo pode ter parecido arriscado. A proteção pode ter sido se afastar, observar e criar um universo interior rico. Você pode ter aprendido que pensar era mais seguro do que sentir e ser visto. Observe se essa origem encontra eco na sua história.",
+    "Com o tempo, essa proteção pode ter desenvolvido um talento real: profundidade, criatividade e capacidade de ver o que outros não veem. Ao mesmo tempo, o corpo pode ter ficado um pouco de fora da conversa. Ombros se recolhem, a presença parece incompleta, a solidão vira fortaleza e, às vezes, prisão. O trabalho não é se tornar outra pessoa. É reunir o que já é seu.",
+    "Hoje, isso pode aparecer como necessidade de espaço, dificuldade de se manter em ambientes muito estimulantes e uma vida interior que poucos conhecem de verdade. Você pode ser leal e intenso nos poucos vínculos que escolhe. O desafio é confiar, em doses, que é seguro existir aqui e ser tocado pela vida real.",
+    "O caminho de integração passa pelo corpo e pela presença. Enquanto a mente já habita mundos sofisticados, o corpo espera ser habitado com a mesma atenção. Cada vez que você ancora a riqueza interior no aqui e agora, a experiência de ser você fica mais inteira.",
+    "Integrar o Esquizóide não é se tornar 'comum'. É trazer o universo interior para o contato com o mundo. Quando a presença começa a acompanhar a visão, surge alguém criativo, conectado e profundamente autêntico.",
   ],
   oral: [
-    "Há em você uma profundidade emocional que é raridade neste mundo. Você sente o outro antes mesmo de ele falar, percebe a dor escondida, a alegria genuína, a saudade que ninguém mais enxerga. Essa é sua maior dádiva: empatia encarnada, leitura relacional que antecipa o ambiente.",
-    "A estrutura Oral carrega a ferida do abandono, não necessariamente um abandono literal, mas a experiência de não ter havido suporte suficiente, consistente e incondicional. No corpo, isso aparece como colapso postural: o peito cede, os ombros caem, você inteiro aprende a operar com menos energia. O trabalho interno é aprender a apoiar-se em si mesmo.",
-    "Você nutre o outro com uma generosidade extraordinária. Mas existe uma pergunta silenciosa que o acompanha: 'E eu, quem me sustenta?' O caminho de cura passa por aprender a pedir, a receber, a deixar que cuidem de você com a mesma entrega com que você cuida. Você merece isso, não como recompensa, mas como direito.",
-    "Sua sensibilidade é um presente que o mundo precisa. A melancolia, a saudade, o anseio de pertencer são sinais de alguém que lê vínculo com precisão. Quanto mais você encontrar estrutura interna, limites, autocuidado e apoio próprio, mais consegue sustentar relações sem se dissolver nelas.",
-    "A transformação da estrutura Oral é sobre plenitude: aprender que você pode se encher por dentro em vez de depender do outro para isso. Não é sobre fechar a abertura, mas sobre ter um centro tão forte quanto a receptividade que você já carrega naturalmente.",
+    "Na abordagem dos traços, a estrutura Oral se associa à fase do nascimento até cerca de 1 ano, quando o suporte pode ter faltado ou chegado de forma irregular. A proteção pode ter sido buscar o outro, cuidar, sentir e se ligar. Você pode ter aprendido que o amor vem de fora. Observe se essa história faz sentido para você.",
+    "Com o tempo, essa proteção pode ter desenvolvido uma empatia rara: você lê o outro, aquece ambientes e sustenta vínculos. Ao mesmo tempo, o corpo pode ter aprendido a operar com menos sustentação própria. O peito cede, a energia cai quando a conexão falta, e a pergunta silenciosa aparece: 'e eu, quem me sustenta?'",
+    "Hoje, isso pode aparecer como generosidade grande, medo de abandonar e de ser abandonado, e dificuldade de receber sem se sentir em dívida. Você pode dar demais para não ficar sozinho. O desafio é construir um centro próprio sem fechar a abertura que já é seu talento.",
+    "O caminho de integração passa por pedir, receber e se apoiar em si mesmo com a mesma entrega com que você cuida. Você merece isso como direito, não como recompensa. Limites e autocuidado não apagam o vínculo: tornam o vínculo sustentável.",
+    "Integrar o Oral é descobrir plenitude por dentro. Não é fechar a receptividade. É ter um centro tão forte quanto a capacidade de amar que você já carrega.",
   ],
   psicopata: [
-    "Você chegou ao mundo com uma capacidade de influência que é visível no seu corpo: a parte superior se impõe, os ombros comunicam antes de você falar, a postura comanda o espaço ao redor. Essa não é uma falha de caráter, é uma resposta adaptativa de um ser que precisou controlar o ambiente para sobreviver.",
-    "A estrutura Psicopata nasce de uma traição, de uma vontade que foi violada quando ainda era vulnerável. O corpo aprendeu a se expandir para cima como defesa: quanto maior acima da cintura, menos vulnerável. Funcionou. Você se tornou alguém difícil de controlar. O preço foi a desconexão com a própria fragilidade.",
-    "Sua força é real. Seu magnetismo, sua capacidade estratégica, sua visão, são dons genuínos que o mundo reconhece. O que a vida lhe convida a descobrir é que por baixo da armadura existe vulnerabilidade que também quer ser vista, descansar e receber apoio sem precisar impressionar.",
-    "A transformação para você passa por descer, trazer a energia do peito e dos ombros até o chão, até as pernas, até a pelve. Quando o poder vem do corpo inteiro e não apenas do tórax, ele se torna sustentável, autêntico, enraizado. É aí que o líder se torna sábio e o estrategista se torna humano.",
-    "A vulnerabilidade que você evitou com tanto custo é justamente o que completa o que você tem. Líderes que conhecem sua própria fragilidade e a revelam nos momentos certos inspiram lealdade que a força sozinha nunca consegue. Essa é a próxima fronteira do seu poder.",
+    "Na abordagem dos traços, a estrutura Psicopata se associa à fase entre 1 e 2,5 anos, quando a vontade pode ter sido interrompida e confiar pode ter custado caro. A proteção pode ter sido expandir, controlar e liderar. Você pode ter aprendido que força evita dor. Observe se isso encontra eco na sua vida.",
+    "Com o tempo, essa proteção pode ter desenvolvido magnetismo, visão e capacidade de fazer as coisas andarem. O corpo comunica presença antes da fala. O preço pode ter sido a distância da própria fragilidade: quanto mais forte por cima, menos espaço para ser cuidado por baixo.",
+    "Hoje, isso pode aparecer como alta performance, impaciência com lentidão e dificuldade de mostrar necessidade. Você investe onde há respeito e estímulo. O desafio é descobrir que vulnerabilidade, nos momentos certos, não diminui liderança: humaniza e aprofunda a confiança.",
+    "O caminho de integração passa por descer. Trazer a força do peito e dos ombros até o chão, até as pernas, até o descanso. Quando o poder vem do corpo inteiro e da verdade, ele se torna sustentável.",
+    "Integrar o Psicopata é permitir que a força e a fragilidade convivam. Líderes que conhecem o próprio limite inspiram uma lealdade que a performance sozinha nunca alcança.",
   ],
   masoquista: [
-    "Há uma força em você que é silenciosa e contínua, uma capacidade de suportar que não é fraqueza, mas acúmulo de pressão não expressa. O corpo masoquista comprimiu-se ao longo do tempo, como uma mola que nunca pôde expandir. Essa compressão é visível nas proporções e na textura da postura.",
-    "A ferida que moldou essa estrutura foi a humilhação, a vontade que foi quebrada repetidamente até que a submissão se tornou mais segura que a expressão. No corpo, isso aparece como tensão crônica nos quadris, pescoço e coxas, lugares onde se guarda o que não pode ser dito, o que foi engolido por décadas.",
-    "Sua lealdade é profunda. Uma vez que você se compromete com alguém ou algo, vai até o fim, mesmo quando isso custa mais do que deveria. Você conhece o sofrimento de dentro e por isso tem uma compaixão rara. O caminho de cura passa por aprender que expansão é possível, que o mundo não vai desabar quando você diz não.",
-    "A transformação para a estrutura Masoquista é a expansão gradual. Não a explosão, mas o crescimento suave e contínuo, a voz que sobe um tom de cada vez, o corpo que aprende a ocupar mais espaço. Cada vez que você se expressa em vez de engolir, está reescrevendo a história do seu corpo.",
-    "A alegria, o prazer, a leveza, não são recompensas por sofrimento. São direitos que existem independentemente do quanto você suportou. A vida está esperando que você se permita florescer, não apesar do que passou, mas além disso.",
+    "Na abordagem dos traços, a estrutura Masoquista se associa ao desfralde, entre 2,5 e 3,5 anos, quando expressar vontade pode ter custado crítica ou humilhação. A proteção pode ter sido engolir, aguentar e continuar. Você pode ter aprendido que submissão era mais segura do que expansão. Observe se essa leitura encontra eco em você.",
+    "Com o tempo, essa proteção pode ter desenvolvido lealdade, persistência e capacidade de sustentar o que outros abandonam. O corpo pode ter comprimido o que não podia ser dito. A força silenciosa é real. O custo é o prazer adiado e o espaço que você ainda hesita em ocupar.",
+    "Hoje, isso pode aparecer como fazer demais, reclamar de menos e permanecer em situações que já pedem mudança. Você conhece a dor de dentro e por isso acolhe o outro com profundidade. O desafio é descobrir que o mundo não desaba quando você diz não.",
+    "O caminho de integração é a expansão gradual. Não a explosão. Um tom a mais na voz, um limite pequeno, um prazer permitido. Cada vez que você expressa em vez de engolir, reescreve a história do corpo.",
+    "Integrar o Masoquista é lembrar que alegria e leveza não são prêmio por sofrimento. São direito. A vida espera que você floresça além do que foi suportado.",
   ],
   rigido: [
-    "Você foi feito para funcionar bem no mundo. Sua postura diz isso: ereta, organizada, controlada, um ser que se mantém unido. Há uma competência visível no jeito como você habita seu corpo e seu lugar no mundo. Você realiza, entrega, aparece. Sua estrutura é reconhecida como referência.",
-    "A estrutura Rígida se forma quando entrega emocional e vulnerabilidade passaram a custar caro. O corpo aprendeu a se manter unido acima de tudo, porque desorganizar parecia perigoso. O resultado é um corpo que se mantém inteiro e, ao mesmo tempo, limita a expressão espontânea do que se sente.",
-    "Externamente você opera com clareza. O desafio interno é permitir que emoção circule sem ser imediatamente gerenciada. O que fica represado não desaparece: permanece em você até encontrar saída segura.",
-    "A integração da estrutura Rígida passa por flexibilizar o controle com intenção, não por perder padrão. Quando você relaxa o suficiente para sentir sem corrigir na hora, a competência exterior ganha profundidade emocional.",
-    "A pergunta operacional para você é: o que aparece quando ninguém está olhando, quando não há meta, papel ou entrega? A resposta mostra o que você ainda regula de perto.",
+    "Na abordagem dos traços, a estrutura Rígida se associa a experiências infantis em que demonstrar sentimento, confiar plenamente ou se entregar emocionalmente pode ter trazido frustração, rejeição ou sensação de não ser escolhido. Como proteção, você pode ter aprendido a controlar melhor as emoções, buscar reconhecimento pelas capacidades e demonstrar valor pelo que realiza. Assim, em vez de mostrar que precisa de carinho, pode ter tentado merecê-lo sendo correto, competente e admirável. Observe se essa história faz sentido para a sua vida.",
+    "Com o tempo, essa proteção pode ter desenvolvido excelência, organização e confiabilidade reais. O corpo se mantém unido, a postura comunica competência. O preço pode ser a dificuldade de se desorganizar o suficiente para sentir. O que fica represado não desaparece: espera uma saída segura.",
+    "Na vida adulta, essa estratégia pode continuar: você se esforça para ser admirado, sente necessidade de corresponder às expectativas e encontra dificuldade em demonstrar fragilidade, mesmo quando gostaria de receber acolhimento. Externamente você opera com clareza. Por dentro, a emoção pede permissão.",
+    "O caminho de integração passa por flexibilizar o controle com intenção, não por perder padrão. Quando você relaxa o suficiente para sentir sem corrigir na hora, a competência ganha profundidade humana.",
+    "Integrar o Rígido é descobrir quem você é quando não precisa provar. A pergunta viva é: o que aparece quando ninguém está olhando, quando não há meta nem papel? A resposta mostra o que ainda pede cuidado e o que já está pronto para crescer.",
   ],
 };
 
 const COMBOS: Record<string, string> = {
-  "esquizoide-oral": "uma sensibilidade extrema que tanto se retira para a mente quanto anseia por conexão. Há um movimento interno constante entre o isolamento criativo e o desejo de pertencer, dois universos que pedem integração.",
-  "esquizoide-psicopata": "uma combinação rara de visão estratégica e profundidade filosófica. O poder de influência existe mas opera preferencialmente de uma distância segura, o contato direto e a liderança visível são o próximo passo de crescimento.",
-  "esquizoide-masoquista": "uma pressão interna dupla: o corpo pede silêncio e o mundo pede conformidade. Há riqueza interior enorme, mas o acesso a ela fica bloqueado por tensão corporal crônica e desconexão. O corpo precisa ser habitado para a riqueza circular.",
-  "esquizoide-rigido": "precisão intelectual aliada à organização, mas a vivência emocional permanece distante. A forma rígida guarda o espaço esquizóide, mas também impede a chegada do calor humano necessário à integração.",
-  "oral-esquizoide": "um ser que tanto precisa de vínculo quanto recua do contato. O anseio de pertencer coexiste com o medo de ser invadido pela proximidade. É uma polaridade que pede integração gradual, cuidadosa e paciente.",
-  "oral-psicopata": "a combinação de necessidade afetiva com força de influência, podem emergir padrões onde a necessidade se disfarça de generosidade que espera retribuição. O caminho é a transparência: pedir diretamente o que se precisa.",
-  "oral-masoquista": "sofrimento em dobro: abandono e humilhação criando um padrão profundo de autossacrifício. Mas também compaixão excepcional, quem conhece a dor de dentro acolhe a dor do outro com uma profundidade rara.",
-  "oral-rigido": "a necessidade de vínculo (Oral) gerida pela organização rígida (Rígido). Você sustenta os outros com consistência, mas regula entrega e recebimento. O paradoxo é aprender a receber apoio sem perder estrutura.",
-  "psicopata-esquizoide": "um visionário que prefere operar nos bastidores. Há poder real, mas ele é exercido preferencialmente através de ideias e estratégias em vez de presença física direta. A liderança existe mas com distância de segurança.",
-  "psicopata-oral": "força e vulnerabilidade em tensão permanente. A fachada poderosa esconde uma necessidade profunda de ser visto e validado. A integração acontece quando o poder não precisa mais funcionar como defesa contra a necessidade.",
-  "psicopata-masoquista": "uma energia densa e intensa, poder de cima pressionando contra resistência de baixo. Pode gerar explosões ou implosões quando você não encontra saída saudável. A integração cria liderança autêntica com raízes.",
-  "psicopata-rigido": "performance de alto nível, um ser que tanto domina quanto organiza com excelência. O exterior brilha; o desafio é o interior. Muito realizado fora, com uma saudade crescente de si mesmo por dentro.",
-  "masoquista-esquizoide": "peso e distância combinados, o corpo carrega muito enquanto a mente se afasta. A riqueza interior existe mas fica enterrada sob camadas de tensão corporal e desconexão. O caminho é a presença encarnada.",
-  "masoquista-oral": "duas estruturas de sofrimento que se reforçam, o peso do mundo combinado com a necessidade do outro. A transformação vem através de autocuidado radical e de aprender a receber sem culpa.",
-  "masoquista-psicopata": "força em conflito com força, uma luta interna constante entre submissão e poder. Quando integrados, podem gerar uma liderança autêntica que conhece tanto a dor quanto a força de verdade.",
-  "masoquista-rigido": "resistência disciplinada, o corpo suporta enquanto a mente organiza. Um guerreiro silencioso e confiável que precisa aprender que expansão e alegria também são parte do seu direito.",
-  "rigido-esquizoide": "organização externa com profundidade interna. Um ser que funciona bem no mundo mas habita universos muito mais ricos em seu interior. O desafio é trazer essa riqueza para o contato real.",
-  "rigido-oral": "a necessidade de vínculo (Oral) gerida pela organização rígida (Rígido). A estrutura rígida contém a necessidade oral; a integração pede receber apoio com a mesma competência com que você oferece, sem administrar cada troca afetiva.",
-  "rigido-psicopata": "uma combinação de excelência e poder, alguém que tanto realiza quanto lidera. Mas o que está por baixo? Quando ninguém está olhando, o que este ser realmente sente e permite sentir?",
-  "rigido-masoquista": "disciplina e resistência, um ser que entrega muito e reclama pouco. A organização rígida cobre a pressão masoquista, criando alguém confiável que internamente pede por alívio e leveza.",
+  "esquizoide-oral":
+    "pode haver um movimento constante entre se recolher para pensar e desejar pertencer. A profundidade pede espaço; o vínculo pede proximidade. Quando as duas forças conversam, surge alguém capaz de unir visão interior e calor humano.",
+  "esquizoide-psicopata":
+    "pode haver visão clara e capacidade de influenciar, muitas vezes exercidas a uma distância segura. A liderança existe, mas prefere ideias e estratégia à exposição contínua. Integradas, essas forças criam um visionário com presença real.",
+  "esquizoide-masoquista":
+    "pode haver muita vida por dentro e pouca saída por fora. O pensamento se afasta e o corpo segura. A riqueza interior pede presença e voz para deixar de ficar presa sob o silêncio.",
+  "esquizoide-rigido":
+    "pode haver precisão mental com organização na vida prática. As ideias ganham forma, mas o sentimento pode ficar à distância. A integração convida o calor humano a ocupar o mesmo espaço do pensamento e da entrega.",
+  "oral-esquizoide":
+    "pode haver desejo de vínculo e, ao mesmo tempo, medo de se perder na proximidade. Você quer perto e também precisa de espaço. Habitar essa tensão com consciência permite empatia profunda sem invasão.",
+  "oral-psicopata":
+    "pode haver necessidade de ser visto misturada à força de quem lidera. Às vezes a generosidade espera uma retribuição que não foi pedida. O caminho é pedir com clareza e deixar a força servir ao vínculo, não escondê-lo.",
+  "oral-masoquista":
+    "pode haver um padrão profundo de dar e aguentar. Abandono e crítica, quando se encontram, reforçam o autossacrifício. A compaixão que nasce disso é rara. A transformação começa quando você também se coloca na conta do cuidado.",
+  "oral-rigido":
+    "pode haver desejo de vínculo organizado pela necessidade de manter a forma. Você cuida com consistência, mas regula o quanto se entrega e o quanto recebe. A integração é aprender a receber sem perder estrutura.",
+  "psicopata-esquizoide":
+    "pode haver poder de influência exercido mais por ideias do que por exposição. Você pensa antes de avançar e avança com intenção. A liderança ganha profundidade quando a presença também se permite aparecer.",
+  "psicopata-oral":
+    "pode haver força por fora e necessidade de acolhimento por dentro. A performance protege o desejo de ser visto sem impressão. Quando o poder deixa de esconder a necessidade, a liderança se humaniza.",
+  "psicopata-masoquista":
+    "pode haver avanço e contenção ao mesmo tempo. Uma parte quer expandir; outra segura. Sem saída saudável, a tensão sobe. Integradas, essas forças criam liderança com raiz e humanidade.",
+  "psicopata-rigido":
+    "pode haver alto rendimento: liderar e organizar, influenciar e entregar. O exterior brilha. O desafio é o interior: quem você é quando não está realizando. Essa descoberta enraíza o poder.",
+  "masoquista-esquizoide":
+    "pode haver peso no corpo e distância na mente. Você carrega muito e, ao mesmo tempo, se afasta. A presença gentil no corpo abre caminho para a riqueza interior aparecer.",
+  "masoquista-oral":
+    "pode haver dor conhecida de perto e generosidade grande. Você oferece e aguenta. A transformação pede autocuidado concreto: receber sem culpa e se tratar com a mesma gentileza que oferece ao outro.",
+  "masoquista-psicopata":
+    "pode haver luta interna entre se submeter e avançar. Quando encontra saída, essa tensão vira liderança que conhece a dor e ainda assim escolhe crescer sem esmagar.",
+  "masoquista-rigido":
+    "pode haver resistência disciplinada: entregar muito e reclamar pouco. A organização cobre o peso. A integração pede permissão para leveza, prazer e apoio.",
+  "rigido-esquizoide":
+    "pode haver competência no mundo e universos ricos por dentro. O exterior funciona; o interior raramente é compartilhado. A integração convida a profundidade a ser vista sem perder a organização.",
+  "rigido-oral":
+    "pode haver desejo de vínculo gerido pela organização. Você cuida com consistência e regula a entrega. A integração é receber com a mesma competência com que oferece, sem administrar cada troca afetiva.",
+  "rigido-psicopata":
+    "pode haver excelência e influência juntas. Muito realizado por fora, com saudade de profundidade por dentro. Descobrir o ser atrás da função não diminui o poder: aprofunda.",
+  "rigido-masoquista":
+    "pode haver disciplina cobrindo um peso antigo. Você entrega, mantém e quase não pede. A integração pede relaxar o suficiente para sentir o acumulado e expandir o suficiente para não carregar tudo sozinho.",
 };
 
 const CARACTERISTICAS: Record<keyof EstruturasPct, string[]> = {
   esquizoide: [
-    "Assimetria perceptível entre os lados do corpo",
-    "Segmentos corporais visualmente desconectados entre si",
-    "Estrutura ectomorfa com volume muscular reduzido",
-    "Ombros contraídos, elevados ou assimétricos",
-    "Pelve retraída e desengajada do tronco",
-    "Pouca continuidade visual de cima a baixo",
+    "Corpo que ocupa pouco espaço",
+    "Ombros recolhidos",
+    "Presença mais mental do que corporal",
+    "Traços alongados",
+    "Recolhimento antes da ação",
+    "Olhar profundo e distante",
   ],
   oral: [
-    "Peito colapsado com esterno rebaixado",
-    "Baixo tônus muscular geral",
-    "Postura curvada com inclinação anterior da cabeça",
-    "Pouco enraizamento nos membros inferiores",
-    "Ombros caídos para frente",
-    "Expressão de baixo nível de carga energética",
+    "Peito menos aberto",
+    "Ombros que caem para frente",
+    "Postura que busca apoio",
+    "Expressão receptiva",
+    "Suavidade nos traços",
+    "Energia que pede contato",
   ],
   psicopata: [
-    "Ombros marcadamente mais largos que o quadril",
-    "Peito expandido e projetado para frente",
-    "Desenvolvimento muscular concentrado na parte superior",
-    "Cabeça erguida com queixo levemente elevado",
-    "Contração visível no trapézio e dorso superior",
-    "Pernas relativamente menos expressivas que o tronco",
+    "Ombros mais largos que o quadril",
+    "Peito projetado",
+    "Presença forte na metade de cima",
+    "Cabeça erguida",
+    "Postura de comando",
+    "Base menos expressiva que o tronco",
   ],
   masoquista: [
-    "Corpo comprimido e de aparência densa",
-    "Pescoço curto e tronco largo",
-    "Pouca definição de cintura em relação ao tronco",
-    "Quadril amplo e pesado",
-    "Tensão crônica visível em lombar e coxas",
-    "Ombros rebaixados e contraídos",
+    "Corpo mais denso e comprimido",
+    "Pescoço aparentemente curto",
+    "Tronco largo",
+    "Quadril marcado",
+    "Tensão em lombar e coxas",
+    "Ombros rebaixados",
   ],
   rigido: [
-    "Postura ereta e verticalmente precisa",
-    "Simetria corporal marcante entre os dois lados",
-    "Tônus muscular bem distribuído no corpo todo",
-    "Proporções equilibradas entre ombros e quadril",
-    "Alinhamento preciso da coluna vertebral",
-    "Expressão de controle e contenção do movimento",
+    "Postura ereta e organizada",
+    "Simetria corporal",
+    "Proporções equilibradas",
+    "Compostura no movimento",
+    "Alinhamento claro",
+    "Expressão contida",
   ],
 };
-
-// ── Communication style library ────────────────────────────────────────────────
 
 const ESTILOS_COMUNICACAO: Record<keyof EstruturasPct, EstiloComunicacao> = {
   esquizoide: {
     tipo: "Reservado e profundo",
-    descricao: "Você é seletivo com palavras, cada uma tem peso real. A comunicação acontece quando há necessidade genuína ou quando um tema desperta interesse verdadeiro. Em silêncio, você está pensando, processando, habitando mundos interiores, não ausente.",
-    emGrupos: "Em grupos, tende a observar mais do que participar. A conversa superficial esgota rapidamente; o que você busca é a troca que vai fundo. Com uma pessoa certa, em um espaço seguro, pode falar por horas com uma riqueza que surpreende quem só te conhecia calado.",
-    emRelacoes: "Prefere se comunicar por escrito ou em profundidade e reflexão em vez de impulso. Expressar o que sente verbalmente é genuinamente mais difícil do que compreender o que sente. Os outros podem interpretar seu silêncio como distância, raramente é isso.",
-    emConflito: "Diante do conflito, o impulso é recuar e processar internamente. Raramente responde no calor da hora, e quando responde, é com uma clareza e precisão que pode surpreender quem esperava reação emocional imediata.",
-    emTensao: "A tensão alta faz você desaparecer internamente, presente no corpo, ausente na interação. Pode levar horas ou dias para processar o que aconteceu e só então encontrar as palavras certas. Isso não é fraqueza: é como você funciona.",
+    descricao:
+      "Você escolhe as palavras com cuidado. Fala quando há necessidade verdadeira ou quando um tema desperta interesse real. No silêncio, você está pensando e processando, não ausente.",
+    emGrupos:
+      "Em grupos, observa mais do que participa. A conversa rasa cansa rápido. Com a pessoa certa, em um espaço seguro, pode falar por horas com uma riqueza que surpreende quem só te conhecia calado.",
+    emRelacoes:
+      "Prefere profundidade à pressa. Expressar o que sente em voz alta pode ser mais difícil do que compreender o que sente. Os outros podem ler o seu silêncio como distância. Raramente é isso.",
+    emConflito:
+      "Diante do conflito, o impulso é recuar e processar por dentro. Raramente responde no calor da hora. Quando responde, costuma trazer clareza e precisão.",
+    emTensao:
+      "Na tensão alta, você pode desaparecer por dentro: presente no corpo, ausente na troca. Pode levar tempo até as palavras certas chegarem. Isso não é fraqueza. É o seu ritmo.",
   },
   oral: {
     tipo: "Expressivo e relacional",
-    descricao: "Você se comunica com abertura emocional: as emoções aparecem nas palavras, no tom, no gesto. Falar ajuda a organizar o que sente. A conversa é, para você, um espaço de conexão tanto quanto de troca de informação.",
-    emGrupos: "Em grupos, busca conexão genuína e frequentemente aquece o ambiente. Tem facilidade para perceber o que o outro precisa ouvir, e generosidade para dizê-lo. Pode ser o centro emocional de um grupo sem precisar ser o mais falante.",
-    emRelacoes: "Nas relações íntimas, a comunicação flui com naturalidade, você fala, compartilha, confessa. O desafio é perceber quando está falando mais para aliviar a própria ansiedade do que para genuinamente conectar. A distinção faz toda a diferença.",
-    emConflito: "Em situações de conflito, a tendência é tentar harmonizar, a discórdia é fisicamente desconfortável. Às vezes cede antes de expressar o que realmente pensa ou sente. Com o tempo, o não-dito vira peso.",
-    emTensao: "Sob tensão, pode tornar-se mais verborrágico, falar como forma de manejar a ansiedade. Perceber esse padrão é o primeiro passo para escolher as palavras que realmente importam em vez de produzir volume.",
+    descricao:
+      "Você se comunica com abertura. Emoção aparece na voz, no tom e no gesto. Falar ajuda a organizar o que sente. A conversa é conexão, não só troca de informação.",
+    emGrupos:
+      "Em grupos, busca calor genuíno e frequentemente aquece o ambiente. Percebe o que o outro precisa ouvir e tem generosidade para dizer. Pode ser o centro emocional sem ser o mais falante.",
+    emRelacoes:
+      "Nas relações íntimas, a comunicação flui. Você compartilha e confessa. O desafio é perceber quando fala para aliviar a própria ansiedade e quando fala para conectar de verdade.",
+    emConflito:
+      "No conflito, tende a harmonizar. A discórdia incomoda. Às vezes cede antes de dizer o que realmente pensa. Com o tempo, o não-dito vira peso.",
+    emTensao:
+      "Sob tensão, pode falar mais para manejar a ansiedade. Perceber isso ajuda a escolher as palavras que importam, em vez de só produzir volume.",
   },
   psicopata: {
     tipo: "Direto e estratégico",
-    descricao: "Você é um comunicador natural, presença forte, voz que organiza o espaço, palavras que têm peso imediato. Fala com convicção e raramente perde o fio do que quer transmitir. Sabe exatamente como posicionar o que diz.",
-    emGrupos: "Em grupos, tende a assumir o papel de quem articula, resume ou direciona. Percebe rapidamente a dinâmica do ambiente e sabe onde posicionar-se para ser ouvido. Não precisa falar muito, quando fala, é ouvido.",
-    emRelacoes: "Nas relações, a comunicação tende a ser objetiva e funcional. O que sente está presente mas passa por filtros antes de ganhar voz. O desafio é deixar a vulnerabilidade também encontrar expressão, não porque diminui, mas porque completa.",
-    emConflito: "No conflito, é direto, talvez mais do que o outro esperava. Não tem dificuldade em defender um ponto de vista e pode ser persistente. Mas persuasão duradoura exige que o outro se sinta ouvido antes de ser convencido.",
-    emTensao: "Sob pressão, a comunicação pode endurecer, o tom aumenta, a paciência encurta, a escuta diminui. Perceber isso é crítico: a eficácia do que você diz depende de como é recebido, e o controle do tom é uma habilidade de liderança real.",
+    descricao:
+      "Você comunica com presença. A voz organiza o espaço e as palavras têm peso. Fala com convicção e sabe se posicionar.",
+    emGrupos:
+      "Em grupos, tende a articular, resumir ou direcionar. Percebe a dinâmica rápido e sabe onde se colocar para ser ouvido. Não precisa falar muito. Quando fala, é ouvido.",
+    emRelacoes:
+      "Nas relações, a comunicação pode ser objetiva. O que sente passa por filtros antes de ganhar voz. O desafio é deixar a vulnerabilidade também aparecer, porque ela completa a força.",
+    emConflito:
+      "No conflito, é direto, às vezes mais do que o outro esperava. Defende o ponto com persistência. Persuasão duradoura pede que o outro se sinta ouvido antes de ser convencido.",
+    emTensao:
+      "Sob pressão, o tom pode endurecer e a escuta encolher. Perceber isso é liderança real: o que você diz só funciona se puder ser recebido.",
   },
   masoquista: {
     tipo: "Contido e reflexivo",
-    descricao: "Você pensa muito antes de falar, e o que fala carrega consideração e peso. A comunicação é cuidadosa, às vezes mais do que necessária. Guardar é mais natural do que expressar. As palavras têm custo real para você.",
-    emGrupos: "Em grupos, prefere uma posição de observação ou de apoio. Não sente necessidade de dominar a conversa, o que tem a dizer pode esperar o momento certo. Mas quando fala, o que diz costuma ser preciso e oportuno.",
-    emRelacoes: "Nas relações, você é confiável e discreto, guarda o que é compartilhado com respeito genuíno. Mas também tende a guardar o que próprio sente por mais tempo do que seria saudável. Os outros podem não saber o quanto você carrega.",
-    emConflito: "No conflito, a tendência é engolir. Raramente confronta no calor da hora, prefere silenciar, processar e às vezes nunca mencionar. O ressentimento pode se acumular exatamente nessa contenção, saindo mais tarde e de formas inesperadas.",
-    emTensao: "Sob tensão, o silêncio aprofunda. A pressão interna cresce enquanto a comunicação diminui, o oposto do que seria necessário. Às vezes tudo irrompe em um momento inesperado, depois de longa e invisível contenção.",
+    descricao:
+      "Você pensa muito antes de falar. O que diz carrega peso e consideração. Guardar é mais natural do que expressar. As palavras têm custo.",
+    emGrupos:
+      "Em grupos, prefere observar ou apoiar. Não precisa dominar a conversa. Quando fala, costuma ser preciso e oportuno.",
+    emRelacoes:
+      "Nas relações, é discreto e confiável. Guarda o que o outro compartilha. Também guarda o próprio sentimento por tempo demais. Os outros podem não saber o quanto você carrega.",
+    emConflito:
+      "No conflito, a tendência é engolir. Prefere silenciar e processar. O ressentimento pode crescer nessa contenção e sair mais tarde, de formas inesperadas.",
+    emTensao:
+      "Sob tensão, o silêncio aprofunda. A pressão sobe enquanto a comunicação diminui. Às vezes tudo irrompe depois de longa contenção invisível.",
   },
   rigido: {
     tipo: "Preciso e estruturado",
-    descricao: "Você se comunica com clareza e precisão, sabe o que quer dizer e diz com organização. Há uma qualidade de competência no discurso que transmite confiabilidade. O pensamento está bem estruturado antes de virar palavra.",
-    emGrupos: "Em grupos, pode tanto liderar a discussão quanto moderá-la. Tem facilidade para organizar o pensamento coletivo e trazer clareza quando a conversa se perde. Funciona bem em contextos que têm estrutura e propósito.",
-    emRelacoes: "Nas relações íntimas, a comunicação pode parecer mais formal ou contida do que o outro espera. O que sente está presente, mas passa por um filtro de compostura antes de chegar à voz. Isso pode criar distância que não é intenção.",
-    emConflito: "No conflito, é racional e argumentado. Pode ter dificuldade com a dimensão emocional, que muitas vezes pede validação antes de solução. Alguém que chora não quer ser convencido: quer ser visto. Essa distinção é importante.",
-    emTensao: "Sob tensão, o controle aumenta, a comunicação torna-se mais formal, mais distante, mais gerenciada. É uma armadura que funciona no curto prazo mas cria isolamento exatamente quando a conexão seria mais necessária.",
+    descricao:
+      "Você se comunica com clareza. Sabe o que quer dizer e organiza o discurso. Há competência na fala, e isso transmite confiabilidade.",
+    emGrupos:
+      "Em grupos, pode liderar ou moderar. Tem facilidade para organizar o pensamento coletivo e trazer clareza quando a conversa se perde.",
+    emRelacoes:
+      "Nas relações íntimas, a comunicação pode parecer mais contida do que o outro espera. O sentimento está presente, mas passa por compostura antes de chegar à voz. Isso pode criar distância sem intenção.",
+    emConflito:
+      "No conflito, é racional e argumentado. Pode ter dificuldade com a dimensão emocional, que muitas vezes pede ser vista antes de ser resolvida.",
+    emTensao:
+      "Sob tensão, o controle aumenta. A comunicação fica mais formal e gerenciada. Funciona no curto prazo e pode isolar exatamente quando a conexão seria mais necessária.",
   },
 };
 
-// ── Unique combination profiles ─────────────────────────────────────────────────
-
 const PERFIS_UNICOS: Record<string, string> = {
-  "esquizoide-oral": "Você combina profundidade rara com um anseio genuíno de conexão, duas forças que muitas vezes puxam em direções opostas. A mente habita universos interiores vastos enquanto a parte de você que busca vínculo anseia por pertencimento e sustentação. O resultado é uma pessoa que tanto precisa de solidão quanto sofre com ela, tanto deseja o contato quanto recua diante dele. Esta tensão não é defeito, é o campo de sua integração. Quando as duas estruturas se encontram, emerge alguém capaz de unir a profundidade do pensamento à riqueza do sentimento: um criativo com empatia real e inteligência emocional genuína.",
-  "esquizoide-psicopata": "Você é um estrategista que pensa de dentro para fora. A visão intelectual do Esquizóide aliada ao poder de influência do Psicopata cria alguém capaz de transformar ideias abstratas em movimentos concretos, mas que frequentemente prefere operar nos bastidores, a uma distância segura da exposição direta. Liderança existe em você, mas costuma ser exercida através de ideias, estruturas e estratégias mais do que através de presença física contínua. Quando integradas, estas estruturas produzem um visionário com capacidade executiva, difícil de encontrar, impossível de ignorar.",
-  "esquizoide-masoquista": "A combinação cria uma experiência interna densa e silenciosa. O Esquizóide retira a energia para a mente; o Masoquista a pressiona para baixo. O mundo exterior pode não perceber a intensidade do que acontece internamente, você carrega muito, pensa muito, sente muito, e raramente tudo isso encontra expressão proporcional. Há uma riqueza interior real que fica enterrada sob camadas de contenção e desconexão. A integração passa por habitar o corpo com presença e gentileza, e permitir que o que está dentro ganhe voz, forma e movimento.",
-  "esquizoide-rigido": "Precisão intelectual aliada a organização interna, uma combinação que produz alguém de alta capacidade e funcionalidade real. A riqueza do universo interior Esquizóide é estruturada pela Rígida, criando uma mente que tanto gera ideias profundas quanto as executa com consistência. O desafio compartilhado: ambas as estruturas tendem a manter o mundo emocional à distância, uma por fragmentação, a outra por controle. A integração convida o sentir a ocupar o mesmo espaço que o pensar e o realizar.",
-  "oral-esquizoide": "Um anseio de vínculo aliado a uma mente que precisa de distância, uma polaridade que cria tensão interior constante e rica. Você deseja profundamente mas também teme o que a proximidade pode custar. Esta tensão não precisa ser resolvida: precisa ser habitada com consciência. Quando integradas, estas estruturas produzem alguém com empatia extraordinária e visão interior rara, capaz de sentir o outro com precisão e de compreender padrões que outros simplesmente não veem.",
-  "oral-psicopata": "O anseio de ser visto e validado combinado com a força de quem lidera, uma combinação poderosa e internamente complexa. Há uma necessidade de reconhecimento que pode se disfarçar de generosidade ou liderança. A pergunta que esta combinação convida a explorar: quando você está servindo o outro porque genuinamente quer, e quando está buscando aprovação que ainda não aprendeu a dar a si mesmo? Quando integradas, estas estruturas criam um líder profundamente humano, alguém com força real e abertura relacional ao mesmo tempo.",
-  "oral-masoquista": "Duas estruturas de necessidade não atendida que se reforçam mutuamente, abandono e humilhação criando um padrão profundo de autossacrifício e sofrimento silencioso. Você carrega muito, oferece muito e frequentemente recebe pouco. A compaixão que emerge dessa experiência é real e rara, quem conhece a dor de dentro acolhe o outro com uma profundidade difícil de imitar. A transformação começa com a decisão de que você merece receber tanto quanto oferece, e que pedir não é fraqueza, é integração.",
-  "oral-rigido": "A necessidade de vínculo (Oral) contida por uma estrutura que aprendeu a gerenciar entrega e recebimento. O Oral quer entregar-se; o Rígido organiza essa entrega. O resultado pode ser alguém que cuida com consistência mas raramente se permite ser completamente vulnerável no cuidado. A integração abre o vínculo sem perder a estrutura, e revela que a vulnerabilidade não desorganiza, ela completa o que a consistência começou.",
-  "psicopata-esquizoide": "Um visionário estratégico que prefere a profundidade do pensamento à exposição direta. Você tem poder real de influência e visão clara, mas tende a exercê-los através de ideias e estruturas em vez de presença física contínua. A liderança existe mas opera com distância de segurança. Quando integradas, estas estruturas produzem alguém com profundidade filosófica e capacidade executiva, que pensa antes de agir e age com intenção precisa.",
-  "psicopata-oral": "Força exterior e vulnerabilidade interior em permanente tensão. A fachada poderosa e persuasiva esconde uma necessidade de ser visto, sustentado e validado sem precisar impressionar. Esta tensão é sua fronteira de crescimento mais fértil. A integração acontece quando o poder deixa de ser uma defesa contra a necessidade, e você descobre que mostrar o que precisa não enfraquece sua liderança: a humaniza de forma definitiva.",
-  "psicopata-masoquista": "Uma energia densa e contraditória: poder de cima, resistência de baixo. O Psicopata quer expandir e avançar; o Masoquista contém e resiste. Esta tensão interna pode gerar impasses intensos, ou, quando integrada, uma liderança de força e humanidade incomuns. Esta combinação conhece tanto a ambição quanto o peso das coisas, e quando as duas se encontram, cria alguém que lidera sem esmagar e resiste sem se prender.",
-  "psicopata-rigido": "Excelência e poder em uma mesma estrutura, alguém que tanto domina quanto organiza, tanto lidera quanto entrega. O exterior brilha com competência real e presença inconfundível. O desafio compartilhado está no interior: ambas as estruturas tendem a manter a vulnerabilidade protegida atrás da performance e da eficiência. Muito realizado fora, com uma saudade crescente de profundidade e intimidade real por dentro.",
-  "masoquista-esquizoide": "Peso corporal e distância mental, duas forças que criam isolamento a partir de direções diferentes. Você carrega muito internamente e ao mesmo tempo tem dificuldade de estar completamente presente no corpo que carrega esse peso. A riqueza interior existe mas fica enterrada sob tensão e desconexão. O caminho é a presença encarnada: habitar o corpo com gentileza crescente e permitir que o peso encontre expressão e movimento.",
-  "masoquista-oral": "Duas estruturas que conhecem a dor de dentro, abandono e humilhação criando um núcleo profundo de necessidade não atendida. Você oferece muito, aguenta muito e frequentemente experimenta a vida como um esforço contínuo. A compaixão que nasce dessa experiência é extraordinária. A transformação radical começa com autocuidado genuíno, não como conceito, mas como prática diária de se tratar com a mesma generosidade que você naturalmente oferece ao mundo.",
-  "masoquista-psicopata": "Força em conflito com força, uma batalha interna constante entre submissão e poder, entre suportar e avançar. Esta tensão pode gerar explosões ou implosões quando você não encontra saída saudável. Quando integradas, estas estruturas criam uma liderança autêntica que conhece o peso real das coisas e ainda assim escolhe avançar, uma combinação de força genuína e humanidade que poucos possuem.",
-  "masoquista-rigido": "Resistência e disciplina, um guerreiro silencioso e confiável que entrega muito e reclama pouco. A organização rígida cobre a pressão masoquista, criando alguém que funciona com consistência admirável mas que internamente carrega mais do que o mundo vê. A integração pede permissão para a leveza, descobrir que a vida pode ser também prazer, expansão e alegria, e não apenas resistência e entrega contínua.",
-  "rigido-esquizoide": "Organização externa com profundidade interna, um ser que funciona exemplarmente no mundo mas habita universos muito mais ricos em seu interior. A estrutura rígida garante que o mundo veja competência; a esquizóide guarda mundos que raramente são compartilhados. A integração convida essa riqueza interior para o contato real, sem perder a organização que você construiu, mas deixando a profundidade também ser vista e recebida.",
-  "rigido-oral": "A necessidade de vínculo (Oral) gerida pela organização rígida (Rígido): você cuida dos outros com consistência real, mas regula tanto a entrega quanto o recebimento. A integração pede aprender a receber apoio com a mesma competência com que você oferece, sem administrar cada troca afetiva.",
-  "rigido-psicopata": "Excelência e poder numa combinação de alto rendimento, alguém que tanto realiza quanto influencia, tanto organiza quanto comanda. O exterior é brilhante e a competência é real. O desafio profundo é encontrar quem você é quando não está realizando ou liderando, o ser por baixo da função. Essa descoberta não diminui o poder: ela o enraíza em algo que nenhuma realização externa pode dar.",
-  "rigido-masoquista": "Disciplina e resistência, você entrega muito, mantém muito e quase nunca pede. A organização rígida cobre o peso masoquista, criando uma persona de confiabilidade que raramente revela o custo interno que carrega. A integração pede dois movimentos simultâneos: relaxar o controle o suficiente para sentir o que está acumulado, e expandir o suficiente para não carregar tudo sozinho indefinidamente.",
+  "esquizoide-oral":
+    "Você combina profundidade rara com desejo genuíno de conexão, duas forças que muitas vezes puxam em direções opostas. A mente habita universos interiores enquanto a parte que busca vínculo anseia por pertencimento. O resultado pode ser alguém que precisa de solidão e também sofre com ela, deseja o contato e recua diante dele. Essa tensão não é defeito: é o campo da sua integração. Quando as duas se encontram, emerge alguém capaz de unir visão e sentimento.",
+  "esquizoide-psicopata":
+    "Você é um estrategista que pensa de dentro para fora. A visão do Esquizóide aliada à influência do Psicopata cria alguém capaz de transformar ideias em movimento, muitas vezes preferindo os bastidores à exposição direta. A liderança existe, mas costuma passar por ideias e estruturas. Quando integradas, essas forças produzem um visionário com capacidade de realizar, difícil de ignorar.",
+  "esquizoide-masoquista":
+    "A combinação cria uma experiência interna densa e silenciosa. O Esquizóide leva a energia para o pensamento; o Masoquista a segura no corpo. O mundo pode não perceber a intensidade do que acontece por dentro. Há riqueza real enterrada sob contenção. A integração passa por habitar o corpo com gentileza e permitir que o que está dentro ganhe voz e movimento.",
+  "esquizoide-rigido":
+    "Precisão mental aliada à organização prática. A riqueza interior do Esquizóide é estruturada pelo Rígido, criando alguém que gera ideias profundas e as executa com consistência. O desafio compartilhado: ambas as estruturas tendem a manter o mundo emocional à distância. A integração convida o sentir a ocupar o mesmo espaço do pensar e do realizar.",
+  "oral-esquizoide":
+    "Um anseio de vínculo aliado a uma mente que precisa de distância. Você deseja profundamente e também teme o custo da proximidade. Essa tensão não precisa ser apagada: precisa ser habitada com consciência. Quando integradas, essas forças produzem empatia extraordinária e visão interior rara.",
+  "oral-psicopata":
+    "O desejo de ser visto combinado com a força de quem lidera. Pode haver necessidade de reconhecimento disfarçada de generosidade ou de liderança. A pergunta viva é: quando você serve porque quer, e quando busca aprovação que ainda não aprendeu a dar a si? Integradas, essas forças criam um líder profundamente humano.",
+  "oral-masoquista":
+    "Duas histórias de necessidade não atendida podem se reforçar: abandono e humilhação criando autossacrifício. Você carrega muito, oferece muito e frequentemente recebe pouco. A compaixão que nasce disso é rara. A transformação começa com a decisão de que você merece receber tanto quanto oferece, e que pedir não é fraqueza.",
+  "oral-rigido":
+    "A necessidade de vínculo contida por uma estrutura que aprendeu a gerenciar entrega e recebimento. O Oral quer se entregar; o Rígido organiza essa entrega. Você pode cuidar com consistência e raramente se permitir ser completamente vulnerável. A integração abre o vínculo sem perder a estrutura.",
+  "psicopata-esquizoide":
+    "Um visionário estratégico que prefere a profundidade do pensamento à exposição direta. Você tem influência e visão, mas tende a exercê-las por ideias e estruturas. A liderança opera com distância de segurança. Quando integradas, essas forças produzem profundidade e capacidade de agir com intenção precisa.",
+  "psicopata-oral":
+    "Força por fora e vulnerabilidade por dentro em tensão permanente. A fachada poderosa pode esconder a necessidade de ser visto e sustentado sem impressionar. A integração acontece quando o poder deixa de ser defesa contra a necessidade, e você descobre que mostrar o que precisa humaniza a liderança.",
+  "psicopata-masoquista":
+    "Energia densa: uma parte quer avançar, outra contém. Sem saída saudável, a tensão sobe. Quando integradas, essas forças criam liderança com raiz e humanidade, alguém que conhece ambição e peso ao mesmo tempo.",
+  "psicopata-rigido":
+    "Excelência e poder na mesma composição. Alguém que lidera e organiza, influencia e entrega. O exterior brilha. O desafio está no interior: quem você é quando não está realizando. Muito feito por fora, com saudade crescente de intimidade real por dentro.",
+  "masoquista-esquizoide":
+    "Peso no corpo e distância na mente. Você carrega muito e tem dificuldade de estar presente no corpo que carrega esse peso. A riqueza interior existe, mas fica enterrada. O caminho é a presença encarnada: habitar o corpo com gentileza e permitir expressão.",
+  "masoquista-oral":
+    "Duas estruturas que conhecem a dor de perto. Você oferece muito, aguenta muito e frequentemente vive a vida como esforço contínuo. A compaixão que nasce disso é extraordinária. A transformação começa com autocuidado concreto, tratandose com a mesma generosidade que oferece ao mundo.",
+  "masoquista-psicopata":
+    "Força em conflito com força: entre se submeter e avançar. Sem saída, pode haver explosão ou implosão. Quando integradas, essas forças criam liderança autêntica que conhece o peso das coisas e ainda assim escolhe crescer.",
+  "masoquista-rigido":
+    "Resistência e disciplina. Um guerreiro silencioso e confiável que entrega muito e reclama pouco. A organização cobre o peso. A integração pede permissão para leveza, prazer e alegria, não só resistência.",
+  "rigido-esquizoide":
+    "Organização no mundo e profundidade por dentro. Você funciona bem lá fora e habita universos ricos cá dentro. A estrutura rígida mostra competência; a esquizóide guarda o que raramente é compartilhado. A integração convida essa riqueza a ser vista e recebida.",
+  "rigido-oral":
+    "A necessidade de vínculo gerida pela organização. Você cuida com consistência e regula a entrega. A integração pede aprender a receber apoio com a mesma competência com que oferece, sem administrar cada troca afetiva.",
+  "rigido-psicopata":
+    "Excelência e influência em alto rendimento. O exterior é brilhante e a competência é real. O desafio é encontrar quem você é quando não está realizando ou liderando. Essa descoberta não diminui o poder: enraíza.",
+  "rigido-masoquista":
+    "Disciplina e resistência. Você entrega, mantém e quase nunca pede. A organização cobre o custo interno. A integração pede dois movimentos: relaxar o suficiente para sentir o acumulado e expandir o suficiente para não carregar tudo sozinho.",
 };
-
-// ── Functional dynamic library ──────────────────────────────────────────────────
 
 const DINAMICAS_FUNCIONAIS: Record<keyof EstruturasPct, DinamicaFuncional> = {
   esquizoide: {
-    trabalho: "No trabalho, você funciona melhor em profundidade do que em amplitude, prefere mergulhar fundo em um problema do que transitar entre muitos ao mesmo tempo. Ambientes de alta estimulação social ou com exigência constante de interação drenam sua energia de forma desproporcional. O rendimento máximo vem em espaços de autonomia, com tempo para pensar sem interrupção e projetos que demandam originalidade real.",
-    relacoes: "Relacionamentos consomem energia de uma forma que você raramente verbaliza. Não é que você não quer as pessoas, é que a presença continuada exige um gerenciamento energético real que outros não percebem. Seus vínculos mais profundos são poucos, mas extraordinariamente intensos. Você é leal de uma forma que quem está fora não vê e quem está dentro raramente esquece.",
-    estresse: "Sob estresse, você se retira, para dentro da cabeça, para a solidão, para o trabalho intelectual. A tendência é processar em silêncio e só então emergir com clareza ou solução. Outros podem interpretar isso como distância ou frieza. É, na verdade, você funcionando como sabe: primeiro entende, depois responde.",
-    decisoes: "Suas decisões são tomadas internamente, com um processo que pode parecer lento para quem está ao redor. Você analisa a fundo, considera múltiplas variáveis e frequentemente chega a conclusões que outros não haviam considerado. A dificuldade aparece quando é necessário decidir com velocidade ou quando o fator emocional tem mais peso do que a lógica.",
-    energia: "Você é introvertido no sentido mais literal, a energia se regenera na solidão e se consome na interação. Grandes grupos e ambientes muito estimulantes criam fadiga real que precisa de tempo para se recuperar. Aprenda a respeitar esses ciclos: quando você pede recolhimento, atendê-lo não é isolamento, é manutenção.",
-    sombra: "O lado que você menos gosta de ver em si mesmo: a tendência ao isolamento que se torna prisão, a intelectualização que evita sentir, a dificuldade de se deixar impactar pelo outro. A sombra desta estrutura é o mundo que existe apenas na cabeça, rico demais para ser compartilhado, protegido demais para ser tocado. A cura está em trazer esse universo para o contato real, um passo de cada vez.",
+    trabalho:
+      "No trabalho, você rende mais na profundidade do que na dispersão. Prefere mergulhar em um problema a saltar entre muitos. Ambientes de muita interação drenam. O melhor rendimento vem com autonomia, tempo para pensar e projetos que pedem originalidade real.",
+    relacoes:
+      "Relacionamentos consomem uma energia que você raramente explica. Não é que você não queira as pessoas: a presença contínua exige um cuidado interno que outros não veem. Seus vínculos mais profundos são poucos e intensos. Você é leal de um jeito que quem está fora quase não percebe.",
+    estresse:
+      "Sob estresse, você se retira para a mente, para a solidão ou para o trabalho de pensar. Processa em silêncio e só então emerge com clareza. Outros podem ler isso como frieza. É você funcionando: primeiro entende, depois responde.",
+    decisoes:
+      "Suas decisões nascem por dentro, com um processo que pode parecer lento. Você analisa fundo e chega a conclusões que outros não viram. A dificuldade aparece quando a vida pede velocidade ou quando o sentimento pesa mais do que a lógica.",
+    energia:
+      "Você se regenera na solidão e se consome na interação. Grupos grandes e ambientes muito estimulantes pedem recuperação. Quando você pede recolhimento, atender a isso não é isolamento: é manutenção.",
+    sombra:
+      "O que pode doer reconhecer: o isolamento que vira prisão, o pensamento que evita sentir, a dificuldade de se deixar tocar. A sombra é o mundo rico demais para ser compartilhado e protegido demais para ser alcançado. A cura começa em trazer esse universo para o contato real, um passo de cada vez.",
   },
   oral: {
-    trabalho: "No trabalho, você funciona melhor em ambientes colaborativos e relacionais, onde o contato humano faz parte do processo. Tarefas que exigem isolamento prolongado drenam sua energia de forma diferente. Você rende mais quando sente que o que faz importa para alguém, que há conexão no propósito. O reconhecimento genuíno importa, não como vaidade, mas como combustível.",
-    relacoes: "Relacionamentos são, para você, o centro de gravidade da existência. Você investe profundamente nas pessoas, sente suas alegrias e dores quase como se fossem suas, e tem uma capacidade de cuidado que é raridade real. O desafio estrutural é perceber quando está dando em excesso para suprir uma necessidade que seria mais bem suprida olhando para dentro.",
-    estresse: "Sob estresse, você tende a buscar o outro, falar, compartilhar, pedir apoio ou oferecer cuidado. A conexão é a âncora. Quando sozinho por muito tempo sob pressão, a energia cai de forma perceptível e você fica menos estável. Manter vínculos saudáveis não é dependência: para você, é uma necessidade legítima que merece ser honrada.",
-    decisoes: "Você decide com o impacto emocional e relacional muito presente no processo. Às vezes isso é precisamente a sabedoria necessária. Outras vezes, a decisão mais saudável é aquela que vai desagradar ou decepcionar alguém, e é aí que você trava. Aprender a decidir por você mesmo é uma prática de longo prazo.",
-    energia: "Sua energia tem baixa voltagem basal, não é preguiça, é como você está organizado. Você precisa de carga regular através de conexões genuínas, propósito claro e autocuidado consistente. Quando bem carregado, sua presença tem calor e vitalidade reais. Quando vazio, a tendência é buscar o outro para reabastecer, o que pode criar ciclos de dependência que são diferentes de conexão.",
-    sombra: "O que você menos quer ver: a dependência afetiva que se disfarça de generosidade, o auto-abandono que se parece com cuidado ao outro, a dificuldade de se sustentar por dentro. A sombra é o espaço onde a necessidade não atendida opera sem ser nomeada, sabotando relações justamente pelo excesso do que você quer delas. Nomear essa necessidade diretamente é o começo da integração.",
+    trabalho:
+      "No trabalho, você rende melhor onde há colaboração e sentido humano. Isolamento longo drena. Você produz mais quando sente que o que faz importa para alguém. O reconhecimento genuíno não é vaidade: é combustível.",
+    relacoes:
+      "Relacionamentos são o centro de gravidade. Você investe fundo, sente a dor e a alegria do outro e cuida com uma generosidade rara. O desafio é perceber quando está dando em excesso para preencher uma necessidade que pediria olhar para dentro.",
+    estresse:
+      "Sob estresse, você busca o outro: falar, compartilhar, pedir ou oferecer cuidado. A conexão é âncora. Sozinho por muito tempo sob pressão, a energia cai. Manter vínculos saudáveis, para você, é necessidade legítima.",
+    decisoes:
+      "Você decide com o impacto relacional bem presente. Às vezes isso é sabedoria. Outras vezes, a decisão saudável é a que vai desagradar alguém, e aí você trava. Aprender a decidir por si é prática de longo prazo.",
+    energia:
+      "Sua energia pede recarga regular em conexões genuínas, propósito e autocuidado. Bem nutrido, você tem calor e vitalidade. Vazio, pode buscar o outro para se reabastecer, e aí a conexão se confunde com dependência.",
+    sombra:
+      "O que pode doer reconhecer: a dependência disfarçada de generosidade, o autoabandono que parece cuidado, a dificuldade de se sustentar por dentro. Nomear a necessidade diretamente é o começo da integração.",
   },
   psicopata: {
-    trabalho: "No trabalho, você funciona em alta performance e orientação a resultados. Ambientes sem desafio, sem progressão ou com burocracia excessiva frustram rapidamente, você foi feito para avançar, não para manter. Tem facilidade natural para liderar, articular visões e mobilizar recursos humanos. O risco é confundir eficiência com relação: times motivados por medo entregam menos do que times inspirados.",
-    relacoes: "Relacionamentos tendem a ser funcionais e estruturados, você investe onde vê retorno real, onde há estimulação e respeito. A vulnerabilidade emocional é o território mais difícil: não porque não existe, mas porque expô-la parece, por dentro, equivalente a dar poder ao outro. A transformação relacional começa quando você descobre que mostrar o que precisa não é fraqueza, é confiança.",
-    estresse: "Sob estresse, você avança, mais ação, mais controle, mais intensidade. A tendência é dominar a situação antes que ela te domine. Isso funciona em crises objetivas. Em crises emocionais, o mesmo padrão pode amplificar o problema: forçar solução onde o que é necessário é simplesmente estar presente e sentir.",
-    decisoes: "Você decide com velocidade e convicção. A análise é rápida, o comprometimento é alto e a execução começa antes de muitos ainda estarem decidindo. O ponto cego é a consulta genuína: não como performance de participação, mas como abertura real para que o pensamento do outro mude o seu. As melhores decisões frequentemente chegam quando o ego sai da sala.",
-    energia: "Você tem alta voltagem energética, a carga é abundante e você precisa de descarga regular para não criar tensão crônica. Exercício físico intenso, projetos com visibilidade real e momentos de liderança são fontes naturais de descarga. Sem saídas saudáveis, a energia pode se acumular em tensão nos ombros, nuca e maxilar, o corpo guarda o que não foi expresso.",
-    sombra: "O que você menos quer reconhecer: a necessidade de aprovação que se esconde atrás da performance, a vulnerabilidade que foi enterrada tão cedo que mal se lembra de onde está, a parte de você que quer ser vista de forma simples mas ainda não sabe como permitir. A sombra do Psicopata é a fragilidade original que a força veio proteger, e que ainda está lá, esperando ser encontrada.",
+    trabalho:
+      "No trabalho, você opera em alta performance e orientação a resultado. Ambientes sem desafio ou com burocracia demais frustram. Você lidera, articula e mobiliza. O risco é confundir eficiência com relação: times inspirados entregam mais do que times pressionados.",
+    relacoes:
+      "Relacionamentos tendem a ser estruturados. Você investe onde há respeito e estímulo. Mostrar vulnerabilidade parece, por dentro, dar poder ao outro. A transformação começa quando você descobre que mostrar necessidade é confiança, não fraqueza.",
+    estresse:
+      "Sob estresse, você avança: mais ação, mais controle, mais intensidade. Funciona em crises objetivas. Em crises emocionais, o mesmo padrão pode forçar solução onde o que falta é presença e sentimento.",
+    decisoes:
+      "Você decide com velocidade e convicção. A execução começa cedo. O ponto cego é a consulta genuína: deixar o pensamento do outro mudar o seu. As melhores decisões chegam quando o ego sai da sala.",
+    energia:
+      "Você tem alta carga e precisa de descarga saudável: movimento, projetos com sentido e momentos de verdade. Sem saída, a tensão sobe para ombros, nuca e maxilar. O corpo guarda o que não foi expresso.",
+    sombra:
+      "O que pode doer reconhecer: a necessidade de aprovação atrás da performance, a fragilidade antiga que a força veio proteger, a parte que quer ser vista de forma simples. A sombra é essa fragilidade ainda à espera de ser encontrada.",
   },
   masoquista: {
-    trabalho: "No trabalho, você é o colaborador que realmente entrega, presente, comprometido, confiável mesmo quando ninguém está olhando. A tendência é assumir mais do que deveria e reclamar menos do que seria saudável. O risco é a invisibilidade: fazer tanto sem pedir nada pode criar a impressão de que tudo está bem quando não está. Aprender a comunicar limites é uma habilidade profissional real.",
-    relacoes: "Você é leal de uma forma que poucos conseguem manter. Uma vez que se compromete com alguém, vai até o fim, mesmo que o custo seja alto demais. O desafio estrutural é perceber quando a lealdade se tornou submissão: quando você permanece não porque quer, mas porque sair parece impossível ou perigoso. A saúde relacional começa quando você pode escolher ficar, e também escolher ir.",
-    estresse: "Sob estresse, você aguenta. Silencia, comprime, continua funcionando quando outros já teriam parado. Isso é força real, e também é onde você se cobra com mais severidade. O estresse crônico não atendido encontra saída no corpo: adoecimento, depressão, a explosão que vem do nada depois de longa contenção. Atender o estresse antes que ele se acumule é autocuidado, não fraqueza.",
-    decisoes: "Você decide devagar e com muito peso, cada opção é avaliada pelo que pode custar, pelo que pode desagradar, pelo que pode criar conflito. A tendência é adiar a decisão que vai incomodar alguém, mesmo que essa decisão seja necessária e justa. Com o tempo, aprende-se que decisões adiadas não desaparecem: elas crescem.",
-    energia: "Sua energia é densa e resistente, não é alta voltagem, mas é profunda e duradoura. Você tem capacidade de sustentar esforço por longos períodos sem colapsar. O problema é que você raramente recebe tanta energia quanto gasta, a descarga que pede é expansão, expressão, movimento. Sem saídas regulares, a energia se acumula como tensão crônica em quadris, lombar e ombros.",
-    sombra: "O que você menos quer ver: o padrão de suportar que se tornou identidade, o ressentimento silencioso que cresce enquanto você continua dizendo que está bem, a expansão que parece perigosa porque um dia custou vínculo. A sombra desta estrutura é a crença de que ocupar mais espaço, expressar mais, pedir mais, vai custar algo que você não pode perder. A cura começa quando você descobre que não vai.",
+    trabalho:
+      "No trabalho, você entrega de verdade: presente, comprometido, confiável. A tendência é assumir demais e reclamar de menos. O risco é a invisibilidade: fazer tanto sem pedir nada pode parecer que está tudo bem quando não está. Comunicar limite é competência.",
+    relacoes:
+      "Você é leal até o fim, mesmo quando o custo é alto. O desafio é perceber quando a lealdade virou submissão: permanecer não porque quer, mas porque sair parece impossível. Saúde relacional começa quando você pode escolher ficar e também escolher ir.",
+    estresse:
+      "Sob estresse, você aguenta. Continua funcionando quando outros já teriam parado. Isso é força, e também onde a cobrança interna aperta. Estresse não atendido encontra saída no corpo. Cuidar antes de acumular não é fraqueza.",
+    decisoes:
+      "Você decide com muito peso. Avalia o que pode custar e quem pode se magoar. Adia a decisão que incomoda, mesmo quando ela é justa. Decisões adiadas não somem: crescem.",
+    energia:
+      "Sua energia é densa e duradoura. Sustenta esforço longo. O problema é gastar mais do que recebe. A descarga que você precisa é expressão e expansão. Sem isso, a tensão se acumula em quadris, lombar e ombros.",
+    sombra:
+      "O que pode doer reconhecer: o aguentar que virou identidade, o ressentimento silencioso, a expansão que parece perigosa. A sombra é a crença de que pedir mais vai custar o que você não pode perder. A cura começa quando você descobre que pode caber mais espaço.",
   },
   rigido: {
-    trabalho: "No trabalho, você é referência, comprometido, preciso, entregador. Faz o que promete e frequentemente faz mais. O ambiente de alta performance é o seu habitat natural. O risco não está na entrega: está no custo. A perfeição como padrão cria uma pressão contínua sobre si mesmo que, com o tempo, esgota, não o corpo, mas o entusiasmo. Aprender a 'bom o suficiente' pode ser a expansão mais difícil.",
-    relacoes: "Você é confiável nas relações, presente, consistente, capaz de sustentar vínculos com seriedade. O que está por baixo disso: você sente profundamente, mas mantém as emoções em circulação controlada. O outro pode experimentar você como distante ou formal em momentos onde esperava entrega emocional. Não é distância, é a armadura que nunca foi completamente removida.",
-    estresse: "Sob estresse, você aumenta o controle, da situação, das emoções, do ambiente. Funciona em crises objetivas com eficácia notável. Em crises relacionais ou emocionais, o mesmo mecanismo pode criar mais distância exatamente quando conexão seria a solução. Você precisa de permissão para sentir sem imediatamente gerenciar o que sente.",
-    decisoes: "Você decide com método, analisa, pondera, avalia critérios. Raramente age por impulso. A decisão costuma ser boa quando os critérios são claros. O ponto cego é o fator emocional: o que você realmente sente sobre a situação pode ter ficado de fora do processo de deliberação. A intuição emocional não é menos válida que a lógica, é frequentemente a informação que completa o quadro.",
-    energia: "Seu fluxo energético é organizado e disponível, corre por canais definidos e produz resultado consistente. Você funciona bem nas dimensões de realização e controle. Encontra barreiras quando é convidado a circular no campo emocional e relacional, onde não há estrutura prévia, onde a entrega não tem garantia de retorno. É justamente aí que a maior expansão de energia é possível.",
-    sombra: "O que você menos quer reconhecer: a rigidez que se disfarça de princípios, a sensibilidade que quer contato mas desvia na hora em que ele chega, o perfeccionismo que é autocobrança mascarada de padrão. A sombra da estrutura rígida é o ser sensível e profundo que existe por baixo do controle, que sente muito mais do que permite mostrar, e que ainda está esperando permissão para existir sem armadura.",
+    trabalho:
+      "No trabalho, você é referência: preciso, entregador, fiel ao que promete. Alta performance é habitat natural. O risco não está na entrega: está no custo. A perfeição como padrão esgota o entusiasmo. Aprender o 'suficientemente bom' pode ser a expansão mais difícil.",
+    relacoes:
+      "Você é confiável e consistente. Por baixo, sente profundamente e mantém a emoção sob cuidado. O outro pode te experimentar como formal exatamente quando esperava entrega. Não é distância: é a proteção que ainda não foi toda removida.",
+    estresse:
+      "Sob estresse, você aumenta o controle da situação e de si. Funciona em crises objetivas. Em crises emocionais, o mesmo mecanismo cria distância quando a conexão seria a solução. Você precisa de permissão para sentir sem gerenciar na hora.",
+    decisoes:
+      "Você decide com método. Raramente age por impulso. O ponto cego é o sentimento deixado de fora da deliberação. A intuição emocional não é menos válida que a lógica: muitas vezes completa o quadro.",
+    energia:
+      "Sua energia é organizada e disponível para realizar. Encontra barreira no campo emocional e relacional, onde não há estrutura prévia. É justamente aí que a maior expansão é possível.",
+    sombra:
+      "O que pode doer reconhecer: a rigidez disfarçada de princípio, a sensibilidade que quer contato e desvia na hora, o perfeccionismo que é autocobrança. A sombra é o ser sensível por baixo do controle, que sente mais do que permite mostrar.",
   },
 };
 
-/** Origem Reich/Lowen em linguagem acessível (1 parágrafo por estrutura). */
+/** Dor associada ao traço, em linguagem acessível e hipotética. */
 const DORES_LIVRO: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "Na origem, o corpo aprendeu que existir plenamente era arriscado. A distância não é frieza, é o jeito de se cuidar. No cotidiano, o padrão costuma ser recuar antes de ser invadido.",
+    "Na origem desta abordagem, o corpo pode ter aprendido que existir plenamente era arriscado. A distância não é frieza: é cuidado antigo. No cotidiano, o padrão costuma ser recuar antes de se sentir invadido ou rejeitado.",
   oral:
-    "O padrão nasce de suporte inconsistente na formação. O corpo colapsa para buscar apoio externo. Na relação, aparece como dar demais, pedir pouco e sentir que nunca é sustentado o suficiente.",
+    "O padrão pode nascer de suporte inconsistente no começo da vida. O corpo busca apoio externo. Na relação, aparece como dar demais, pedir pouco e sentir que nunca é sustentado o suficiente.",
   psicopata:
-    "Quando vulnerabilidade foi punida cedo, o corpo expandiu-se para cima como defesa. Na relação, pode parecer forte e distante; o desafio é permitir afeto sem perder presença.",
+    "Quando a vulnerabilidade pode ter custado caro cedo, o corpo aprendeu a se expandir e a controlar. Na relação, pode parecer forte e distante. O desafio é permitir afeto sem perder presença.",
   masoquista:
-    "Humilhação repetida ensinou que expressar vontade custava caro. O corpo comprime e aguenta. Na relação, surge lealdade excessiva, dificuldade em dizer não e ressentimento silencioso.",
+    "A crítica ou a humilhação podem ter ensinado que expressar vontade custava caro. O corpo comprime e aguenta. Na relação, surge lealdade excessiva, dificuldade de dizer não e ressentimento silencioso.",
   rigido:
-    "Quando vulnerabilidade e entrega emocional foram punidas, o corpo organizou-se em proteção funcional. No cotidiano você parece confiável e competente, mas você ainda regula emoção de perto, dificultando sentir sem planejar cada reação.",
+    "Quando a entrega emocional pode ter sido frustrada, o corpo se organizou para funcionar bem e se proteger. No cotidiano você parece confiável e competente, e ainda assim regula de perto o que sente, dificultando se entregar sem planejar cada reação.",
 };
 
 const PERGUNTAS_TRANSFORMACAO: Record<keyof EstruturasPct, string> = {

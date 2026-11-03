@@ -1,43 +1,18 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { RefreshCw, ChevronDown, ChevronUp, Info } from "lucide-react";
-import { sanitizarResultadoLegado, isResultadoLegado, leituraDoTraco } from "@workspace/traco-narrativa";
+import {
+  sanitizarResultadoLegado,
+  isResultadoLegado,
+  comporJornadaTraco,
+} from "@workspace/traco-narrativa";
 import { limparJargao } from "@workspace/copy-voz";
-import LeituraBlocos from "@/components/LeituraBlocos";
+import JornadaTracoResultado from "@/pages/traco/components/JornadaTracoResultado";
 import {
   ESTRUTURAS_CONFIG,
   FOTOS_CONFIG,
   type EstruturasPct,
   type TipoFoto,
 } from "@/pages/traco/tracoConfig";
-
-interface EstiloComunicacao {
-  tipo: string;
-  descricao: string;
-  emGrupos: string;
-  emRelacoes: string;
-  emConflito: string;
-  emTensao: string;
-}
-
-interface DinamicaFuncional {
-  trabalho: string;
-  relacoes: string;
-  estresse: string;
-  decisoes: string;
-  energia: string;
-  sombra: string;
-}
-
-interface FusaoDiagnosticoEmocionalResposta {
-  versaoMatriz: string;
-  alinhamentoFotosFormulario: number;
-  assertividadeLeitura: number;
-  pesoFormulario: number;
-  padroesEmocionaisNormalizados: Record<string, number>;
-  vetorFormularioEstruturas: Record<string, number>;
-  sinaisConvergentes: string[];
-  entradaDiagnostico: unknown;
-}
 
 interface ResultadoAnalise {
   versaoNarrativa?: string;
@@ -51,28 +26,34 @@ interface ResultadoAnalise {
   centroEnergetico: string;
   padraoEnergetico: string;
   mensagemTerapeutica: string;
-  dominanteApelido?: string;
   fraseIdentidade?: string;
   pontosFortes?: string[];
   pontosAtencao?: string[];
   ferida?: string;
   dorLivro?: string;
   perguntaTransformacao?: string;
-  leituraEmocionalDeclarada?: string;
-  contrasteFotosFormulario?: string;
   couracaCorporal?: string;
-  pontosCuidadoPrioritarios?: string[];
   recurso?: string;
   recomendacoesPraticas?: string[];
-  confiancaAnalise?: number;
-  estruturasSomenteFotos?: EstruturasPct;
-  sinteseIntegradaFotosQuestionario?: string;
   sinteseHumana?: string;
-  fusaoDiagnosticoEmocional?: FusaoDiagnosticoEmocionalResposta;
   perfilFisicoNarrado?: string;
-  estiloComunicacao?: EstiloComunicacao;
+  estiloComunicacao?: {
+    tipo: string;
+    descricao: string;
+    emGrupos: string;
+    emRelacoes: string;
+    emConflito: string;
+    emTensao: string;
+  };
   perfilUnico?: string;
-  dinamicaFuncional?: DinamicaFuncional;
+  dinamicaFuncional?: {
+    trabalho: string;
+    relacoes: string;
+    estresse: string;
+    decisoes: string;
+    energia: string;
+    sombra: string;
+  };
   evidenciasMotor?: Array<{ estrutura: string; peso: number; descricao: string }>;
   marcadoresPorFoto?: Array<{
     tipo: string;
@@ -81,26 +62,14 @@ interface ResultadoAnalise {
     shr: number | null;
     ulr: number | null;
     simetria: number | null;
-    projecaoCraniana?: number | null;
-    ombrosAdiantados?: number | null;
-    colapsoToracico?: number | null;
-    erroProcessamento?: string;
   }>;
-  marcadoresAgregados?: Record<string, number | null>;
-  eixosReich?: {
-    indiceExpansao: number;
-    indiceRetracao: number;
-    indiceContencao: number;
-    indiceCompressao: number;
-    indiceFragmentacao: number;
-  };
   segmentosReich?: Record<string, number>;
   metadata?: {
     analysisVersion?: string;
-    eixosReich?: ResultadoAnalise["eixosReich"];
     segmentosReich?: Record<string, number>;
-    versaoEixos?: string;
   };
+  confiancaAnalise?: number;
+  estruturasSomenteFotos?: EstruturasPct;
 }
 
 interface AnaliseTraco {
@@ -156,12 +125,7 @@ function Capitulo({
   return (
     <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.12)" }}>
       {recolhivel ? (
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="w-full"
-          style={{ background: "rgba(30,24,18,0.55)" }}
-        >
+        <button type="button" onClick={() => setOpen((v) => !v)} className="w-full" style={{ background: "rgba(30,24,18,0.55)" }}>
           {cabecalho}
         </button>
       ) : (
@@ -198,22 +162,33 @@ export function TracoPainelResultado({
     year: "numeric",
   });
   const alvoAnalise = pessoaNome?.trim() ? pessoaNome.trim() : "Você";
-  const terceiraPessoa = !!pessoaNome?.trim();
-  const fusao = resultado.fusaoDiagnosticoEmocional as FusaoDiagnosticoEmocionalResposta | undefined;
-  const temFusao = !!fusao;
-  const alinhamento = fusao?.alinhamentoFotosFormulario;
-  const baixaConcordancia = typeof alinhamento === "number" && alinhamento < 55;
-  const sinaisConvergentes = (fusao?.sinaisConvergentes ?? []).slice(0, 2);
-  const showAuditUi =
-    import.meta.env.DEV || import.meta.env.VITE_TRACO_AUDIT_UI === "1";
+  const showAuditUi = import.meta.env.DEV || import.meta.env.VITE_TRACO_AUDIT_UI === "1";
   const [expandedAuditoria, setExpandedAuditoria] = useState(false);
   const segmentos = resultado.segmentosReich ?? resultado.metadata?.segmentosReich;
-  const sinteseHumana = resultado.sinteseHumana;
-  const recomendacoes = resultado.recomendacoesPraticas?.slice(0, 5) ?? [];
-  const interpretacaoLegado =
-    legado && resultado.interpretacao?.trim()
-      ? resultado.interpretacao.split(/\n+/).filter(Boolean)
-      : [];
+
+  const jornada = useMemo(
+    () =>
+      estruturaPrincipal
+        ? comporJornadaTraco({
+            estruturas: resultado.estruturas,
+            estruturaPrincipal: resultado.estruturaPrincipal,
+            estruturaSecundaria: resultado.estruturaSecundaria,
+            pontosFortes: resultado.pontosFortes,
+            pontosAtencao: resultado.pontosAtencao,
+            fraseIdentidade: resultado.fraseIdentidade,
+            ferida: resultado.ferida,
+            dorLivro: resultado.dorLivro,
+            recurso: resultado.recurso,
+            perfilUnico: resultado.perfilUnico,
+            dinamicaFuncional: resultado.dinamicaFuncional,
+            estiloComunicacao: resultado.estiloComunicacao,
+            recomendacoesPraticas: resultado.recomendacoesPraticas,
+            mensagemTerapeutica: resultado.mensagemTerapeutica,
+            perguntaTransformacao: resultado.perguntaTransformacao,
+          })
+        : null,
+    [estruturaPrincipal, resultado],
+  );
 
   const demaisTracos = useMemo(() => {
     const principal = resultado.estruturaPrincipal;
@@ -242,14 +217,14 @@ export function TracoPainelResultado({
             border: "1px solid rgba(224,123,57,0.2)",
           }}
         >
-          Este resultado foi gerado com uma versão anterior do motor. Use <strong>Reanalisar</strong> para
-          desbloquear a leitura completa (cruzamentos, cuidados prioritários e menos repetição).
+          Este resultado foi gerado com uma versão anterior. Use <strong>Reanalisar</strong> para
+          atualizar a leitura completa.
         </p>
       )}
 
-      {configPrincipal && estruturaPrincipal && (
+      {configPrincipal && estruturaPrincipal && jornada && (
         <Capitulo
-          titulo="Percentuais"
+          titulo="Seu mapa de personalidade"
           subtitulo={`Resultado de ${alvoAnalise} · ${dataAnalise}`}
           recolhivel={false}
         >
@@ -271,35 +246,18 @@ export function TracoPainelResultado({
               >
                 Traço {configPrincipal.nome}
               </span>
-              {temFusao && typeof alinhamento === "number" && (
-                <span
-                  className="text-xs px-3 py-1 rounded-full"
-                  style={{
-                    background: baixaConcordancia ? "rgba(224,123,57,0.1)" : "rgba(109,185,109,0.1)",
-                    color: baixaConcordancia ? "rgba(224,123,57,0.9)" : "rgba(109,185,109,0.85)",
-                    border: baixaConcordancia
-                      ? "1px solid rgba(224,123,57,0.25)"
-                      : "1px solid rgba(109,185,109,0.25)",
-                  }}
-                >
-                  {alinhamento}% convergência
-                </span>
-              )}
             </div>
 
             <div className="flex items-start justify-between gap-4 mb-3">
               <div>
                 <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>
-                  Estrutura Principal
+                  O que mais aparece em você
                 </p>
                 <h2 className="font-tan-mon-cheri text-2xl md:text-3xl" style={{ color: configPrincipal.cor }}>
                   {configPrincipal.nome}
                 </h2>
               </div>
-              <div
-                className="text-3xl font-bold font-tan-mon-cheri flex-shrink-0"
-                style={{ color: configPrincipal.cor, opacity: 0.9 }}
-              >
+              <div className="text-3xl font-bold font-tan-mon-cheri flex-shrink-0" style={{ color: configPrincipal.cor, opacity: 0.9 }}>
                 {resultado.estruturas[estruturaPrincipal]}%
               </div>
             </div>
@@ -307,7 +265,7 @@ export function TracoPainelResultado({
             {resultado.estruturaSecundaria && (
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <span className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
-                  Secundária:
+                  Também presente:
                 </span>
                 <span
                   className="text-xs px-3 py-1 rounded-full"
@@ -324,14 +282,8 @@ export function TracoPainelResultado({
             )}
 
             {demaisTracos.length > 0 && (
-              <div
-                className="mb-3 pt-3"
-                style={{ borderTop: "1px solid rgba(200,165,107,0.12)" }}
-              >
-                <p
-                  className="text-xs tracking-widest uppercase mb-2"
-                  style={{ color: "rgba(200,165,107,0.4)" }}
-                >
+              <div className="mb-3 pt-3" style={{ borderTop: "1px solid rgba(200,165,107,0.12)" }}>
+                <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.4)" }}>
                   Demais traços
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -348,8 +300,7 @@ export function TracoPainelResultado({
                           opacity: 0.92,
                         }}
                       >
-                        {cfg.nome}{" "}
-                        <span style={{ opacity: 0.85 }}>({pct}%)</span>
+                        {cfg.nome} <span style={{ opacity: 0.85 }}>({pct}%)</span>
                       </span>
                     );
                   })}
@@ -357,7 +308,11 @@ export function TracoPainelResultado({
               </div>
             )}
 
-            <details className="group mb-3">
+            <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.7 }}>
+              {jornada.mapa.significado}
+            </p>
+
+            <details className="group mb-1">
               <summary
                 className="text-xs flex items-center gap-1.5 cursor-pointer list-none"
                 style={{ color: "rgba(200,165,107,0.55)" }}
@@ -370,42 +325,6 @@ export function TracoPainelResultado({
               </p>
             </details>
           </div>
-
-          {temFusao && sinteseHumana && (
-            <div
-              className="rounded-xl p-4"
-              style={{
-                background: baixaConcordancia
-                  ? "rgba(224,123,57,0.05)"
-                  : "rgba(109,185,109,0.05)",
-                border: baixaConcordancia
-                  ? "1px solid rgba(224,123,57,0.18)"
-                  : "1px solid rgba(109,185,109,0.18)",
-              }}
-            >
-              <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(109,185,109,0.6)" }}>
-                {terceiraPessoa ? "Fotos e questionário" : "Suas fotos e respostas"}
-              </p>
-              {baixaConcordancia && (
-                <p className="text-xs mb-2" style={{ color: "rgba(224,123,57,0.85)" }}>
-                  Parte das leituras aponta em direções diferentes. O perfil integrado equilibra as duas fontes.
-                </p>
-              )}
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)" }}>
-                {sinteseHumana}
-              </p>
-              {sinaisConvergentes.length > 0 && (
-                <ul className="mt-3 space-y-1">
-                  {sinaisConvergentes.map((s: string, i: number) => (
-                    <li key={i} className="text-xs flex gap-2" style={{ color: "rgba(247,242,236,0.5)" }}>
-                      <span style={{ color: "rgba(109,185,109,0.6)" }}>·</span>
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
 
           {((resultado.pontosFortes?.length ?? 0) > 0 || (resultado.pontosAtencao?.length ?? 0) > 0) && (
             <div className="grid md:grid-cols-2 gap-3">
@@ -453,6 +372,9 @@ export function TracoPainelResultado({
           )}
 
           <div className="space-y-3 pt-1">
+            <p className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
+              Quanto cada traço aparece no seu perfil
+            </p>
             {(Object.entries(resultado.estruturas) as [keyof EstruturasPct, number][])
               .sort(([, a], [, b]) => b - a)
               .map(([key, pct]) => {
@@ -465,12 +387,8 @@ export function TracoPainelResultado({
                     <div className="flex justify-between text-xs mb-1">
                       <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.45)" }}>
                         {cfg.nome}
-                        {isPrincipal && (
-                          <span className="ml-1.5 opacity-70">· principal</span>
-                        )}
-                        {isSecundaria && (
-                          <span className="ml-1.5 opacity-70">· secundária</span>
-                        )}
+                        {isPrincipal && <span className="ml-1.5 opacity-70">· principal</span>}
+                        {isSecundaria && <span className="ml-1.5 opacity-70">· também presente</span>}
                       </span>
                       <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.4)" }}>{pct}%</span>
                     </div>
@@ -490,35 +408,35 @@ export function TracoPainelResultado({
         </Capitulo>
       )}
 
-      {estruturaPrincipal && (
-        <LeituraBlocos leitura={leituraDoTraco(resultado)} />
-      )}
+      {jornada && <JornadaTracoResultado jornada={jornada} />}
 
-      {/* O corpo fala */}
       {(resultado.caracteristicasFisicasObservadas?.length ||
         resultado.perfilFisicoNarrado ||
         resultado.couracaCorporal ||
         resultado.padraoPostural ||
         (resultado.observacoesPorFoto && Object.keys(resultado.observacoesPorFoto).length > 0)) && (
-        <Capitulo titulo="O corpo fala" defaultOpen={false}>
-          {resultado.caracteristicasFisicasObservadas &&
-            resultado.caracteristicasFisicasObservadas.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {resultado.caracteristicasFisicasObservadas.map((tag, i) => (
-                  <span
-                    key={i}
-                    className="text-xs px-3 py-1.5 rounded-full"
-                    style={{
-                      background: "rgba(200,165,107,0.08)",
-                      border: "1px solid rgba(200,165,107,0.18)",
-                      color: "rgba(200,165,107,0.8)",
-                    }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+        <Capitulo titulo="O corpo fala" defaultOpen={false} subtitulo="Um apoio à leitura, com cuidado">
+          <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
+            O que aparece abaixo é observação, não diagnóstico. O corpo acompanha a leitura; as respostas continuam sendo a base.
+          </p>
+
+          {resultado.caracteristicasFisicasObservadas && resultado.caracteristicasFisicasObservadas.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {resultado.caracteristicasFisicasObservadas.map((tag, i) => (
+                <span
+                  key={i}
+                  className="text-xs px-3 py-1.5 rounded-full"
+                  style={{
+                    background: "rgba(200,165,107,0.08)",
+                    border: "1px solid rgba(200,165,107,0.18)",
+                    color: "rgba(200,165,107,0.8)",
+                  }}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           {resultado.perfilFisicoNarrado && (
             <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)", lineHeight: 1.8 }}>
@@ -609,72 +527,26 @@ export function TracoPainelResultado({
             {expandedAuditoria ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {expandedAuditoria && (
-            <div
-              className="px-6 py-5 space-y-5"
-              style={{ background: "rgba(30,24,18,0.3)", borderTop: "1px solid rgba(200,165,107,0.08)" }}
-            >
+            <div className="px-6 py-5 space-y-5" style={{ background: "rgba(30,24,18,0.3)", borderTop: "1px solid rgba(200,165,107,0.08)" }}>
               {resultado.metadata?.analysisVersion && (
                 <p className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
                   Motor: {resultado.metadata.analysisVersion}
                   {resultado.confiancaAnalise != null ? ` · Confiança ${resultado.confiancaAnalise}%` : ""}
-                  {resultado.versaoNarrativa ? ` · Narrativa ${resultado.versaoNarrativa}` : ""}
                 </p>
               )}
               {resultado.estruturasSomenteFotos && (
-                <div>
-                  <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.45)" }}>
-                    Só fotos (antes da fusão)
-                  </p>
-                  <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
-                    {Object.entries(resultado.estruturasSomenteFotos)
-                      .map(([k, v]) => `${k}: ${v}%`)
-                      .join(" · ")}
-                  </p>
-                </div>
-              )}
-              {resultado.marcadoresPorFoto && resultado.marcadoresPorFoto.length > 0 && (
-                <div className="space-y-3">
-                  <p className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
-                    Marcadores por foto
-                  </p>
-                  {resultado.marcadoresPorFoto.map((m) => (
-                    <div key={m.tipo} className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
-                      <span style={{ color: "rgba(200,165,107,0.6)" }}>{m.tipo}</span>
-                      {m.shr != null ? ` · OMR ${m.shr.toFixed(2)}` : ""}
-                      {m.ulr != null ? ` · ULR ${m.ulr.toFixed(2)}` : ""}
-                      {m.simetria != null ? ` · sim ${m.simetria.toFixed(2)}` : ""}
-                    </div>
-                  ))}
-                </div>
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
+                  {Object.entries(resultado.estruturasSomenteFotos)
+                    .map(([k, v]) => `${k}: ${v}%`)
+                    .join(" · ")}
+                </p>
               )}
               {segmentos && (
-                <div>
-                  <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.45)" }}>
-                    Proteção corporal por segmento
-                  </p>
-                  <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
-                    {Object.entries(segmentos)
-                      .map(([k, v]) => `${k}: ${(v as number).toFixed(2)}`)
-                      .join(" · ")}
-                  </p>
-                </div>
-              )}
-              {resultado.evidenciasMotor && resultado.evidenciasMotor.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
-                    Regras acionadas
-                  </p>
-                  {resultado.evidenciasMotor.map((ev, i) => (
-                    <p key={i} className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
-                      <span style={{ color: "rgba(200,165,107,0.55)" }}>
-                        {ev.estrutura} ({ev.peso > 0 ? "+" : ""}
-                        {ev.peso.toFixed(2)})
-                      </span>
-                      {","}
-                      {ev.descricao}
-                    </p>
-                  ))}
-                </div>
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
+                  {Object.entries(segmentos)
+                    .map(([k, v]) => `${k}: ${(v as number).toFixed(2)}`)
+                    .join(" · ")}
+                </p>
               )}
             </div>
           )}

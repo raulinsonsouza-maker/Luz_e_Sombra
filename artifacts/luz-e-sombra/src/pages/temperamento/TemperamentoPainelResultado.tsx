@@ -130,6 +130,9 @@ export default function TemperamentoPainelResultado({
 
         {pct && primario && (
           <div className="space-y-3 pt-2">
+            <p className="text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>
+              Os percentuais mostram quanto cada temperamento aparece no seu perfil.
+            </p>
             {(Object.entries(pct) as [TemperamentoCodigo, number][])
               .sort((a, b) => b[1] - a[1])
               .map(([cod, val]) => {
