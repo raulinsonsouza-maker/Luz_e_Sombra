@@ -5,9 +5,8 @@ import { apiFetch } from "@/lib/auth";
 import { toastApiError } from "@/lib/apiError";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
-import MissaoDiariaCard from "@/components/MissaoDiariaCard";
-import { useConcluirMissao, type LevelUpInfo } from "@/hooks/useConcluirMissao";
-import { Flame, Trophy, Star, Zap, Sunrise, Crown, Target, Gem, Sparkles, Shield, Compass, Mountain, Award, type LucideIcon } from "lucide-react";
+import { fraseDoDia } from "@/lib/frasesAno";
+import { Flame, Trophy, Star, Zap, Sunrise, Crown, Target, Gem, Sparkles, Shield, Compass, Mountain, Award, Check, type LucideIcon } from "lucide-react";
 import { CATALOGO } from "@workspace/copy-voz";
 
 interface Missao {
@@ -19,6 +18,8 @@ interface Missao {
 
 interface Progresso {
   xp: number;
+  luzes: number;
+  conviteConcluido: boolean;
   nivel: number;
   nomeNivel: string;
   streakDias: number;
@@ -74,8 +75,8 @@ export default function MissoesPage() {
   const [tab, setTab] = useState<"diarias" | "conquistas">("diarias");
   const [progresso, setProgresso] = useState<Progresso | null>(null);
   const [carregando, setCarregando] = useState(true);
-  const [levelUp, setLevelUp] = useState<LevelUpInfo | null>(null);
-  const { concluirMissao, concluindo } = useConcluirMissao(setProgresso, setLevelUp);
+  const [concluindoConvite, setConcluindoConvite] = useState(false);
+  const hoje = fraseDoDia();
 
   useEffect(() => {
     if (status === "unauthenticated") { navigate("/login"); return; }
@@ -93,9 +94,27 @@ export default function MissoesPage() {
     setCarregando(false);
   }
 
-  const concluidasHoje = progresso?.missoes.filter(m => m.concluida).length ?? 0;
-  const totalHoje = progresso?.missoes.length ?? 0;
-  const xpDisponivelHoje = progresso?.missoes.filter(m => !m.concluida).reduce((s, m) => s + m.xpRecompensa, 0) ?? 0;
+  const concluidasHoje = progresso?.conviteConcluido ? 1 : 0;
+  const totalHoje = 1;
+
+  async function concluirConvite() {
+    if (progresso?.conviteConcluido || concluindoConvite) return;
+    setConcluindoConvite(true);
+    try {
+      const res = await apiFetch("/gamificacao/convite/concluir", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok || typeof data.luzes === "number") {
+        setProgresso((atual) =>
+          atual ? { ...atual, conviteConcluido: true, luzes: data.luzes ?? (atual.luzes ?? 0) + 1 } : atual,
+        );
+      } else {
+        toastApiError();
+      }
+    } catch {
+      toastApiError();
+    }
+    setConcluindoConvite(false);
+  }
   const conquistasComputadas: ConquistaItem[] = CONQUISTAS.map((c) => {
     let desbloqueada = false;
     if (!progresso) return { ...c, desbloqueada: false };
@@ -127,65 +146,6 @@ export default function MissoesPage() {
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
       <MobileTopBar />
-      {/* Level-up modal */}
-      {levelUp && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-6"
-          style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}
-        >
-          <div
-            className="w-full max-w-sm rounded-3xl p-8 text-center"
-            style={{
-              background: "linear-gradient(160deg, #2f251b, #1e1812)",
-              border: "1px solid rgba(200,165,107,0.4)",
-              boxShadow: "0 0 60px rgba(200,165,107,0.2)",
-            }}
-          >
-            <div
-              className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", boxShadow: "0 0 40px rgba(200,165,107,0.4)" }}
-            >
-              <Gem className="w-10 h-10" style={{ color: "#1a1208" }} />
-            </div>
-            <p className="text-xs font-bold tracking-[0.3em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.6)" }}>
-              Você evoluiu!
-            </p>
-            <h2 className="font-tan-mon-cheri text-3xl mb-1" style={{ color: "#f7f2ec" }}>
-              NÍVEL {levelUp.nivel}
-            </h2>
-            <p className="font-tan-mon-cheri text-xl mb-3" style={{ color: "#c8a56b" }}>
-              {levelUp.nomeNivel}
-            </p>
-            <p className="text-sm mb-6" style={{ color: "rgba(247,242,236,0.5)" }}>
-              {levelUp.nomeNivel === "Observador" && "Você está aprendendo a se observar e entender seus padrões."}
-              {levelUp.nomeNivel === "Explorador" && "Sua consciência se expande. Continue explorando sua essência."}
-              {levelUp.nomeNivel === "Transformador" && "A mudança real está em suas mãos. Você está transformando."}
-              {levelUp.nomeNivel === "Iluminado" && "Você floresceu. Sua jornada é inspiração para o mundo."}
-            </p>
-            <div
-              className="flex items-center justify-center gap-4 mb-6 py-3 rounded-2xl"
-              style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.15)" }}
-            >
-              <div className="text-center">
-                <p className="text-xs" style={{ color: "rgba(200,165,107,0.5)" }}>Recompensa</p>
-                <p className="font-bold text-sm" style={{ color: "#c8a56b" }}>+100 XP bônus</p>
-              </div>
-              <div className="w-px h-8" style={{ background: "rgba(200,165,107,0.2)" }} />
-              <div className="text-center">
-                <p className="text-xs" style={{ color: "rgba(200,165,107,0.5)" }}>Novo conteúdo</p>
-                <p className="font-bold text-sm" style={{ color: "#c8a56b" }}>Desbloqueado</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setLevelUp(null)}
-              className="w-full py-3 rounded-2xl font-semibold text-sm transition-all"
-              style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
-            >
-              Continuar
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="max-w-lg mx-auto px-4 pt-6">
         <PageIntroHeader eyebrow={CATALOGO.missoes.eyebrow} titulo={CATALOGO.missoes.titulo} subtitulo={CATALOGO.missoes.subtitulo} />
@@ -215,43 +175,32 @@ export default function MissoesPage() {
         {tab === "diarias" && (
           <>
             {/* Progress summary */}
-            {!carregando && progresso && (
-              <div
-                className="rounded-2xl p-4 mb-4 flex items-center justify-between"
-                style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.15)" }}
+            <div
+              className="rounded-3xl p-5 mb-4"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.16)" }}
+            >
+              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: "#5db97a" }}>
+                Seu convite de hoje
+              </p>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.78)" }}>
+                {hoje.convite}
+              </p>
+              <button
+                type="button"
+                onClick={() => void concluirConvite()}
+                disabled={carregando || concluindoConvite || progresso?.conviteConcluido}
+                className="w-full py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
+                style={{
+                  background: progresso?.conviteConcluido ? "rgba(93,185,122,0.16)" : "linear-gradient(135deg, #c8a56b, #9c7742)",
+                  color: progresso?.conviteConcluido ? "#5db97a" : "#1a1208",
+                }}
               >
-                <div>
-                  <p className="text-xs" style={{ color: "rgba(200,165,107,0.6)" }}>Missões hoje</p>
-                  <p className="font-tan-mon-cheri text-xl" style={{ color: "#f7f2ec" }}>
-                    {concluidasHoje}/{totalHoje}
-                  </p>
-                </div>
-                {xpDisponivelHoje > 0 && (
-                  <div className="text-right">
-                    <p className="text-xs" style={{ color: "rgba(200,165,107,0.6)" }}>XP disponível</p>
-                    <div className="flex items-center gap-1 justify-end">
-                      <Zap className="w-3.5 h-3.5" style={{ color: "#c8a56b" }} />
-                      <p className="font-bold text-sm" style={{ color: "#c8a56b" }}>+{xpDisponivelHoje} XP</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Mission list */}
-            <div className="space-y-3 mb-6">
-              {carregando ? (
-                [0, 1, 2, 3].map(i => (
-                  <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: "rgba(200,165,107,0.05)" }} />
-                ))
-              ) : progresso?.missoes.map(missao => (
-                <MissaoDiariaCard
-                  key={missao.id}
-                  missao={missao}
-                  concluindo={concluindo === missao.id}
-                  onConcluir={concluirMissao}
-                />
-              ))}
+                <Check className="w-4 h-4" />
+                {progresso?.conviteConcluido ? "Convite feito · +1 Luz" : "Marcar como feito · +1 Luz"}
+              </button>
+              <p className="text-xs mt-3" style={{ color: "rgba(247,242,236,0.45)" }}>
+                {progresso?.luzes ?? 0} {(progresso?.luzes ?? 0) === 1 ? "Luz" : "Luzes"}
+              </p>
             </div>
 
             {/* Streak */}

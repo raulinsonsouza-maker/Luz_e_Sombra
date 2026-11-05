@@ -115,12 +115,23 @@ export const gamificacaoTable = pgTable("gamificacao", {
   id: serial("id").primaryKey(),
   usuarioId: integer("usuario_id").notNull().unique().references(() => usuariosTable.id, { onDelete: "cascade" }),
   xp: integer("xp").notNull().default(0),
+  /** Uma Luz por convite diário concluído. */
+  luzes: integer("luzes").notNull().default(0),
   nivel: integer("nivel").notNull().default(1),
   streakDias: integer("streak_dias").notNull().default(0),
   melhorStreak: integer("melhor_streak").notNull().default(0),
   ultimoAcessoEm: text("ultimo_acesso_em"),
   atualizadoEm: timestamp("atualizado_em").notNull().defaultNow(),
 });
+
+export const convitesDiariosTable = pgTable("convites_diarios", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  dataReferencia: text("data_referencia").notNull(),
+  concluidoEm: timestamp("concluido_em").notNull().defaultNow(),
+}, (table) => ({
+  usuarioDataUnico: unique("convites_diarios_usuario_data").on(table.usuarioId, table.dataReferencia),
+}));
 
 export const missoesDiariasTable = pgTable("missoes_diarias", {
   id: serial("id").primaryKey(),
@@ -309,6 +320,7 @@ export type PessoaAnalise = typeof pessoasAnaliseTable.$inferSelect;
 export type FotoTraco = typeof fotosTracoTable.$inferSelect;
 export type AnaliseTraco = typeof analiseTracoTable.$inferSelect;
 export type Gamificacao = typeof gamificacaoTable.$inferSelect;
+export type ConviteDiario = typeof convitesDiariosTable.$inferSelect;
 export type MissaoDiaria = typeof missoesDiariasTable.$inferSelect;
 export type Comunidade = typeof comunidadeTable.$inferSelect;
 export type Reacao = typeof reacoesTable.$inferSelect;

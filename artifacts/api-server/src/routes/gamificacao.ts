@@ -2,19 +2,18 @@ import { Router, Response } from "express";
 import { db } from "@workspace/db";
 import {
   gamificacaoTable,
+  convitesDiariosTable,
   missoesDiariasTable,
   avaliacoesTable,
   analiseTracoTable,
   analiseTemperamento40Table,
   analiseLinguagensAmorTable,
   configuracoesModulosTable,
-  usuariosTable,
 } from "@workspace/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
 import { minicursoCompletoParaUsuario } from "./modulosJornada";
 import { temAnalise } from "../lib/temAnaliseJornada";
-import { MISSOES_POR_DIA } from "../lib/missoesCuradas";
 import { awardXp, getOrCreateGamificacao } from "../lib/awardXp";
 
 const router = Router();
@@ -31,45 +30,8 @@ function getNivelInfo(xp: number) {
   return [...NIVEIS].reverse().find((n) => xp >= n.xpMin) ?? NIVEIS[0];
 }
 
-/** Índice 0..59 para MISSOES_POR_DIA (cicla após 60 dias). Base: cadastro do usuário. */
-function diaJornada(criadoEm: Date | string | null | undefined, hoje: Date = new Date()): number {
-  const base =
-    criadoEm instanceof Date
-      ? criadoEm
-      : criadoEm
-        ? new Date(criadoEm)
-        : hoje;
-  const dias = Math.floor((hoje.getTime() - base.getTime()) / 86400000);
-  return ((dias % 60) + 60) % 60;
-}
-
 function getTodayStr() {
   return new Date().toISOString().split("T")[0];
-}
-
-async function ensureTodayMissions(usuarioId: number, today: string) {
-  const existing = await db
-    .select()
-    .from(missoesDiariasTable)
-    .where(and(eq(missoesDiariasTable.usuarioId, usuarioId), eq(missoesDiariasTable.dataReferencia, today)));
-
-  if (existing.length > 0) return existing;
-
-  const [u] = await db
-    .select({ criadoEm: usuariosTable.criadoEm })
-    .from(usuariosTable)
-    .where(eq(usuariosTable.id, usuarioId))
-    .limit(1);
-
-  const idx = diaJornada(u?.criadoEm);
-  const missoesDoDia = MISSOES_POR_DIA[idx] ?? MISSOES_POR_DIA[0];
-
-  const inserted = await db
-    .insert(missoesDiariasTable)
-    .values(missoesDoDia.map((m) => ({ usuarioId, titulo: m.titulo, xpRecompensa: m.xp, dataReferencia: today })))
-    .returning();
-
-  return inserted;
 }
 
 async function updateStreak(usuarioId: number) {
@@ -102,7 +64,11 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
     const today = getTodayStr();
 
     const gam = await updateStreak(userId);
-    const missoes = await ensureTodayMissions(userId, today);
+    const [conviteHoje] = await db
+      .select({ id: convitesDiariosTable.id })
+      .from(convitesDiariosTable)
+      .where(and(eq(convitesDiariosTable.usuarioId, userId), eq(convitesDiariosTable.dataReferencia, today)))
+      .limit(1);
 
     const nivelInfo = getNivelInfo(gam.xp);
     const nextNivel = NIVEIS.find(n => n.nivel === nivelInfo.nivel + 1);
@@ -172,6 +138,8 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
 
     res.json({
       xp: gam.xp,
+      luzes: gam.luzes ?? 0,
+      conviteConcluido: !!conviteHoje,
       nivel: nivelInfo.nivel,
       nomeNivel: nivelInfo.nome,
       descNivel: nivelInfo.desc,
@@ -179,12 +147,7 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
       xpParaProximo,
       streakDias: gam.streakDias,
       melhorStreak: gam.melhorStreak,
-      missoes: missoes.map((m) => ({
-        id: m.id,
-        titulo: m.titulo,
-        xpRecompensa: m.xpRecompensa,
-        concluida: !!m.concluidaEm,
-      })),
+      missoes: [],
       jornada: {
         traco: !!analise,
         temperamento: !!temperamento,
@@ -198,6 +161,34 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Erro ao buscar progresso" });
+  }
+});
+
+router.post("/convite/concluir", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const today = getTodayStr();
+    const gam = await getOrCreateGamificacao(userId);
+    const [existente] = await db
+      .select({ id: convitesDiariosTable.id })
+      .from(convitesDiariosTable)
+      .where(and(eq(convitesDiariosTable.usuarioId, userId), eq(convitesDiariosTable.dataReferencia, today)))
+      .limit(1);
+    if (existente) {
+      return res.status(400).json({ error: "Convite já concluído", luzes: gam.luzes ?? 0 });
+    }
+
+    await db.insert(convitesDiariosTable).values({ usuarioId: userId, dataReferencia: today });
+    const [updated] = await db
+      .update(gamificacaoTable)
+      .set({ luzes: (gam.luzes ?? 0) + 1, atualizadoEm: new Date() })
+      .where(eq(gamificacaoTable.usuarioId, userId))
+      .returning();
+
+    return res.json({ success: true, luzes: updated.luzes });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Erro ao concluir convite" });
   }
 });
 

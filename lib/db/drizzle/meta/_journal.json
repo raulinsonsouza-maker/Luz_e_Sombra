@@ -29,6 +29,13 @@
       "when": 1752250800000,
       "tag": "0004_kommo_pix_reminders",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1762370000000,
+      "tag": "0005_convites_diarios_luzes",
+      "breakpoints": true
     }
   ]
 }

@@ -30,6 +30,8 @@ import CursosPage from "@/pages/CursosPage";
 import CursoPage from "@/pages/CursoPage";
 import QuemSouEuPage from "@/pages/QuemSouEuPage";
 import NotificacoesPage from "@/pages/NotificacoesPage";
+import ReflexaoPage from "@/pages/ReflexaoPage";
+import TracoPreviewPage from "@/pages/dev/TracoPreviewPage";
 
 function ProtectedRoute({ component: Component, adminOnly = false }: { component: React.ComponentType; adminOnly?: boolean }) {
   const { user, status } = useAuth();
@@ -61,8 +63,12 @@ function Router() {
         <Route path="/esqueci-senha" component={EsqueciSenhaPage} />
         <Route path="/redefinir-senha" component={RedefinirSenhaPage} />
         <Route path="/admin/login" component={AdminLoginPage} />
+        {import.meta.env.DEV ? <Route path="/dev/traco" component={TracoPreviewPage} /> : null}
         <Route path="/dashboard">
           <ProtectedRoute component={HomePage} />
+        </Route>
+        <Route path="/reflexao">
+          <ProtectedRoute component={ReflexaoPage} />
         </Route>
         <Route path="/jornada/:slug">
           <ProtectedRoute component={JornadaHubPage} />
