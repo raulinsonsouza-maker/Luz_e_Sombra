@@ -110,7 +110,7 @@ export default function TemperamentoPainelResultado({
         </div>
       </div>
 
-      {leitura && <LeituraBlocos fluida leitura={leitura} />}
+      {leitura && <LeituraBlocos leitura={leitura} />}
     </div>
   );
 }

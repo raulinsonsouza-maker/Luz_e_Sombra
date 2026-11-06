@@ -146,16 +146,16 @@ export function leituraTemperamento(r: TemperamentoUi | null | undefined): Leitu
     });
     return comporLeitura(
       {
-        quemVoceE: profunda.principal,
-        noDiaADia: profunda.combinacao,
-        sombra: profunda.inteira,
+        quemVoceE: lista(item("No começo", profunda.chega), item("O que você precisa", profunda.precisa)),
+        noDiaADia: lista(item("Na sequência", profunda.depois), item("Em alguns dias", profunda.disputa)),
+        sombra: lista(item("Na prática", profunda.atrapalha), item("Se continuar", profunda.pressao)),
         oQueFazer: lista(...profunda.passos, profunda.pergunta),
       },
       {
-        quemVoceE: "O principal",
-        noDiaADia: "A combinação",
-        sombra: "Quem você é por inteiro",
-        oQueFazer: "O que fazer com isso",
+        quemVoceE: "O que você faz primeiro",
+        noDiaADia: "O que acontece depois",
+        sombra: "Onde isso atrapalha",
+        oQueFazer: "O que fazer nesta semana",
       },
     );
   }

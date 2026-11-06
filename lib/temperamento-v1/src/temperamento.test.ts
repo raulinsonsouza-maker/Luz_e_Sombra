@@ -128,7 +128,7 @@ describe("temperamento-v3 Eysenck-lite", () => {
     assert.equal(parsed.success, false);
   });
 
-  it("a leitura da combinação usa os quatro jeitos e distingue a ordem", () => {
+  it("a leitura cruza a ordem em frase literal, sem montar peças", () => {
     const sang = montarLeituraDaCombinacao({
       primario: "SANGUINEO",
       secundario: "COLERICO",
@@ -139,16 +139,34 @@ describe("temperamento-v3 Eysenck-lite", () => {
       secundario: "SANGUINEO",
       percentuais: { COLERICO: 40, SANGUINEO: 30, MELANCOLICO: 20, FLEUMATICO: 10 },
     });
-    const textoSang = [...sang.principal, ...sang.combinacao, ...sang.inteira].join(" ");
-    const textoCol = col.combinacao.join(" ");
-    assert.ok(textoSang.includes("sanguíneo") || textoSang.includes("Sanguíneo"));
-    assert.ok(textoSang.includes("colérico") || textoSang.includes("Colérico"));
-    assert.ok(textoSang.includes("melancólico") || textoSang.includes("Melancólico"));
-    assert.ok(textoSang.includes("fleumático") || textoSang.includes("Fleumático"));
-    assert.ok(sang.combinacao.join(" ").length > 700);
-    assert.notEqual(sang.combinacao[0], col.combinacao[0]);
-    assert.ok(!textoSang.includes("—"));
-    assert.ok(!textoCol.includes("—"));
+    const texto = [
+      sang.chega,
+      sang.precisa,
+      sang.depois,
+      sang.disputa ?? "",
+      sang.atrapalha,
+      sang.pressao,
+      ...sang.passos,
+      sang.pergunta,
+      col.depois,
+    ].join(" ");
+    assert.notEqual(sang.depois, col.depois);
+    assert.match(sang.depois, /conversa/);
+    assert.match(col.depois, /resolver/);
+    assert.equal(sang.disputa, undefined);
+    assert.doesNotMatch(texto, /sanguíneo|colérico|melancólico|fleumático|juntos formam|é a gente|a parte /i);
+    assert.doesNotMatch(texto, /\b(porta|calor|freio|virada|murcha|peça)\b/i);
+    assert.ok(!texto.includes("—"));
+  });
+
+  it("o terceiro percentual escolhe o custo e a disputa quando fica perto", () => {
+    const leitura = montarLeituraDaCombinacao({
+      primario: "SANGUINEO",
+      secundario: "COLERICO",
+      percentuais: { SANGUINEO: 40, COLERICO: 28, MELANCOLICO: 22, FLEUMATICO: 10 },
+    });
+    assert.match(leitura.atrapalha, /entrega/);
+    assert.ok(leitura.disputa);
   });
 
   it("titulo do perfil usa temperamento dominante", () => {
