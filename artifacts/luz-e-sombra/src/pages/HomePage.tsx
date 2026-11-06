@@ -2,9 +2,12 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import MobileTopBar from "@/components/MobileTopBar";
 import { dataPorExtenso, fraseDoDia } from "@/lib/frasesAno";
+import { momentoDoDia } from "@/lib/momentoDoDia";
 import { toast } from "sonner";
+import { Bell } from "lucide-react";
+import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
+import { LP_PORTAL_NAME } from "@/lib/lpConfig";
 import {
   Check,
   ChevronRight,
@@ -56,6 +59,7 @@ export default function HomePage() {
   const [modulosJornada, setModulosJornada] = useState<ModuloJornada[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [concluindoConvite, setConcluindoConvite] = useState(false);
+  const { count: notiCount } = useNotificacoesCount();
   const hoje = fraseDoDia();
 
   useEffect(() => {
@@ -82,6 +86,7 @@ export default function HomePage() {
   }
 
   const primeiroNome = (user?.nome || "").split(" ")[0] || "Usuário";
+  const reflexaoMomento = user?.dataNascimento ? momentoDoDia(user.dataNascimento) : null;
 
   async function concluirConvite() {
     if (progresso?.conviteConcluido || concluindoConvite) return;
@@ -121,43 +126,67 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
-      <MobileTopBar />
+      <div className="max-w-lg mx-auto">
+        <div className="relative overflow-hidden" style={{ minHeight: 460 }}>
+          <img src="/images/peao.jpeg" alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(180deg, rgba(18,12,8,0.28) 0%, rgba(18,12,8,0.45) 42%, rgba(18,12,8,0.82) 100%)" }}
+          />
+          <div className="relative flex min-h-[460px] flex-col px-4 pt-4 pb-5">
+            <div className="flex items-center justify-between gap-3 md:hidden">
+              <span className="font-tan-mon-cheri text-base tracking-wide truncate" style={{ color: "#f7f2ec" }}>
+                {LP_PORTAL_NAME}
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate("/notificacoes")}
+                className="relative flex items-center justify-center w-9 h-9 rounded-full shrink-0"
+                style={{ background: "rgba(18,12,8,0.35)", border: "1px solid rgba(247,242,236,0.2)" }}
+                title="Notificações"
+              >
+                <Bell className="w-4 h-4" style={{ color: "#f7f2ec" }} />
+                {notiCount > 0 && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-0.5"
+                    style={{ background: "#c8a56b", color: "#130f09" }}
+                  >
+                    {notiCount > 99 ? "99+" : notiCount}
+                  </span>
+                )}
+              </button>
+            </div>
 
-      <div className="max-w-lg mx-auto px-4">
-        <div className="pt-4 pb-5 md:pt-8">
-          <p className="text-[11px] font-semibold tracking-[0.22em] uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
-            {dataPorExtenso()}
-          </p>
-          <p className="text-xs font-semibold tracking-[0.18em] uppercase" style={{ color: "rgba(247,242,236,0.45)" }}>
-            {saudacao()},
-          </p>
-          <h1
-            className="font-tan-mon-cheri mb-4"
-            style={{ fontSize: "clamp(2rem, 6vw, 3rem)", color: "#f7f2ec", lineHeight: 1.08 }}
-          >
-            {primeiroNome}
-          </h1>
-          <button
-            type="button"
-            onClick={() => navigate("/reflexao")}
-            className="relative w-full overflow-hidden rounded-3xl text-left"
-            style={{ minHeight: 380 }}
-          >
-            <img src="/images/peao.jpeg" alt="" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "rgba(18,12,8,0.5)" }} />
-            <div className="relative flex min-h-[380px] flex-col items-center justify-center gap-5 px-6 py-10 text-center">
+            <div className="mt-8 md:mt-6">
+              <p className="text-[11px] font-semibold tracking-[0.22em] uppercase" style={{ color: "#c8a56b" }}>
+                {dataPorExtenso()}
+              </p>
+              <p className="text-xs tracking-[0.16em] uppercase mt-3" style={{ color: "rgba(247,242,236,0.72)" }}>
+                {saudacao()},
+              </p>
+              <h1 className="font-tan-mon-cheri text-4xl leading-none mt-1" style={{ color: "#f7f2ec" }}>
+                {primeiroNome}
+              </h1>
+            </div>
+
+            <div className="mt-auto pt-8">
               <p className="font-tan-mon-cheri text-xl leading-snug" style={{ color: "#f7f2ec" }}>
                 {hoje.frase}
               </p>
-              <span
-                className="inline-flex items-center rounded-full px-6 py-3 text-sm font-semibold"
+              <button
+                type="button"
+                onClick={() => navigate("/reflexao")}
+                className="inline-flex items-center mt-4 rounded-full px-5 py-2.5 text-sm font-semibold"
                 style={{ background: "rgba(247,242,236,0.92)", color: "#1a1208" }}
               >
                 Ver detalhes
-              </span>
+              </button>
             </div>
-          </button>
+          </div>
         </div>
+      </div>
+
+      <div className="max-w-lg mx-auto px-4 pt-4">
 
         {/* Seu próximo passo */}
         {moduloAtivo && (
@@ -253,12 +282,39 @@ export default function HomePage() {
             }}
           >
             <Check className="w-4 h-4" />
-            {progresso?.conviteConcluido ? "Convite feito · +1 Luz" : "Marcar como feito · +1 Luz"}
+            {progresso?.conviteConcluido ? "Luz de hoje recebida" : "Receber 1 Luz"}
           </button>
-          <p className="text-xs mt-3 leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
-            Luzes: o reconhecimento de cada passo. {progresso?.luzes ?? 0}{" "}
-            {(progresso?.luzes ?? 0) === 1 ? "Luz" : "Luzes"} até aqui.
+        </div>
+
+        <div
+          className="rounded-3xl p-5 mb-4"
+          style={{
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(200,165,107,0.16)",
+          }}
+        >
+          <p className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: "#c8a56b" }}>
+            Seu momento
           </p>
+          {reflexaoMomento ? (
+            <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.78)" }}>
+              {reflexaoMomento}
+            </p>
+          ) : (
+            <div>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.78)" }}>
+                Para ver o seu momento de hoje, complete a data de nascimento no perfil.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate("/perfil")}
+                className="text-sm font-semibold"
+                style={{ color: "#c8a56b" }}
+              >
+                Completar perfil
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Explorar */}

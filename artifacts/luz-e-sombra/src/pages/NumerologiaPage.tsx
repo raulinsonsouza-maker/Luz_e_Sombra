@@ -120,7 +120,7 @@ export default function NumerologiaPage() {
     status === "authenticated",
   );
 
-  const ANOS_DISPONIVEIS = [2025, 2026];
+  const ANOS_DISPONIVEIS = [2025, 2026, 2027];
   const anoAtual = new Date().getFullYear();
   const anoDefault = ANOS_DISPONIVEIS.includes(anoAtual) ? anoAtual : ANOS_DISPONIVEIS[0];
   const [anoAnalise, setAnoAnalise] = useState(anoDefault);

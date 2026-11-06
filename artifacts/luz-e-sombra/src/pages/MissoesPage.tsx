@@ -196,7 +196,7 @@ export default function MissoesPage() {
                 }}
               >
                 <Check className="w-4 h-4" />
-                {progresso?.conviteConcluido ? "Convite feito · +1 Luz" : "Marcar como feito · +1 Luz"}
+                {progresso?.conviteConcluido ? "Luz de hoje recebida" : "Receber 1 Luz"}
               </button>
               <p className="text-xs mt-3" style={{ color: "rgba(247,242,236,0.45)" }}>
                 {progresso?.luzes ?? 0} {(progresso?.luzes ?? 0) === 1 ? "Luz" : "Luzes"}

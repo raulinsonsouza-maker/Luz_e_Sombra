@@ -154,6 +154,22 @@ export function construirTabelaNascimento(dataNascimentoDDMMYYYY: string): Recor
   return tabela
 }
 
+// ─── Personal Day ───────────────────────────────────────────────────────────
+
+export function calcularDiaPessoal(dataNascimento: string, data: Date = new Date()) {
+  const dataFmt = formatarDataBrasileira(dataNascimento)
+  const ano = data.getFullYear()
+  const mes = data.getMonth() + 1
+  const dia = data.getDate()
+  const anoPessoal = calcularAnoPessoal(dataFmt, ano)
+  if (!anoPessoal) return null
+  const clima = reduzirNumeroForcando(somaDigitosString(String(ano)))
+  const ciclo = anoPessoal.reduzidoForcado
+  const periodo = reduzirNumeroForcando(anoPessoal.reduzido + mes)
+  const hoje = reduzirNumeroForcando(periodo + dia)
+  return { hoje, periodo, ciclo, clima }
+}
+
 // ─── Personal Months ────────────────────────────────────────────────────────
 
 export function calcularMesesPessoais(anoPessoal: number, anoAnalise: number): MesPessoal[] {
