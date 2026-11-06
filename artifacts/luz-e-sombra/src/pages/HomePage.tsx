@@ -59,6 +59,7 @@ export default function HomePage() {
   const [modulosJornada, setModulosJornada] = useState<ModuloJornada[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [concluindoConvite, setConcluindoConvite] = useState(false);
+  const [avisoLuz, setAvisoLuz] = useState(false);
   const { count: notiCount } = useNotificacoesCount();
   const hoje = fraseDoDia();
 
@@ -85,6 +86,12 @@ export default function HomePage() {
     setCarregando(false);
   }
 
+  useEffect(() => {
+    if (!avisoLuz) return;
+    const timer = window.setTimeout(() => setAvisoLuz(false), 2600);
+    return () => window.clearTimeout(timer);
+  }, [avisoLuz]);
+
   const primeiroNome = (user?.nome || "").split(" ")[0] || "Usuário";
   const reflexaoMomento = user?.dataNascimento ? momentoDoDia(user.dataNascimento) : null;
 
@@ -100,6 +107,7 @@ export default function HomePage() {
             ? { ...atual, conviteConcluido: true, luzes: data.luzes ?? atual.luzes + 1 }
             : atual,
         );
+        setAvisoLuz(true);
       } else {
         toast.error("Não foi possível marcar o convite.");
       }
@@ -126,6 +134,21 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
+      {avisoLuz && (
+        <div className="pointer-events-none fixed inset-x-0 top-16 z-50 flex justify-center px-6" aria-live="polite">
+          <p
+            className="luz-aviso rounded-full px-5 py-3 text-sm font-semibold"
+            style={{
+              background: "#1f1710",
+              color: "#f7f2ec",
+              border: "1px solid rgba(200,165,107,0.5)",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.4)",
+            }}
+          >
+            Mais uma Luz recebida
+          </p>
+        </div>
+      )}
       <div className="max-w-lg mx-auto">
         <div className="relative overflow-hidden" style={{ minHeight: 460 }}>
           <img src={imagemDoDia()} alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -276,7 +299,15 @@ export default function HomePage() {
               color: progresso?.conviteConcluido ? "#5db97a" : "#1a1208",
             }}
           >
-            <Check className="w-4 h-4" />
+            {progresso?.conviteConcluido ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <span
+                className="w-4 h-4 rounded-[5px] border-2 shrink-0"
+                style={{ borderColor: "currentColor" }}
+                aria-hidden
+              />
+            )}
             {progresso?.conviteConcluido ? "Luz de hoje recebida" : "Receber 1 Luz"}
           </button>
         </div>
@@ -288,8 +319,8 @@ export default function HomePage() {
             border: "1px solid rgba(200,165,107,0.16)",
           }}
         >
-          <p className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: "#c8a56b" }}>
-            Seu momento {dataDiaMes()}
+          <p className="text-sm font-semibold mb-3" style={{ color: "#c8a56b" }}>
+            Seu momento: {dataDiaMes()}
           </p>
           {reflexaoMomento ? (
             <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.78)" }}>

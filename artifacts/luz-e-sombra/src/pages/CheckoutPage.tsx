@@ -10,16 +10,15 @@ import {
   Mail,
   Phone,
   Lock,
-  Sparkles,
   CreditCard,
   QrCode,
   BadgeCheck,
 } from "lucide-react";
 import { toast } from "sonner";
+import LogoPortal from "@/components/LogoPortal";
 import {
   LP_PRODUCT_NAME,
   LP_PRODUCT_TAGLINE,
-  LP_PORTAL_NAME,
   LP_CHECKOUT_SUBTITLE,
   LP_INCLUDED_ITEMS,
   LP_PRICE,
@@ -276,12 +275,7 @@ export default function CheckoutPage() {
             <ArrowLeft size={14} />
             Voltar
           </button>
-          <div className="flex items-center gap-2">
-            <Sparkles size={14} style={{ color: "#c8a56b" }} />
-            <span className="font-tan-mon-cheri text-sm hidden sm:inline" style={{ color: "#f7f2ec" }}>
-              {LP_PORTAL_NAME}
-            </span>
-          </div>
+          <LogoPortal className="h-8 w-auto" />
           <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "rgba(200,165,107,0.6)" }}>
             <Lock size={12} />
             <span className="hidden sm:inline">Checkout seguro</span>

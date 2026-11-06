@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Mail, Loader2, ArrowLeft, CheckCircle2, LogIn } from "lucide-react";
-import { LP_PORTAL_NAME, LP_JOURNEY_NAME } from "@/lib/lpConfig";
+import { LP_JOURNEY_NAME } from "@/lib/lpConfig";
+import LogoPortal from "@/components/LogoPortal";
 import { apiFetch } from "@/lib/auth";
 
 export default function EsqueciSenhaPage() {
@@ -42,7 +43,7 @@ export default function EsqueciSenhaPage() {
         </Link>
 
         <div className="luxury-card p-8">
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-brand-medium mb-1">{LP_PORTAL_NAME}</p>
+          <LogoPortal tom="ouro" className="h-10 w-auto mb-3" />
           <p className="text-xs text-brand-medium/60 mb-3">{LP_JOURNEY_NAME}</p>
           <h1 className="font-tan-mon-cheri text-3xl text-brand-dark mb-2">Esqueci minha senha</h1>
           <p className="text-sm text-brand-medium/70 mb-8">

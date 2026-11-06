@@ -76,6 +76,7 @@ export default function MissoesPage() {
   const [progresso, setProgresso] = useState<Progresso | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [concluindoConvite, setConcluindoConvite] = useState(false);
+  const [avisoLuz, setAvisoLuz] = useState(false);
   const hoje = fraseDoDia();
 
   useEffect(() => {
@@ -83,6 +84,12 @@ export default function MissoesPage() {
     if (status === "loading") return;
     buscarProgresso();
   }, [status]);
+
+  useEffect(() => {
+    if (!avisoLuz) return;
+    const timer = window.setTimeout(() => setAvisoLuz(false), 2600);
+    return () => window.clearTimeout(timer);
+  }, [avisoLuz]);
 
   async function buscarProgresso() {
     try {
@@ -107,6 +114,7 @@ export default function MissoesPage() {
         setProgresso((atual) =>
           atual ? { ...atual, conviteConcluido: true, luzes: data.luzes ?? (atual.luzes ?? 0) + 1 } : atual,
         );
+        setAvisoLuz(true);
       } else {
         toastApiError();
       }
@@ -145,7 +153,22 @@ export default function MissoesPage() {
       className="min-h-screen pb-28"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
-      <MobileTopBar />
+      {avisoLuz && (
+        <div className="pointer-events-none fixed inset-x-0 top-16 z-50 flex justify-center px-6" aria-live="polite">
+          <p
+            className="luz-aviso rounded-full px-5 py-3 text-sm font-semibold"
+            style={{
+              background: "#1f1710",
+              color: "#f7f2ec",
+              border: "1px solid rgba(200,165,107,0.5)",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.4)",
+            }}
+          >
+            Mais uma Luz recebida
+          </p>
+        </div>
+      )}
+      <MobileTopBar titulo="Missões" />
 
       <div className="max-w-lg mx-auto px-4 pt-6">
         <PageIntroHeader eyebrow={CATALOGO.missoes.eyebrow} titulo={CATALOGO.missoes.titulo} subtitulo={CATALOGO.missoes.subtitulo} />
@@ -195,7 +218,11 @@ export default function MissoesPage() {
                   color: progresso?.conviteConcluido ? "#5db97a" : "#1a1208",
                 }}
               >
-                <Check className="w-4 h-4" />
+                {progresso?.conviteConcluido ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <span className="w-4 h-4 rounded-[5px] border-2 shrink-0" style={{ borderColor: "currentColor" }} aria-hidden />
+                )}
                 {progresso?.conviteConcluido ? "Luz de hoje recebida" : "Receber 1 Luz"}
               </button>
               <p className="text-xs mt-3" style={{ color: "rgba(247,242,236,0.45)" }}>

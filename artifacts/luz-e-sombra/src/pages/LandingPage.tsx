@@ -6,7 +6,6 @@ import {
   Check,
   Shield,
   Sparkles,
-  Sun,
   Layers,
   Target,
   Heart,
@@ -20,6 +19,7 @@ import {
   LpFinalCtaSection,
 } from "@/components/lp/LpOfferSections";
 import SignupModal from "@/components/funnel/SignupModal";
+import LogoPortal from "@/components/LogoPortal";
 import { captureUtmsFromUrl } from "@/lib/utm";
 import { trackLpEvent } from "@/lib/lpAnalytics";
 import {
@@ -86,24 +86,7 @@ export default function LandingPage() {
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="flex items-center gap-3 min-w-0 text-left group"
           >
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-              style={{
-                background: "linear-gradient(135deg, rgba(200,165,107,0.2), rgba(156,119,66,0.08))",
-                border: "1px solid rgba(200,165,107,0.35)",
-                boxShadow: "0 4px 20px rgba(200,165,107,0.15)",
-              }}
-            >
-              <Sun size={18} style={{ color: "#c8a56b" }} />
-            </div>
-            <div className="min-w-0 hidden sm:block">
-              <p className="font-tan-mon-cheri text-base leading-tight truncate" style={{ color: "#f7f2ec" }}>
-                {LP_PORTAL_NAME}
-              </p>
-              <p className="text-[10px] tracking-wide truncate" style={{ color: "rgba(200,165,107,0.55)" }}>
-                {LP_JOURNEY_NAME}
-              </p>
-            </div>
+            <LogoPortal className="h-10 sm:h-11 w-auto" />
           </button>
 
           <nav className="hidden md:flex items-center gap-1">
@@ -439,9 +422,7 @@ export default function LandingPage() {
         className="py-8 px-5 text-center"
         style={{ background: "#0a0805", borderTop: "1px solid rgba(200,165,107,0.08)" }}
       >
-        <p className="font-tan-mon-cheri mb-1" style={{ fontSize: "1rem", color: "rgba(200,165,107,0.5)" }}>
-          {LP_PORTAL_NAME}
-        </p>
+        <LogoPortal className="h-10 w-auto mx-auto mb-3" />
         <p className="text-xs tracking-wide" style={{ color: "rgba(247,242,236,0.25)" }}>
           {LP_JOURNEY_NAME}
         </p>

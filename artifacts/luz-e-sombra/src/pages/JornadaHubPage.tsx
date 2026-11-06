@@ -418,12 +418,12 @@ export default function JornadaHubPage() {
   if (!modulo) {
     return (
       <div className="min-h-screen px-4 pt-8 journey-forest-bg">
-        <MobileTopBar titulo="Jornada" subtitulo="Módulo não encontrado" />
+        <MobileTopBar titulo="Jornada" voltar={JORNADA_ROOT} />
         <div className="max-w-lg mx-auto text-center">
           <p className="text-sm mb-4" style={{ color: "rgba(247,242,236,0.5)" }}>
             Módulo não encontrado.
           </p>
-          <NavBackButton to={JORNADA_ROOT} label="Jornada" className="mx-auto mb-4" />
+          <NavBackButton to={JORNADA_ROOT} label="Jornada" className="mx-auto mb-4 hidden md:flex" />
         </div>
       </div>
     );
@@ -432,9 +432,9 @@ export default function JornadaHubPage() {
   if (modulo.status === "locked") {
     return (
       <div className="min-h-screen px-4 pt-6 pb-28 journey-forest-bg">
-        <MobileTopBar titulo={modulo.tituloIntro} subtitulo="Módulo bloqueado" />
+        <MobileTopBar titulo={modulo.tituloIntro} voltar={JORNADA_ROOT} />
         <div className="max-w-lg mx-auto">
-          <NavBackButton to={JORNADA_ROOT} label="Jornada" />
+          <NavBackButton to={JORNADA_ROOT} label="Jornada" className="hidden md:flex" />
           <div
             className="rounded-2xl p-8 text-center"
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
@@ -454,9 +454,9 @@ export default function JornadaHubPage() {
 
   return (
     <>
-      <MobileTopBar titulo={modulo.tituloIntro} subtitulo="Módulo da jornada" />
+      <MobileTopBar titulo={modulo.tituloIntro} voltar={JORNADA_ROOT} />
       <AppPageShell forest contentClassName="pt-6">
-        <NavBackButton to={JORNADA_ROOT} label="Jornada" className="mb-4" />
+        <NavBackButton to={JORNADA_ROOT} label="Jornada" className="mb-4 hidden md:flex" />
         <PageIntroHeader
           eyebrow="Módulo da jornada"
           titulo={modulo.tituloIntro}
@@ -597,6 +597,7 @@ export default function JornadaHubPage() {
                       <Eye className="w-4 h-4" />
                       {verResultadoLabel}
                     </button>
+                    {modulo.slug !== "numerologia" && (
                     <button
                       type="button"
                       onClick={() =>
@@ -613,6 +614,7 @@ export default function JornadaHubPage() {
                       <Plus className="w-4 h-4" />
                       {copy?.novaAnaliseLabel ?? "Nova análise"}
                     </button>
+                    )}
                   </div>
                 ) : (
                   <button

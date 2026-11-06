@@ -59,12 +59,13 @@ export default function CursosPage() {
       className="min-h-screen pb-28"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
-      <MobileTopBar />
+      <MobileTopBar titulo="Cursos" />
       <div className="max-w-lg mx-auto px-4 pt-6">
         <PageIntroHeader
           eyebrow="Aprendizado & Crescimento"
           titulo="Cursos"
           subtitulo="Transforme conhecimento em prática"
+          hiddenOnMobile
         />
 
         {!FEATURE_FLAGS.SHOW_COURSES_CATALOG ? (

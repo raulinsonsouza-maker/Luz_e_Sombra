@@ -285,10 +285,10 @@ export default function ComunidadePage() {
       className="min-h-screen pb-28"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
-      <MobileTopBar />
+      <MobileTopBar titulo="Comunidade" />
       <div className="max-w-xl mx-auto px-4 pt-6">
 
-        <PageIntroHeader eyebrow="Espaço Compartilhado" titulo="Comunidade" subtitulo="Partilhas, dúvidas e conexões" />
+        <PageIntroHeader eyebrow="Espaço Compartilhado" titulo="Comunidade" subtitulo="Partilhas, dúvidas e conexões" hiddenOnMobile />
 
         <div className={`mb-6 ${isAdmin ? "flex justify-end" : "hidden"}`}>
           {isAdmin && (

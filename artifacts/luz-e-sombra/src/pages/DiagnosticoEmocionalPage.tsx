@@ -22,12 +22,12 @@ export default function DiagnosticoEmocionalPage() {
 
   return (
     <>
-      <MobileTopBar titulo="Diagnóstico emocional" subtitulo="Contexto antes do corpo" />
+      <MobileTopBar titulo="Diagnóstico emocional" voltar={JORNADA_MODULE_NAV.traco.hub} />
       <AppPageShell contentClassName="pt-4 space-y-2">
         <NavBackButton
           to={JORNADA_MODULE_NAV.traco.hub}
           label={JORNADA_MODULE_NAV.traco.backLabel}
-          className="mb-0"
+          className="mb-0 hidden md:flex"
         />
         <PageIntroHeader
           eyebrow="Traço de Caráter"

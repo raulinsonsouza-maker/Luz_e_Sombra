@@ -1,7 +1,6 @@
 const PORTAL_URL = "https://portaliluminando.com.br";
-const PORTAL_NOME = "Portal Iluminando";
 const FUNDO = "/images/peao.jpeg";
-const LOGO = "/logo-luxury.svg";
+import { LOGO_CLARO } from "@/lib/marca";
 
 function quebrar(ctx: CanvasRenderingContext2D, texto: string, max: number): string[] {
   const palavras = texto.split(" ");
@@ -56,7 +55,7 @@ function linhasQueCabem(ctx: CanvasRenderingContext2D, frase: string, maxLargura
   return { tamanho: 42, linhas, altura: linhas.length * 42 * 1.35 };
 }
 
-async function cartaoStories(frase: string, data?: string, fundo: string = FUNDO): Promise<File | null> {
+async function cartaoStories(frase: string, data?: string, fundo: string = FUNDO, abertura?: string): Promise<File | null> {
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
   canvas.height = 1920;
@@ -92,28 +91,44 @@ async function cartaoStories(frase: string, data?: string, fundo: string = FUNDO
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
+  let cursor = 280;
   try {
-    const logo = await carregarImagem(LOGO);
-    ctx.drawImage(logo, (canvas.width - 210) / 2, 250, 210, 210);
+    const logo = await carregarImagem(LOGO_CLARO);
+    const logoLargura = 820;
+    const logoAltura = (logo.height / logo.width) * logoLargura;
+    const logoY = 150;
+    ctx.drawImage(logo, (canvas.width - logoLargura) / 2, logoY, logoLargura, logoAltura);
+    cursor = logoY + logoAltura + 78;
   } catch {
-    /* o nome abaixo ainda identifica a origem */
+    /* segue sem a marca se o arquivo não carregar */
   }
-
-  ctx.fillStyle = "#f7f2ec";
-  ctx.font = '500 72px "Tan Mon Cheri", serif';
-  ctx.fillText(PORTAL_NOME, canvas.width / 2, 540);
 
   if (data) {
     ctx.fillStyle = "#c8a56b";
     ctx.font = "600 30px sans-serif";
-    textoEspacado(ctx, data, canvas.width / 2, 760, 6);
+    textoEspacado(ctx, data, canvas.width / 2, cursor, 6);
+    cursor += 58;
   }
 
   ctx.fillStyle = "rgba(200,165,107,0.9)";
-  ctx.fillRect(canvas.width / 2 - 70, 820, 140, 3);
+  ctx.fillRect(canvas.width / 2 - 70, cursor, 140, 3);
+  cursor += 52;
 
-  const zonaTopo = 880;
-  const zonaAltura = 640;
+  let zonaTopo = cursor;
+  let zonaAltura = Math.max(280, 1560 - zonaTopo);
+  if (abertura) {
+    ctx.fillStyle = "rgba(247,242,236,0.92)";
+    ctx.font = '500 40px "Tan Mon Cheri", serif';
+    const linhasAbertura = quebrar(ctx, abertura, 760).slice(0, 4);
+    const passoAbertura = 52;
+    linhasAbertura.forEach((linha, i) => ctx.fillText(linha, canvas.width / 2, cursor + i * passoAbertura));
+    const depois = cursor + linhasAbertura.length * passoAbertura + 18;
+    ctx.fillStyle = "rgba(200,165,107,0.9)";
+    ctx.fillRect(canvas.width / 2 - 36, depois, 72, 2);
+    zonaTopo = depois + 48;
+    zonaAltura = Math.max(280, 1560 - zonaTopo);
+  }
+
   const bloco = linhasQueCabem(ctx, frase, 840, zonaAltura);
   ctx.fillStyle = "#f7f2ec";
   ctx.font = `500 ${bloco.tamanho}px "Tan Mon Cheri", serif`;
@@ -130,14 +145,15 @@ async function cartaoStories(frase: string, data?: string, fundo: string = FUNDO
   return new File([blob], "frase-do-dia.png", { type: "image/png" });
 }
 
-export function textoCompartilhar(frase: string): string {
-  return `${frase}\n\nPortal Iluminando\n${PORTAL_URL}`;
+export function textoCompartilhar(frase: string, abertura?: string): string {
+  const corpo = abertura ? `${abertura}\n\n${frase}` : frase;
+  return `${corpo}\n\nPortal Iluminando\n${PORTAL_URL}`;
 }
 
 /** Abre a folha do celular (Stories ou WhatsApp). No computador, copia e abre o WhatsApp. */
-export async function compartilharFrase(frase: string, data?: string, fundo?: string): Promise<"nativo" | "whatsapp"> {
-  const texto = textoCompartilhar(frase);
-  const arquivo = await cartaoStories(frase, data, fundo);
+export async function compartilharFrase(frase: string, data?: string, fundo?: string, abertura?: string): Promise<"nativo" | "whatsapp"> {
+  const texto = textoCompartilhar(frase, abertura);
+  const arquivo = await cartaoStories(frase, data, fundo, abertura);
 
   if (typeof navigator.share === "function") {
     if (arquivo && navigator.canShare?.({ files: [arquivo] })) {

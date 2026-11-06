@@ -489,8 +489,8 @@ export default function TracodeCaraterPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: "linear-gradient(160deg, #1e1812 0%, #2a1f14 50%, #2f251b 100%)" }}>
-      <MobileTopBar />
-      <div className="max-w-4xl mx-auto px-6 pt-4">
+      <MobileTopBar titulo="Traço de Caráter" voltar={JORNADA_MODULE_NAV.traco.hub} />
+      <div className="max-w-4xl mx-auto px-6 pt-4 hidden md:block">
         <NavBackButton
           to={JORNADA_MODULE_NAV.traco.hub}
           label={JORNADA_MODULE_NAV.traco.backLabel}

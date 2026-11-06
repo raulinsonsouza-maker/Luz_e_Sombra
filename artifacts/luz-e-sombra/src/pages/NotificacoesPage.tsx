@@ -73,9 +73,9 @@ export default function NotificacoesPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: BG }}>
-      <MobileTopBar />
+      <MobileTopBar titulo="Notificações" mostrarSino={false} />
       <div className="px-4 pt-8 pb-6 max-w-2xl mx-auto">
-        <PageIntroHeader eyebrow="Central de" titulo="Notificações" className="mb-3" />
+        <PageIntroHeader eyebrow="Central de" titulo="Notificações" className="mb-3" hiddenOnMobile />
         <div className="flex items-end justify-between flex-wrap gap-3">
           {naoLidas > 0 && (
             <button

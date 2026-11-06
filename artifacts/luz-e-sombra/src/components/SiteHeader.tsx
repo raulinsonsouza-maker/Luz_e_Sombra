@@ -25,7 +25,7 @@ import {
   isToolsGroupActive,
   isChromelessRoute,
 } from "@/lib/navConfig";
-import { LP_PORTAL_NAME } from "@/lib/lpConfig";
+import LogoPortal from "@/components/LogoPortal";
 
 const GOLD = "#c8a56b";
 const TEXT = "#f7f2ec";
@@ -100,13 +100,7 @@ export default function SiteHeader() {
             onClick={() => navigate("/dashboard")}
             className="flex items-center gap-3 group shrink-0"
           >
-            <div
-              className="w-px h-7 transition-opacity group-hover:opacity-100 opacity-60"
-              style={{ background: `linear-gradient(to bottom, transparent, ${GOLD}, transparent)` }}
-            />
-            <span className="font-tan-mon-cheri text-base tracking-wide" style={{ color: TEXT }}>
-              {LP_PORTAL_NAME}
-            </span>
+            <LogoPortal className="h-8 w-auto" />
           </button>
 
           {/* Desktop nav — primário + explorar */}

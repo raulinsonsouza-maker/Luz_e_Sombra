@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { KeyRound, Loader2, ArrowLeft, CheckCircle2, Eye, EyeOff, LogIn } from "lucide-react";
 import { LP_PORTAL_NAME, LP_JOURNEY_NAME } from "@/lib/lpConfig";
+import LogoPortal from "@/components/LogoPortal";
 import { apiFetch } from "@/lib/auth";
 import { PASSWORD_HINT, validatePassword } from "@/lib/passwordPolicy";
 
@@ -59,7 +60,7 @@ export default function RedefinirSenhaPage() {
       <div className="min-h-screen flex items-center justify-center px-4 py-12"
         style={{ background: "linear-gradient(160deg, #faf8f4 0%, #f0ebe3 100%)" }}>
         <div className="w-full max-w-md luxury-card p-8 text-center">
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-brand-medium mb-2">{LP_PORTAL_NAME}</p>
+          <LogoPortal tom="ouro" className="h-10 w-auto mx-auto mb-3" />
           <h1 className="font-tan-mon-cheri text-2xl text-brand-dark mb-3">Link inválido</h1>
           <p className="text-sm text-brand-medium/80 mb-6 leading-relaxed">
             Este link expirou ou está incompleto. Solicite um novo e-mail de redefinição de senha.
@@ -80,7 +81,7 @@ export default function RedefinirSenhaPage() {
         </Link>
 
         <div className="luxury-card p-8">
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-brand-medium mb-1">{LP_PORTAL_NAME}</p>
+          <LogoPortal tom="ouro" className="h-10 w-auto mb-3" />
           <p className="text-xs text-brand-medium/60 mb-3">{LP_JOURNEY_NAME}</p>
           <h1 className="font-tan-mon-cheri text-3xl text-brand-dark mb-2">Nova senha</h1>
           <p className="text-sm text-brand-medium/70 mb-8">

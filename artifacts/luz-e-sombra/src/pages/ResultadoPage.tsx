@@ -445,13 +445,13 @@ export default function ResultadoPage() {
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
       <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-4 animate-fadeIn">
-        <MobileTopBar />
+        <MobileTopBar titulo="Resultado" voltar={JORNADA_MODULE_NAV.roda.hub} />
         <NavBackButton
           to={JORNADA_MODULE_NAV.roda.hub}
           label={JORNADA_MODULE_NAV.roda.backLabel}
-          className="mb-2"
+          className="mb-2 hidden md:flex"
         />
-        <PageIntroHeader eyebrow="Roda da Vida" titulo="Resultado" subtitulo="Leitura completa da sua avaliação" className="mb-2" />
+        <PageIntroHeader eyebrow="Roda da Vida" titulo="Resultado" subtitulo="Leitura completa da sua avaliação" className="mb-2" hiddenOnMobile />
 
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <div className="rounded-3xl overflow-hidden"

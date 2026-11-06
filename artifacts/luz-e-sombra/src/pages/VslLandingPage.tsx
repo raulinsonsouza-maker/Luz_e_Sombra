@@ -14,6 +14,7 @@ import {
 import { VSL_UNLOCK_KEY, VSL_COPY, LP_GATE_PERCENT, formatLpPriceLabel, LP_PORTAL_NAME, LP_JOURNEY_NAME, LP_CTA_LOGIN } from "@/lib/lpConfig";
 import { trackLpEvent } from "@/lib/lpAnalytics";
 import SignupModal from "@/components/funnel/SignupModal";
+import LogoPortal from "@/components/LogoPortal";
 import { captureUtmsFromUrl } from "@/lib/utm";
 
 function readUnlocked(): boolean {
@@ -72,9 +73,7 @@ export default function VslLandingPage() {
         }}
       >
         <div className="max-w-3xl mx-auto px-5 w-full flex items-center justify-between gap-3">
-          <span className="font-tan-mon-cheri text-base" style={{ color: "#f7f2ec" }}>
-            {LP_PORTAL_NAME}
-          </span>
+          <LogoPortal className="h-8 w-auto" />
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"

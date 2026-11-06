@@ -495,16 +495,16 @@ export default function QuemSouEuPage() {
       className="min-h-screen pb-28"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}
     >
-      <MobileTopBar />
+      <MobileTopBar titulo="Quem sou eu" voltar={JORNADA_MODULE_NAV.dossie.hub} />
 
       <div className="max-w-lg mx-auto px-4 pt-6 space-y-5">
         <div className="flex items-center justify-between gap-3">
-          <NavBackButton to={JORNADA_MODULE_NAV.dossie.hub} label="Jornada" className="mb-0" />
+          <NavBackButton to={JORNADA_MODULE_NAV.dossie.hub} label="Jornada" className="mb-0 hidden md:flex" />
           <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.3)" }}>
             {anoAtual}
           </span>
         </div>
-        <PageIntroHeader eyebrow="6º passo · Dossiê de Vida" titulo="Quem sou eu" subtitulo="Síntese integrada da fase Iniciante — como você funciona, o que sustenta seus padrões e o que priorizar agora" className="mb-2" />
+        <PageIntroHeader eyebrow="6º passo · Dossiê de Vida" titulo="Quem sou eu" subtitulo="Síntese integrada da fase Iniciante — como você funciona, o que sustenta seus padrões e o que priorizar agora" className="mb-2" hiddenOnMobile />
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">

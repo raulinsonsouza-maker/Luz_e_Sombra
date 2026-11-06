@@ -204,9 +204,9 @@ export default function MeuPerfilPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}>
-      <MobileTopBar />
+      <MobileTopBar titulo="Meu espaço" />
       <div className="max-w-lg mx-auto px-4 pt-6">
-        <PageIntroHeader eyebrow="Perfil" titulo="Meu espaço" subtitulo="Dados, progresso e configurações" className="mb-4" />
+        <PageIntroHeader eyebrow="Perfil" titulo="Meu espaço" subtitulo="Dados, progresso e configurações" className="mb-4" hiddenOnMobile />
 
         {/* ── Profile hero ────────────────────────────────────────────────── */}
         <div className="flex flex-col items-center mb-8">

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import {
   Calendar, TrendingUp, Heart, Briefcase, DollarSign, Activity,
-  AlertCircle, Brain, Lightbulb, ChevronRight, Sparkles,
-  User, Star, Zap, Shield, Eye, Hash, BookOpen, Compass, ExternalLink, Lock,
+  AlertCircle, Brain, Lightbulb, ChevronRight,
+  User, Star, Zap, Shield, Hash, BookOpen, Compass, Lock,
 } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 import { useJornadaModulo } from "@/hooks/useJornadaModulo";
@@ -89,12 +89,12 @@ function Tag({ children }: { children: React.ReactNode }) {
 
 function InfoCard({ icon: Icon, label, children }: { icon: typeof Briefcase; label: string; children: React.ReactNode }) {
   return (
-    <div className="p-5 rounded-xl num-panel">
-      <div className="flex items-center gap-2 mb-3">
-        <Icon className="w-4 h-4 text-brand-gold" />
-        <h3 className="font-semibold text-on-dark text-sm">{label}</h3>
+    <div>
+      <div className="flex items-center gap-2 mb-1.5">
+        <Icon className="w-3.5 h-3.5 text-brand-gold" />
+        <h3 className="text-[11px] font-semibold tracking-[0.16em] uppercase" style={{ color: "#c8a56b" }}>{label}</h3>
       </div>
-      <p className="text-on-darker text-sm leading-relaxed">{children}</p>
+      <p className="text-[15px] leading-relaxed" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.8 }}>{children}</p>
     </div>
   );
 }
@@ -127,6 +127,7 @@ export default function NumerologiaPage() {
   const [erro, setErro] = useState("");
   const [resultado, setResultado] = useState<ReturnType<typeof calcular> | null>(null);
   const [abaAtiva, setAbaAtiva] = useState<"perfil" | "ano" | "meses">("perfil");
+  const marcouConclusao = useRef(false);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -174,24 +175,30 @@ export default function NumerologiaPage() {
     };
   }
 
-  async function handleCalcular() {
-    setErro("");
+  useEffect(() => {
+    if (status !== "authenticated" || bloqueado) return;
     const dataNasc = user?.dataNascimento ?? "";
     const nomeUser = user?.nome ?? "";
     if (!dataNasc) {
       setErro("Data de nascimento não encontrada. Acesse seu perfil para cadastrar.");
+      setResultado(null);
       return;
     }
     const r = calcular(dataNasc, nomeUser, anoAnalise);
-    if (!r) return;
-    setResultado(r);
-    setAbaAtiva("perfil");
-    try {
-      await apiFetch("/modulos-jornada/numerologia/concluir-analise", { method: "POST" });
-    } catch {
-      /* resultado já exibido; conclusão na jornada pode ser repetida depois */
+    if (!r) {
+      setErro("Não foi possível ler a data de nascimento.");
+      setResultado(null);
+      return;
     }
-  }
+    setErro("");
+    setResultado(r);
+    if (!marcouConclusao.current) {
+      marcouConclusao.current = true;
+      apiFetch("/modulos-jornada/numerologia/concluir-analise", { method: "POST" }).catch(() => {
+        marcouConclusao.current = false;
+      });
+    }
+  }, [status, bloqueado, user?.dataNascimento, user?.nome, anoAnalise]);
 
   if (status === "loading" || carregandoJornada) {
     return (
@@ -231,64 +238,32 @@ export default function NumerologiaPage() {
 
             {leituraNumerologia(numerodeVidaInfo) && (
               <div className="mb-6">
-                <LeituraBlocos leitura={leituraNumerologia(numerodeVidaInfo)!} />
+                <LeituraBlocos fluida leitura={leituraNumerologia(numerodeVidaInfo)!} />
               </div>
             )}
 
-            <p className="text-on-darker text-sm leading-relaxed mb-6">{numerodeVidaInfo.palavrasChave.join(" · ")}</p>
-
-            {/* 4 life areas */}
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <InfoCard icon={Activity} label="Saúde e Corpo">{numerodeVidaInfo.saude}</InfoCard>
-              <InfoCard icon={Star} label="Espiritualidade">{numerodeVidaInfo.espiritualidade}</InfoCard>
-            </div>
-
-            {/* Talents */}
-            <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.2)" }}>
-                <h3 className="font-semibold text-on-dark text-sm mb-3">Talentos Naturais</h3>
-                <ul className="space-y-2">
-                  {numerodeVidaInfo.talentos.map((t, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-on-darker">
-                      <span className="text-brand-gold mt-0.5 flex-shrink-0">·</span>
-                      <span>{t}</span>
-                    </li>
-                  ))}
-                </ul>
+            <div className="mt-10 grid md:grid-cols-2 gap-8">
+              <div>
+                <p className="text-[11px] font-semibold tracking-[0.16em] uppercase mb-2" style={{ color: "#c8a56b" }}>Saúde e corpo</p>
+                <p className="text-[15px] leading-relaxed" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.8 }}>{numerodeVidaInfo.saude}</p>
               </div>
-              <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
-                <h3 className="font-semibold text-on-dark text-sm mb-3">Desafios de Crescimento</h3>
-                <ul className="space-y-2">
-                  {numerodeVidaInfo.desafios.map((d, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-on-darker">
-                      <span className="text-on-dark-soft/50 mt-0.5 flex-shrink-0">·</span>
-                      <span>{d}</span>
-                    </li>
-                  ))}
-                </ul>
+              <div>
+                <p className="text-[11px] font-semibold tracking-[0.16em] uppercase mb-2" style={{ color: "#c8a56b" }}>Espiritualidade</p>
+                <p className="text-[15px] leading-relaxed" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.8 }}>{numerodeVidaInfo.espiritualidade}</p>
               </div>
             </div>
 
-            {/* Shadow + Affirmation */}
-            <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <Eye className="w-3.5 h-3.5 text-on-dark-soft/60" />
-                  <h3 className="font-semibold text-on-dark text-sm">Sombra</h3>
-                </div>
-                <p className="text-on-dark-muted text-xs leading-relaxed">{numerodeVidaInfo.sombra}</p>
-              </div>
-              <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.25)" }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-3.5 h-3.5 text-brand-gold" />
-                  <h3 className="font-semibold text-on-dark text-sm">Afirmação</h3>
-                </div>
-                <p className="text-on-darker text-sm leading-relaxed italic">{numerodeVidaInfo.afirmacao}</p>
-              </div>
+            <div className="mt-8">
+              <p className="text-[11px] font-semibold tracking-[0.16em] uppercase mb-3" style={{ color: "#c8a56b" }}>Talentos naturais</p>
+              <ul className="space-y-2">
+                {numerodeVidaInfo.talentos.map((t, i) => (
+                  <li key={i} className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.78)" }}>{t}</li>
+                ))}
+              </ul>
             </div>
 
             {/* Keywords */}
-            <div className="flex flex-wrap gap-2 pt-4" style={{ borderTop: "1px solid rgba(200,165,107,0.15)" }}>
+            <div className="flex flex-wrap gap-2 mt-8 pt-5" style={{ borderTop: "1px solid rgba(200,165,107,0.15)" }}>
               {numerodeVidaInfo.palavrasChave.map((p, i) => <Tag key={i}>{p}</Tag>)}
             </div>
           </div>
@@ -312,7 +287,7 @@ export default function NumerologiaPage() {
                 </p>
                 {leituraNumerologia(expressaoInfo) && (
                   <div className="mb-4">
-                    <LeituraBlocos leitura={leituraNumerologia(expressaoInfo)!} />
+                    <LeituraBlocos fluida leitura={leituraNumerologia(expressaoInfo)!} />
                   </div>
                 )}
                 <div className="flex flex-wrap gap-2 mt-4">
@@ -336,7 +311,7 @@ export default function NumerologiaPage() {
                 </p>
                 {leituraNumerologia(almaInfo) && (
                   <div className="mb-4">
-                    <LeituraBlocos leitura={leituraNumerologia(almaInfo)!} />
+                    <LeituraBlocos fluida leitura={leituraNumerologia(almaInfo)!} />
                   </div>
                 )}
                 <div className="flex flex-wrap gap-2 mt-4">
@@ -421,7 +396,7 @@ export default function NumerologiaPage() {
               </div>
               {interp && leituraNumerologia(perfilDoAno(interp)) && (
                 <div className="mb-2">
-                  <LeituraBlocos leitura={leituraNumerologia(perfilDoAno(interp))!} />
+                  <LeituraBlocos fluida leitura={leituraNumerologia(perfilDoAno(interp))!} />
                 </div>
               )}
             </div>
@@ -599,7 +574,7 @@ export default function NumerologiaPage() {
 
               {leituraNumerologia(perfilDoMes(mes)) && (
                 <div className="mb-4">
-                  <LeituraBlocos leitura={leituraNumerologia(perfilDoMes(mes))!} />
+                  <LeituraBlocos fluida leitura={leituraNumerologia(perfilDoMes(mes))!} />
                 </div>
               )}
 
@@ -622,9 +597,9 @@ export default function NumerologiaPage() {
   if (bloqueado) {
     return (
       <div className="min-h-screen app-dark-shell px-4 pt-6 pb-28">
-        <MobileTopBar titulo="Numerologia" subtitulo="Módulo bloqueado" />
+        <MobileTopBar titulo="Numerologia" voltar={JORNADA_ROOT} />
         <div className="max-w-lg mx-auto">
-          <NavBackButton to={JORNADA_ROOT} label="Jornada" />
+          <NavBackButton to={JORNADA_ROOT} label="Jornada" className="hidden md:flex" />
           <div
             className="rounded-2xl p-8 text-center mt-6"
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
@@ -655,9 +630,9 @@ export default function NumerologiaPage() {
 
   return (
     <>
-      <MobileTopBar titulo="Numerologia" subtitulo="Meus números e ciclos" />
+      <MobileTopBar titulo="Numerologia" voltar={JORNADA_MODULE_NAV.numerologia.hub} />
       <AppPageShell width="wide" contentClassName="space-y-5 md:space-y-6">
-        <NavBackButton to={JORNADA_MODULE_NAV.numerologia.hub} label={JORNADA_MODULE_NAV.numerologia.backLabel} className="mb-0" />
+        <NavBackButton to={JORNADA_MODULE_NAV.numerologia.hub} label={JORNADA_MODULE_NAV.numerologia.backLabel} className="mb-0 hidden md:flex" />
         <PageIntroHeader
           eyebrow="Análise numerológica"
           titulo="Numerologia"
@@ -730,19 +705,11 @@ export default function NumerologiaPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Edit profile link */}
-                <a href="/perfil"
-                  className="flex items-center gap-1.5 text-xs font-medium flex-shrink-0 self-start sm:mt-0 transition-opacity hover:opacity-80"
-                  style={{ color: "rgba(200,165,107,0.75)" }}>
-                  <ExternalLink className="w-3 h-3" />
-                  Editar perfil
-                </a>
               </div>
             </div>
 
             {/* Year selection */}
-            <div className="mb-7 md:mb-8">
+            <div className="mb-1">
               <p className="text-xs font-semibold tracking-[0.25em] uppercase text-center mb-4"
                 style={{ color: "rgba(200,165,107,0.9)" }}>
                 Selecione o ano de análise
@@ -772,14 +739,6 @@ export default function NumerologiaPage() {
               </div>
             )}
 
-            {/* CTA */}
-            <button
-              onClick={handleCalcular}
-              className="w-full py-3.5 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all hover:opacity-90 active:scale-[0.99]"
-              style={{ background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)", color: "#fff", boxShadow: "0 6px 30px rgba(200,165,107,0.25)", letterSpacing: "0.05em" }}>
-              <Sparkles className="w-5 h-5" />
-              Revelar Minha Análise
-            </button>
           </div>
 
           {/* Gold bottom bar */}

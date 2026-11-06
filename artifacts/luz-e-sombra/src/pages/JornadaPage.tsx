@@ -101,7 +101,7 @@ export default function JornadaPage() {
 
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
-      <MobileTopBar />
+      <MobileTopBar titulo="Jornada" />
       <div className="max-w-lg mx-auto px-4 pt-6">
         <div className="mb-8">
           <PageIntroHeader

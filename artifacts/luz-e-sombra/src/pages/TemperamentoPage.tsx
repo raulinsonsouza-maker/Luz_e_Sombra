@@ -238,9 +238,9 @@ export default function TemperamentoPage() {
 
     return (
       <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
-        <MobileTopBar titulo="Temperamento" subtitulo="Seu mapa temperamental" />
+        <MobileTopBar titulo="Temperamento" voltar={TEMP_NAV.hub} subtitulo="Seu mapa temperamental" />
         <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
-          <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} />
+          <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} className="hidden md:flex" />
 
           <PageIntroHeader
             hiddenOnMobile
@@ -282,9 +282,9 @@ export default function TemperamentoPage() {
   if (fase === "intro") {
     return (
       <div className="min-h-screen pb-28" style={{ background: bg }}>
-        <MobileTopBar titulo="Temperamento" subtitulo="16 afirmações · ~3 min" />
+        <MobileTopBar titulo="Temperamento" voltar={TEMP_NAV.hub} subtitulo="16 afirmações · ~3 min" />
         <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
-          <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} />
+          <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} className="hidden md:flex" />
           <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.55)" }}>
             Análise de temperamento
           </p>
@@ -354,10 +354,10 @@ export default function TemperamentoPage() {
     return (
       <div className="min-h-screen relative flex items-center justify-center" style={{ background: bg }}>
         <div className="absolute top-0 left-0 right-0">
-          <MobileTopBar titulo="Temperamento" subtitulo="A processar..." />
+          <MobileTopBar titulo="Temperamento" voltar={TEMP_NAV.hub} subtitulo="A processar..." />
         </div>
         <div className="absolute top-24 left-0 right-0 px-4 max-w-lg mx-auto">
-          <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} className="mb-0" />
+          <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} className="mb-0 hidden md:flex" />
         </div>
         <Loader2 className="w-10 h-10 animate-spin" style={{ color: "#c8a56b" }} />
       </div>
@@ -374,9 +374,9 @@ export default function TemperamentoPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: bg }}>
-      <MobileTopBar titulo="Temperamento" subtitulo={`${qIndex + 1} de ${TOTAL} · ~3 min`} />
+      <MobileTopBar titulo="Temperamento" voltar={TEMP_NAV.hub} subtitulo={`${qIndex + 1} de ${TOTAL} · ~3 min`} />
       <div className="max-w-lg mx-auto px-4 pt-8 pb-10">
-        <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} />
+        <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} className="hidden md:flex" />
 
         <div className="flex items-center justify-between mb-4">
           <button type="button" onClick={voltar} className="text-xs" style={{ color: "rgba(200,165,107,0.65)" }}>

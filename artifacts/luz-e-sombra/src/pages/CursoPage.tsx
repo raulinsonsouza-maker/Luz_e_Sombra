@@ -124,10 +124,10 @@ export default function CursoPage() {
   return (
     <div className="min-h-screen pb-32"
       style={{ background: "linear-gradient(160deg, #130f09 0%, #1e1812 40%, #2f251b 100%)" }}>
-      <MobileTopBar titulo={curso.titulo} subtitulo={curso.categoria ?? "Curso"} />
+      <MobileTopBar titulo={curso.titulo} voltar="/cursos" />
       <div className="max-w-2xl mx-auto px-4 sm:px-5 pt-4 sm:pt-6">
 
-        <NavBackButton to="/cursos" label="Cursos" />
+        <NavBackButton to="/cursos" label="Cursos" className="hidden md:flex" />
 
         {/* Hero do curso */}
         <div className="rounded-2xl overflow-hidden mb-6 shadow-xl shadow-black/30"

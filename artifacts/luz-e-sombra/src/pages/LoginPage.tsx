@@ -3,6 +3,7 @@ import { useLocation, Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { LogIn, AlertCircle, Loader2, Eye, EyeOff } from "lucide-react";
 import { LP_PORTAL_NAME, LP_JOURNEY_NAME } from "@/lib/lpConfig";
+import LogoPortal from "@/components/LogoPortal";
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
@@ -77,14 +78,7 @@ export default function LoginPage() {
         />
 
         <div className="relative z-10">
-          <div
-            className="w-12 h-0.5 mb-8"
-            style={{ background: "linear-gradient(90deg, #c8a56b, transparent)" }}
-          />
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-2"
-            style={{ color: "#c8a56b" }}>
-            {LP_PORTAL_NAME}
-          </p>
+          <LogoPortal className="h-12 w-auto mb-8" />
         </div>
 
         <div className="relative z-10">
@@ -123,9 +117,7 @@ export default function LoginPage() {
       >
         <div className="w-full max-w-md">
           <div className="lg:hidden text-center mb-10">
-            <h1 className="font-tan-mon-cheri text-3xl text-brand-dark mb-1">
-              {LP_PORTAL_NAME}
-            </h1>
+            <LogoPortal tom="ouro" className="h-12 w-auto mx-auto mb-3" />
             <p className="text-brand-medium text-sm">{LP_JOURNEY_NAME}</p>
           </div>
 

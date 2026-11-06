@@ -422,12 +422,12 @@ function AvaliacaoContent() {
 
   return (
     <>
-      <MobileTopBar titulo="Roda da Vida" subtitulo="12 dimensões da vida" />
+      <MobileTopBar titulo="Roda da Vida" voltar={JORNADA_MODULE_NAV.roda.hub} />
       <AppPageShell contentClassName="pt-6">
         <NavBackButton
           to={JORNADA_MODULE_NAV.roda.hub}
           label={JORNADA_MODULE_NAV.roda.backLabel}
-          className="mb-4"
+          className="mb-4 hidden md:flex"
         />
         <PageIntroHeader
           eyebrow="Autoconhecimento"

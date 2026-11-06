@@ -445,9 +445,9 @@ export default function LinguagensAmorPage() {
       : "Seu mapa de receber amor";
     return (
       <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
-        <MobileTopBar titulo="Linguagens do amor" subtitulo={subtituloResultado} />
+        <MobileTopBar titulo="Linguagens do amor" voltar={LING_NAV.hub} subtitulo={subtituloResultado} />
         <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
-          <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} />
+          <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} className="hidden md:flex" />
 
           <PageIntroHeader
             hiddenOnMobile
@@ -505,10 +505,10 @@ export default function LinguagensAmorPage() {
     return (
       <div className="min-h-screen relative flex flex-col items-center justify-center px-4" style={{ background: bg }}>
         <div className="absolute top-0 left-0 right-0">
-          <MobileTopBar titulo="Linguagens do amor" subtitulo="A guardar…" />
+          <MobileTopBar titulo="Linguagens do amor" voltar={LING_NAV.hub} subtitulo="A guardar…" />
         </div>
         <div className="absolute top-24 left-0 right-0 px-4 max-w-lg mx-auto">
-          <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} className="mb-0" />
+          <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} className="mb-0 hidden md:flex" />
         </div>
         <Loader2 className="w-10 h-10 animate-spin mb-4" style={{ color: "#c8a56b" }} />
         <p className="text-sm" style={{ color: "rgba(247,242,236,0.5)" }}>
@@ -521,9 +521,9 @@ export default function LinguagensAmorPage() {
   if (fase === "intro") {
     return (
       <div className="min-h-screen pb-28 px-4 pt-8" style={{ background: bg }}>
-        <MobileTopBar titulo="5 Linguagens do Amor" subtitulo="Questionário" />
+        <MobileTopBar titulo="Linguagens do amor" voltar={LING_NAV.hub} />
         <div className="max-w-lg mx-auto px-4">
-          <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} />
+          <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} className="hidden md:flex" />
           <Heart className="w-12 h-12 mb-6 hidden md:block" style={{ color: "#c8a56b" }} />
           <h1 className="font-tan-mon-cheri text-3xl mb-4 hidden md:block" style={{ color: "#f7f2ec" }}>
             5 Linguagens do Amor
@@ -585,9 +585,9 @@ export default function LinguagensAmorPage() {
 
   return (
     <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
-      <MobileTopBar titulo="Linguagens do amor" subtitulo={subtituloPerguntas} />
+      <MobileTopBar titulo="Linguagens do amor" voltar={LING_NAV.hub} subtitulo={subtituloPerguntas} />
       <div className="max-w-lg mx-auto px-4">
-        <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} />
+        <NavBackButton to={LING_NAV.hub} label={LING_NAV.backLabel} className="hidden md:flex" />
         {faseQuiz === "desempate" && qIndex === 0 && (
           <div
             className="mb-4 p-3 rounded-xl text-xs text-center leading-relaxed"

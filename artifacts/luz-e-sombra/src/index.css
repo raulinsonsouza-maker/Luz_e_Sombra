@@ -44,6 +44,17 @@ select {
   background-color: #1f1710;
 }
 
+@keyframes luz-aviso {
+  0% { opacity: 1; transform: translateY(8px); }
+  10% { opacity: 1; transform: translateY(0); }
+  78% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+
+.luz-aviso {
+  animation: luz-aviso 2.6s ease forwards;
+}
+
 .journey-card-glow {
   background: linear-gradient(135deg, rgba(200, 165, 107, 0.09), rgba(70, 52, 35, 0.35));
   border: 1px solid rgba(200, 165, 107, 0.22);

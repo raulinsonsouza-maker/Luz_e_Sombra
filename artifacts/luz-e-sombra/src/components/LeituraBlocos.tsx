@@ -14,7 +14,8 @@ const SECAO_ICONE: Record<SlotId, typeof Sparkles> = {
 };
 
 /** Desenha a leitura a partir da moldura. O título de cada bloco vem do copy-voz. */
-export default function LeituraBlocos({ leitura }: { leitura: LeituraPortal }) {
+export default function LeituraBlocos({ leitura, fluida = false }: { leitura: LeituraPortal; fluida?: boolean }) {
+  if (fluida) return <LeituraFluida leitura={leitura} />;
   return (
     <div className="space-y-4">
       {leitura.secoes.map((secao) => {
@@ -141,6 +142,80 @@ function Frase({ texto }: { texto: string }) {
       </span>{" "}
       <span style={{ color: COR_TEXTO }}>{corte[2]}</span>
     </>
+  );
+}
+
+function LeituraFluida({ leitura }: { leitura: LeituraPortal }) {
+  return (
+    <div className="space-y-9">
+      {leitura.secoes.map((secao, indice) => (
+        <section key={secao.id} className={indice > 0 ? "pt-8" : undefined} style={indice > 0 ? { borderTop: "1px solid rgba(200,165,107,0.16)" } : undefined}>
+          <h3 className="font-tan-mon-cheri text-2xl leading-none mb-4" style={{ color: "#e8d5b0" }}>
+            {secao.titulo}
+          </h3>
+          {secao.id === "oQueFazer" ? <PassosFluidos secao={secao} /> : <ParagrafosFluidos secao={secao} />}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function ParagrafosFluidos({ secao }: { secao: SecaoLeitura }) {
+  return (
+    <div className="space-y-5">
+      {grupos(itensDa(secao)).map((grupo, i) => (
+        <div key={i}>
+          {grupo.rotulo && (
+            <p className="text-[11px] font-semibold tracking-[0.16em] uppercase mb-1.5" style={{ color: OURO }}>
+              {grupo.rotulo}
+            </p>
+          )}
+          <div className="space-y-3">
+            {grupo.textos.map((texto, j) => (
+              <p key={j} className="text-[15px] leading-relaxed" style={{ color: COR_TEXTO, lineHeight: 1.8 }}>
+                {texto}
+              </p>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PassosFluidos({ secao }: { secao: SecaoLeitura }) {
+  const itens = itensDa(secao);
+  const ultimo = itens[itens.length - 1];
+  const temPergunta = itens.length > 1 && !!ultimo?.texto.trim().endsWith("?");
+  const corpo = temPergunta ? itens.slice(0, -1) : itens;
+  const passos = corpo.filter((item) => item.texto.length <= LIMITE_PASSO);
+  const intros = corpo.filter((item) => item.texto.length > LIMITE_PASSO);
+  const lista = passos.length > 1 || (passos.length === 1 && intros.length > 0) ? passos : [];
+  const soltos = lista.length ? intros : corpo;
+
+  return (
+    <div className="space-y-4">
+      {soltos.map((item, i) => (
+        <p key={i} className="text-[15px] leading-relaxed" style={{ color: COR_TEXTO, lineHeight: 1.8 }}>
+          {item.texto}
+        </p>
+      ))}
+      {lista.length > 0 && (
+        <ol className="space-y-3">
+          {lista.map((item, i) => (
+            <li key={i} className="flex gap-3 text-[15px] leading-relaxed" style={{ color: COR_TEXTO, lineHeight: 1.75 }}>
+              <span className="font-semibold shrink-0" style={{ color: OURO }}>{i + 1}.</span>
+              <span>{item.texto}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+      {temPergunta && ultimo && (
+        <p className="text-[15px] leading-relaxed italic pt-2" style={{ color: COR_FORTE, lineHeight: 1.75 }}>
+          {ultimo.texto}
+        </p>
+      )}
+    </div>
   );
 }
 

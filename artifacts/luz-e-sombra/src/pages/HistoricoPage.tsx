@@ -97,9 +97,9 @@ export default function HistoricoPage() {
 
   return (
     <>
-      <MobileTopBar titulo="Histórico" subtitulo="Evolução da Roda da Vida" />
+      <MobileTopBar titulo="Histórico" voltar="/dashboard" />
       <AppPageShell width="xl" contentClassName="py-6 md:py-10 space-y-4">
-        <NavBackButton to="/dashboard" label="Início" className="mb-0" />
+        <NavBackButton to="/dashboard" label="Início" className="mb-0 hidden md:flex" />
         <PageIntroHeader
           eyebrow="Evolução"
           titulo="Histórico de Avaliações"
