@@ -7,6 +7,7 @@ import {
 } from "@workspace/traco-narrativa";
 import { limparJargao } from "@workspace/copy-voz";
 import JornadaTracoResultado from "@/pages/traco/components/JornadaTracoResultado";
+import { TextoFormatado } from "@/components/TextoLeitura";
 import {
   ESTRUTURAS_CONFIG,
   FOTOS_CONFIG,
@@ -308,9 +309,9 @@ export function TracoPainelResultado({
               </div>
             )}
 
-            <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.7 }}>
-              {jornada.mapa.significado}
-            </p>
+            <div className="mb-3">
+              <TextoFormatado texto={jornada.mapa.significado} fluido={false} />
+            </div>
 
             <details className="group mb-1">
               <summary
@@ -320,9 +321,9 @@ export function TracoPainelResultado({
                 <Info className="w-3.5 h-3.5" />
                 Saber mais sobre {configPrincipal.nome}
               </summary>
-              <p className="text-sm leading-relaxed mt-2 pl-5" style={{ color: "rgba(247,242,236,0.45)" }}>
-                {configPrincipal.descricaoLonga}
-              </p>
+              <div className="mt-2 pl-5">
+                <TextoFormatado texto={configPrincipal.descricaoLonga} fluido={false} />
+              </div>
             </details>
           </div>
 
@@ -439,9 +440,7 @@ export function TracoPainelResultado({
           )}
 
           {resultado.perfilFisicoNarrado && (
-            <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)", lineHeight: 1.8 }}>
-              {resultado.perfilFisicoNarrado}
-            </p>
+            <TextoFormatado texto={resultado.perfilFisicoNarrado} fluido={false} />
           )}
 
           {resultado.couracaCorporal && (
@@ -452,9 +451,7 @@ export function TracoPainelResultado({
               <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(155,143,222,0.55)" }}>
                 Como o corpo se protege
               </p>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
-                {limparJargao(resultado.couracaCorporal)}
-              </p>
+              <TextoFormatado texto={limparJargao(resultado.couracaCorporal)} fluido={false} />
               {(resultado.centroEnergetico || resultado.padraoEnergetico) && (
                 <div className="space-y-2 mt-3">
                   {resultado.centroEnergetico && (
@@ -479,9 +476,7 @@ export function TracoPainelResultado({
               <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
                 Padrão postural
               </p>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>
-                {resultado.padraoPostural}
-              </p>
+              <TextoFormatado texto={resultado.padraoPostural} fluido={false} />
             </div>
           )}
 
@@ -503,9 +498,7 @@ export function TracoPainelResultado({
                       <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>
                         {FOTOS_CONFIG[tipo]?.label ?? tipo}
                       </p>
-                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
-                        {limparJargao(obs)}
-                      </p>
+                      <TextoFormatado texto={limparJargao(obs)} fluido={false} />
                     </div>
                   ))}
                 </div>

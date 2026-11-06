@@ -31,6 +31,7 @@ import {
 import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import { normalizarObjetoTextos } from "@workspace/copy-voz";
 import LeituraBlocos from "@/components/LeituraBlocos";
+import { ListaItens, TextoFormatado } from "@/components/TextoLeitura";
 import { leituraDossie } from "@/lib/leiturasPortal";
 import {
   Loader2, Sparkles, Heart, Star, Compass,
@@ -669,7 +670,7 @@ export default function QuemSouEuPage() {
                       style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(200,165,107,0.1)" }}
                     >
                       <p className="text-xs font-semibold mb-2" style={{ color: "rgba(200,165,107,0.75)" }}>{item.titulo}</p>
-                      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.6)" }}>{item.texto}</p>
+                      <TextoFormatado texto={item.texto} fluido={false} />
                     </div>
                   ))}
                 </div>
@@ -708,9 +709,7 @@ export default function QuemSouEuPage() {
                   className="rounded-xl p-4 mb-5"
                   style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.12)" }}
                 >
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.7)" }}>
-                    {anoPessoalInfo.essencia}
-                  </p>
+                  {anoPessoalInfo.essencia && <TextoFormatado texto={anoPessoalInfo.essencia} fluido={false} />}
                 </div>
 
                 {/* Temas do ano */}
@@ -732,7 +731,7 @@ export default function QuemSouEuPage() {
                       <Icon className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "rgba(200,165,107,0.4)" }} />
                       <div>
                         <p className="text-[10px] font-semibold tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>{label}</p>
-                        <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>{texto}</p>
+                        <TextoFormatado texto={texto} fluido={false} />
                       </div>
                     </div>
                   ))}
@@ -780,9 +779,9 @@ export default function QuemSouEuPage() {
                         <p className="font-semibold" style={{ color: "#f7f2ec" }}>{vidaInfo.titulo}</p>
                       </div>
                     </div>
-                    <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.55)" }}>
-                      {vidaInfo.missao}
-                    </p>
+                    <div className="mb-3">
+                      <TextoFormatado texto={vidaInfo.missao} fluido={false} />
+                    </div>
 
                     {/* Talentos */}
                     <p className="text-[10px] font-bold tracking-[0.25em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.4)" }}>Seus talentos naturais</p>
@@ -803,9 +802,7 @@ export default function QuemSouEuPage() {
                       <p className="text-[10px] font-bold tracking-[0.25em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.4)" }}>
                         Zona de sombra
                       </p>
-                      <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
-                        {vidaInfo.sombra}
-                      </p>
+                      <TextoFormatado texto={vidaInfo.sombra} fluido={false} />
                     </div>
                   </div>
                 )}
@@ -1049,9 +1046,7 @@ export default function QuemSouEuPage() {
                             {insight.titulo}
                           </p>
                         </div>
-                        <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)" }}>
-                          {insight.corpo}
-                        </p>
+                        <TextoFormatado texto={insight.corpo} fluido={false} />
                       </div>
                     );
                   })}
@@ -1072,9 +1067,7 @@ export default function QuemSouEuPage() {
                     {diagnosticoEmocional.fonte === "fusao" && " · Fusão Traço + formulário"}
                     {diagnosticoEmocional.fonte === "heuristica" && " · Estimativa (complete o diagnóstico)"}
                   </p>
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.65)" }}>
-                    {diagnosticoEmocional.resumo}
-                  </p>
+                  <TextoFormatado texto={diagnosticoEmocional.resumo} fluido={false} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   {[
@@ -1099,13 +1092,7 @@ export default function QuemSouEuPage() {
                     Tag: {diagnosticoEmocional.tag.replace("_", " ")}
                   </span>
                 </div>
-                <div className="space-y-2">
-                  {diagnosticoEmocional.proximosPassos.map((p, i) => (
-                    <p key={i} className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
-                      {i + 1}. {p}
-                    </p>
-                  ))}
-                </div>
+                <ListaItens itens={diagnosticoEmocional.proximosPassos} fluido={false} />
               </SecaoCard>
             )}
 

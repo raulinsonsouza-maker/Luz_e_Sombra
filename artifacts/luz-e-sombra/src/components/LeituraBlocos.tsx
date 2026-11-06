@@ -1,6 +1,8 @@
 import type { ItemLeitura, LeituraPortal, SecaoLeitura } from "@workspace/copy-voz";
 import type { ReactNode } from "react";
 import { Sparkles } from "lucide-react";
+import { ConteudoGrupo, TextoFormatado } from "@/components/TextoLeitura";
+import { pontuar } from "@/lib/formatarLeitura";
 
 const COR_TEXTO = "rgba(247,242,236,0.78)";
 const COR_FORTE = "rgba(247,242,236,0.94)";
@@ -45,11 +47,7 @@ export function CorpoCartao({
 }) {
   return (
     <div className="space-y-3 min-w-0">
-      {paragrafos.map((texto) => (
-        <p key={texto} className="text-sm leading-relaxed break-words" style={{ color: COR_TEXTO, lineHeight: 1.75 }}>
-          {texto}
-        </p>
-      ))}
+      <ConteudoGrupo textos={paragrafos} fluido={false} />
       {passos.length > 0 && (
         <ol className="list-none space-y-2.5">
           {passos.map((texto, i) => (
@@ -61,7 +59,7 @@ export function CorpoCartao({
                 {i + 1}
               </span>
               <p className="text-sm leading-relaxed break-words min-w-0" style={{ color: COR_TEXTO, lineHeight: 1.7 }}>
-                {texto}
+                {pontuar(texto)}
               </p>
             </li>
           ))}
@@ -144,13 +142,7 @@ function Paragrafos({ secao }: { secao: SecaoLeitura }) {
               {grupo.rotulo}
             </p>
           )}
-          <div className="space-y-2.5">
-            {grupo.textos.map((texto, j) => (
-              <p key={j} className="text-sm leading-relaxed break-words" style={{ lineHeight: 1.75 }}>
-                <Frase texto={texto} />
-              </p>
-            ))}
-          </div>
+          <ConteudoGrupo textos={grupo.textos} fluido={false} />
         </div>
       ))}
     </div>
@@ -181,24 +173,9 @@ function Faixa({ texto }: { texto: string }) {
   );
 }
 
-function Frase({ texto }: { texto: string }) {
-  const corte = texto.match(/^(.+?[.!?])\s+([\s\S]+)$/);
-  if (!corte || corte[1].length > 220) {
-    return <span style={{ color: COR_TEXTO }}>{texto}</span>;
-  }
-  return (
-    <>
-      <span className="font-semibold" style={{ color: COR_FORTE }}>
-        {corte[1]}
-      </span>{" "}
-      <span style={{ color: COR_TEXTO }}>{corte[2]}</span>
-    </>
-  );
-}
-
 function LeituraFluida({ leitura }: { leitura: LeituraPortal }) {
   return (
-    <div className="space-y-9">
+    <div className="space-y-7">
       {leitura.secoes.map((secao, indice) => (
         <section key={secao.id} className={indice > 0 ? "pt-8" : undefined} style={indice > 0 ? { borderTop: "1px solid rgba(200,165,107,0.16)" } : undefined}>
           <h3 className="font-tan-mon-cheri text-2xl leading-none mb-4" style={{ color: "#e8d5b0" }}>
@@ -221,13 +198,7 @@ function ParagrafosFluidos({ secao }: { secao: SecaoLeitura }) {
               {grupo.rotulo}
             </p>
           )}
-          <div className="space-y-3">
-            {grupo.textos.map((texto, j) => (
-              <p key={j} className="text-[15px] leading-relaxed" style={{ color: COR_TEXTO, lineHeight: 1.8 }}>
-                {texto}
-              </p>
-            ))}
-          </div>
+          <ConteudoGrupo textos={grupo.textos} />
         </div>
       ))}
     </div>
@@ -247,16 +218,14 @@ function PassosFluidos({ secao }: { secao: SecaoLeitura }) {
   return (
     <div className="space-y-4">
       {soltos.map((item, i) => (
-        <p key={i} className="text-[15px] leading-relaxed" style={{ color: COR_TEXTO, lineHeight: 1.8 }}>
-          {item.texto}
-        </p>
+        <TextoFormatado key={i} texto={item.texto} />
       ))}
       {lista.length > 0 && (
         <ol className="space-y-3">
           {lista.map((item, i) => (
             <li key={i} className="flex gap-3 text-[15px] leading-relaxed" style={{ color: COR_TEXTO, lineHeight: 1.75 }}>
               <span className="font-semibold shrink-0" style={{ color: OURO }}>{i + 1}.</span>
-              <span>{item.texto}</span>
+              <span>{pontuar(item.texto)}</span>
             </li>
           ))}
         </ol>
@@ -293,9 +262,7 @@ function Passos({ secao }: { secao: SecaoLeitura }) {
               {item.rotulo}
             </p>
           )}
-          <p className="text-sm leading-relaxed break-words" style={{ lineHeight: 1.75 }}>
-            <Frase texto={item.texto} />
-          </p>
+          <TextoFormatado texto={item.texto} fluido={false} />
         </div>
       ))}
       {lista.length > 0 && (
@@ -315,7 +282,7 @@ function Passos({ secao }: { secao: SecaoLeitura }) {
                   </p>
                 )}
                 <p className="text-sm leading-relaxed break-words" style={{ color: COR_TEXTO, lineHeight: 1.7 }}>
-                  {item.texto}
+                  {pontuar(item.texto)}
                 </p>
               </div>
             </li>

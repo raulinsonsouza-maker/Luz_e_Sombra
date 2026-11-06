@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import {
   Calendar, TrendingUp, Heart, Briefcase, DollarSign, Activity,
-  AlertCircle, Brain, Lightbulb, ChevronRight,
+  AlertCircle, Brain, Lightbulb, ChevronDown, ChevronRight,
   User, Star, Zap, Shield, Hash, BookOpen, Compass, Lock,
 } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
@@ -11,6 +11,7 @@ import { useJornadaModulo } from "@/hooks/useJornadaModulo";
 
 import { ANOS_UNIVERSAIS, ANOS_PESSOAIS, COMBINACOES, NUMEROS_DE_VIDA, type AnaliseNumero } from "@/lib/numerologia-data";
 import LeituraBlocos from "@/components/LeituraBlocos";
+import { ListaItens, TextoFormatado } from "@/components/TextoLeitura";
 import { leituraDoMes, leituraNumerologia } from "@/lib/leiturasPortal";
 import MobileTopBar from "@/components/MobileTopBar";
 import NavBackButton from "@/components/NavBackButton";
@@ -38,8 +39,8 @@ function perfilDoAno(interp: AnaliseNumero) {
     missao: interp.detalhado,
     carreira: interp.temas.carreira,
     relacionamentos: interp.temas.relacionamentos,
-    sombra: interp.desafios.join(". "),
-    afirmacao: interp.praticasSugeridas?.join(" "),
+    desafios: interp.desafios,
+    praticas: interp.praticasSugeridas,
   };
 }
 
@@ -84,7 +85,7 @@ function InfoCard({ icon: Icon, label, children }: { icon: typeof Briefcase; lab
         <Icon className="w-3.5 h-3.5 text-brand-gold" />
         <h3 className="text-[11px] font-semibold tracking-[0.16em] uppercase" style={{ color: "#c8a56b" }}>{label}</h3>
       </div>
-      <p className="text-[15px] leading-relaxed" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.8 }}>{children}</p>
+      {typeof children === "string" ? <TextoFormatado texto={children} /> : <div className="text-[15px] leading-relaxed" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.8 }}>{children}</div>}
     </div>
   );
 }
@@ -117,6 +118,7 @@ export default function NumerologiaPage() {
   const [erro, setErro] = useState("");
   const [resultado, setResultado] = useState<ReturnType<typeof calcular> | null>(null);
   const [abaAtiva, setAbaAtiva] = useState<"perfil" | "ano" | "meses">("perfil");
+  const [mesAberto, setMesAberto] = useState<number | null>(null);
   const marcouConclusao = useRef(false);
 
   useEffect(() => {
@@ -235,21 +237,17 @@ export default function NumerologiaPage() {
             <div className="mt-10 grid md:grid-cols-2 gap-8">
               <div>
                 <p className="text-[11px] font-semibold tracking-[0.16em] uppercase mb-2" style={{ color: "#c8a56b" }}>Saúde e corpo</p>
-                <p className="text-[15px] leading-relaxed" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.8 }}>{numerodeVidaInfo.saude}</p>
+                <TextoFormatado texto={numerodeVidaInfo.saude} />
               </div>
               <div>
                 <p className="text-[11px] font-semibold tracking-[0.16em] uppercase mb-2" style={{ color: "#c8a56b" }}>Espiritualidade</p>
-                <p className="text-[15px] leading-relaxed" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.8 }}>{numerodeVidaInfo.espiritualidade}</p>
+                <TextoFormatado texto={numerodeVidaInfo.espiritualidade} />
               </div>
             </div>
 
             <div className="mt-8">
               <p className="text-[11px] font-semibold tracking-[0.16em] uppercase mb-3" style={{ color: "#c8a56b" }}>Talentos naturais</p>
-              <ul className="space-y-2">
-                {numerodeVidaInfo.talentos.map((t, i) => (
-                  <li key={i} className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.78)" }}>{t}</li>
-                ))}
-              </ul>
+              <ListaItens itens={numerodeVidaInfo.talentos} />
             </div>
 
             {/* Keywords */}
@@ -323,7 +321,7 @@ export default function NumerologiaPage() {
                   {NUMEROS_DE_VIDA[persVal].arquetipo}
                 </h3>
                 <p className="text-xs text-on-dark-soft mb-3">Das consoantes do nome, como os outros te percebem</p>
-                <p className="text-sm text-on-darker leading-relaxed">{NUMEROS_DE_VIDA[persVal].missao}</p>
+                <TextoFormatado texto={NUMEROS_DE_VIDA[persVal].missao} />
               </div>
             </div>
           </div>
@@ -399,7 +397,7 @@ export default function NumerologiaPage() {
                   <p className="text-xs text-on-dark-soft">Energia coletiva global</p>
                 </div>
               </div>
-              {univ && <p className="text-sm text-on-dark-muted leading-relaxed">{univ.climaColetivo}</p>}
+              {univ && <TextoFormatado texto={univ.climaColetivo} />}
             </div>
           </div>
         </div>
@@ -430,22 +428,16 @@ export default function NumerologiaPage() {
               {interp.areasDeAtencao && interp.areasDeAtencao.length > 0 && (
                 <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
                   <h3 className="font-semibold text-on-dark text-sm mb-3">Áreas de Atenção</h3>
-                  <ul className="space-y-1.5">
-                    {interp.areasDeAtencao.map((a, i) => (
-                      <li key={i} className="text-xs text-on-darker flex items-start gap-2">
-                        <span className="text-brand-gold/60 mt-0.5">·</span><span>{a}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <ListaItens itens={interp.areasDeAtencao} />
                 </div>
               )}
             </div>
             {interp.afirmacoes && interp.afirmacoes.length > 0 && (
               <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.25)" }}>
                 <h3 className="font-semibold text-on-dark text-sm mb-3">Afirmações do Ano</h3>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {interp.afirmacoes.map((a, i) => (
-                    <p key={i} className="text-sm text-on-darker italic">"{a}"</p>
+                    <TextoFormatado key={i} texto={a.startsWith('"') ? a : `"${a}"`} />
                   ))}
                 </div>
               </div>
@@ -504,7 +496,7 @@ export default function NumerologiaPage() {
                     <Icon className="w-4 h-4 text-brand-gold" />
                     <h3 className="font-semibold text-sm" style={{ color: "#f7f2ec" }}>{label}</h3>
                   </div>
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.88)" }}>{val}</p>
+                  <TextoFormatado texto={val} />
                 </div>
               ))}
             </div>
@@ -513,7 +505,7 @@ export default function NumerologiaPage() {
                 <ChevronRight className="w-4 h-4 text-brand-gold" />
                 <h3 className="font-semibold text-sm" style={{ color: "#f7f2ec" }}>Recomendações Práticas</h3>
               </div>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.92)" }}>{combinacao.recomendacoes}</p>
+              <TextoFormatado texto={combinacao.recomendacoes} />
             </div>
           </div>
         )}
@@ -547,27 +539,41 @@ export default function NumerologiaPage() {
             Cada mês deste ano pede uma coisa diferente. Leia como um convite para o momento, não como uma regra.
           </p>
         </div>
-        <div className="grid lg:grid-cols-2 gap-4">
-          {resultado.meses.map((mes: MesPessoal, idx: number) => (
-            <div key={idx} className="num-panel p-5 md:p-6 transition-all hover:shadow-lg"
-              style={{ border: "1px solid rgba(200,165,107,0.18)" }}>
-
-              {/* Header */}
-              <div className="flex items-center justify-between mb-4 pb-4"
-                style={{ borderBottom: "1px solid rgba(200,165,107,0.15)" }}>
-                <div>
-                  <h3 className="font-semibold text-lg text-on-dark">{mes.mesNome}</h3>
-                  <p className="text-xs text-brand-gold mt-0.5 font-semibold tracking-wide uppercase">{mes.energia}</p>
-                </div>
-                <NumBadge n={mes.reduzido} size="sm" />
+        <div className="grid lg:grid-cols-2 gap-3">
+          {resultado.meses.map((mes: MesPessoal) => {
+            const aberto = mesAberto === mes.mesNumero;
+            const leitura = leituraDoMes(mes);
+            return (
+              <div key={mes.mesNumero} className="num-panel overflow-hidden"
+                style={{ border: "1px solid rgba(200,165,107,0.18)" }}>
+                <button
+                  type="button"
+                  aria-expanded={aberto}
+                  onClick={() => setMesAberto(aberto ? null : mes.mesNumero)}
+                  className="flex w-full items-center justify-between gap-3 p-4 text-left md:p-5"
+                >
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-lg text-on-dark">{mes.mesNome}</h3>
+                    <p className="text-xs text-brand-gold mt-0.5 font-semibold tracking-wide uppercase">{mes.energia}</p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <NumBadge n={mes.reduzido} size="sm" />
+                    <ChevronDown
+                      className="h-5 w-5 transition-transform"
+                      style={{ color: "#c8a56b", transform: aberto ? "rotate(180deg)" : "none" }}
+                    />
+                  </div>
+                </button>
+                {aberto && leitura && (
+                  <div className="px-4 pb-5 md:px-6 md:pb-6" style={{ borderTop: "1px solid rgba(200,165,107,0.15)" }}>
+                    <div className="pt-4">
+                      <LeituraBlocos fluida leitura={leitura} />
+                    </div>
+                  </div>
+                )}
               </div>
-
-              {leituraDoMes(mes) && (
-                <LeituraBlocos fluida leitura={leituraDoMes(mes)!} />
-              )}
-
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );

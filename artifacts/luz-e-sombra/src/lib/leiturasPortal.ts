@@ -40,6 +40,7 @@ type PerfilNumero = {
   sombra?: string;
   afirmacao?: string;
   desafios?: string[];
+  praticas?: string[];
 };
 
 function listaNatural(itens: string[]): string {
@@ -100,8 +101,10 @@ export function leituraNumerologia(perfil: PerfilNumero | null | undefined): Lei
       lista(item("O excesso", perfil.sombra), comTitulo("O que pede cuidado", perfil.desafios ?? [])),
       "A sombra deste número é o excesso do próprio talento, quando ele vira hábito sem consciência.",
     ),
-    oQueFazer: perfil.afirmacao
-      || "Escolha uma situação de hoje e aja um pouco mais perto do que este número pede, em um gesto só.",
+    oQueFazer: ou(
+      lista(perfil.afirmacao, ...(perfil.praticas ?? [])),
+      "Escolha uma situação de hoje e aja um pouco mais perto do que este número pede, em um gesto só.",
+    ),
   });
 }
 

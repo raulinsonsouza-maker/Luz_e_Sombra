@@ -1,4 +1,6 @@
 import type { BlocoJornada, EtapaJornada, JornadaTraco } from "@workspace/traco-narrativa";
+import { TextoFormatado } from "@/components/TextoLeitura";
+import { pontuar } from "@/lib/formatarLeitura";
 
 const OURO = "#c8a56b";
 const TEXTO = "rgba(247,242,236,0.78)";
@@ -72,9 +74,7 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
             {bloco.rotulo}
           </p>
         )}
-        <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.75 }}>
-          <PrimeiraFrase texto={bloco.texto} />
-        </p>
+        <TextoFormatado texto={bloco.texto} fluido={false} />
       </div>
     );
   }
@@ -109,7 +109,7 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
           {bloco.itens.map((item, i) => (
             <li key={i} className="flex gap-2 text-sm" style={{ color: TEXTO, lineHeight: 1.6 }}>
               <span style={{ color: OURO }}>·</span>
-              <span>{item}</span>
+              <span>{pontuar(item)}</span>
             </li>
           ))}
         </ul>
@@ -135,7 +135,7 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
                 {i + 1}
               </span>
               <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.7 }}>
-                {item}
+                {pontuar(item)}
               </p>
             </li>
           ))}
@@ -182,17 +182,3 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
   );
 }
 
-function PrimeiraFrase({ texto }: { texto: string }) {
-  const corte = texto.match(/^(.+?[.!?])\s+([\s\S]+)$/);
-  if (!corte || corte[1].length > 220) {
-    return <>{texto}</>;
-  }
-  return (
-    <>
-      <span className="font-semibold" style={{ color: FORTE }}>
-        {corte[1]}
-      </span>{" "}
-      <span>{corte[2]}</span>
-    </>
-  );
-}

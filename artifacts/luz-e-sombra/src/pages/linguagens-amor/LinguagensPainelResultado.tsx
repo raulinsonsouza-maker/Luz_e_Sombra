@@ -4,6 +4,7 @@ import { LABEL_LINGUAGEM, type LinguagemAmor } from "@workspace/cinco-linguagens
 import { LINGUAGEM_VISUAL } from "./linguagensConfig";
 import { enriquecerResultado, isV2, isV3, type ResultadoLinguagensUi } from "./enriquecerResultado";
 import LeituraBlocos from "@/components/LeituraBlocos";
+import { TextoFormatado } from "@/components/TextoLeitura";
 import { leituraLinguagens } from "@/lib/leiturasPortal";
 
 export type { ResultadoLinguagensUi };
@@ -28,6 +29,7 @@ function Secao({
 }
 
 function Prosa({ children }: { children: ReactNode }) {
+  if (typeof children === "string") return <TextoFormatado texto={children} fluido={false} />;
   return (
     <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.85 }}>
       {children}
