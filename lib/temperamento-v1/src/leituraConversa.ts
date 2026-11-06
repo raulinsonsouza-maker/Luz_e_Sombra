@@ -3,7 +3,7 @@ import type { TemperamentoCodigo } from "./types";
 import { TEMPERAMENTOS } from "./types";
 
 export const FRASE_ASSUMIR =
-  "Quando alguém demora para decidir, você assume a situação e resolve por essa pessoa.";
+  "Diante da demora, você toma a iniciativa e busca uma solução.";
 
 export const FRASE_CRITICA =
   "Uma crítica fica com você por vários dias, mesmo quando a conversa já acabou.";
@@ -47,10 +47,10 @@ const NOME: Record<TemperamentoCodigo, string> = {
 };
 
 const EXPLICACAO: Record<TemperamentoCodigo, string> = {
-  SANGUINEO: "Sanguíneo é o jeito de quem se anima com gente, conversa e novidade. A experiência ganha sentido quando você divide.",
-  COLERICO: "Colérico é o jeito de quem olha para o que precisa ser feito e começa, ajustando o caminho no meio.",
-  MELANCOLICO: "Melancólico é o jeito de quem quer entender antes de escolher e repara no que os outros deixam passar.",
-  FLEUMATICO: "Fleumático é o jeito de quem observa antes de entrar e prefere um ambiente em paz.",
+  SANGUINEO: "Sanguíneo: você se anima com gente, conversa e novidade. Muitas vezes você descobre o que pensa enquanto fala.",
+  COLERICO: "Colérico: você olha para o que precisa ser feito e começa. O caminho se ajusta no meio.",
+  MELANCOLICO: "Melancólico: você quer entender antes de escolher e repara no que os outros deixam passar.",
+  FLEUMATICO: "Fleumático: você observa antes de entrar e prefere um ambiente em paz.",
 };
 
 const INTRO: Record<TemperamentoCodigo, string> = {
@@ -85,7 +85,7 @@ const CENAS: CenaItem[] = [
   {
     id: "E01",
     alvo: "SANGUINEO",
-    reconhecer: "Você começa uma conversa até com quem acabou de conhecer.",
+    reconhecer: "Você consegue iniciar conversas até com pessoas que acabou de conhecer.",
     facilidade: "Você se aproxima e as pessoas entram no assunto.",
   },
   {
@@ -182,28 +182,28 @@ const CENAS: CenaItem[] = [
 const ORDEM: Record<string, FatoOrdem> = {
   SANGUINEO_COLERICO: {
     depois:
-      "Imagine uma conversa sobre uma ideia. Você começa de um jeito leve, as pessoas entram no assunto e, pouco depois, você pede uma decisão. Quem estava só conversando sente que precisa entregar alguma coisa.",
+      "O colérico entra logo depois e muda o rumo. Você abre com leveza. Em seguida, quer que a ideia saia do papel. Quem entrou para trocar uma ideia percebe que o assunto ganhou um destino.",
     encontro:
-      "Pense num projeto em casa ou no trabalho. Primeiro a conversa pode ser o lugar em que a ideia nasce: você entende o que quer enquanto conta. Logo depois pode vir a vontade de organizar, definir quem faz o quê e ver aquilo acontecer.",
+      "Numa reunião ou num jantar, você puxa o assunto e as pessoas entram. Pouco depois, você já organiza o próximo passo. A força é juntar gente e fazer a coisa andar.",
     descoberta:
-      "Você não precisa diminuir o entusiasmo nem deixar de ter iniciativa. O cuidado é outro: o silêncio de alguém pode não ser falta de interesse, e a demora pode não ser falta de compromisso. Pode ser só um tempo diferente do seu.",
-    pergunta: "Quando alguém demora para decidir, você consegue esperar, ou já quer resolver por essa pessoa?",
+      "O aperto é outro: quem veio só conversar sai com a sensação de que a conversa virou tarefa.",
+    pergunta: "Na última vez em que você empolgou alguém com uma ideia, a pessoa saiu com vontade de participar ou com a sensação de que já tinha uma tarefa?",
     relacao:
-      "Nas relações, você gosta de proximidade e, na mesma conversa, quer resolver o incômodo. A outra pessoa ainda precisa de tempo.",
+      "Na convivência, você aproxima e também conduz. O incômodo pede conversa e rumo no mesmo momento. A outra pessoa ainda está sentindo, e você já quer o próximo passo.",
     trabalho:
-      "No trabalho, você pode gostar de começar e de ver a ideia andar. A parte repetitiva, quando a novidade passa, pode ser mais difícil de sustentar.",
+      "No trabalho, você comunica a ideia e puxa as pessoas com você. Quando o grupo para, você escolhe o próximo passo. O trecho mais difícil é continuar quando a novidade passa e a tarefa pede conclusão.",
     atrapalhos: [
-      "Você pode querer a conclusão antes de a outra pessoa ter terminado de explicar.",
-      "Você pode começar com muita energia e perder o ritmo quando a tarefa fica repetitiva.",
-      "Você pode achar que o silêncio do outro é falta de interesse, quando era só um tempo diferente do seu.",
+      "A intenção é aproveitar o ânimo enquanto ele está alto. Diante da demora, você toma a iniciativa e busca uma solução. A outra pessoa perde o lugar de pensar junto.",
+      "Você começa com muita energia e perde o ritmo quando a tarefa fica repetitiva.",
+      "Você lê o silêncio do outro como falta de interesse, e era só um tempo diferente do seu.",
     ],
     passos: [
-      "Em uma conversa importante, deixe a outra pessoa terminar. Antes de sugerir um caminho, pergunte o que ela pensa.",
-      "Escolha uma tarefa que já começou e termine essa antes de abrir outra ideia.",
-      "Se alguém demorar, espere um pouco mais do que o seu primeiro impulso pediria.",
+      "Numa conversa, deixe a pessoa terminar antes de organizar o próximo passo.",
+      "Escolha uma tarefa que a conversa já abriu e termine essa antes de começar outra ideia.",
+      "Quando algo der certo, registre para você o que você fez, antes de contar para alguém.",
     ],
     fechamento:
-      "Você não precisa deixar de ser uma pessoa de conversa para aprender a ouvir até o fim. Não precisa perder a iniciativa para respeitar o tempo de quem está com você.",
+      "Você não precisa falar menos para ouvir, nem abrir mão da iniciativa para respeitar o tempo de quem está com você. O instante que importa é aquele em que a conversa deixa de ser encontro e vira tarefa. Aí você escolhe.",
   },
   SANGUINEO_MELANCOLICO: {
     depois:
@@ -483,9 +483,8 @@ const ORDEM: Record<string, FatoOrdem> = {
 };
 
 const ABERTURA = [
-  "Existem muitas maneiras de viver o mesmo dia. Algumas pessoas precisam conversar para organizar o que pensam. Outras preferem olhar antes de entrar. Algumas gostam de decidir logo. Outras precisam de mais tempo para ter certeza.",
-  "Nenhum desses jeitos é melhor que o outro. São maneiras diferentes de funcionar. Nada disso é uma etiqueta. Só vale se você se reconhecer.",
-  "O que vem a seguir é um convite para você reconhecer o que você faz, em casa, no trabalho ou numa conversa, e perceber onde o seu jeito dificulta as coisas.",
+  "Você não precisa estudar temperamento para se reconhecer aqui.",
+  "O texto fala do que as suas respostas mostraram, na conversa, em casa e no trabalho.",
 ];
 
 const FECHO_COMUM =
@@ -568,6 +567,119 @@ const PERGUNTA_FECHO: Record<string, string> = {
   FLEUMATICO_MELANCOLICO: "O que não ficou bom e você ainda não pediu para mudar?",
 };
 
+function montarSanguineoColerico(opts: {
+  percentuais: Record<TemperamentoCodigo, number>;
+  respostas?: Record<string, RespostaSimNao>;
+  usar: boolean;
+}): CartaoConversa[] {
+  const respostas = opts.respostas;
+  const usar = opts.usar;
+  const marcadas = cenasDe(["SANGUINEO", "COLERICO", "MELANCOLICO", "FLEUMATICO"], respostas, usar);
+  const ordem = ordenar(opts.percentuais);
+  const terceiro = ordem[2] ?? "MELANCOLICO";
+  const quarto = ordem[3] ?? "FLEUMATICO";
+  const fato = ORDEM.SANGUINEO_COLERICO;
+  const reconhece = (id: CodigoItem) => marcadas.some((cena) => cena.id === id);
+  const doAlvo = (codigo: TemperamentoCodigo) => textos(cenasDe([codigo], respostas, usar), "reconhecer", 3);
+
+  const primeiro = [
+    "O sanguíneo é a característica mais presente nas suas respostas.",
+    ...(usar ? doAlvo("SANGUINEO") : ["Pelo conjunto, você se aproxima pelas pessoas e pela conversa."]),
+  ];
+
+  const menor = (codigo: TemperamentoCodigo, lugar: "terceira" | "quarta") => {
+    const nome = NOME[codigo];
+    const cenas = doAlvo(codigo);
+    const titulo = `O ${nome} aparece como uma ${lugar} tendência nas suas respostas.`;
+    if (!usar) return [titulo];
+    if (cenas.length === 0) return [titulo, "Nas perguntas desse jeito, você não marcou um comportamento para destacar."];
+    return [titulo, ...cenas];
+  };
+
+  const relacoes = [fato.relacao];
+  if (reconhece("E03")) relacoes.push("Em casa, você conta o que sentiu e já segue em frente. A outra pessoa ainda está naquele assunto.");
+  if (reconhece("E08")) relacoes.push("Em casa, você cobra na hora quando alguém atrasa o combinado. A outra pessoa para de contar o que sentia.");
+
+  const atrapalhos: string[] = [];
+  if (!usar) {
+    atrapalhos.push("O aperto desta combinação, quando aparece, é a conversa que vira tarefa. Sem uma resposta que marque a cena, isso fica como possibilidade.");
+  } else if (reconhece("E06")) {
+    atrapalhos.push("A intenção é aproveitar o ânimo enquanto ele está alto. Diante da demora, você toma a iniciativa e busca uma solução. A outra pessoa perde o lugar de pensar junto.");
+  } else if (reconhece("E04")) {
+    atrapalhos.push("Você conta a história e a outra pessoa quase não entra. A conversa termina sem a opinião dela.");
+  }
+  for (const cena of marcadas) {
+    if (cena.alvo === "SANGUINEO" || cena.alvo === "COLERICO") continue;
+    if (cena.atrapalha && !atrapalhos.includes(cena.atrapalha)) atrapalhos.push(cena.atrapalha);
+  }
+  if (usar && atrapalhos.length === 0) atrapalhos.push("Nenhuma cena de aperto ficou marcada nas suas respostas.");
+
+  return [
+    { id: "antes", titulo: "Antes de olhar os números", paragrafos: ABERTURA, perguntas: [], passos: [] },
+    {
+      id: "jeitos",
+      titulo: "O que cada jeito quer dizer",
+      paragrafos: [
+        "Estes quatro nomes só organizam jeitos diferentes de reagir. Todos podem estar em você. Muda o quanto cada um apareceu.",
+        EXPLICACAO.SANGUINEO,
+        EXPLICACAO.COLERICO,
+        EXPLICACAO.MELANCOLICO,
+        EXPLICACAO.FLEUMATICO,
+      ],
+      perguntas: [],
+      passos: [],
+    },
+    {
+      id: "primeiro",
+      titulo: "O que aparece primeiro",
+      paragrafos: primeiro,
+      perguntas: [PERGUNTA_JEITO.SANGUINEO],
+      passos: [],
+    },
+    { id: "depois", titulo: "O que entra logo depois", paragrafos: [fato.depois], perguntas: [], passos: [] },
+    {
+      id: "encontro",
+      titulo: "Quando os dois se encontram",
+      paragrafos: [fato.encontro, fato.descoberta],
+      perguntas: [fato.pergunta],
+      passos: [],
+    },
+    {
+      id: "tambem",
+      titulo: "O que também está em você",
+      paragrafos: [...menor(terceiro, "terceira"), ...menor(quarto, "quarta")],
+      perguntas: [],
+      passos: [],
+    },
+    {
+      id: "aproveitar",
+      titulo: "O que você pode aproveitar",
+      paragrafos: [
+        "A força desta combinação é esta: você junta as pessoas e, logo depois, coloca a ideia para andar. Você não fica só na conversa, e também não chega só cobrando.",
+      ],
+      perguntas: [],
+      passos: [],
+    },
+    { id: "relacoes", titulo: "Nas relações", paragrafos: relacoes, perguntas: [], passos: [] },
+    { id: "trabalho", titulo: "No trabalho", paragrafos: [fato.trabalho], perguntas: [], passos: [] },
+    { id: "atrapalha", titulo: "Quando o seu jeito atrapalha", paragrafos: atrapalhos, perguntas: [], passos: [] },
+    {
+      id: "semana",
+      titulo: "Para experimentar nesta semana",
+      paragrafos: ["Nesta semana, observe como você reage e experimente uma atitude diferente."],
+      perguntas: [],
+      passos: [...fato.passos],
+    },
+    {
+      id: "fica",
+      titulo: "O que fica com você",
+      paragrafos: [fato.fechamento],
+      perguntas: [PERGUNTA_FECHO.SANGUINEO_COLERICO],
+      passos: [],
+    },
+  ];
+}
+
 export function montarLeituraConversa(opts: {
   primario: TemperamentoCodigo;
   secundario: TemperamentoCodigo;
@@ -584,6 +696,9 @@ export function montarLeituraConversa(opts: {
   const fato = ORDEM[chave(primario, secundario)] ?? ORDEM[chave(secundario, primario)] ?? ORDEM.SANGUINEO_FLEUMATICO;
   const usar = opts.questionarioClaro === true && !!opts.respostas;
   const respostas = opts.respostas;
+  if (primario === "SANGUINEO" && secundario === "COLERICO") {
+    return montarSanguineoColerico({ percentuais: opts.percentuais, respostas, usar });
+  }
   const doPrimeiro = cenasDe([primario], respostas, usar);
   const todas = cenasDe([primario, secundario, terceiro, quarto], respostas, usar);
   const aviso = usar ? [] : [AVISO_ANTIGO];

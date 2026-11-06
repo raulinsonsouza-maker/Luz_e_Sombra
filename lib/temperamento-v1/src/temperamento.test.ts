@@ -160,7 +160,7 @@ describe("temperamento-v3 Eysenck-lite", () => {
     const depoisCol = col.find((cartao) => cartao.id === "depois")?.paragrafos.join(" ") ?? "";
     assert.equal(sang.length, 12);
     assert.notEqual(depoisSang, depoisCol);
-    assert.match(depoisSang, /decisão/);
+    assert.match(depoisSang, /saia do papel/);
     assert.match(depoisCol, /resolver/);
     assert.match(texto, /pode|talvez/);
     assert.match(texto, /\?/);
@@ -223,7 +223,7 @@ describe("temperamento-v3 Eysenck-lite", () => {
     assert.ok(semAssumir.includes(FRASE_CRITICA));
     assert.ok(!semCritica.includes(FRASE_CRITICA));
     assert.ok(semCritica.includes(FRASE_ASSUMIR));
-    assert.match(semCritica, /Uma pausa, por exemplo, pode ser algo para experimentar, não algo que você já faz/);
+    assert.match(semCritica, /você não marcou um comportamento para destacar/);
   });
 
   it("resultado antigo não finge descoberta de item", () => {
