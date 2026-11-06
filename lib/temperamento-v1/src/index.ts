@@ -54,3 +54,4 @@ export {
   dadosTemperamento,
 } from "./interpretacao";
 export { montarAnaliseAprofundada, semParagrafosDuplicados } from "./analiseAprofundada";
+export { montarLeituraDaCombinacao, type LeituraDaCombinacao } from "./leituraCombinada";

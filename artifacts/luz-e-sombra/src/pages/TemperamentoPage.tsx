@@ -272,29 +272,7 @@ export default function TemperamentoPage() {
 
           <AvisosResposta flag={qf} alertas={alertas} />
 
-          <TemperamentoPainelResultado
-            resultado={resultadoApi}
-            onRefazer={() => {
-              setResultadoApi(null);
-              setFase("intro");
-              setOrdemIds([]);
-              setQIndex(0);
-            }}
-          />
-
-          <button
-            type="button"
-            className="w-full py-3.5 rounded-xl font-semibold"
-            style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
-            onClick={() => {
-              setResultadoApi(null);
-              setFase("intro");
-              setOrdemIds([]);
-              setQIndex(0);
-            }}
-          >
-            Refazer questionário
-          </button>
+          <TemperamentoPainelResultado resultado={resultadoApi} />
         </div>
       </div>
     );

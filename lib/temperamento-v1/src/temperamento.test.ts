@@ -6,6 +6,7 @@ import { computarTemperamento } from "./compute";
 import { tituloPerfilTemperamento, sanitizarTituloTemperamentoLegado } from "./interpretacao";
 import { gerarOrdemItens } from "./shuffleItens";
 import { semParagrafosDuplicados } from "./analiseAprofundada";
+import { montarLeituraDaCombinacao } from "./leituraCombinada";
 import type { RespostaSimNao } from "./itens";
 
 function answersAll(resposta: RespostaSimNao): Record<string, RespostaSimNao> {
@@ -125,6 +126,29 @@ describe("temperamento-v3 Eysenck-lite", () => {
       metadata: {},
     });
     assert.equal(parsed.success, false);
+  });
+
+  it("a leitura da combinação usa os quatro jeitos e distingue a ordem", () => {
+    const sang = montarLeituraDaCombinacao({
+      primario: "SANGUINEO",
+      secundario: "COLERICO",
+      percentuais: { SANGUINEO: 40, COLERICO: 30, MELANCOLICO: 20, FLEUMATICO: 10 },
+    });
+    const col = montarLeituraDaCombinacao({
+      primario: "COLERICO",
+      secundario: "SANGUINEO",
+      percentuais: { COLERICO: 40, SANGUINEO: 30, MELANCOLICO: 20, FLEUMATICO: 10 },
+    });
+    const textoSang = [...sang.principal, ...sang.combinacao, ...sang.inteira].join(" ");
+    const textoCol = col.combinacao.join(" ");
+    assert.ok(textoSang.includes("sanguíneo") || textoSang.includes("Sanguíneo"));
+    assert.ok(textoSang.includes("colérico") || textoSang.includes("Colérico"));
+    assert.ok(textoSang.includes("melancólico") || textoSang.includes("Melancólico"));
+    assert.ok(textoSang.includes("fleumático") || textoSang.includes("Fleumático"));
+    assert.ok(sang.combinacao.join(" ").length > 700);
+    assert.notEqual(sang.combinacao[0], col.combinacao[0]);
+    assert.ok(!textoSang.includes("—"));
+    assert.ok(!textoCol.includes("—"));
   });
 
   it("titulo do perfil usa temperamento dominante", () => {

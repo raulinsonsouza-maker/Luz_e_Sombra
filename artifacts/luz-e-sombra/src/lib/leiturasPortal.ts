@@ -1,4 +1,5 @@
 import { comporLeitura, type LeituraPortal, type PecaLeitura } from "@workspace/copy-voz";
+import { montarLeituraDaCombinacao, type TemperamentoCodigo } from "@workspace/temperamento-v1";
 
 function item(rotulo: string, texto?: string | null): PecaLeitura | null {
   const t = (texto ?? "").trim();
@@ -115,6 +116,8 @@ type TemperamentoUi = {
   comboNarrativa?: string;
   combo?: { forca?: string; tensao?: string; contexto?: string };
   analiseAprofundada?: Array<{ id?: string; titulo?: string; paragrafos?: string[] }>;
+  perfil?: { primario?: TemperamentoCodigo; secundario?: TemperamentoCodigo };
+  scores?: { temperamentos_percentuais?: Partial<Record<TemperamentoCodigo, number>> };
 };
 
 function textosDaAnalise(r: TemperamentoUi, ids: string[]): string[] {
@@ -126,6 +129,36 @@ function textosDaAnalise(r: TemperamentoUi, ids: string[]): string[] {
 }
 
 export function leituraTemperamento(r: TemperamentoUi | null | undefined): LeituraPortal | null {
+  const primaria = r?.perfil?.primario;
+  const secundaria = r?.perfil?.secundario;
+  const percentuais = r?.scores?.temperamentos_percentuais;
+  if (primaria && secundaria && percentuais && primaria !== secundaria) {
+    const cheios = {
+      COLERICO: percentuais.COLERICO ?? 0,
+      SANGUINEO: percentuais.SANGUINEO ?? 0,
+      MELANCOLICO: percentuais.MELANCOLICO ?? 0,
+      FLEUMATICO: percentuais.FLEUMATICO ?? 0,
+    };
+    const profunda = montarLeituraDaCombinacao({
+      primario: primaria,
+      secundario: secundaria,
+      percentuais: cheios,
+    });
+    return comporLeitura(
+      {
+        quemVoceE: profunda.principal,
+        noDiaADia: profunda.combinacao,
+        sombra: profunda.inteira,
+        oQueFazer: lista(...profunda.passos, profunda.pergunta),
+      },
+      {
+        quemVoceE: "O principal",
+        noDiaADia: "A combinação",
+        sombra: "Quem você é por inteiro",
+        oQueFazer: "O que fazer com isso",
+      },
+    );
+  }
   if (!r?.sinteseHumana && !r?.portraitIdentidade && !r?.analiseAprofundada?.length) return null;
   const passos = textosDaAnalise(r, ["crescimento"])
     .filter((texto) => /^\d+\./.test(texto))

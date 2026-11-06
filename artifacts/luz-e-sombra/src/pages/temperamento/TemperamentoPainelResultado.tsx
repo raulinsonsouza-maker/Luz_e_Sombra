@@ -6,7 +6,6 @@ import LeituraBlocos from "@/components/LeituraBlocos";
 import { leituraTemperamento } from "@/lib/leiturasPortal";
 import {
   enriquecerResultadoTemperamento,
-  isResultadoLegado,
   type ResultadoTemperamentoUi,
 } from "./enriquecerResultado";
 
@@ -14,10 +13,8 @@ const GOLD = "#c8a56b";
 
 export default function TemperamentoPainelResultado({
   resultado: raw,
-  onRefazer,
 }: {
   resultado: ResultadoTemperamentoUi;
-  onRefazer?: () => void;
 }) {
   const r = useMemo(() => enriquecerResultadoTemperamento(raw), [raw]);
   const perfil = r.perfil;
@@ -26,56 +23,13 @@ export default function TemperamentoPainelResultado({
   const pct = r.scores?.temperamentos_percentuais;
   const visP = primario ? TEMPERAMENTO_VISUAL[primario] : null;
   const IconP = visP?.icon;
-  const legado = isResultadoLegado(r);
 
   const tituloPerfil = primario && secundario && perfil?.tipo ? perfil.arquetipo : perfil?.arquetipo ?? "";
 
   const leitura = leituraTemperamento(r);
-  const desatualizado = (r as { questionario?: string }).questionario !== "claro";
 
   return (
     <div className="space-y-5">
-      {desatualizado && (
-        <div
-          className="rounded-xl px-4 py-3 text-sm"
-          style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.22)" }}
-        >
-          <p style={{ color: "rgba(247,242,236,0.82)" }}>
-            As perguntas mudaram. O resultado antigo misturava quem gosta de gente com quem cobra resultado. Vale refazer.
-          </p>
-          {onRefazer && (
-            <button
-              type="button"
-              className="mt-2 text-xs font-semibold underline"
-              style={{ color: "#c8a56b" }}
-              onClick={onRefazer}
-            >
-              Refazer questionário
-            </button>
-          )}
-        </div>
-      )}
-      {legado && (
-        <div
-          className="rounded-xl px-4 py-3 text-sm"
-          style={{ background: "rgba(155,143,222,0.08)", border: "1px solid rgba(155,143,222,0.2)" }}
-        >
-          <p style={{ color: "rgba(247,242,236,0.78)" }}>
-            Atualizámos o teste: versão mais curta e análise mais profunda. Refazer leva cerca de 3 minutos.
-          </p>
-          {onRefazer && (
-            <button
-              type="button"
-              className="mt-2 text-xs font-semibold underline"
-              style={{ color: "#c8a56b" }}
-              onClick={onRefazer}
-            >
-              Refazer questionário
-            </button>
-          )}
-        </div>
-      )}
-
       <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.14)" }}>
         <div className="px-5 py-4" style={{ background: "rgba(30,24,18,0.55)" }}>
           <h2 className="font-tan-mon-cheri text-base" style={{ color: GOLD }}>

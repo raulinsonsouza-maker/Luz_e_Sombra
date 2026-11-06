@@ -90,11 +90,9 @@ async function carregarPreviewAnalise(
               )
             : (p.arquetipo as string | undefined);
         if (!titulo) return null;
-        const claro = row?.resultado?.questionario === "claro";
         return {
           titulo,
           linha: p.frase_sintese as string | undefined,
-          badge: claro ? undefined : "Vale refazer",
         };
       }
       case "traco": {
