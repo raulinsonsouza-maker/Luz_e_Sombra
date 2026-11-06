@@ -12,30 +12,21 @@ function answersAll(resposta: RespostaSimNao): Record<string, RespostaSimNao> {
   return Object.fromEntries(CODIGOS_ITEM.map((c) => [c, resposta])) as Record<string, RespostaSimNao>;
 }
 
-/** Respostas que favorecem extroversão alta e neuroticismo baixo → Sanguíneo. */
-function answersSanguineo(): Record<string, RespostaSimNao> {
+function answersDoJeito(alvo: (typeof ITENS_EYSENCK)[number]["alvo"]): Record<string, RespostaSimNao> {
   const ans: Record<string, RespostaSimNao> = {};
   for (const item of ITENS_EYSENCK) {
-    if (item.eixo === "E") {
-      ans[item.id] = item.direcao === "positiva" ? "sim" : "nao";
-    } else {
-      ans[item.id] = item.direcao === "positiva" ? "nao" : "sim";
-    }
+    const acerta = item.alvo === alvo;
+    ans[item.id] = item.direcao === "positiva" ? (acerta ? "sim" : "nao") : acerta ? "nao" : "sim";
   }
   return ans;
 }
 
-/** Respostas introvertidas + instáveis → Melancólico. */
+function answersSanguineo(): Record<string, RespostaSimNao> {
+  return answersDoJeito("SANGUINEO");
+}
+
 function answersMelancolico(): Record<string, RespostaSimNao> {
-  const ans: Record<string, RespostaSimNao> = {};
-  for (const item of ITENS_EYSENCK) {
-    if (item.eixo === "E") {
-      ans[item.id] = item.direcao === "positiva" ? "nao" : "sim";
-    } else {
-      ans[item.id] = item.direcao === "positiva" ? "sim" : "nao";
-    }
-  }
-  return ans;
+  return answersDoJeito("MELANCOLICO");
 }
 
 describe("temperamento-v3 Eysenck-lite", () => {
@@ -91,10 +82,30 @@ describe("temperamento-v3 Eysenck-lite", () => {
     });
     const r = computarTemperamento(raw);
     assert.equal(r.perfil.primario, "SANGUINEO");
-    assert.ok(r.scores.scoreE >= 60);
+    assert.ok(r.scores.scoreE >= 50);
     assert.ok(r.scores.scoreN <= 40);
     const sumPct = Object.values(r.scores.temperamentos_percentuais).reduce((a, b) => a + b, 0);
     assert.ok(Math.abs(sumPct - 100) < 0.01);
+  });
+
+  it("jeito de animar as pessoas não vira colérico só porque a pessoa é expansiva", () => {
+    const ans = answersSanguineo();
+    ans.E05 = "sim";
+    const r = computarTemperamento(
+      entradaTemperamentoSchema.parse({ answers: ans, metadata: { tempo_total_segundos: 180 } }),
+    );
+    assert.equal(r.perfil.primario, "SANGUINEO");
+    assert.notEqual(r.perfil.primario, "COLERICO");
+  });
+
+  it("quem decide e cobra resulta em Colérico", () => {
+    const r = computarTemperamento(
+      entradaTemperamentoSchema.parse({
+        answers: answersDoJeito("COLERICO"),
+        metadata: { tempo_total_segundos: 180 },
+      }),
+    );
+    assert.equal(r.perfil.primario, "COLERICO");
   });
 
   it("respostas introvertidas instáveis produzem Melancólico", () => {

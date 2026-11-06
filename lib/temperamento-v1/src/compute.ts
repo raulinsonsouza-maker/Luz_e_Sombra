@@ -42,6 +42,7 @@ export interface ResultadoTemperamentoComputado {
   relatorio_vars: Record<string, string | number>;
   relatorioInterno: RelatorioInterno;
   versaoNarrativa: "temperamento_v4";
+  questionario: "claro";
   sinteseHumana: string;
   portraitIdentidade: string;
   seuDom: string;
@@ -157,6 +158,7 @@ export function computarTemperamento(entrada: EntradaTemperamento): ResultadoTem
     relatorio_vars,
     relatorioInterno,
     versaoNarrativa: narrativa.versaoNarrativa,
+    questionario: "claro" as const,
     sinteseHumana: narrativa.sinteseHumana,
     portraitIdentidade: narrativa.portraitIdentidade,
     seuDom: narrativa.seuDom,

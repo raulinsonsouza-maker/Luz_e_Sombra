@@ -12,6 +12,12 @@
   --font-tan-mon-cheri: 'Tan Mon Cheri', serif;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   font-family: var(--font-ui);
   color: #2f251b;

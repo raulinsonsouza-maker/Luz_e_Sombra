@@ -11,7 +11,7 @@ import { useJornadaModulo } from "@/hooks/useJornadaModulo";
 
 import { ANOS_UNIVERSAIS, ANOS_PESSOAIS, COMBINACOES, NUMEROS_DE_VIDA, type AnaliseNumero } from "@/lib/numerologia-data";
 import LeituraBlocos from "@/components/LeituraBlocos";
-import { leituraNumerologia } from "@/lib/leiturasPortal";
+import { leituraDoMes, leituraNumerologia } from "@/lib/leiturasPortal";
 import MobileTopBar from "@/components/MobileTopBar";
 import NavBackButton from "@/components/NavBackButton";
 import PageIntroHeader from "@/components/PageIntroHeader";
@@ -40,16 +40,6 @@ function perfilDoAno(interp: AnaliseNumero) {
     relacionamentos: interp.temas.relacionamentos,
     sombra: interp.desafios.join(". "),
     afirmacao: interp.praticasSugeridas?.join(" "),
-  };
-}
-
-function perfilDoMes(mes: MesPessoal) {
-  return {
-    essencia: mes.descricao,
-    descricao: mes.profundidade,
-    missao: mes.reflexao,
-    sombra: mes.evitar.join(". "),
-    afirmacao: mes.acoes.join(" "),
   };
 }
 
@@ -554,7 +544,7 @@ export default function NumerologiaPage() {
             Os 12 Meses de {resultado.ano}
           </h2>
           <p className="text-on-dark-muted text-sm">
-            Cada mês recebe uma energia específica baseada no seu Ano Pessoal {resultado.anoPessoal.reduzido}.
+            Cada mês deste ano pede uma coisa diferente. Leia como um convite para o momento, não como uma regra.
           </p>
         </div>
         <div className="grid lg:grid-cols-2 gap-4">
@@ -572,19 +562,8 @@ export default function NumerologiaPage() {
                 <NumBadge n={mes.reduzido} size="sm" />
               </div>
 
-              {leituraNumerologia(perfilDoMes(mes)) && (
-                <div className="mb-4">
-                  <LeituraBlocos fluida leitura={leituraNumerologia(perfilDoMes(mes))!} />
-                </div>
-              )}
-
-              {mes.areas.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-xs font-semibold tracking-wider uppercase text-brand-gold mb-2">Áreas em destaque</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {mes.areas.map((a, i) => <Tag key={i}>{a}</Tag>)}
-                  </div>
-                </div>
+              {leituraDoMes(mes) && (
+                <LeituraBlocos fluida leitura={leituraDoMes(mes)!} />
               )}
 
             </div>

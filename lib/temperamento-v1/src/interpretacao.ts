@@ -235,8 +235,8 @@ const LABEL_DIMENSAO: Record<Dimensao, string> = {
 };
 
 export function extrairPerguntaCrescimento(texto: string): string {
-  const m = texto.match(/Pergunta prática:\s*«([^»]+)»/);
-  return m?.[1] ?? "";
+  const m = texto.match(/Pergunta prática:\s*[«"]([^»"]+)[»"]/);
+  return m?.[1]?.trim() ?? "";
 }
 
 const SINTESE_DUPLO: Partial<Record<string, string>> = {
@@ -264,25 +264,20 @@ export function montarSinteseHumana(opts: {
   scoreE?: number;
   scoreN?: number;
 }): string {
-  const { tipo, primario, secundario, empateProximo, frase_sintese, scoreE, scoreN } = opts;
+  const { tipo, primario, secundario, empateProximo, frase_sintese } = opts;
   const np = NOME_TEMPERAMENTO[primario];
   const ns = NOME_TEMPERAMENTO[secundario];
 
-  const eixo =
-    scoreE !== undefined && scoreN !== undefined
-      ? ` Energia social ${Math.round(scoreE)}%, estabilidade emocional ${Math.round(100 - scoreN)}%.`
-      : "";
-
   if (empateProximo) {
-    return `${frase_sintese}${eixo} Seu perfil equilibra ${np} e ${ns} quase na mesma medida; ${np} é o dominante para entender seu padrão hoje.`;
+    return `${frase_sintese} ${np} e ${ns} aparecem quase na mesma medida. Os dois explicam o seu jeito, conforme o dia.`;
   }
   if (tipo === "DUPLO") {
-    return `${frase_sintese}${eixo} Você combina ${np} com traço forte de ${ns}: dois estilos que se alternam conforme o contexto.`;
+    return `${frase_sintese} Você junta o jeito ${np} com um traço forte de ${ns}. Um aparece na pressa, o outro quando você relaxa.`;
   }
   if (tipo === "DOMINANTE" || tipo === "ATIPICO") {
-    return `${frase_sintese}${eixo} Seu jeito de ser é claramente ${np}, com os outros temperamentos como matiz.`;
+    return `${frase_sintese} O que mais aparece em você é o jeito ${np}.`;
   }
-  return `${frase_sintese}${eixo} Você é principalmente ${np}, com ${ns} colorindo seu dia a dia.`;
+  return `${frase_sintese} Você é principalmente ${np}, e o jeito ${ns} aparece em alguns momentos.`;
 }
 
 function montarPortraitIdentidade(opts: {

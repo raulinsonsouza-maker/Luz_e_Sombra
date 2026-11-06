@@ -98,7 +98,7 @@ async function cartaoStories(frase: string, data?: string, fundo: string = FUNDO
     const logoAltura = (logo.height / logo.width) * logoLargura;
     const logoY = 150;
     ctx.drawImage(logo, (canvas.width - logoLargura) / 2, logoY, logoLargura, logoAltura);
-    cursor = logoY + logoAltura + 78;
+    cursor = logoY + logoAltura + 120;
   } catch {
     /* segue sem a marca se o arquivo não carregar */
   }

@@ -41,6 +41,48 @@ type PerfilNumero = {
   desafios?: string[];
 };
 
+function listaNatural(itens: string[]): string {
+  const nomes = itens.map((item) => item.trim().replace(/^\w/, (letra) => letra.toLowerCase())).filter(Boolean);
+  if (nomes.length <= 1) return nomes[0] ?? "";
+  return `${nomes.slice(0, -1).join(", ")} e ${nomes[nomes.length - 1]}`;
+}
+
+/** Leitura do mês pessoal. Não usa o retrato de identidade. */
+export function leituraDoMes(mes: {
+  descricao?: string;
+  profundidade?: string;
+  reflexao?: string;
+  acoes?: string[];
+  evitar?: string[];
+  areas?: string[];
+} | null | undefined): LeituraPortal | null {
+  if (!mes?.descricao && !mes?.profundidade) return null;
+  const onde = listaNatural(mes.areas ?? []);
+  const pergunta = (mes.reflexao ?? "").replace(/^["“]|["”]$/g, "").trim();
+  return comporLeitura(
+    {
+      quemVoceE: lista(mes.descricao, mes.profundidade),
+      noDiaADia: onde
+        ? `Olhe primeiro para ${onde}.`
+        : "Repare em qual parte da sua semana esse convite aparece com mais força.",
+      sombra: ou(
+        lista(...(mes.evitar ?? [])),
+        "O peso deste mês é forçar um gesto quando o momento pede outro.",
+      ),
+      oQueFazer: ou(
+        lista(...(mes.acoes ?? []), pergunta),
+        "Escolha um gesto pequeno desta leitura e faça ainda nesta semana.",
+      ),
+    },
+    {
+      quemVoceE: "O mês",
+      noDiaADia: "Onde olhar",
+      sombra: "O que pesa",
+      oQueFazer: "O que fazer",
+    },
+  );
+}
+
 export function leituraNumerologia(perfil: PerfilNumero | null | undefined): LeituraPortal | null {
   if (!perfil?.essencia && !perfil?.descricao) return null;
   return comporLeitura({
@@ -72,34 +114,49 @@ type TemperamentoUi = {
   perguntaCrescimento?: string;
   comboNarrativa?: string;
   combo?: { forca?: string; tensao?: string; contexto?: string };
-  analiseAprofundada?: Array<{ titulo?: string; paragrafos?: string[] }>;
+  analiseAprofundada?: Array<{ id?: string; titulo?: string; paragrafos?: string[] }>;
 };
+
+function textosDaAnalise(r: TemperamentoUi, ids: string[]): string[] {
+  return (r.analiseAprofundada ?? [])
+    .filter((sec) => sec.id && ids.includes(sec.id))
+    .flatMap((sec) => sec.paragrafos ?? [])
+    .map((texto) => texto.trim())
+    .filter(Boolean);
+}
 
 export function leituraTemperamento(r: TemperamentoUi | null | undefined): LeituraPortal | null {
   if (!r?.sinteseHumana && !r?.portraitIdentidade && !r?.analiseAprofundada?.length) return null;
-  const analise = (r.analiseAprofundada ?? []).flatMap((sec) =>
-    comTitulo(sec.titulo?.trim() || "A leitura", sec.paragrafos ?? []),
-  );
-  return comporLeitura({
-    quemVoceE: lista(item("O retrato", r.portraitIdentidade), item("Em uma frase", r.sinteseHumana), analise),
-    noDiaADia: ou(
-      lista(
-        item("O que marca você", r.tracosMarcantes?.length ? r.tracosMarcantes.join(" · ") : ""),
-        item("Os dois juntos", r.comboNarrativa),
-        item("A força da combinação", r.combo?.forca),
-        item("Onde isso aparece", r.combo?.contexto),
+  const passos = textosDaAnalise(r, ["crescimento"])
+    .filter((texto) => /^\d+\./.test(texto))
+    .map((texto) => texto.replace(/^\d+\.\s*/, ""));
+  const pergunta =
+    (r.perguntaCrescimento?.includes("?") ? r.perguntaCrescimento : "") ||
+    r.passoPratico?.match(/Pergunta prática:\s*[«"]([^»"]+)[»"]/)?.[1] ||
+    "";
+  return comporLeitura(
+    {
+      quemVoceE: lista(r.portraitIdentidade, r.sinteseHumana, r.comboNarrativa),
+      noDiaADia: ou(
+        lista(...textosDaAnalise(r, ["reacao", "relacoes", "trabalho", "decisao"])),
+        "Repare como você entra numa conversa e como você começa uma tarefa.",
       ),
-      "Repare no ritmo com que você entra nas conversas e nas tarefas de hoje.",
-    ),
-    sombra: ou(
-      lista(item("O ponto cego", r.pontoCego), item("A tensão", r.combo?.tensao)),
-      "O ponto cego é o talento usado no automático, quando você não percebe o efeito nos outros.",
-    ),
-    oQueFazer: ou(
-      lista(item("O passo", r.passoPratico), r.perguntaCrescimento),
-      "Faça uma pausa de um minuto antes da próxima decisão apressada.",
-    ),
-  });
+      sombra: ou(
+        lista(...textosDaAnalise(r, ["sombra"]), r.pontoCego),
+        "O exagero é o seu talento no automático, quando você não percebe o efeito nos outros.",
+      ),
+      oQueFazer: ou(
+        lista(...passos, pergunta),
+        "Escolha um passo pequeno desta semana e faça até o fim.",
+      ),
+    },
+    {
+      quemVoceE: "O seu jeito",
+      noDiaADia: "No dia a dia",
+      sombra: "Quando passa do ponto",
+      oQueFazer: "O que fazer",
+    },
+  );
 }
 
 type NarrativaAmor = {

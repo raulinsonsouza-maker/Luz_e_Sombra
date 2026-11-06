@@ -52,12 +52,13 @@ export const DIMENSAO_LABEL: Record<string, string> = {
 export function labelTipoPerfil(tipo: TipoPerfil | string | undefined): string {
   switch (tipo) {
     case "DUPLO":
+      return "Dois jeitos perto";
     case "DOMINANTE":
     case "ATIPICO":
-      return "Temperamento dominante";
+      return "O que mais aparece";
     case "MISTO":
-      return "Perfil equilibrado";
+      return "Um pouco de cada";
     default:
-      return "Seu temperamento";
+      return "Seu jeito";
   }
 }

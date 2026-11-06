@@ -1,4 +1,4 @@
-import { MOLDURA, type ItemLeitura, type LeituraPortal, type PecaLeitura, type SlotsLeitura } from "./moldura.js";
+import { MOLDURA, type ItemLeitura, type LeituraPortal, type PecaLeitura, type SlotId, type SlotsLeitura } from "./moldura.js";
 import { normalizarTextoUsuario } from "./normalizar.js";
 
 /**
@@ -68,18 +68,19 @@ export function limparJargao(texto: string): string {
   return t;
 }
 
-export function comporLeitura(slots: SlotsLeitura): LeituraPortal {
+export function comporLeitura(slots: SlotsLeitura, titulos?: Partial<Record<SlotId, string>>): LeituraPortal {
   const secoes = MOLDURA.secoes.map((secao) => {
     const itens = pedacos(slots[secao.id]);
     const paragrafos = itens.map((item) => item.texto);
     const texto = paragrafos.join(" ");
+    const titulo = titulos?.[secao.id]?.trim() || secao.titulo;
     if (!texto) {
-      throw new Error(`Leitura sem o bloco "${secao.titulo}".`);
+      throw new Error(`Leitura sem o bloco "${titulo}".`);
     }
     if (AINDA_PROIBIDO.test(texto)) {
-      throw new Error(`A leitura ainda traz um termo fora do modelo em "${secao.titulo}".`);
+      throw new Error(`A leitura ainda traz um termo fora do modelo em "${titulo}".`);
     }
-    return { id: secao.id, titulo: secao.titulo, texto, paragrafos, itens };
+    return { id: secao.id, titulo, texto, paragrafos, itens };
   });
   return { secoes };
 }

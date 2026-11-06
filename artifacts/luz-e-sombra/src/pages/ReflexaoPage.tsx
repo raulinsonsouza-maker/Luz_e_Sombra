@@ -55,8 +55,8 @@ export default function ReflexaoPage() {
             style={{ background: "linear-gradient(180deg, rgba(18,12,8,0.42) 0%, rgba(18,12,8,0.58) 46%, rgba(18,12,8,0.78) 100%)" }}
           />
           <div className="relative flex h-full min-h-[420px] flex-col items-center text-center px-8 pt-10 pb-8">
-            <div className="flex flex-col items-center">
-            <LogoPortal className="w-[15.5rem] h-auto" />
+            <div className="flex flex-col items-center mb-8">
+              <LogoPortal className="w-[15.5rem] h-auto" />
             </div>
 
             <div className="flex flex-1 w-full flex-col items-center justify-center">

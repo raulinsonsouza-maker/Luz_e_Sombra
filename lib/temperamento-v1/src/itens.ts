@@ -1,3 +1,5 @@
+import type { TemperamentoCodigo } from "./types";
+
 export type EixoEysenck = "E" | "N";
 export type RespostaSimNao = "sim" | "nao";
 export type CodigoItem = `E${string}` | `N${string}`;
@@ -8,27 +10,27 @@ export interface ItemTemperamento {
   eixo: EixoEysenck;
   /** "sim" pontua 1 quando direcao positiva; "nao" pontua 1 quando direcao negativa. */
   direcao: "positiva" | "negativa";
+  /** Jeito que esta frase descreve. Sim (ou não, se a direção for negativa) soma neste temperamento. */
+  alvo: TemperamentoCodigo;
 }
 
 export const ITENS_EYSENCK: readonly ItemTemperamento[] = [
-  // Extroversão
-  { id: "E01", texto: "Gosto de estar no centro das atenções em grupos.", eixo: "E", direcao: "positiva" },
-  { id: "E02", texto: "Inicio conversas com pessoas que não conheço com facilidade.", eixo: "E", direcao: "positiva" },
-  { id: "E03", texto: "Sinto-me com mais energia quando estou rodeado de gente.", eixo: "E", direcao: "positiva" },
-  { id: "E04", texto: "Prefiro liderar ou tomar a frente quando surge uma tarefa em grupo.", eixo: "E", direcao: "positiva" },
-  { id: "E05", texto: "Preciso de tempo sozinho para recarregar depois de eventos sociais.", eixo: "E", direcao: "negativa" },
-  { id: "E06", texto: "Evito chamar atenção para mim em situações públicas.", eixo: "E", direcao: "negativa" },
-  { id: "E07", texto: "Prefiro trabalhar sozinho a depender de muita interação constante.", eixo: "E", direcao: "negativa" },
-  { id: "E08", texto: "Em festas, costumo ficar mais à margem do que no centro da conversa.", eixo: "E", direcao: "negativa" },
-  // Neuroticismo (estabilidade emocional invertida na UI)
-  { id: "N01", texto: "Pequenas críticas me incomodam por muito tempo.", eixo: "N", direcao: "positiva" },
-  { id: "N02", texto: "Preocupo-me com coisas que ainda não aconteceram.", eixo: "N", direcao: "positiva" },
-  { id: "N03", texto: "Meu humor muda com facilidade ao longo do dia.", eixo: "N", direcao: "positiva" },
-  { id: "N04", texto: "Sinto-me tenso quando as coisas saem do planejado.", eixo: "N", direcao: "positiva" },
-  { id: "N05", texto: "Mantenho a calma mesmo quando há pressão em volta.", eixo: "N", direcao: "negativa" },
-  { id: "N06", texto: "Recupero-me rápido depois de um dia difícil.", eixo: "N", direcao: "negativa" },
-  { id: "N07", texto: "Raramente fico remoendo erros do passado.", eixo: "N", direcao: "negativa" },
-  { id: "N08", texto: "Consigo separar o que sinto do que preciso fazer na hora.", eixo: "N", direcao: "negativa" },
+  { id: "E01", texto: "Eu puxo assunto com facilidade, até com quem acabei de conhecer.", eixo: "E", direcao: "positiva", alvo: "SANGUINEO" },
+  { id: "E02", texto: "Estar no meio das pessoas me anima mais do que me cansa.", eixo: "E", direcao: "positiva", alvo: "SANGUINEO" },
+  { id: "E03", texto: "Quando algo me chateia, eu desabafo e logo volto ao bom humor.", eixo: "E", direcao: "positiva", alvo: "SANGUINEO" },
+  { id: "E04", texto: "Eu gosto de contar história e fazer as pessoas rirem.", eixo: "E", direcao: "positiva", alvo: "SANGUINEO" },
+  { id: "E05", texto: "Se ninguém decide, eu tomo a frente e resolvo.", eixo: "E", direcao: "positiva", alvo: "COLERICO" },
+  { id: "E06", texto: "Eu fico irritado quando as pessoas demoram para ir ao ponto.", eixo: "E", direcao: "positiva", alvo: "COLERICO" },
+  { id: "E07", texto: "Eu prefiro terminar a tarefa a ficar conversando sem conclusão.", eixo: "E", direcao: "positiva", alvo: "COLERICO" },
+  { id: "E08", texto: "Quando alguém atrasa o que combinou, eu cobro na hora.", eixo: "E", direcao: "positiva", alvo: "COLERICO" },
+  { id: "N01", texto: "Eu penso bastante antes de decidir, para não errar.", eixo: "N", direcao: "positiva", alvo: "MELANCOLICO" },
+  { id: "N02", texto: "Uma crítica fica na minha cabeça por vários dias.", eixo: "N", direcao: "positiva", alvo: "MELANCOLICO" },
+  { id: "N03", texto: "Eu reparo em detalhes que a maioria deixa passar.", eixo: "N", direcao: "positiva", alvo: "MELANCOLICO" },
+  { id: "N04", texto: "Eu guardo o que sinto em vez de falar na hora.", eixo: "N", direcao: "positiva", alvo: "MELANCOLICO" },
+  { id: "N05", texto: "Eu mantenho a calma mesmo quando todo mundo está nervoso.", eixo: "N", direcao: "positiva", alvo: "FLEUMATICO" },
+  { id: "N06", texto: "Eu evito discussão, mesmo quando discordo.", eixo: "N", direcao: "positiva", alvo: "FLEUMATICO" },
+  { id: "N07", texto: "Eu gosto de rotina e não tenho pressa para mudar as coisas.", eixo: "N", direcao: "positiva", alvo: "FLEUMATICO" },
+  { id: "N08", texto: "As pessoas me procuram porque eu escuto sem interromper.", eixo: "N", direcao: "positiva", alvo: "FLEUMATICO" },
 ] as const;
 
 export const CODIGOS_ITEM = ITENS_EYSENCK.map((i) => i.id);

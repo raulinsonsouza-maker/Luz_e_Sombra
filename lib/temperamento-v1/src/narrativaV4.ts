@@ -7,7 +7,6 @@ import {
   extrairPerguntaCrescimento,
   montarDimensoesLegiveis,
   montarSinteseHumana,
-  NOME_TEMPERAMENTO,
   type RelatorioSecao,
 } from "./interpretacao";
 import {
@@ -17,7 +16,7 @@ import {
 } from "./analiseAprofundada";
 
 function extrairPassoPratico(texto: string): string {
-  return texto.replace(/Pergunta prática:\s*«[^»]+»\.?\s*/g, "").trim();
+  return texto.replace(/Pergunta prática:\s*[«"][^»"]+[»"]\.?\s*/g, "").trim();
 }
 
 function resumoDom(pontoForte: string): string {
@@ -131,7 +130,7 @@ export function montarNarrativaV4(opts: {
   return normalizarObjetoTextos({
     versaoNarrativa: "temperamento_v4",
     sinteseHumana,
-    portraitIdentidade: `Com energia social em ${Math.round(scoreE)}% e estabilidade emocional em ${Math.round(100 - scoreN)}%, seu perfil ${NOME_TEMPERAMENTO[primario]} ganha contornos próprios no mapa temperamental.`,
+    portraitIdentidade: d.motorInterno,
     seuDom: resumoDom(d.pontoForte),
     pontoCego: resumoPontoCego(d.falhaEstrutural),
     comboNarrativa,

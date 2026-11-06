@@ -19,6 +19,26 @@ import {
   type RespostaSimNao,
 } from "@workspace/temperamento-v1";
 
+const AVISO_RESPOSTA: Record<string, string> = {
+  FAST_COMPLETION: "As respostas saíram rápido demais. Se o texto não parecer você, refaça com calma.",
+  HIGH_VARIANCE: "Quase todas as respostas foram iguais. Vale refazer, marcando só o que é verdade na maior parte do tempo.",
+  EXTREME_PROFILE: "As respostas ficaram no meio. Se quiser um retrato mais nítido, refaça com calma.",
+  HIGH_CENTRAL_TENDENCY: "Quase todas as respostas foram iguais. Vale refazer, marcando só o que é verdade na maior parte do tempo.",
+  LOW_VARIANCE: "As respostas ficaram no meio. Se quiser um retrato mais nítido, refaça com calma.",
+};
+
+function AvisosResposta({ flag, alertas }: { flag?: string; alertas: string[] }) {
+  const mensagens = [...new Set([flag, ...alertas].map((codigo) => (codigo && codigo !== "OK" ? AVISO_RESPOSTA[codigo] : "")).filter(Boolean))];
+  if (mensagens.length === 0) return null;
+  return (
+    <div className="rounded-xl p-3 text-sm space-y-1" style={{ background: "rgba(200,165,107,0.08)", color: "rgba(247,242,236,0.82)" }}>
+      {mensagens.map((mensagem) => (
+        <p key={mensagem}>{mensagem}</p>
+      ))}
+    </div>
+  );
+}
+
 const STORAGE_KEY = "luz_temperamento_v3_draft";
 const TOTAL = TOTAL_ITENS;
 const TEMP_NAV = JORNADA_MODULE_NAV.temperamento;
@@ -247,19 +267,20 @@ export default function TemperamentoPage() {
             className="mb-2"
             eyebrow="Análise de temperamento"
             titulo="Seu perfil"
-            subtitulo="Quem você é por dentro"
+            subtitulo="Como você reage no dia a dia"
           />
 
-          {(qf && qf !== "OK") || alertas.length > 0 ? (
-            <div className="rounded-xl p-3 text-sm" style={{ background: "rgba(180,80,80,0.12)", color: "#f0d0d0" }}>
-              {qf && qf !== "OK" && <p>Qualidade das respostas: {qf}</p>}
-              {alertas.map((a) => (
-                <p key={a}>{a}</p>
-              ))}
-            </div>
-          ) : null}
+          <AvisosResposta flag={qf} alertas={alertas} />
 
-          <TemperamentoPainelResultado resultado={resultadoApi} />
+          <TemperamentoPainelResultado
+            resultado={resultadoApi}
+            onRefazer={() => {
+              setResultadoApi(null);
+              setFase("intro");
+              setOrdemIds([]);
+              setQIndex(0);
+            }}
+          />
 
           <button
             type="button"
@@ -289,7 +310,7 @@ export default function TemperamentoPage() {
             Análise de temperamento
           </p>
           <h1 className="font-tan-mon-cheri text-2xl mb-4" style={{ color: "#f7f2ec" }}>
-            Quem você é por dentro
+            Como você reage
           </h1>
           <p className="text-sm leading-relaxed mb-2" style={{ color: "rgba(247,242,236,0.55)" }}>
             Para cada afirmação, responda <strong>Sim</strong> ou <strong>Não</strong> pelo que é mais verdadeiro na{" "}

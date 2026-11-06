@@ -12,22 +12,6 @@ import {
 
 const GOLD = "#c8a56b";
 
-function BarraEixo({ label, valor, cor }: { label: string; valor: number; cor: string }) {
-  return (
-    <div>
-      <div className="flex justify-between text-xs mb-1.5">
-        <span style={{ color: "rgba(247,242,236,0.65)" }}>{label}</span>
-        <span className="tabular-nums" style={{ color: cor }}>
-          {valor}%
-        </span>
-      </div>
-      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <div className="h-full rounded-full transition-all" style={{ width: `${valor}%`, background: cor }} />
-      </div>
-    </div>
-  );
-}
-
 export default function TemperamentoPainelResultado({
   resultado: raw,
   onRefazer,
@@ -44,16 +28,33 @@ export default function TemperamentoPainelResultado({
   const IconP = visP?.icon;
   const legado = isResultadoLegado(r);
 
-  const scoreE = r.scores?.scoreE ?? Math.round((r.scores?.dimensoes?.ENG?.bruto ?? 50));
-  const scoreEstab = r.scores?.estabilidadeEmocional ?? Math.round(100 - (r.scores?.scoreN ?? 50));
-
   const tituloPerfil = primario && secundario && perfil?.tipo ? perfil.arquetipo : perfil?.arquetipo ?? "";
-  const mostraCombo = Boolean(r.combo || r.comboNarrativa) && primario !== secundario;
 
   const leitura = leituraTemperamento(r);
+  const desatualizado = (r as { questionario?: string }).questionario !== "claro";
 
   return (
     <div className="space-y-5">
+      {desatualizado && (
+        <div
+          className="rounded-xl px-4 py-3 text-sm"
+          style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.22)" }}
+        >
+          <p style={{ color: "rgba(247,242,236,0.82)" }}>
+            As perguntas mudaram. O resultado antigo misturava quem gosta de gente com quem cobra resultado. Vale refazer.
+          </p>
+          {onRefazer && (
+            <button
+              type="button"
+              className="mt-2 text-xs font-semibold underline"
+              style={{ color: "#c8a56b" }}
+              onClick={onRefazer}
+            >
+              Refazer questionário
+            </button>
+          )}
+        </div>
+      )}
       {legado && (
         <div
           className="rounded-xl px-4 py-3 text-sm"
@@ -78,11 +79,8 @@ export default function TemperamentoPainelResultado({
       <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.14)" }}>
         <div className="px-5 py-4" style={{ background: "rgba(30,24,18,0.55)" }}>
           <h2 className="font-tan-mon-cheri text-base" style={{ color: GOLD }}>
-            Seu perfil
+            Seu jeito
           </h2>
-          <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.35)" }}>
-            Nome e eixos
-          </p>
         </div>
         <div
           className="px-5 py-5 space-y-4"
@@ -123,15 +121,10 @@ export default function TemperamentoPainelResultado({
           </div>
         )}
 
-        <div className="space-y-3 pt-1">
-          <BarraEixo label="Energia social" valor={Math.round(scoreE)} cor={visP?.cor ?? GOLD} />
-          <BarraEixo label="Estabilidade emocional" valor={Math.round(scoreEstab)} cor="#6db96d" />
-        </div>
-
         {pct && primario && (
           <div className="space-y-3 pt-2">
             <p className="text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>
-              Os percentuais mostram quanto cada temperamento aparece no seu perfil.
+              O quanto cada jeito aparece em você.
             </p>
             {(Object.entries(pct) as [TemperamentoCodigo, number][])
               .sort((a, b) => b[1] - a[1])
@@ -163,7 +156,7 @@ export default function TemperamentoPainelResultado({
         </div>
       </div>
 
-      {leitura && <LeituraBlocos leitura={leitura} />}
+      {leitura && <LeituraBlocos fluida leitura={leitura} />}
     </div>
   );
 }
