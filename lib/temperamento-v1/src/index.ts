@@ -55,3 +55,4 @@ export {
 } from "./interpretacao";
 export { montarAnaliseAprofundada, semParagrafosDuplicados } from "./analiseAprofundada";
 export { montarLeituraDaCombinacao, type LeituraDaCombinacao } from "./leituraCombinada";
+export { montarLeituraConversa, type CartaoConversa } from "./leituraConversa";

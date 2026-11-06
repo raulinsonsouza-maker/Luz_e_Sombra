@@ -76,6 +76,7 @@ export default function TemperamentoPage() {
   const [startedAt, setStartedAt] = useState<number>(() => Date.now());
   const [erro, setErro] = useState<string | null>(null);
   const [resultadoApi, setResultadoApi] = useState<ResultadoTemperamentoUi | null>(null);
+  const [respostasSalvas, setRespostasSalvas] = useState<Record<string, RespostaSimNao> | null>(null);
   const [carregandoUltimo, setCarregandoUltimo] = useState(false);
   const [msgIntro, setMsgIntro] = useState<string | null>(null);
 
@@ -138,8 +139,12 @@ export default function TemperamentoPage() {
         setMsgIntro("Não foi possível carregar agora. Tenta de novo daqui a pouco.");
         return;
       }
-      const row = (await res.json()) as { resultado?: ResultadoTemperamentoUi } | null;
+      const row = (await res.json()) as {
+        resultado?: ResultadoTemperamentoUi;
+        respostas?: Record<string, RespostaSimNao>;
+      } | null;
       if (row?.resultado?.perfil) {
+        setRespostasSalvas(row.respostas ?? null);
         setResultadoApi(row.resultado);
         setFase("resultado");
         return;
@@ -206,6 +211,7 @@ export default function TemperamentoPage() {
         return;
       }
       localStorage.removeItem(STORAGE_KEY);
+      setRespostasSalvas(ans);
       setResultadoApi(data as ResultadoTemperamentoUi);
       setFase("resultado");
     } catch {
@@ -257,9 +263,9 @@ export default function TemperamentoPage() {
     const alertas = (resultadoApi.alertas as string[] | undefined) ?? [];
 
     return (
-      <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
+      <div className="min-h-screen pb-28" style={{ background: bg }}>
         <MobileTopBar titulo="Temperamento" voltar={TEMP_NAV.hub} subtitulo="Seu mapa temperamental" />
-        <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
+        <div className="max-w-lg md:max-w-2xl mx-auto px-4 pt-4 space-y-6">
           <NavBackButton to={TEMP_NAV.hub} label={TEMP_NAV.backLabel} className="hidden md:flex" />
 
           <PageIntroHeader
@@ -272,7 +278,7 @@ export default function TemperamentoPage() {
 
           <AvisosResposta flag={qf} alertas={alertas} />
 
-          <TemperamentoPainelResultado resultado={resultadoApi} />
+          <TemperamentoPainelResultado resultado={resultadoApi} respostas={respostasSalvas} />
         </div>
       </div>
     );

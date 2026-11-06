@@ -6,8 +6,12 @@ import { computarTemperamento } from "./compute";
 import { tituloPerfilTemperamento, sanitizarTituloTemperamentoLegado } from "./interpretacao";
 import { gerarOrdemItens } from "./shuffleItens";
 import { semParagrafosDuplicados } from "./analiseAprofundada";
-import { montarLeituraDaCombinacao } from "./leituraCombinada";
+import { FRASE_ASSUMIR, FRASE_CRITICA, montarLeituraConversa } from "./leituraConversa";
 import type { RespostaSimNao } from "./itens";
+
+function textoDe(cartoes: { paragrafos: string[]; perguntas: string[]; passos: string[] }[]): string {
+  return cartoes.map((cartao) => [...cartao.paragrafos, ...cartao.perguntas, ...cartao.passos].join(" ")).join(" ");
+}
 
 function answersAll(resposta: RespostaSimNao): Record<string, RespostaSimNao> {
   return Object.fromEntries(CODIGOS_ITEM.map((c) => [c, resposta])) as Record<string, RespostaSimNao>;
@@ -128,45 +132,87 @@ describe("temperamento-v3 Eysenck-lite", () => {
     assert.equal(parsed.success, false);
   });
 
-  it("a leitura cruza a ordem em frase literal, sem montar peças", () => {
-    const sang = montarLeituraDaCombinacao({
-      primario: "SANGUINEO",
-      secundario: "COLERICO",
-      percentuais: { SANGUINEO: 40, COLERICO: 30, MELANCOLICO: 20, FLEUMATICO: 10 },
-    });
-    const col = montarLeituraDaCombinacao({
+  it("a conversa distingue a ordem e não usa termo clínico", () => {
+    const percentuais = { SANGUINEO: 40, COLERICO: 30, MELANCOLICO: 20, FLEUMATICO: 10 };
+    const sang = montarLeituraConversa({ primario: "SANGUINEO", secundario: "COLERICO", percentuais });
+    const col = montarLeituraConversa({
       primario: "COLERICO",
       secundario: "SANGUINEO",
       percentuais: { COLERICO: 40, SANGUINEO: 30, MELANCOLICO: 20, FLEUMATICO: 10 },
     });
-    const texto = [
-      sang.chega,
-      sang.precisa,
-      sang.depois,
-      sang.disputa ?? "",
-      sang.atrapalha,
-      sang.pressao,
-      ...sang.passos,
-      sang.pergunta,
-      col.depois,
-    ].join(" ");
-    assert.notEqual(sang.depois, col.depois);
-    assert.match(sang.depois, /conversa/);
-    assert.match(col.depois, /resolver/);
-    assert.equal(sang.disputa, undefined);
-    assert.doesNotMatch(texto, /sanguíneo|colérico|melancólico|fleumático|juntos formam|é a gente|a parte /i);
-    assert.doesNotMatch(texto, /\b(porta|calor|freio|virada|murcha|peça)\b/i);
+    const texto = sang.map((cartao) => [...cartao.paragrafos, ...cartao.perguntas, ...cartao.passos].join(" ")).join(" ");
+    const depoisSang = sang.find((cartao) => cartao.id === "depois")?.paragrafos.join(" ") ?? "";
+    const depoisCol = col.find((cartao) => cartao.id === "depois")?.paragrafos.join(" ") ?? "";
+    assert.equal(sang.length, 12);
+    assert.notEqual(depoisSang, depoisCol);
+    assert.match(depoisSang, /decisão/);
+    assert.match(depoisCol, /resolver/);
+    assert.match(texto, /pode|talvez/);
+    assert.match(texto, /\?/);
+    assert.match(texto, /possibilidade/);
+    assert.doesNotMatch(texto, /regulação emocional|mecanismo de defesa|predominância|validação|diagnóstico|autossabotagem/i);
+    assert.ok(!texto.includes(FRASE_ASSUMIR));
+    assert.ok(!texto.includes(FRASE_CRITICA));
     assert.ok(!texto.includes("—"));
   });
 
-  it("o terceiro percentual escolhe o custo e a disputa quando fica perto", () => {
-    const leitura = montarLeituraDaCombinacao({
+  it("um não tira a cena daquele item", () => {
+    const base = answersAll("nao");
+    const comCenas = {
+      ...base,
+      E06: "sim" as const,
+      N02: "sim" as const,
+    };
+    const percentuais = { SANGUINEO: 40, COLERICO: 30, MELANCOLICO: 20, FLEUMATICO: 10 };
+    const com = textoDe(
+      montarLeituraConversa({
+        primario: "SANGUINEO",
+        secundario: "COLERICO",
+        percentuais,
+        respostas: comCenas,
+        questionarioClaro: true,
+      }),
+    );
+    const semAssumir = textoDe(
+      montarLeituraConversa({
+        primario: "SANGUINEO",
+        secundario: "COLERICO",
+        percentuais,
+        respostas: { ...comCenas, E06: "nao" },
+        questionarioClaro: true,
+      }),
+    );
+    const semCritica = textoDe(
+      montarLeituraConversa({
+        primario: "SANGUINEO",
+        secundario: "COLERICO",
+        percentuais,
+        respostas: { ...comCenas, N02: "nao" },
+        questionarioClaro: true,
+      }),
+    );
+    assert.ok(com.includes(FRASE_ASSUMIR));
+    assert.ok(com.includes(FRASE_CRITICA));
+    assert.ok(!semAssumir.includes(FRASE_ASSUMIR));
+    assert.ok(semAssumir.includes(FRASE_CRITICA));
+    assert.ok(!semCritica.includes(FRASE_CRITICA));
+    assert.ok(semCritica.includes(FRASE_ASSUMIR));
+    assert.match(semCritica, /Uma pausa, por exemplo, pode ser algo para experimentar, não algo que você já faz/);
+  });
+
+  it("resultado antigo não finge descoberta de item", () => {
+    const leitura = montarLeituraConversa({
       primario: "SANGUINEO",
       secundario: "COLERICO",
-      percentuais: { SANGUINEO: 40, COLERICO: 28, MELANCOLICO: 22, FLEUMATICO: 10 },
+      percentuais: { SANGUINEO: 40, COLERICO: 30, MELANCOLICO: 20, FLEUMATICO: 10 },
+      respostas: { ...answersAll("sim"), E06: "sim", N02: "sim" },
+      questionarioClaro: false,
     });
-    assert.match(leitura.atrapalha, /entrega/);
-    assert.ok(leitura.disputa);
+    const texto = textoDe(leitura);
+    assert.equal(leitura.length, 12);
+    assert.match(texto, /possibilidade/);
+    assert.ok(!texto.includes(FRASE_ASSUMIR));
+    assert.ok(!texto.includes(FRASE_CRITICA));
   });
 
   it("titulo do perfil usa temperamento dominante", () => {

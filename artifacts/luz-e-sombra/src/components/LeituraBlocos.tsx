@@ -1,49 +1,100 @@
-import type { ItemLeitura, LeituraPortal, SecaoLeitura, SlotId } from "@workspace/copy-voz";
-import { ListChecks, Moon, Sparkles, SunMedium } from "lucide-react";
+import type { ItemLeitura, LeituraPortal, SecaoLeitura } from "@workspace/copy-voz";
+import type { ReactNode } from "react";
+import { Sparkles } from "lucide-react";
 
 const COR_TEXTO = "rgba(247,242,236,0.78)";
 const COR_FORTE = "rgba(247,242,236,0.94)";
 const OURO = "#c8a56b";
 const LIMITE_PASSO = 280;
 
-const SECAO_ICONE: Record<SlotId, typeof Sparkles> = {
-  quemVoceE: Sparkles,
-  noDiaADia: SunMedium,
-  sombra: Moon,
-  oQueFazer: ListChecks,
-};
+/** Cartão padrão das leituras. O título quebra no celular e não vaza para fora. */
+export function CartaoPadrao({ titulo, children }: { titulo: string; children: ReactNode }) {
+  return (
+    <section
+      className="rounded-2xl p-4 sm:p-5 min-w-0"
+      style={{
+        background: "rgba(200,165,107,0.06)",
+        border: "1px solid rgba(200,165,107,0.16)",
+      }}
+    >
+      <div className="flex items-start gap-2.5 mb-4 min-w-0">
+        <span
+          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+          style={{ background: "rgba(200,165,107,0.14)", border: "1px solid rgba(200,165,107,0.28)" }}
+        >
+          <Sparkles className="w-3.5 h-3.5" style={{ color: OURO }} />
+        </span>
+        <h3 className="font-tan-mon-cheri text-base md:text-lg leading-snug min-w-0 break-words" style={{ color: "#e8d5b0" }}>
+          {titulo}
+        </h3>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/** Parágrafos, pergunta e passos no mesmo cartão das outras leituras. */
+export function CorpoCartao({
+  paragrafos,
+  perguntas = [],
+  passos = [],
+}: {
+  paragrafos: string[];
+  perguntas?: string[];
+  passos?: string[];
+}) {
+  return (
+    <div className="space-y-3 min-w-0">
+      {paragrafos.map((texto) => (
+        <p key={texto} className="text-sm leading-relaxed break-words" style={{ color: COR_TEXTO, lineHeight: 1.75 }}>
+          {texto}
+        </p>
+      ))}
+      {passos.length > 0 && (
+        <ol className="space-y-2.5">
+          {passos.map((texto, i) => (
+            <li key={texto} className="flex gap-3 min-w-0">
+              <span
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0 mt-0.5"
+                style={{ background: "rgba(200,165,107,0.16)", color: "#e8d5b0" }}
+              >
+                {i + 1}
+              </span>
+              <p className="text-sm leading-relaxed break-words min-w-0" style={{ color: COR_TEXTO, lineHeight: 1.7 }}>
+                {texto}
+              </p>
+            </li>
+          ))}
+        </ol>
+      )}
+      {perguntas.map((texto) => (
+        <div
+          key={texto}
+          className="rounded-xl px-4 py-3 min-w-0"
+          style={{ background: "rgba(200,165,107,0.1)", border: "1px solid rgba(200,165,107,0.22)" }}
+        >
+          <p className="text-[11px] font-semibold tracking-[0.04em] sm:tracking-[0.14em] uppercase mb-1.5 break-words" style={{ color: OURO }}>
+            Para pensar
+          </p>
+          <p className="text-sm leading-relaxed break-words font-medium" style={{ color: COR_FORTE, lineHeight: 1.7 }}>
+            {texto}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /** Desenha a leitura a partir da moldura. O título de cada bloco vem do copy-voz. */
 export default function LeituraBlocos({ leitura, fluida = false }: { leitura: LeituraPortal; fluida?: boolean }) {
   if (fluida) return <LeituraFluida leitura={leitura} />;
   return (
     <div className="space-y-4">
-      {leitura.secoes.map((secao) => {
-        const Icone = SECAO_ICONE[secao.id];
-        return (
-          <section
-            key={secao.id}
-            className="rounded-2xl p-5"
-            style={{
-              background: "rgba(200,165,107,0.06)",
-              border: "1px solid rgba(200,165,107,0.16)",
-            }}
-          >
-            <div className="flex items-center gap-2.5 mb-4">
-              <span
-                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                style={{ background: "rgba(200,165,107,0.14)", border: "1px solid rgba(200,165,107,0.28)" }}
-              >
-                <Icone className="w-3.5 h-3.5" style={{ color: OURO }} />
-              </span>
-              <h3 className="font-tan-mon-cheri text-lg leading-none" style={{ color: "#e8d5b0" }}>
-                {secao.titulo}
-              </h3>
-            </div>
-            {secao.id === "oQueFazer" ? <Passos secao={secao} /> : <Paragrafos secao={secao} />}
-          </section>
-        );
-      })}
+      {leitura.secoes.map((secao) => (
+        <CartaoPadrao key={secao.id} titulo={secao.titulo}>
+          {secao.id === "oQueFazer" ? <Passos secao={secao} /> : <Paragrafos secao={secao} />}
+        </CartaoPadrao>
+      ))}
     </div>
   );
 }
@@ -89,13 +140,13 @@ function Paragrafos({ secao }: { secao: SecaoLeitura }) {
           }}
         >
           {grupo.rotulo && (
-            <p className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-1.5" style={{ color: OURO }}>
+            <p className="text-[11px] font-semibold tracking-[0.04em] sm:tracking-[0.14em] uppercase mb-1.5 break-words" style={{ color: OURO }}>
               {grupo.rotulo}
             </p>
           )}
           <div className="space-y-2.5">
             {grupo.textos.map((texto, j) => (
-              <p key={j} className="text-sm leading-relaxed" style={{ lineHeight: 1.75 }}>
+              <p key={j} className="text-sm leading-relaxed break-words" style={{ lineHeight: 1.75 }}>
                 <Frase texto={texto} />
               </p>
             ))}
@@ -113,7 +164,7 @@ function Faixa({ texto }: { texto: string }) {
       className="rounded-xl px-4 py-3"
       style={{ background: "rgba(200,165,107,0.12)", border: "1px solid rgba(200,165,107,0.28)" }}
     >
-      <p className="text-sm leading-relaxed" style={{ color: COR_FORTE, lineHeight: 1.7 }}>
+      <p className="text-sm leading-relaxed break-words" style={{ color: COR_FORTE, lineHeight: 1.7 }}>
         {corte ? (
           <>
             {corte[1]}
@@ -238,11 +289,11 @@ function Passos({ secao }: { secao: SecaoLeitura }) {
           style={{ background: "rgba(255,255,255,0.025)", borderLeft: "2px solid rgba(200,165,107,0.55)" }}
         >
           {item.rotulo && (
-            <p className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-1.5" style={{ color: OURO }}>
+            <p className="text-[11px] font-semibold tracking-[0.04em] sm:tracking-[0.14em] uppercase mb-1.5 break-words" style={{ color: OURO }}>
               {item.rotulo}
             </p>
           )}
-          <p className="text-sm leading-relaxed" style={{ lineHeight: 1.75 }}>
+          <p className="text-sm leading-relaxed break-words" style={{ lineHeight: 1.75 }}>
             <Frase texto={item.texto} />
           </p>
         </div>
@@ -259,11 +310,11 @@ function Passos({ secao }: { secao: SecaoLeitura }) {
               </span>
               <div className="min-w-0">
                 {item.rotulo && (
-                  <p className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-0.5" style={{ color: OURO }}>
+                  <p className="text-[11px] font-semibold tracking-[0.04em] sm:tracking-[0.14em] uppercase mb-0.5 break-words" style={{ color: OURO }}>
                     {item.rotulo}
                   </p>
                 )}
-                <p className="text-sm leading-relaxed" style={{ color: COR_TEXTO, lineHeight: 1.7 }}>
+                <p className="text-sm leading-relaxed break-words" style={{ color: COR_TEXTO, lineHeight: 1.7 }}>
                   {item.texto}
                 </p>
               </div>
@@ -276,7 +327,7 @@ function Passos({ secao }: { secao: SecaoLeitura }) {
           className="rounded-xl px-4 py-3"
           style={{ background: "rgba(200,165,107,0.1)", border: "1px solid rgba(200,165,107,0.22)" }}
         >
-          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-1.5" style={{ color: OURO }}>
+          <p className="text-[11px] font-semibold tracking-[0.04em] sm:tracking-[0.14em] uppercase mb-1.5 break-words" style={{ color: OURO }}>
             {ultimo.rotulo || "Para pensar"}
           </p>
           <p className="text-sm leading-relaxed font-medium" style={{ color: COR_FORTE, lineHeight: 1.7 }}>

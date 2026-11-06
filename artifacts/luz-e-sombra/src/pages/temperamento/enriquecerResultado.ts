@@ -7,6 +7,7 @@ import {
 import type { Dimensao, TemperamentoCodigo, TipoPerfil } from "@workspace/temperamento-v1";
 
 export type ResultadoTemperamentoUi = Record<string, unknown> & {
+  questionario?: string;
   versaoNarrativa?: string;
   versao?: string;
   perfil?: {

@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import type { TemperamentoCodigo } from "@workspace/temperamento-v1";
-import { NOME_TEMPERAMENTO } from "@workspace/temperamento-v1";
+import type { RespostaSimNao, TemperamentoCodigo } from "@workspace/temperamento-v1";
+import { montarLeituraConversa, NOME_TEMPERAMENTO } from "@workspace/temperamento-v1";
 import { labelTipoPerfil, TEMPERAMENTO_VISUAL } from "./temperamentoConfig";
-import LeituraBlocos from "@/components/LeituraBlocos";
+import LeituraBlocos, { CartaoPadrao, CorpoCartao } from "@/components/LeituraBlocos";
 import { leituraTemperamento } from "@/lib/leiturasPortal";
 import {
   enriquecerResultadoTemperamento,
@@ -13,8 +13,10 @@ const GOLD = "#c8a56b";
 
 export default function TemperamentoPainelResultado({
   resultado: raw,
+  respostas,
 }: {
   resultado: ResultadoTemperamentoUi;
+  respostas?: Record<string, RespostaSimNao> | null;
 }) {
   const r = useMemo(() => enriquecerResultadoTemperamento(raw), [raw]);
   const perfil = r.perfil;
@@ -27,6 +29,21 @@ export default function TemperamentoPainelResultado({
   const tituloPerfil = primario && secundario && perfil?.tipo ? perfil.arquetipo : perfil?.arquetipo ?? "";
 
   const leitura = leituraTemperamento(r);
+  const cartoes = useMemo(() => {
+    if (!primario || !secundario || !pct) return null;
+    return montarLeituraConversa({
+      primario,
+      secundario,
+      percentuais: {
+        COLERICO: pct.COLERICO ?? 0,
+        SANGUINEO: pct.SANGUINEO ?? 0,
+        MELANCOLICO: pct.MELANCOLICO ?? 0,
+        FLEUMATICO: pct.FLEUMATICO ?? 0,
+      },
+      respostas: respostas ?? undefined,
+      questionarioClaro: r.questionario === "claro",
+    });
+  }, [primario, secundario, pct, respostas, r.questionario]);
 
   return (
     <div className="space-y-5">
@@ -55,11 +72,11 @@ export default function TemperamentoPainelResultado({
               >
                 <IconP className="w-6 h-6" style={{ color: visP.cor }} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
                   {labelTipoPerfil(perfil.tipo)}
                 </p>
-                <h1 className="font-tan-mon-cheri text-xl md:text-2xl" style={{ color: "#f7f2ec" }}>
+                <h1 className="font-tan-mon-cheri text-xl md:text-2xl leading-snug break-words" style={{ color: "#f7f2ec" }}>
                   {tituloPerfil}
                 </h1>
                 {secundario && primario !== secundario && (
@@ -110,7 +127,17 @@ export default function TemperamentoPainelResultado({
         </div>
       </div>
 
-      {leitura && <LeituraBlocos leitura={leitura} />}
+      {cartoes ? (
+        <div className="space-y-4">
+          {cartoes.map((cartao) => (
+            <CartaoPadrao key={cartao.id} titulo={cartao.titulo}>
+              <CorpoCartao paragrafos={cartao.paragrafos} perguntas={cartao.perguntas} passos={cartao.passos} />
+            </CartaoPadrao>
+          ))}
+        </div>
+      ) : (
+        leitura && <LeituraBlocos leitura={leitura} />
+      )}
     </div>
   );
 }
