@@ -3,10 +3,10 @@ import type { TemperamentoCodigo } from "./types";
 import { TEMPERAMENTOS } from "./types";
 
 export const FRASE_ASSUMIR =
-  "Quando alguém demora para decidir, pode surgir vontade de assumir a situação e resolver por essa pessoa.";
+  "Quando alguém demora para decidir, você assume a situação e resolve por essa pessoa.";
 
 export const FRASE_CRITICA =
-  "Uma crítica pode ficar com você por vários dias, mesmo quando a conversa já acabou.";
+  "Uma crítica fica com você por vários dias, mesmo quando a conversa já acabou.";
 
 export interface CartaoConversa {
   id: string;
@@ -47,190 +47,155 @@ const NOME: Record<TemperamentoCodigo, string> = {
 };
 
 const EXPLICACAO: Record<TemperamentoCodigo, string> = {
-  SANGUINEO:
-    "Sanguíneo é o jeito de quem gosta de se conectar. Gosta de conversar, contar o que viveu, conhecer gente e sentir que está participando do que acontece.",
-  COLERICO:
-    "Colérico é o jeito de quem gosta de fazer acontecer. Tende a tomar a frente, buscar um caminho, decidir e transformar uma ideia em algo concreto.",
-  MELANCOLICO:
-    "Melancólico é o jeito de quem gosta de compreender. Costuma olhar detalhes, pensar antes de agir e querer que as coisas fiquem bem feitas.",
-  FLEUMATICO:
-    "Fleumático é o jeito de quem gosta de tranquilidade. Tende a valorizar a calma, a paciência e um ambiente em que não precise resolver tudo ao mesmo tempo.",
+  SANGUINEO: "Sanguíneo é o jeito de quem se anima com gente, conversa e novidade. A experiência ganha sentido quando você divide.",
+  COLERICO: "Colérico é o jeito de quem olha para o que precisa ser feito e começa, ajustando o caminho no meio.",
+  MELANCOLICO: "Melancólico é o jeito de quem quer entender antes de escolher e repara no que os outros deixam passar.",
+  FLEUMATICO: "Fleumático é o jeito de quem observa antes de entrar e prefere um ambiente em paz.",
 };
 
 const INTRO: Record<TemperamentoCodigo, string> = {
   SANGUINEO:
-    "Pode ser que uma das primeiras coisas que as pessoas notem em você seja a facilidade de entrar na conversa, puxar um assunto e deixar o ambiente mais leve.",
+    "Quando você chega num lugar novo, você olha primeiro as pessoas, o clima e o que dá para conversar. Você descobre o que pensa enquanto fala. A conversa organiza a ideia.",
   COLERICO:
-    "Pode ser que você queira ver a coisa sair do lugar. Conversar só por conversar, em algumas situações, pode parecer pouco.",
+    "Diante de um problema, você procura a saída antes de reunir todos os detalhes. Uma tarefa atrasada vira a pergunta de quem faz o quê e como recuperar o prazo.",
   MELANCOLICO:
-    "Pode ser que você olhe o que pode dar errado antes de aceitar, e que um detalhe pequeno mude a sua vontade de seguir.",
+    "Diante de uma escolha, você quer o contexto: o que muda na rotina, o que pode falhar e o que combina com o que você valoriza. Uma decisão simples fica maior do que é.",
   FLEUMATICO:
-    "Pode ser que você espere os outros falarem e prefira um ambiente calmo a uma discussão.",
+    "Você observa o ambiente antes de participar. Numa discussão em casa, enquanto alguém quer resolver na hora, você espera as pessoas se acalmarem. Não reagir na hora não quer dizer que você não tenha opinião.",
 };
 
-const POSSIBILIDADE: Record<TemperamentoCodigo, string> = {
-  SANGUINEO:
-    "Uma possibilidade é você gostar de participar, conversar e sentir que o que você faz importa para os outros. Isto é uma possibilidade, não uma conclusão fechada.",
-  COLERICO:
-    "Uma possibilidade é você querer ver as coisas andando e sentir pressa quando a decisão demora. Isto é uma possibilidade, não uma conclusão fechada.",
-  MELANCOLICO:
-    "Uma possibilidade é você olhar detalhes e pensar antes de uma decisão importante. Isto é uma possibilidade, não uma conclusão fechada.",
-  FLEUMATICO:
-    "Uma possibilidade é você procurar, em alguns dias, um momento sem ter o que resolver. Isto é uma possibilidade, não uma conclusão fechada.",
-};
+const AVISO_ANTIGO =
+  "O desenho abaixo vem da proporção das suas respostas antigas. O que nenhuma pergunta nova cobriu fica como possibilidade: diz o que pode acontecer, não uma cena que você marcou.";
 
 const FACILIDADE: Record<TemperamentoCodigo, string> = {
-  SANGUINEO: "Você pode ter facilidade para começar uma conversa e deixar as pessoas mais à vontade.",
-  COLERICO: "Você pode ter facilidade para tomar a frente quando ninguém decide.",
-  MELANCOLICO: "Você pode perceber um detalhe que ajuda a melhorar o que vai ser entregue.",
-  FLEUMATICO: "Você pode escutar com calma quando as outras pessoas estão apressadas.",
+  SANGUINEO: "Você começa uma conversa e as pessoas ficam mais à vontade.",
+  COLERICO: "Você toma a frente quando ninguém decide.",
+  MELANCOLICO: "Você percebe um detalhe que melhora o que vai ser entregue.",
+  FLEUMATICO: "Você escuta com calma quando as outras pessoas estão apressadas.",
 };
 
 const PERGUNTA_JEITO: Record<TemperamentoCodigo, string> = {
-  SANGUINEO: "Quando ninguém demonstra interesse no que você conta, isso muda o seu ânimo?",
-  COLERICO: "Quando alguém demora, você espera ou já quer resolver no lugar dessa pessoa?",
-  MELANCOLICO: "Você espera algo ficar muito bom antes de considerar que terminou?",
-  FLEUMATICO: "Você consegue ficar um tempo sem conduzir nada, ou sente que precisa estar fazendo alguma coisa?",
+  SANGUINEO: "Você consegue continuar valorizando o que começou quando o ânimo passa e ninguém está te incentivando?",
+  COLERICO: "Você consegue deixar as coisas acontecerem de um jeito diferente do seu sem sentir que perdeu o controle?",
+  MELANCOLICO: "Quantas vezes você deixa de começar, decidir ou concluir porque ainda acha que poderia fazer melhor?",
+  FLEUMATICO: "Quantas vezes você deixa de dizer o que realmente quer só para evitar um desconforto?",
 };
 
 const CENAS: CenaItem[] = [
   {
     id: "E01",
     alvo: "SANGUINEO",
-    reconhecer: "Talvez você perceba que começa uma conversa até com quem acabou de conhecer.",
-    facilidade: "Aproximar-se das pessoas pode ser um jeito natural de participar do que está acontecendo.",
+    reconhecer: "Você começa uma conversa até com quem acabou de conhecer.",
+    facilidade: "Você se aproxima e as pessoas entram no assunto.",
   },
   {
     id: "E02",
     alvo: "SANGUINEO",
-    reconhecer: "Estar no meio das pessoas pode te animar mais do que te cansar.",
-    facilidade: "Um ambiente com conversa pode te ajudar a entrar no que precisa ser feito.",
+    reconhecer: "Estar no meio das pessoas te anima mais do que te cansa.",
   },
   {
     id: "E03",
     alvo: "SANGUINEO",
-    reconhecer: "Quando algo te chateia, você pode desabafar e, pouco depois, voltar ao bom humor.",
-    relacao:
-      "Em casa, pode acontecer de você contar o que sentiu e já querer seguir, enquanto a outra pessoa ainda está naquele assunto.",
+    relacao: "Em casa, você conta o que sentiu e já segue em frente. A outra pessoa ainda está naquele assunto.",
+    experimento: "Na próxima discussão, fique mais um minuto no assunto antes de contar outra coisa.",
   },
   {
     id: "E04",
     alvo: "SANGUINEO",
-    reconhecer: "Você pode gostar de contar o que aconteceu e ver as pessoas rindo com você.",
-    facilidade: "Compartilhar uma história pode ser a sua maneira de entrar numa roda.",
-    atrapalha: "Em algumas situações, a conversa pode ficar tão sua que a outra pessoa quase não entra.",
+    atrapalha: "Você conta a história e a outra pessoa quase não entra. A conversa termina sem a opinião dela.",
     experimento: "Numa conversa desta semana, conte menos uma frase e pergunte o que a outra pessoa achou.",
   },
   {
     id: "E05",
     alvo: "COLERICO",
-    reconhecer: "Se ninguém decide, pode surgir vontade de tomar a frente e resolver.",
-    facilidade: "Quando o grupo está parado, você pode ser a pessoa que escolhe o próximo passo.",
-    trabalho: "No trabalho, quando a decisão trava, você pode assumir o que precisa andar.",
-    atrapalha: "Assumir tudo pode deixar pouco espaço para a ideia de quem está junto.",
-    experimento: "Antes da próxima decisão em grupo, faça uma pergunta e espere a resposta inteira.",
+    trabalho: "No trabalho, quando a decisão trava, você assume o próximo passo mesmo já estando cheio de tarefa.",
+    facilidade: "Quando o grupo está parado, você escolhe o próximo passo.",
   },
   {
     id: "E06",
     alvo: "COLERICO",
-    reconhecer: FRASE_ASSUMIR,
-    relacao: FRASE_ASSUMIR,
     atrapalha: FRASE_ASSUMIR,
-    experimento: "Quando alguém demorar, diga que pode esperar e deixe a pessoa terminar o raciocínio.",
+    experimento: "Quando alguém demorar, diga que espera e deixe a pessoa terminar o raciocínio.",
   },
   {
     id: "E07",
     alvo: "COLERICO",
-    reconhecer: "Você pode preferir terminar a conversa com uma conclusão do que ficar no assunto sem destino.",
-    trabalho: "Numa reunião, você pode querer fechar o assunto enquanto outra pessoa ainda está entendendo.",
-    atrapalha: "Nem toda conversa precisa terminar com uma decisão. Às vezes o outro só precisava falar.",
+    trabalho: "Numa reunião, você fecha o assunto enquanto a outra pessoa ainda está entendendo.",
     experimento: "Escolha uma conversa e termine sem pedir uma conclusão. Só agradeça o que foi dito.",
   },
   {
     id: "E08",
     alvo: "COLERICO",
-    reconhecer: "Quando alguém atrasa o que combinou, você pode cobrar na hora.",
-    trabalho: "No trabalho, um atraso pode te fazer cobrar antes de ouvir o que aconteceu.",
-    relacao: "Em casa, cobrar na hora pode fazer a outra pessoa parar de contar o que sentia.",
-    experimento: "Na próxima cobrança, pergunte primeiro o que atrasou. A cobrança pode vir na frase seguinte.",
+    relacao: "Em casa, você cobra na hora quando alguém atrasa o combinado. A outra pessoa para de contar o que sentia.",
+    experimento: "Na próxima cobrança, pergunte primeiro o que atrasou. A cobrança vem na frase seguinte.",
   },
   {
     id: "N01",
     alvo: "MELANCOLICO",
-    reconhecer: "Antes de uma decisão importante, você pode pensar bastante para não errar.",
-    facilidade: "Esse tempo de olhar antes pode evitar um passo que você ia se arrepender de dar.",
-    trabalho: "Uma tarefa pode demorar a ser dada como pronta, porque você ainda quer ter certeza.",
+    trabalho: "Você organiza e prevê problemas por tempo demais, e o prazo anda. A tarefa só fica pronta quando você tem certeza.",
+    facilidade: "Olhar antes te evita um passo que você ia querer desfazer.",
   },
   {
     id: "N02",
     alvo: "MELANCOLICO",
     reconhecer: FRASE_CRITICA,
-    atrapalha: FRASE_CRITICA,
-    experimento: "Se uma crítica voltar à cabeça, escreva uma frase sobre o que ela pediu e pare por hoje.",
+    atrapalha: "Você transforma um comentário sobre a tarefa numa dúvida sobre a sua capacidade.",
+    experimento: "Se uma crítica voltar, escreva uma frase sobre o que ela pediu e pare por hoje.",
   },
   {
     id: "N03",
     alvo: "MELANCOLICO",
-    reconhecer: "Você pode reparar um detalhe que a maioria deixa passar.",
-    facilidade: "Esse olhar pode melhorar o que você entrega em casa ou no trabalho.",
-    trabalho: "No trabalho, você pode continuar mexendo num detalhe de algo que já estava bom.",
-    atrapalha: "Em algumas situações, procurar mais um detalhe atrasa o que já podia ter sido entregue.",
-    experimento: "Ao terminar uma atividade, pergunte se você está melhorando o resultado ou só procurando outro detalhe.",
+    trabalho: "No trabalho, você mexe de novo num detalhe de algo que já estava pronto. A entrega atrasa.",
+    experimento: "Ao terminar uma atividade, pergunte se você melhora o resultado ou só procura outro detalhe.",
   },
   {
     id: "N04",
     alvo: "MELANCOLICO",
-    reconhecer: "Quando algo incomoda, você pode guardar o que sente em vez de falar na hora.",
-    relacao: "Numa relação, o silêncio pode ser o seu jeito de se proteger, e a outra pessoa pode ler isso como distância.",
-    atrapalha: "Guardar o incômodo pode fazer você concordar por fora e continuar pensando nisso sozinho.",
+    relacao: "Você espera que a outra pessoa perceba o que você precisa, sem você dizer. O silêncio vira distância.",
     experimento: "Diga uma coisa pequena que te incomodou no mesmo dia, em uma frase.",
   },
   {
     id: "N05",
     alvo: "FLEUMATICO",
-    reconhecer: "Você pode manter a calma mesmo quando as pessoas ao redor estão nervosas.",
-    facilidade: "Essa calma pode ajudar uma conversa difícil a não virar briga.",
+    reconhecer: "Você mantém a calma quando as pessoas ao redor estão nervosas.",
+    facilidade: "Essa calma segura uma conversa difícil para ela não virar briga.",
   },
   {
     id: "N06",
     alvo: "FLEUMATICO",
-    reconhecer: "Para não discutir, você pode concordar mesmo quando discorda.",
-    relacao: "Em família, concordar para evitar briga pode deixar um combinado que não era o seu.",
-    atrapalha: "Evitar a discussão pode fazer o problema voltar maior, porque ninguém ouviu o que você queria.",
+    relacao: "Em família, você concorda para evitar briga e o combinado não era o seu.",
     experimento: "Numa conversa em que você discordar, diga a sua posição em uma frase, sem aumentar o tom.",
   },
   {
     id: "N07",
     alvo: "FLEUMATICO",
-    reconhecer: "Você pode gostar de um momento sem pressa e sem ter algo para resolver.",
-    facilidade: "Uma pausa pode te deixar mais disposto para a próxima conversa ou a próxima tarefa.",
+    reconhecer: "Você gosta de um momento sem pressa e sem ter algo para resolver.",
   },
   {
     id: "N08",
     alvo: "FLEUMATICO",
-    reconhecer: "As pessoas podem te procurar porque você escuta sem interromper.",
-    facilidade: "Escutar até o fim pode ser o que deixa a outra pessoa à vontade para falar a verdade.",
-    relacao: "Nas relações, você pode escutar tanto que o seu próprio assunto fica para depois.",
+    relacao: "Você escuta até o fim e o seu próprio assunto fica para depois.",
+    facilidade: "As pessoas falam a verdade porque você não interrompe.",
   },
 ];
 
 const ORDEM: Record<string, FatoOrdem> = {
   SANGUINEO_COLERICO: {
     depois:
-      "Imagine uma conversa sobre uma ideia. Você pode começar de um jeito leve, as pessoas entram no assunto e, pouco depois, você pede uma decisão. Quem estava só conversando pode sentir que precisa entregar alguma coisa.",
+      "Imagine uma conversa sobre uma ideia. Você começa de um jeito leve, as pessoas entram no assunto e, pouco depois, você pede uma decisão. Quem estava só conversando sente que precisa entregar alguma coisa.",
     encontro:
-      "Pense num projeto em casa ou no trabalho. Primeiro pode vir a vontade de contar, envolver e deixar a ideia viva. Depois pode vir a vontade de organizar, definir quem faz o quê e ver aquilo acontecer.",
+      "Pense num projeto em casa ou no trabalho. Primeiro a conversa pode ser o lugar em que a ideia nasce: você entende o que quer enquanto conta. Logo depois pode vir a vontade de organizar, definir quem faz o quê e ver aquilo acontecer.",
     descoberta:
-      "Você não precisa diminuir o entusiasmo nem deixar de ter iniciativa. Pode aprender a perceber quando a vontade de fazer acontecer deixa pouco espaço para o tempo da outra pessoa.",
+      "Você não precisa diminuir o entusiasmo nem deixar de ter iniciativa. O cuidado é outro: o silêncio de alguém pode não ser falta de interesse, e a demora pode não ser falta de compromisso. Pode ser só um tempo diferente do seu.",
     pergunta: "Quando alguém demora para decidir, você consegue esperar, ou já quer resolver por essa pessoa?",
     relacao:
-      "Nas relações, você pode gostar de proximidade e, ao mesmo tempo, querer resolver o incômodo na mesma conversa. A outra pessoa talvez ainda precise de tempo.",
+      "Nas relações, você gosta de proximidade e, na mesma conversa, quer resolver o incômodo. A outra pessoa ainda precisa de tempo.",
     trabalho:
       "No trabalho, você pode gostar de começar e de ver a ideia andar. A parte repetitiva, quando a novidade passa, pode ser mais difícil de sustentar.",
     atrapalhos: [
-      "Uma possibilidade é querer a conclusão antes de a outra pessoa ter terminado de explicar.",
-      "Uma possibilidade é começar com muita energia e perder o ritmo quando a tarefa fica repetitiva.",
-      "Uma possibilidade é achar que o silêncio do outro é falta de interesse, quando era só um tempo diferente do seu.",
+      "Você pode querer a conclusão antes de a outra pessoa ter terminado de explicar.",
+      "Você pode começar com muita energia e perder o ritmo quando a tarefa fica repetitiva.",
+      "Você pode achar que o silêncio do outro é falta de interesse, quando era só um tempo diferente do seu.",
     ],
     passos: [
       "Em uma conversa importante, deixe a outra pessoa terminar. Antes de sugerir um caminho, pergunte o que ela pensa.",
@@ -244,18 +209,18 @@ const ORDEM: Record<string, FatoOrdem> = {
     depois:
       "Você pode chegar sorrindo e puxar assunto. Depois, algo que foi dito fica com você, mesmo quando a conversa já tinha acabado bem.",
     encontro:
-      "A conversa te anima. Em seguida, você pode querer caprichar no que prometeu, e o entusiasmo encontra a cobrança de fazer direito.",
+      "A conversa te anima e, às vezes, é nela que a ideia fica clara. Em seguida, uma frase pode continuar com você, e o entusiasmo encontra a vontade de fazer direito.",
     descoberta:
-      "Você não precisa parar de contar o que vive para cuidar do que ficou mal resolvido. Pode escolher o que merece mais uma olhada e o que já pode seguir.",
+      "Você não precisa parar de contar o que vive para cuidar do que ficou. Pode escolher o que merece mais uma olhada e o que já pode seguir, sem transformar um comentário numa sentença sobre você.",
     pergunta: "O que te incomodou numa conversa recente e você ainda não falou?",
     relacao:
       "Você pode contar o dia com leveza e, mais tarde, remoer uma frase que a outra pessoa já esqueceu.",
     trabalho:
       "Você pode aceitar uma tarefa no meio da conversa e, depois, achar que ela ainda não está boa o bastante para entregar.",
     atrapalhos: [
-      "Uma possibilidade é prometer no meio da conversa mais do que você consegue caprichar depois.",
-      "Uma possibilidade é rir de um incômodo em vez de dizer o que sentiu.",
-      "Uma possibilidade é revisar a mesma crítica por tempo demais.",
+      "Você pode prometer no meio da conversa mais do que você consegue caprichar depois.",
+      "Você pode rir de um incômodo em vez de dizer o que sentiu.",
+      "Você pode revisar a mesma crítica por tempo demais.",
     ],
     passos: [
       "Conte a uma pessoa o que te incomodou, sem transformar isso em piada.",
@@ -267,20 +232,20 @@ const ORDEM: Record<string, FatoOrdem> = {
   },
   SANGUINEO_FLEUMATICO: {
     depois:
-      "Você pode animar a conversa e ajudar quem está perto. Quando o assunto fica difícil, talvez você mude de tema para ninguém discutir.",
+      "Você anima a conversa e ajuda quem está perto. Quando o assunto fica difícil, você muda de tema para ninguém discutir.",
     encontro:
-      "O começo é participação. O momento seguinte pode ser a vontade de manter a paz, mesmo que o que precisava ser dito fique para depois.",
+      "O começo é participação: você entra, conta, aproxima. O momento seguinte pode ser a vontade de manter a paz, e o assunto difícil sai da mesa.",
     descoberta:
-      "Manter o clima bom é um cuidado. Ele atrapalha quando o assunto importante sai da mesa junto com a tensão.",
+      "Manter o clima bom é um cuidado. Ele atrapalha quando você evita a conversa desconfortável e, dias depois, o incômodo ainda está lá.",
     pergunta: "Onde você mudou de assunto para não falar o que precisava?",
     relacao:
       "Em família, você pode ser a pessoa que alegra a mesa e também a que não traz o conflito.",
     trabalho:
       "No trabalho, você pode aceitar um pedido para não criar atrito, e a sua tarefa de verdade fica para depois.",
     atrapalhos: [
-      "Uma possibilidade é dizer sim para não estragar o clima.",
-      "Uma possibilidade é empurrar a tarefa sem graça porque a conversa é mais fácil.",
-      "Uma possibilidade é sair de um assunto difícil antes de ele ter um destino.",
+      "Você pode dizer sim para não estragar o clima.",
+      "Você pode empurrar a tarefa sem graça porque a conversa é mais fácil.",
+      "Você pode sair de um assunto difícil antes de ele ter um destino.",
     ],
     passos: [
       "Diga não a um pedido que não é seu, em uma frase.",
@@ -292,20 +257,20 @@ const ORDEM: Record<string, FatoOrdem> = {
   },
   COLERICO_SANGUINEO: {
     depois:
-      "Você pode já entrar querendo resolver. A fala agradável vem em seguida, para as pessoas aceitarem o que você já tinha em mente.",
+      "Você já entra querendo resolver. A fala agradável vem em seguida, para as pessoas aceitarem o que você já tinha em mente.",
     encontro:
-      "A decisão chega antes da conversa. O jeito leve pode servir para abrir caminho, não para ouvir de verdade.",
+      "Você pode olhar primeiro para o que precisa ser resolvido e só depois deixar a conversa agradável. O carinho, nesse jeito, às vezes chega como solução, não como escuta.",
     descoberta:
-      "Falar de um jeito bom ajuda as pessoas a ficarem perto. Vale perceber se elas estão escolhendo com você ou só concordando.",
+      "Falar de um jeito bom ajuda as pessoas a ficarem perto. Vale perceber se elas estão escolhendo com você ou só concordando para a tarefa andar.",
     pergunta: "Quem você tratou, nesta semana, como um meio para a tarefa andar?",
     relacao:
       "Numa relação, você pode trazer o assunto já com a solução, e a outra pessoa sente que a conversa era só um aviso.",
     trabalho:
       "No trabalho, você pode fechar o plano e usar a conversa para contar o que já foi decidido.",
     atrapalhos: [
-      "Uma possibilidade é decidir primeiro e chamar de conversa o que já era um aviso.",
-      "Uma possibilidade é achar acordo onde só houve pressa de te agradar.",
-      "Uma possibilidade é corrigir na mesma frase em que elogia.",
+      "Você pode decidir primeiro e chamar de conversa o que já era um aviso.",
+      "Você pode achar acordo onde só houve pressa de te agradar.",
+      "Você pode corrigir na mesma frase em que elogia.",
     ],
     passos: [
       "Antes da próxima decisão, faça uma pergunta e espere a resposta inteira.",
@@ -319,18 +284,18 @@ const ORDEM: Record<string, FatoOrdem> = {
     depois:
       "Você pode querer resolver agora e, antes de fechar, conferir o detalhe. A decisão sai mais tarde e pode sair mais dura.",
     encontro:
-      "A pressa de andar encontra a exigência de ficar certo. As duas juntas podem atrasar justo o que você queria acelerar.",
+      "A pressa de achar uma saída encontra a vontade de não deixar um detalhe passar. As duas juntas podem atrasar justo o que você queria acelerar.",
     descoberta:
-      "Capricho e pressa podem morar juntos. O aprendizado é dizer o que já é suficiente, e entregar quando chegar lá.",
+      "Fazer bem feito e fazer agora podem morar juntos. O aprendizado é dizer o que já é suficiente, e entregar quando chegar lá, sem tratar um erro como se dissesse quem você é.",
     pergunta: "O que você ainda não entregou porque ainda não estava do seu jeito?",
     relacao:
       "Em casa, você pode cobrar uma mudança e, na mesma fala, listar o que ainda não está bom.",
     trabalho:
       "No trabalho, você pode segurar uma entrega para ajustar um detalhe, e o prazo passa.",
     atrapalhos: [
-      "Uma possibilidade é corrigir várias coisas na mesma conversa.",
-      "Uma possibilidade é não entregar porque ainda vê um erro pequeno.",
-      "Uma possibilidade é a pessoa do outro lado ouvir só a crítica, não o cuidado.",
+      "Você pode corrigir várias coisas na mesma conversa.",
+      "Você pode não entregar porque ainda vê um erro pequeno.",
+      "Você pode a pessoa do outro lado ouvir só a crítica, não o cuidado.",
     ],
     passos: [
       "Escreva o que é suficiente antes de começar. Quando chegar lá, entregue.",
@@ -344,18 +309,18 @@ const ORDEM: Record<string, FatoOrdem> = {
     depois:
       "Você pode organizar a tarefa e seguir até o fim sem discutir na hora. A cobrança vem depois, quando o atraso já ficou grande.",
     encontro:
-      "Por fora, a calma. Por dentro, a conta do que não foi dito. Quando sai, sai de uma vez.",
+      "Por fora, a calma de quem não quer briga. Por dentro, a conta do que não foi dito. Quando a pressão sobe, você pode assumir o que era dos outros e cobrar de uma vez.",
     descoberta:
-      "Esperar não é o mesmo que concordar. O outro só fica sabendo disso se você disser no meio do caminho.",
+      "Esperar não é o mesmo que concordar. Dividir a tarefa também realiza. O outro só entende o seu limite se você disser no meio do caminho.",
     pergunta: "O que você vai cobrar tarde se não disser hoje?",
     relacao:
       "Numa relação, o silêncio pode parecer acordo. A cobrança tardia parece, para o outro, ter vindo do nada.",
     trabalho:
       "No trabalho, você pode carregar a tarefa sozinho e só então cobrar quem não entrou.",
     atrapalhos: [
-      "Uma possibilidade é engolir o incômodo até ele ficar grande demais.",
-      "Uma possibilidade é a outra pessoa achar que você concordou.",
-      "Uma possibilidade é a cobrança chegar sem aviso.",
+      "Você pode engolir o incômodo até ele ficar grande demais.",
+      "Você pode a outra pessoa achar que você concordou.",
+      "Você pode a cobrança chegar sem aviso.",
     ],
     passos: [
       "Diga o incômodo no dia em que ele aparecer, em uma frase.",
@@ -367,20 +332,20 @@ const ORDEM: Record<string, FatoOrdem> = {
   },
   MELANCOLICO_SANGUINEO: {
     depois:
-      "Você pode pensar antes de falar. Quando confia, explica de um jeito que as pessoas entendem. Se a conversa fica longa demais, talvez você saia sem avisar.",
+      "Você pensa antes de falar. Quando confia, explica de um jeito que as pessoas entendem. Se a conversa fica longa demais, você sai sem avisar.",
     encontro:
-      "O cuidado com o que vai ser dito encontra a vontade de participar. Os dois juntos podem prometer mais do que você aguenta sustentar.",
+      "Você pode pensar bastante antes de falar e, quando confia, contar com vontade. Os dois juntos podem prometer, no meio da conversa, mais do que o seu cuidado consegue sustentar depois.",
     descoberta:
-      "Participar não exige que você fique até o fim sem pausa. Avisar que precisa de um tempo também é um jeito de cuidar da relação.",
+      "Participar não exige que você tenha tudo organizado antes de dizer. Avisar que precisa de um tempo também é um jeito de cuidar da relação.",
     pergunta: "O que você esconde quando está de bom humor com as pessoas?",
     relacao:
       "Com quem você gosta, pode contar bastante e, no dia seguinte, sentir que falou mais do que queria.",
     trabalho:
       "No trabalho, você pode mostrar só o que já está muito bom, e as pessoas não acompanham o caminho.",
     atrapalhos: [
-      "Uma possibilidade é sair de uma conversa sem dizer que vai sair.",
-      "Uma possibilidade é prometer no entusiasmo o que o seu cuidado não vai conseguir entregar no prazo.",
-      "Uma possibilidade é esconder o trabalho até ele parecer impecável.",
+      "Você pode sair de uma conversa sem dizer que vai sair.",
+      "Você pode prometer no entusiasmo o que o seu cuidado não vai conseguir entregar no prazo.",
+      "Você pode esconder o trabalho até ele parecer impecável.",
     ],
     passos: [
       "Avise quando for sair: preciso de um tempo e eu volto.",
@@ -394,18 +359,18 @@ const ORDEM: Record<string, FatoOrdem> = {
     depois:
       "Você pode estudar o problema antes de agir. Quando decide, cobra a mudança. Quem esperou pode ouvir a crítica junto com a pressa.",
     encontro:
-      "Há um tempo longo de olhar e, de repente, a vontade de que tudo mude agora. Para o outro, os dois momentos parecem pessoas diferentes.",
+      "Há um tempo longo de entender o contexto e, de repente, a vontade de que tudo mude agora. Quem esperou pode ouvir, junto, a crítica e a pressa.",
     descoberta:
-      "Dizer em que ponto você está, se ainda está olhando ou se já decidiu, tira o susto de quem espera com você.",
+      "Dizer se você ainda está olhando ou se já decidiu tira o susto. Ouvir uma opinião diferente não tira a sua capacidade de realizar.",
     pergunta: "O que você já entendeu e ainda não deixou acontecer?",
     relacao:
       "Numa relação, a pessoa pode achar que está tudo bem enquanto você junta argumentos, e levar a cobrança de uma vez.",
     trabalho:
       "No trabalho, a espera por certeza pode virar uma cobrança apressada quando o prazo aperta.",
     atrapalhos: [
-      "Uma possibilidade é ficar em silêncio no estudo e duro na hora de cobrar.",
-      "Uma possibilidade é juntar vários incômodos para uma conversa só.",
-      "Uma possibilidade é não soltar um detalhe que já poderia seguir.",
+      "Você pode ficar em silêncio no estudo e duro na hora de cobrar.",
+      "Você pode juntar vários incômodos para uma conversa só.",
+      "Você pode não soltar um detalhe que já poderia seguir.",
     ],
     passos: [
       "Diga se você ainda está olhando ou se já decidiu.",
@@ -419,18 +384,18 @@ const ORDEM: Record<string, FatoOrdem> = {
     depois:
       "Você pode ver o erro e não falar na hora. Concorda na frente dos outros e continua pensando nisso sozinho.",
     encontro:
-      "O olhar atento e a vontade de paz se encontram no silêncio. O que não foi dito continua trabalhando em você.",
+      "Você pode ver o detalhe e, ao mesmo tempo, não querer a briga. O que não foi dito continua com você, e a outra pessoa acha que está tudo bem.",
     descoberta:
-      "Concordar por fora e revisar por dentro cansa os dois lados. Uma frase no mesmo dia pode ser mais leve do que uma noite inteira pensando.",
+      "Concordar por fora e revisar por dentro cansa. Uma frase no mesmo dia pode ser mais leve do que uma noite inteira pensando se você deveria ter respondido de outro jeito.",
     pergunta: "O que você concordou na frente dos outros e continuou pensando depois?",
     relacao:
       "Em casa, você pode evitar a briga e guardar uma lista do que não ficou bom.",
     trabalho:
       "No trabalho, você pode aceitar um combinado e seguir corrigindo sozinho o que não disse.",
     atrapalhos: [
-      "Uma possibilidade é carregar sozinho uma tarefa que precisava de uma conversa.",
-      "Uma possibilidade é a revisão da noite não ter hora para acabar.",
-      "Uma possibilidade é o outro achar que você está de acordo.",
+      "Você pode carregar sozinho uma tarefa que precisava de uma conversa.",
+      "Você pode a revisão da noite não ter hora para acabar.",
+      "Você pode o outro achar que você está de acordo.",
     ],
     passos: [
       "Diga uma preocupação pequena no mesmo dia em que ela aparecer.",
@@ -442,20 +407,20 @@ const ORDEM: Record<string, FatoOrdem> = {
   },
   FLEUMATICO_SANGUINEO: {
     depois:
-      "Você pode escutar até o fim e deixar a conversa boa. O assunto que te incomoda talvez não entre.",
+      "Você escuta até o fim e deixa a conversa boa. O assunto que te incomoda não entra.",
     encontro:
-      "A calma deixa a conversa fácil, e a vontade de participar fica no que é leve. O que te incomoda continua só com você.",
+      "A calma deixa a conversa fácil, e a vontade de participar fica no que é leve. O que te incomoda continua só com você, e as pessoas podem nem perceber que você precisava de ajuda.",
     descoberta:
-      "Escutar é uma força. Ela fica pela metade quando a conversa nunca chega no que é seu.",
+      "Escutar é uma força. Ela fica pela metade quando a conversa nunca chega no que é seu. Dizer o que você quer não precisa estragar a paz.",
     pergunta: "Onde você deixou a conversa boa para não falar o que te incomoda?",
     relacao:
       "Com amigos, você pode ser uma companhia agradável e sair sem ter dito o que precisava.",
     trabalho:
       "No trabalho, você pode ajudar no assunto dos outros e adiar o seu.",
     atrapalhos: [
-      "Uma possibilidade é a conversa terminar agradável e incompleta.",
-      "Uma possibilidade é aceitar um favor que te atrapalha.",
-      "Uma possibilidade é adiar a conversa que você já sabe que precisa ter.",
+      "Você pode a conversa terminar agradável e incompleta.",
+      "Você pode aceitar um favor que te atrapalha.",
+      "Você pode adiar a conversa que você já sabe que precisa ter.",
     ],
     passos: [
       "Traga um assunto seu numa conversa em que você só escutaria.",
@@ -467,20 +432,20 @@ const ORDEM: Record<string, FatoOrdem> = {
   },
   FLEUMATICO_COLERICO: {
     depois:
-      "Você pode esperar e não discutir. Quando a tarefa para, talvez você decida e cobre de uma vez.",
+      "Você espera e não discute. Quando a tarefa para, você decide e cobra de uma vez.",
     encontro:
-      "Há um tempo de mediação e, depois, um corte. Quem estava na calma pode não entender a cobrança.",
+      "Há um tempo em que você espera a poeira baixar e, depois, um corte. Quem estava na calma pode não entender a cobrança, porque não viu o que você já tinha percebido.",
     descoberta:
-      "Avisar no meio evita que a firmeza pareça uma explosão. A tarefa anda, e as pessoas acompanham.",
+      "Avisar no meio evita que a firmeza pareça ter vindo do nada. Você pode continuar paciente e, ainda assim, tomar uma posição.",
     pergunta: "O que você vai cobrar de uma vez se não disser hoje?",
     relacao:
       "Numa relação, a paciência longa pode terminar numa frase dura, que junta vários dias.",
     trabalho:
       "No trabalho, você pode segurar a decisão para não criar atrito e, no fim, impor o caminho.",
     atrapalhos: [
-      "Uma possibilidade é a cobrança chegar sem os avisos do meio.",
-      "Uma possibilidade é decidir sozinho o que estava sendo mediado.",
-      "Uma possibilidade é o silêncio ser lido como acordo.",
+      "Você pode a cobrança chegar sem os avisos do meio.",
+      "Você pode decidir sozinho o que estava sendo mediado.",
+      "Você pode o silêncio ser lido como acordo.",
     ],
     passos: [
       "Avise no meio, antes da cobrança ficar grande.",
@@ -492,20 +457,20 @@ const ORDEM: Record<string, FatoOrdem> = {
   },
   FLEUMATICO_MELANCOLICO: {
     depois:
-      "Você pode manter a rotina e evitar briga. Quando algo fica mal feito, talvez você guarde o incômodo e não peça a mudança.",
+      "Você mantém a rotina e evita briga. Quando algo fica mal feito, você guarda o incômodo e não pede a mudança.",
     encontro:
-      "A estabilidade e o olhar para o detalhe se encontram no que você engole. A casa ou o trabalho seguem, e você continua vendo o que não ficou bom.",
+      "A rotina segue e o olhar para o detalhe fica com você. A casa ou o trabalho parecem em paz, e você continua vendo o que não ficou bom sem pedir a mudança.",
     descoberta:
-      "Pedir uma mudança pequena não desfaz a paz. Pode ser o que impede o incômodo de ficar só com você.",
+      "Pedir uma mudança pequena não desfaz a paz. Mudar também pode fazer parte de uma vida mais tranquila, e dizer não a um pedido não é dizer não à pessoa.",
     pergunta: "O que não ficou bom e você ainda não pediu para mudar?",
     relacao:
       "Em casa, você pode manter a harmonia e guardar, em silêncio, o que gostaria que fosse diferente.",
     trabalho:
       "No trabalho, a rotina segue e um erro pequeno se repete porque ninguém ouviu o seu reparo.",
     atrapalhos: [
-      "Uma possibilidade é não pedir a mudança para não criar onda.",
-      "Uma possibilidade é revisar de noite o que não foi dito de dia.",
-      "Uma possibilidade é pedir desculpa por apontar o que não ficou bom.",
+      "Você pode não pedir a mudança para não criar onda.",
+      "Você pode revisar de noite o que não foi dito de dia.",
+      "Você pode pedir desculpa por apontar o que não ficou bom.",
     ],
     passos: [
       "Peça uma mudança em uma coisa só, no mesmo dia.",
@@ -519,8 +484,8 @@ const ORDEM: Record<string, FatoOrdem> = {
 
 const ABERTURA = [
   "Existem muitas maneiras de viver o mesmo dia. Algumas pessoas precisam conversar para organizar o que pensam. Outras preferem olhar antes de entrar. Algumas gostam de decidir logo. Outras precisam de mais tempo para ter certeza.",
-  "Nenhum desses jeitos é melhor que o outro. São maneiras diferentes de funcionar.",
-  "O que vem a seguir é um convite para você reconhecer o que talvez já faça, em casa, no trabalho ou numa conversa, e perceber onde o seu jeito pode dificultar as coisas.",
+  "Nenhum desses jeitos é melhor que o outro. São maneiras diferentes de funcionar. Nada disso é uma etiqueta. Só vale se você se reconhecer.",
+  "O que vem a seguir é um convite para você reconhecer o que você faz, em casa, no trabalho ou numa conversa, e perceber onde o seu jeito dificulta as coisas.",
 ];
 
 const FECHO_COMUM =
@@ -560,7 +525,7 @@ function quaseNao(codigo: TemperamentoCodigo): string {
   if (codigo === "FLEUMATICO") {
     return "Este jeito quase não apareceu nas suas respostas. Não quer dizer que você não possa usá-lo. Uma pausa, por exemplo, pode ser algo para experimentar, não algo que você já faz.";
   }
-  return "Este jeito quase não apareceu nas suas respostas. Não quer dizer que ele não possa aparecer em algum dia. Pode ser algo para experimentar, não uma conclusão sobre você.";
+  return "Este jeito quase não apareceu nas suas respostas. Pode ser algo para experimentar, não uma cena que você marcou.";
 }
 
 function blocoMenor(
@@ -570,14 +535,38 @@ function blocoMenor(
 ): string[] {
   const nome = NOME[codigo];
   if (!usar) {
-    return [
-      `O jeito ${nome} apareceu menos na distribuição. ${POSSIBILIDADE[codigo]}`,
-    ];
+    return [`O jeito ${nome} apareceu menos. Você pode reconhecê-lo em algum dia, sem uma cena marcada.`];
   }
   const cenas = cenasDe([codigo], respostas, true);
-  if (cenas.length === 0) return [`O jeito ${nome} ficou baixo. ${quaseNao(codigo)}`];
-  return [`O jeito ${nome} também pode aparecer, em algumas situações.`, ...textos(cenas, "reconhecer", 3)];
+  const reconhecidos = textos(cenas, "reconhecer", 3);
+  if (reconhecidos.length === 0) return [`O jeito ${nome} ficou baixo. ${quaseNao(codigo)}`];
+  return [`O jeito ${nome} também aparece, em menor proporção.`, ...reconhecidos];
 }
+
+function unicos(textosLista: Array<string | undefined>, max: number): string[] {
+  const saida: string[] = [];
+  for (const texto of textosLista) {
+    if (!texto || saida.includes(texto)) continue;
+    saida.push(texto);
+    if (saida.length >= max) break;
+  }
+  return saida;
+}
+
+const PERGUNTA_FECHO: Record<string, string> = {
+  SANGUINEO_COLERICO: "Onde a conversa leve virou um pedido de decisão antes da outra pessoa terminar?",
+  SANGUINEO_MELANCOLICO: "O que você contou com leveza e continuou pensando depois?",
+  SANGUINEO_FLEUMATICO: "Qual assunto você tirou da mesa para o clima continuar bom?",
+  COLERICO_SANGUINEO: "Quem concordou com você porque a conversa já era um aviso?",
+  COLERICO_MELANCOLICO: "O que já estava pronto e você segurou por um detalhe?",
+  COLERICO_FLEUMATICO: "O que você vai cobrar tarde se não disser hoje?",
+  MELANCOLICO_SANGUINEO: "O que você prometeu no meio da conversa e o cuidado não sustenta?",
+  MELANCOLICO_COLERICO: "Você ainda está olhando, ou já decidiu e a outra pessoa não sabe?",
+  MELANCOLICO_FLEUMATICO: "O que você concordou na frente dos outros e continuou pensando depois?",
+  FLEUMATICO_SANGUINEO: "Onde a conversa ficou boa e o que era seu não entrou?",
+  FLEUMATICO_COLERICO: "O que você segurou em silêncio e depois cobrou de uma vez?",
+  FLEUMATICO_MELANCOLICO: "O que não ficou bom e você ainda não pediu para mudar?",
+};
 
 export function montarLeituraConversa(opts: {
   primario: TemperamentoCodigo;
@@ -596,28 +585,22 @@ export function montarLeituraConversa(opts: {
   const usar = opts.questionarioClaro === true && !!opts.respostas;
   const respostas = opts.respostas;
   const doPrimeiro = cenasDe([primario], respostas, usar);
-  const doSegundo = cenasDe([secundario], respostas, usar);
   const todas = cenasDe([primario, secundario, terceiro, quarto], respostas, usar);
-  const aviso = usar
-    ? []
-    : ["O que segue é uma possibilidade a partir da combinação, não uma descoberta de uma resposta sua."];
+  const aviso = usar ? [] : [AVISO_ANTIGO];
 
-  const atrapalhos = usar
-    ? textos(todas, "atrapalha", 3)
-    : [...fato.atrapalhos];
-  const cenasAtrapalho = usar
-    ? todas.filter((cena) => cena.atrapalha && atrapalhos.includes(cena.atrapalha))
-    : [];
-  const experimentos = [
-    ...cenasAtrapalho.map((cena) => cena.experimento).filter((texto): texto is string => !!texto),
-    ...fato.passos,
-  ].slice(0, 3);
+  const atrapalhos = usar ? textos(todas, "atrapalha", 3) : [...fato.atrapalhos];
+  const cenasAtrapalho = usar ? todas.filter((cena) => cena.atrapalha && atrapalhos.includes(cena.atrapalha)) : [];
+  const experimentos = unicos(
+    [...cenasAtrapalho.map((cena) => cena.experimento), ...fato.passos],
+    3,
+  );
 
   const facilidades = usar
-    ? textos([...doPrimeiro, ...doSegundo, ...todas], "facilidade", 3)
+    ? textos(todas, "facilidade", 3)
     : [FACILIDADE[primario], FACILIDADE[secundario]];
-  const relacoes = usar ? textos(todas, "relacao", 3) : [];
-  const trabalhos = usar ? textos(todas, "trabalho", 3) : [];
+  const relacoes = usar ? textos(todas, "relacao", 3) : [fato.relacao];
+  const trabalhos = usar ? textos(todas, "trabalho", 3) : [fato.trabalho];
+  const fecho = PERGUNTA_FECHO[chave(primario, secundario)] ?? PERGUNTA_FECHO.SANGUINEO_FLEUMATICO;
 
   return [
     { id: "antes", titulo: "Antes de olhar os números", paragrafos: ABERTURA, perguntas: [], passos: [] },
@@ -637,25 +620,22 @@ export function montarLeituraConversa(opts: {
     {
       id: "primeiro",
       titulo: "O que aparece primeiro",
-      paragrafos: [
-        `O jeito que mais apareceu é o ${NOME[primario]}. ${INTRO[primario]}`,
-        ...(usar ? textos(doPrimeiro, "reconhecer", 3) : [POSSIBILIDADE[primario]]),
-      ],
+      paragrafos: [`O jeito que mais apareceu é o ${NOME[primario]}. ${INTRO[primario]}`, ...aviso, ...textos(doPrimeiro, "reconhecer", 3)],
       perguntas: [PERGUNTA_JEITO[primario]],
       passos: [],
     },
     {
       id: "depois",
       titulo: "O que entra logo depois",
-      paragrafos: [fato.depois, ...(usar ? textos(doSegundo, "reconhecer", 2) : aviso)],
-      perguntas: [fato.pergunta],
+      paragrafos: [fato.depois],
+      perguntas: [],
       passos: [],
     },
     {
       id: "encontro",
       titulo: "Quando os dois se encontram",
       paragrafos: [fato.encontro, fato.descoberta],
-      perguntas: [],
+      perguntas: [fato.pergunta],
       passos: [],
     },
     {
@@ -668,40 +648,32 @@ export function montarLeituraConversa(opts: {
     {
       id: "aproveitar",
       titulo: "O que você pode aproveitar",
-      paragrafos: usar ? facilidades : [...aviso, ...facilidades],
+      paragrafos: facilidades.length ? facilidades : ["As suas respostas não marcaram uma força específica para destacar nesta semana."],
       perguntas: [],
       passos: [],
     },
     {
       id: "relacoes",
       titulo: "Nas relações",
-      paragrafos: usar
-        ? relacoes.length
-          ? relacoes
-          : ["Nas suas respostas, não apareceu uma cena clara de relação para destacar. Vale observar, nesta semana, se você deixa a outra pessoa terminar de falar."]
-        : [...aviso, fato.relacao],
+      paragrafos: relacoes.length
+        ? relacoes
+        : ["Nas suas respostas, não apareceu uma cena de relação para destacar."],
       perguntas: [],
       passos: [],
     },
     {
       id: "trabalho",
       titulo: "No trabalho",
-      paragrafos: usar
-        ? trabalhos.length
-          ? trabalhos
-          : ["Nas suas respostas, não apareceu uma cena clara de trabalho para destacar. Vale observar se você termina o que começa quando a novidade passa."]
-        : [...aviso, fato.trabalho],
-      perguntas: ["Você tem mais facilidade para começar algo novo ou para levar até o fim o que já começou?"],
+      paragrafos: trabalhos.length ? trabalhos : ["Nas suas respostas, não apareceu uma cena de trabalho para destacar."],
+      perguntas: [],
       passos: [],
     },
     {
       id: "atrapalha",
       titulo: "Quando o seu jeito atrapalha",
-      paragrafos: usar
-        ? atrapalhos.length
-          ? ["Estas situações são possibilidades ligadas ao que você marcou, não um rótulo.", ...atrapalhos]
-          : ["Nenhuma cena de aperto ficou marcada nas suas respostas. Ainda assim, vale notar um momento desta semana em que o seu jeito deixou pouco espaço para outra pessoa."]
-        : [...aviso, ...fato.atrapalhos],
+      paragrafos: atrapalhos.length
+        ? atrapalhos
+        : ["Nenhuma cena de aperto ficou marcada nas suas respostas."],
       perguntas: [],
       passos: [],
     },
@@ -716,7 +688,7 @@ export function montarLeituraConversa(opts: {
       id: "fica",
       titulo: "O que fica com você",
       paragrafos: [fato.fechamento, FECHO_COMUM],
-      perguntas: [],
+      perguntas: [fecho],
       passos: [],
     },
   ];

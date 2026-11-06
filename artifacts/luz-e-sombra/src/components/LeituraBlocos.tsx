@@ -51,7 +51,7 @@ export function CorpoCartao({
         </p>
       ))}
       {passos.length > 0 && (
-        <ol className="space-y-2.5">
+        <ol className="list-none space-y-2.5">
           {passos.map((texto, i) => (
             <li key={texto} className="flex gap-3 min-w-0">
               <span
@@ -299,7 +299,7 @@ function Passos({ secao }: { secao: SecaoLeitura }) {
         </div>
       ))}
       {lista.length > 0 && (
-        <ol className="space-y-2.5">
+        <ol className="list-none space-y-2.5">
           {lista.map((item, i) => (
             <li key={i} className="flex gap-3">
               <span

@@ -13,6 +13,21 @@ function textoDe(cartoes: { paragrafos: string[]; perguntas: string[]; passos: s
   return cartoes.map((cartao) => [...cartao.paragrafos, ...cartao.perguntas, ...cartao.passos].join(" ")).join(" ");
 }
 
+function frasesRepetidas(cartoes: { paragrafos: string[] }[]): string[] {
+  const vistas = new Map<string, number>();
+  for (const cartao of cartoes) {
+    for (const frase of cartao.paragrafos) {
+      if (frase.length < 40) continue;
+      vistas.set(frase, (vistas.get(frase) ?? 0) + 1);
+    }
+  }
+  return [...vistas.entries()].filter(([, vezes]) => vezes > 1).map(([frase]) => frase);
+}
+
+function contarCartao(cartoes: { paragrafos: string[] }[], frase: string): number {
+  return cartoes.filter((cartao) => cartao.paragrafos.some((texto) => texto.includes(frase))).length;
+}
+
 function answersAll(resposta: RespostaSimNao): Record<string, RespostaSimNao> {
   return Object.fromEntries(CODIGOS_ITEM.map((c) => [c, resposta])) as Record<string, RespostaSimNao>;
 }
@@ -150,10 +165,15 @@ describe("temperamento-v3 Eysenck-lite", () => {
     assert.match(texto, /pode|talvez/);
     assert.match(texto, /\?/);
     assert.match(texto, /possibilidade/);
-    assert.doesNotMatch(texto, /regulação emocional|mecanismo de defesa|predominância|validação|diagnóstico|autossabotagem/i);
+    assert.match(texto, /enquanto fala/);
+    assert.match(texto, /quando o ânimo passa e ninguém está te incentivando/);
+    assert.doesNotMatch(texto, /regulação emocional|mecanismo de defesa|predominância|validação|diagnóstico|autossabotagem|impulsiv|perfeccionismo/i);
     assert.ok(!texto.includes(FRASE_ASSUMIR));
     assert.ok(!texto.includes(FRASE_CRITICA));
+    assert.doesNotMatch(texto, /talvez|pode ser que|uma possibilidade é/i);
     assert.ok(!texto.includes("—"));
+    const repetidas = frasesRepetidas(sang);
+    assert.equal(repetidas.length, 0);
   });
 
   it("um não tira a cena daquele item", () => {
@@ -164,15 +184,6 @@ describe("temperamento-v3 Eysenck-lite", () => {
       N02: "sim" as const,
     };
     const percentuais = { SANGUINEO: 40, COLERICO: 30, MELANCOLICO: 20, FLEUMATICO: 10 };
-    const com = textoDe(
-      montarLeituraConversa({
-        primario: "SANGUINEO",
-        secundario: "COLERICO",
-        percentuais,
-        respostas: comCenas,
-        questionarioClaro: true,
-      }),
-    );
     const semAssumir = textoDe(
       montarLeituraConversa({
         primario: "SANGUINEO",
@@ -191,6 +202,21 @@ describe("temperamento-v3 Eysenck-lite", () => {
         questionarioClaro: true,
       }),
     );
+    const leituraCom = montarLeituraConversa({
+      primario: "SANGUINEO",
+      secundario: "COLERICO",
+      percentuais,
+      respostas: comCenas,
+      questionarioClaro: true,
+    });
+    const com = textoDe(leituraCom);
+    assert.doesNotMatch(FRASE_ASSUMIR, /talvez|pode ser que|uma possibilidade é/i);
+    assert.doesNotMatch(FRASE_CRITICA, /talvez|pode ser que|uma possibilidade é/i);
+    assert.equal(contarCartao(leituraCom, FRASE_ASSUMIR), 1);
+    assert.equal(contarCartao(leituraCom, FRASE_CRITICA), 1);
+    const passos = leituraCom.find((cartao) => cartao.id === "semana")?.passos ?? [];
+    assert.equal(passos.length, 3);
+    assert.equal(new Set(passos).size, 3);
     assert.ok(com.includes(FRASE_ASSUMIR));
     assert.ok(com.includes(FRASE_CRITICA));
     assert.ok(!semAssumir.includes(FRASE_ASSUMIR));
