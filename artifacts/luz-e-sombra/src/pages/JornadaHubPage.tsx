@@ -651,8 +651,7 @@ export default function JornadaHubPage() {
           </div>
         </section>
 
-        {/* 3 — Minicurso (capstone não tem minicurso) */}
-        {!isCapstone && (
+        {FEATURE_FLAGS.SHOW_MINICURSOS && !isCapstone && (
         <section className="mb-8">
           <PassoBadge
             numero={3}
@@ -771,7 +770,11 @@ export default function JornadaHubPage() {
           >
             <p className="text-sm" style={{ color: "rgba(247,242,236,0.6)" }}>
               Sua análise está pronta
-              {!minicursoDisponivel ? ", o minicurso será liberado em breve." : ", falta concluir o minicurso acima."}
+              {FEATURE_FLAGS.SHOW_MINICURSOS
+                ? minicursoDisponivel
+                  ? ", falta concluir o minicurso acima."
+                  : ", o minicurso será liberado em breve."
+                : "."}
             </p>
             {!minicursoDisponivel && (
               <button

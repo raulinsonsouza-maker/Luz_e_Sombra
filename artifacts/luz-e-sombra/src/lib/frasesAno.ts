@@ -393,3 +393,7 @@ export function dataPorExtenso(data: Date = new Date()): string {
   const dia = String(data.getDate()).padStart(2, "0");
   return `${DIAS[data.getDay()].toUpperCase()} · ${dia} DE ${MESES[data.getMonth()].toUpperCase()}`;
 }
+
+export function dataDiaMes(data: Date = new Date()): string {
+  return `${data.getDate()} de ${MESES[data.getMonth()]}`;
+}

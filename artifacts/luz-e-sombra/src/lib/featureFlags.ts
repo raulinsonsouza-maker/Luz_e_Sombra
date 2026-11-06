@@ -8,4 +8,6 @@ export const FEATURE_FLAGS = {
   SHOW_COURSE_LESSON_VIDEOS: false,
   /** Catálogo em /cursos e minicursos vinculados à jornada */
   SHOW_COURSES_CATALOG: false,
+  /** Bloco de minicurso dentro de cada módulo da jornada */
+  SHOW_MINICURSOS: false,
 } as const;

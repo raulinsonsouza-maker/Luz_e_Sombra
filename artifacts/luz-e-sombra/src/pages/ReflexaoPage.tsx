@@ -3,19 +3,30 @@ import { useLocation } from "wouter";
 import { ArrowLeft, Share2 } from "lucide-react";
 import { dataPorExtenso, fraseDoDia } from "@/lib/frasesAno";
 import { compartilharFrase } from "@/lib/compartilharFrase";
+import { imagemDoDia } from "@/lib/imagemDoDia";
+import { LP_PORTAL_NAME } from "@/lib/lpConfig";
 import { toast } from "sonner";
 
-const FUNDO = "/images/peao.jpeg";
+const LOGO = "/logo-luxury.svg";
+
+function tamanhoReflexao(texto: string) {
+  if (texto.length > 320) return "1.35rem";
+  if (texto.length > 220) return "1.6rem";
+  if (texto.length > 140) return "1.95rem";
+  return "2.2rem";
+}
 
 export default function ReflexaoPage() {
   const [, navigate] = useLocation();
   const hoje = fraseDoDia();
+  const data = dataPorExtenso();
+  const fundo = imagemDoDia();
   const [enviando, setEnviando] = useState(false);
 
   async function compartilhar() {
     setEnviando(true);
     try {
-      const modo = await compartilharFrase(hoje.reflexao);
+      const modo = await compartilharFrase(hoje.reflexao, data, fundo);
       if (modo === "whatsapp") {
         toast.success("Texto copiado. O WhatsApp abriu com o link do portal.");
       }
@@ -30,27 +41,45 @@ export default function ReflexaoPage() {
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
       <div className="max-w-lg mx-auto px-4 pt-3 flex flex-col" style={{ minHeight: "calc(100vh - 7rem)" }}>
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard")}
+          className="mb-3 inline-flex items-center gap-2 text-xs tracking-wider uppercase self-start"
+          style={{ color: "rgba(247,242,236,0.85)" }}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Início
+        </button>
         <div className="relative flex-1 overflow-hidden rounded-3xl min-h-[420px]">
-          <img src={FUNDO} alt="" className="absolute inset-0 h-full w-full object-cover" />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(18,12,8,0.35) 0%, rgba(18,12,8,0.62) 55%, rgba(18,12,8,0.78) 100%)" }} />
-          <div className="relative flex h-full min-h-[420px] flex-col px-5 py-4">
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              className="inline-flex items-center gap-2 text-xs tracking-wider uppercase self-start"
-              style={{ color: "rgba(247,242,236,0.85)" }}
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Início
-            </button>
-            <div className="flex flex-1 flex-col items-center justify-center text-center px-2 py-8">
-              <p className="text-[11px] tracking-[0.22em] uppercase mb-4" style={{ color: "#c8a56b" }}>
-                {dataPorExtenso()}
+          <img src={fundo} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(180deg, rgba(18,12,8,0.42) 0%, rgba(18,12,8,0.58) 46%, rgba(18,12,8,0.78) 100%)" }}
+          />
+          <div className="relative flex h-full min-h-[420px] flex-col items-center text-center px-8 pt-10 pb-8">
+            <div className="flex flex-col items-center">
+              <img src={LOGO} alt="" className="h-16 w-16" />
+              <p className="font-tan-mon-cheri text-[1.65rem] leading-none mt-3" style={{ color: "#f7f2ec" }}>
+                {LP_PORTAL_NAME}
               </p>
-              <p className="font-tan-mon-cheri text-xl leading-snug" style={{ color: "#f7f2ec" }}>
+            </div>
+
+            <div className="flex flex-1 w-full flex-col items-center justify-center">
+              <p className="text-[11px] tracking-[0.28em] uppercase" style={{ color: "#c8a56b" }}>
+                {data}
+              </p>
+              <div className="my-5 h-px w-12" style={{ background: "rgba(200,165,107,0.85)" }} />
+              <p
+                className="font-tan-mon-cheri max-w-[18rem] leading-snug"
+                style={{ color: "#f7f2ec", fontSize: tamanhoReflexao(hoje.reflexao) }}
+              >
                 {hoje.reflexao}
               </p>
             </div>
+
+            <p className="mt-8 text-[11px] tracking-[0.22em] uppercase" style={{ color: "#c8a56b" }}>
+              portaliluminando.com.br
+            </p>
           </div>
         </div>
 

@@ -251,8 +251,8 @@ export default function JornadaPage() {
                                 }}
                               >
                                 {s === "locked"
-                                  ? "Completa o passo anterior (análise + minicurso)"
-                                  : "Introdução → análise → minicurso para aprofundar"}
+                                  ? "Completa a análise do passo anterior"
+                                  : "Introdução e análise"}
                               </p>
                               {s !== "locked" && (
                                 <p className="text-[11px] mt-2 line-clamp-3" style={{ color: "rgba(247,242,236,0.3)" }}>
@@ -316,8 +316,7 @@ export default function JornadaPage() {
                 Em desenvolvimento
               </p>
               <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.22)" }}>
-                Numerologia aprofundada, diagnóstico emocional integrado e novos percursos — brevemente com a mesma
-                estrutura (vídeo → análise → minicurso).
+                Numerologia aprofundada, diagnóstico emocional integrado e novos percursos.
               </p>
             </div>
           </div>

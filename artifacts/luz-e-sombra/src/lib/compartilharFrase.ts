@@ -1,5 +1,7 @@
 const PORTAL_URL = "https://portaliluminando.com.br";
+const PORTAL_NOME = "Portal Iluminando";
 const FUNDO = "/images/peao.jpeg";
+const LOGO = "/logo-luxury.svg";
 
 function quebrar(ctx: CanvasRenderingContext2D, texto: string, max: number): string[] {
   const palavras = texto.split(" ");
@@ -18,7 +20,43 @@ function quebrar(ctx: CanvasRenderingContext2D, texto: string, max: number): str
   return linhas;
 }
 
-async function cartaoStories(frase: string): Promise<File | null> {
+function carregarImagem(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const el = new Image();
+    el.onload = () => resolve(el);
+    el.onerror = () => reject(new Error(src));
+    el.src = src;
+  });
+}
+
+function textoEspacado(ctx: CanvasRenderingContext2D, texto: string, x: number, y: number, espaco: number) {
+  const chars = [...texto];
+  const largura = chars.reduce((soma, char) => soma + ctx.measureText(char).width, 0) + espaco * (chars.length - 1);
+  let cursor = x - largura / 2;
+  const alinhamento = ctx.textAlign;
+  ctx.textAlign = "left";
+  for (const char of chars) {
+    ctx.fillText(char, cursor, y);
+    cursor += ctx.measureText(char).width + espaco;
+  }
+  ctx.textAlign = alinhamento;
+}
+
+function linhasQueCabem(ctx: CanvasRenderingContext2D, frase: string, maxLargura: number, maxAltura: number) {
+  let tamanho = 78;
+  while (tamanho >= 42) {
+    ctx.font = `500 ${tamanho}px "Tan Mon Cheri", serif`;
+    const linhas = quebrar(ctx, frase, maxLargura);
+    const altura = linhas.length * tamanho * 1.35;
+    if (altura <= maxAltura) return { tamanho, linhas, altura };
+    tamanho -= 2;
+  }
+  ctx.font = `500 42px "Tan Mon Cheri", serif`;
+  const linhas = quebrar(ctx, frase, maxLargura);
+  return { tamanho: 42, linhas, altura: linhas.length * 42 * 1.35 };
+}
+
+async function cartaoStories(frase: string, data?: string, fundo: string = FUNDO): Promise<File | null> {
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
   canvas.height = 1920;
@@ -29,12 +67,7 @@ async function cartaoStories(frase: string): Promise<File | null> {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   try {
-    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const el = new Image();
-      el.onload = () => resolve(el);
-      el.onerror = () => reject(new Error("fundo"));
-      el.src = FUNDO;
-    });
+    const img = await carregarImagem(fundo);
     const escala = Math.max(canvas.width / img.width, canvas.height / img.height);
     const w = img.width * escala;
     const h = img.height * escala;
@@ -43,23 +76,54 @@ async function cartaoStories(frase: string): Promise<File | null> {
     /* fundo sólido já pintado */
   }
 
-  ctx.fillStyle = "rgba(18,12,8,0.55)";
+  const velatura = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  velatura.addColorStop(0, "rgba(18,12,8,0.42)");
+  velatura.addColorStop(0.46, "rgba(18,12,8,0.58)");
+  velatura.addColorStop(1, "rgba(18,12,8,0.78)");
+  ctx.fillStyle = velatura;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#c8a56b";
-  ctx.font = "600 36px sans-serif";
+  try {
+    await document.fonts.load('500 78px "Tan Mon Cheri"');
+  } catch {
+    /* segue com a fonte disponível */
+  }
+
   ctx.textAlign = "center";
-  ctx.fillText("PORTAL ILUMINANDO", canvas.width / 2, 280);
+  ctx.textBaseline = "middle";
+
+  try {
+    const logo = await carregarImagem(LOGO);
+    ctx.drawImage(logo, (canvas.width - 210) / 2, 250, 210, 210);
+  } catch {
+    /* o nome abaixo ainda identifica a origem */
+  }
 
   ctx.fillStyle = "#f7f2ec";
-  ctx.font = "500 54px serif";
-  const linhas = quebrar(ctx, frase, 860);
-  const topo = 820 - (linhas.length * 72) / 2;
-  linhas.forEach((linha, i) => ctx.fillText(linha, canvas.width / 2, topo + i * 72));
+  ctx.font = '500 72px "Tan Mon Cheri", serif';
+  ctx.fillText(PORTAL_NOME, canvas.width / 2, 540);
+
+  if (data) {
+    ctx.fillStyle = "#c8a56b";
+    ctx.font = "600 30px sans-serif";
+    textoEspacado(ctx, data, canvas.width / 2, 760, 6);
+  }
+
+  ctx.fillStyle = "rgba(200,165,107,0.9)";
+  ctx.fillRect(canvas.width / 2 - 70, 820, 140, 3);
+
+  const zonaTopo = 880;
+  const zonaAltura = 640;
+  const bloco = linhasQueCabem(ctx, frase, 840, zonaAltura);
+  ctx.fillStyle = "#f7f2ec";
+  ctx.font = `500 ${bloco.tamanho}px "Tan Mon Cheri", serif`;
+  const passo = bloco.tamanho * 1.35;
+  const inicio = zonaTopo + (zonaAltura - bloco.altura) / 2 + passo / 2;
+  bloco.linhas.forEach((linha, i) => ctx.fillText(linha, canvas.width / 2, inicio + i * passo));
 
   ctx.fillStyle = "#c8a56b";
-  ctx.font = "500 32px sans-serif";
-  ctx.fillText("portaliluminando.com.br", canvas.width / 2, 1680);
+  ctx.font = "600 30px sans-serif";
+  textoEspacado(ctx, "portaliluminando.com.br", canvas.width / 2, 1640, 4);
 
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!blob) return null;
@@ -71,9 +135,9 @@ export function textoCompartilhar(frase: string): string {
 }
 
 /** Abre a folha do celular (Stories ou WhatsApp). No computador, copia e abre o WhatsApp. */
-export async function compartilharFrase(frase: string): Promise<"nativo" | "whatsapp"> {
+export async function compartilharFrase(frase: string, data?: string, fundo?: string): Promise<"nativo" | "whatsapp"> {
   const texto = textoCompartilhar(frase);
-  const arquivo = await cartaoStories(frase);
+  const arquivo = await cartaoStories(frase, data, fundo);
 
   if (typeof navigator.share === "function") {
     if (arquivo && navigator.canShare?.({ files: [arquivo] })) {

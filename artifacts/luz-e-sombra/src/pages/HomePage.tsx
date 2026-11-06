@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { dataPorExtenso, fraseDoDia } from "@/lib/frasesAno";
+import { dataDiaMes, dataPorExtenso, fraseDoDia } from "@/lib/frasesAno";
+import { imagemDoDia } from "@/lib/imagemDoDia";
 import { momentoDoDia } from "@/lib/momentoDoDia";
 import { toast } from "sonner";
 import { Bell } from "lucide-react";
 import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
-import { LP_PORTAL_NAME } from "@/lib/lpConfig";
 import {
   Check,
   ChevronRight,
@@ -128,36 +128,31 @@ export default function HomePage() {
     <div className="min-h-screen pb-28 journey-forest-bg">
       <div className="max-w-lg mx-auto">
         <div className="relative overflow-hidden" style={{ minHeight: 460 }}>
-          <img src="/images/peao.jpeg" alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <img src={imagemDoDia()} alt="" className="absolute inset-0 h-full w-full object-cover" />
           <div
             className="absolute inset-0"
             style={{ background: "linear-gradient(180deg, rgba(18,12,8,0.28) 0%, rgba(18,12,8,0.45) 42%, rgba(18,12,8,0.82) 100%)" }}
           />
-          <div className="relative flex min-h-[460px] flex-col px-4 pt-4 pb-5">
-            <div className="flex items-center justify-between gap-3 md:hidden">
-              <span className="font-tan-mon-cheri text-base tracking-wide truncate" style={{ color: "#f7f2ec" }}>
-                {LP_PORTAL_NAME}
-              </span>
-              <button
-                type="button"
-                onClick={() => navigate("/notificacoes")}
-                className="relative flex items-center justify-center w-9 h-9 rounded-full shrink-0"
-                style={{ background: "rgba(18,12,8,0.35)", border: "1px solid rgba(247,242,236,0.2)" }}
-                title="Notificações"
-              >
-                <Bell className="w-4 h-4" style={{ color: "#f7f2ec" }} />
-                {notiCount > 0 && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-0.5"
-                    style={{ background: "#c8a56b", color: "#130f09" }}
-                  >
-                    {notiCount > 99 ? "99+" : notiCount}
-                  </span>
-                )}
-              </button>
-            </div>
+          <div className="relative flex min-h-[460px] flex-col px-6 pt-5 pb-8">
+            <button
+              type="button"
+              onClick={() => navigate("/notificacoes")}
+              className="absolute top-4 right-4 md:hidden flex items-center justify-center w-9 h-9 rounded-full"
+              style={{ background: "rgba(18,12,8,0.35)", border: "1px solid rgba(247,242,236,0.2)" }}
+              title="Notificações"
+            >
+              <Bell className="w-4 h-4" style={{ color: "#f7f2ec" }} />
+              {notiCount > 0 && (
+                <span
+                  className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-0.5"
+                  style={{ background: "#c8a56b", color: "#130f09" }}
+                >
+                  {notiCount > 99 ? "99+" : notiCount}
+                </span>
+              )}
+            </button>
 
-            <div className="mt-8 md:mt-6">
+            <div className="pr-12 md:pr-0">
               <p className="text-[11px] font-semibold tracking-[0.22em] uppercase" style={{ color: "#c8a56b" }}>
                 {dataPorExtenso()}
               </p>
@@ -169,17 +164,17 @@ export default function HomePage() {
               </h1>
             </div>
 
-            <div className="mt-auto pt-8">
-              <p className="font-tan-mon-cheri text-xl leading-snug" style={{ color: "#f7f2ec" }}>
+            <div className="mt-auto flex flex-col items-center text-center pt-8">
+              <p className="font-tan-mon-cheri text-2xl leading-snug max-w-[18rem]" style={{ color: "#f7f2ec" }}>
                 {hoje.frase}
               </p>
               <button
                 type="button"
                 onClick={() => navigate("/reflexao")}
-                className="inline-flex items-center mt-4 rounded-full px-5 py-2.5 text-sm font-semibold"
+                className="mt-5 rounded-full px-6 py-2.5 text-sm font-semibold"
                 style={{ background: "rgba(247,242,236,0.92)", color: "#1a1208" }}
               >
-                Ver detalhes
+                Refletir
               </button>
             </div>
           </div>
@@ -294,7 +289,7 @@ export default function HomePage() {
           }}
         >
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: "#c8a56b" }}>
-            Seu momento
+            Seu momento {dataDiaMes()}
           </p>
           {reflexaoMomento ? (
             <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.78)" }}>

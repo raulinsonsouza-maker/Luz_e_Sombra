@@ -40,15 +40,8 @@ select {
   font-weight: 400;
 }
 
-/* Visual identity inspired by the "caminho do peão" artwork */
 .journey-forest-bg {
-  background:
-    linear-gradient(160deg, rgba(8, 7, 5, 0.78) 0%, rgba(20, 15, 10, 0.86) 45%, rgba(36, 26, 18, 0.92) 100%),
-    radial-gradient(1000px 560px at 78% 8%, rgba(255, 213, 130, 0.2), transparent 60%),
-    url("/images/peao.jpeg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-color: #1f1710;
 }
 
 .journey-card-glow {
