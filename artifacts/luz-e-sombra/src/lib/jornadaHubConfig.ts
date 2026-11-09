@@ -65,11 +65,11 @@ export const JORNADA_HUB_COPY: Record<
       "As cinco linguagens do amor, descubra como você pede afeto, como você o demonstra e o que isso muda nas suas relações.",
     introTexto: [
       "Cada pessoa dá e recebe afeto de um jeito diferente. As cinco linguagens do amor — palavras de afirmação, tempo de qualidade, presentes, atos de serviço e toque físico — ajudam a entender por que certas relações fluem e outras parecem sempre em descompasso.",
-      "O questionário tem 30 escolhas rápidas: metade sobre como você prefere receber carinho, metade sobre como você naturalmente o expressa. Muitas vezes essas duas dimensões são diferentes — e saber disso muda tudo nas suas relações.",
+      "O questionário tem 30 escolhas rápidas: metade sobre como você prefere receber afeto, metade sobre como você naturalmente o expressa. Muitas vezes essas duas dimensões são diferentes — e saber disso muda tudo nas suas relações.",
       "Reserve alguns minutos e responda com o que você realmente sente, não com o que acha que deveria sentir. O resultado mostra suas linguagens principais e secundárias em cada dimensão.",
     ],
     introBullets: [
-      "Como você prefere receber afeto e carinho",
+      "Como você prefere receber afeto",
       "Como você naturalmente demonstra amor aos outros",
       "Insights para melhorar relações pessoais e familiares",
     ],

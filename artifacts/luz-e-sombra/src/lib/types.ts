@@ -205,6 +205,6 @@ export const AREAS_DA_VIDA: AreaDaVida[] = [
       'Há uma versão de você que adorava fazer algo, desenhar, cozinhar, jogar, cantar, dançar, escrever, que foi gradualmente abandonada pela vida adulta séria?',
     ],
     baixo: 'Vida dominada por obrigações e produtividade. Lazer visto como "perda de tempo". Criatividade suprimida. Pouca ou nenhuma leveza no cotidiano.',
-    alto: 'Espaço regular para jogo, criação e alegria pura. Hobbies cultivados com carinho. Leveza, humor e espontaneidade como partes integrantes da vida.',
+    alto: 'Espaço regular para jogo, criação e alegria pura. Hobbies cultivados com presença. Leveza, humor e espontaneidade como partes integrantes da vida.',
   },
 ]

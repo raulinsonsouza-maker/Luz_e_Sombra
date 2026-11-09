@@ -62,7 +62,7 @@ export const DIAS_PESSOAIS: Record<number, EnergiaNumerologica> = {
     descricao:
       "Hoje favorece o concreto: rotina, contas, organização e o trabalho que ninguém vê — mas que sustenta o resto.",
     profundidade:
-      "É um dia de ofício e chão. O que está emperrado por falta de ordem pode andar se você tratar o detalhe com carinho e seriedade. Pode parecer sem brilho; ainda assim é fundação. Se surgir vontade de ‘entregar algo enorme’, responda com um bloco real de trabalho, não com fantasia de escala. Escolha uma tarefa e conclua. Atalho hoje vira retrabalho amanhã.",
+      "É um dia de ofício e chão. O que está emperrado por falta de ordem pode andar se você tratar o detalhe com atenção e seriedade. Pode parecer sem brilho; ainda assim é fundação. Se surgir vontade de ‘entregar algo enorme’, responda com um bloco real de trabalho, não com fantasia de escala. Escolha uma tarefa e conclua. Atalho hoje vira retrabalho amanhã.",
     clima: "Organização, disciplina suave, casa, finanças práticas e entrega pontual.",
     sombra: "Rigidez, sobrecarga ou perfeccionismo que impede entregar.",
     reflexao: "Qual pendência concreta, se fechada hoje, libera o resto?",

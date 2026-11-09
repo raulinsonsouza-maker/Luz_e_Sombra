@@ -42,7 +42,7 @@ export function PausaDoDiaModal({ open, onClose, prompt, onSaved }: Props) {
     setSaving(true);
     try {
       salvarPercepcao({ mood, text });
-      toast.success("Seu momento foi guardado com carinho.");
+      toast.success("Seu momento foi guardado.");
       onSaved?.();
       onClose();
     } catch (err) {

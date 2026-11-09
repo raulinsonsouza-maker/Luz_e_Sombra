@@ -16,11 +16,10 @@ import { PausaDoDiaModal } from "@/components/PausaDoDiaModal";
 import {
   ChevronRight,
   Map,
-  Users2,
-  GraduationCap,
   FileText,
   Leaf,
-  ChartLine,
+  Bookmark,
+  User,
 } from "lucide-react";
 
 interface Progresso {
@@ -46,10 +45,9 @@ function saudacao() {
 }
 
 const QUICK_ACTIONS = [
-  { label: "Comunidade", sub: "Espaço compartilhado", icon: Users2, href: "/comunidade" },
-  { label: "Jornada", sub: "Sua trilha", icon: Map, href: "/jornada" },
-  { label: "Acompanhamento", sub: "Revisite suas percepções", icon: ChartLine, href: "/acompanhamento" },
-  { label: "Cursos", sub: "Em breve", icon: GraduationCap, href: "/cursos" },
+  { label: "Dossiê de Vida", sub: "Sua síntese integrada", icon: FileText, href: "/quem-sou-eu" },
+  { label: "Frases guardadas", sub: "Palavras para levar com você", icon: Bookmark, href: "/frases-guardadas" },
+  { label: "Meu perfil", sub: "Dados e preferências", icon: User, href: "/perfil" },
 ] as const;
 
 export default function HomePage() {
@@ -424,9 +422,9 @@ export default function HomePage() {
         {/* Explorar */}
         <div className="mb-6">
           <p className="text-xs font-semibold tracking-wider uppercase mb-3" style={{ color: "rgba(200,165,107,0.5)" }}>
-            Explorar
+            Continuar
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {QUICK_ACTIONS.map(({ label, sub, icon: Icon, href }) => (
               <button
                 key={href}
@@ -597,48 +595,114 @@ function MomentoAbas({
         {bloco.profundidade}
       </p>
 
-      {aba === "coletivo" && momento.coletivo.anoUniversal && (
-        <p className="text-[11px] leading-relaxed mb-3" style={{ color: "rgba(200,165,107,0.65)" }}>
-          No clima deste ano: {momento.coletivo.anoUniversal.tema}
-        </p>
-      )}
-
-      <div className="space-y-2 mb-3">
-        <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
-          <span className="font-semibold" style={{ color: "#c8a56b" }}>
-            O que ajuda:{" "}
-          </span>
-          {bloco.clima}
-        </p>
-        <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
-          <span className="font-semibold" style={{ color: "rgba(200,165,107,0.85)" }}>
-            Com cuidado:{" "}
-          </span>
-          {bloco.sombra}
-        </p>
+      <div className="space-y-3 mb-4">
+        <div
+          className="rounded-2xl px-3.5 py-3"
+          style={{
+            background: "rgba(200,165,107,0.07)",
+            border: "1px solid rgba(200,165,107,0.16)",
+          }}
+        >
+          <p
+            className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-1.5"
+            style={{ color: "#c8a56b" }}
+          >
+            O que fazer
+          </p>
+          <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.78)" }}>
+            {bloco.clima}
+          </p>
+        </div>
+        <div
+          className="rounded-2xl px-3.5 py-3"
+          style={{
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(200,165,107,0.12)",
+          }}
+        >
+          <p
+            className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-1.5"
+            style={{ color: "rgba(200,165,107,0.8)" }}
+          >
+            Pontos de atenção
+          </p>
+          <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)" }}>
+            {bloco.sombra}
+          </p>
+        </div>
       </div>
 
       {bloco.palavrasChave.length > 0 && (
-        <p className="text-[10px] tracking-wide mb-3" style={{ color: "rgba(200,165,107,0.45)" }}>
-          {bloco.palavrasChave.join(" · ")}
-        </p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {bloco.palavrasChave.map((palavra) => (
+            <span
+              key={palavra}
+              className="text-xs px-2.5 py-1 rounded-full"
+              style={{
+                background: "rgba(200,165,107,0.1)",
+                color: "rgba(200,165,107,0.85)",
+                border: "1px solid rgba(200,165,107,0.2)",
+              }}
+            >
+              {palavra}
+            </span>
+          ))}
+        </div>
       )}
 
-      <p className="text-xs italic mb-3" style={{ color: "rgba(247,242,236,0.5)" }}>
-        {bloco.reflexao.replace(/^["“]|["”]$/g, "")}
-      </p>
+      <div
+        className="rounded-2xl px-3.5 py-3.5 mb-4"
+        style={{
+          background: "rgba(255,255,255,0.02)",
+          border: "1px solid rgba(200,165,107,0.14)",
+        }}
+      >
+        <p
+          className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-2"
+          style={{ color: "#c8a56b" }}
+        >
+          Para refletir
+        </p>
+        <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.78)" }}>
+          {bloco.reflexao.replace(/^["“]|["”]$/g, "")}
+        </p>
+      </div>
 
       {acoes.length > 0 && (
-        <ul className="space-y-1.5 mb-4">
-          {acoes.map((acao) => (
-            <li key={acao} className="text-xs leading-relaxed flex gap-2" style={{ color: "rgba(247,242,236,0.62)" }}>
-              <span style={{ color: "#c8a56b" }} aria-hidden>
-                ·
-              </span>
-              <span>{acao}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="mb-4">
+          <p
+            className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-2.5"
+            style={{ color: "#c8a56b" }}
+          >
+            Convites do dia
+          </p>
+          <ul className="space-y-2">
+            {acoes.map((acao, i) => (
+              <li
+                key={acao}
+                className="rounded-2xl px-3.5 py-3 flex gap-3"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(200,165,107,0.12)",
+                }}
+              >
+                <span
+                  className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[11px] font-semibold"
+                  style={{
+                    background: "rgba(200,165,107,0.14)",
+                    color: "#c8a56b",
+                  }}
+                  aria-hidden
+                >
+                  {i + 1}
+                </span>
+                <span className="text-sm leading-relaxed pt-0.5" style={{ color: "rgba(247,242,236,0.75)" }}>
+                  {acao}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       <button

@@ -57,7 +57,7 @@ export default function FrasesGuardadasPage() {
       <MobileTopBar titulo="Frases guardadas" voltar="/perfil" />
       <div className="max-w-lg mx-auto px-4 pt-6">
         <PageIntroHeader
-          eyebrow="Para revisitar com carinho"
+          eyebrow="Para revisitar"
           titulo="Suas pequenas reservas de luz."
           subtitulo="Palavras que encontraram um lugar em você. Volte a elas sempre que precisar."
           className="mb-6"
@@ -66,7 +66,7 @@ export default function FrasesGuardadasPage() {
 
         <div className="md:hidden mb-6">
           <p className="text-[10px] font-bold tracking-[0.22em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.55)" }}>
-            Para revisitar com carinho
+            Para revisitar
           </p>
           <h1 className="font-tan-mon-cheri text-2xl mb-2" style={{ color: "#f7f2ec" }}>
             Suas pequenas reservas de luz.
