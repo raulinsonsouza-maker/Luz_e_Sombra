@@ -59,7 +59,7 @@ export default function MissaoDiariaCard({ missao, concluindo = false, onConclui
           color: done ? "rgba(93,185,122,0.7)" : "#c8a56b",
         }}
       >
-        +{missao.xpRecompensa} XP
+        +{missao.xpRecompensa} Luzes
       </span>
     </>
   );

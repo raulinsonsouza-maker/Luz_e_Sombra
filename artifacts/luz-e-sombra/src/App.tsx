@@ -32,6 +32,7 @@ import QuemSouEuPage from "@/pages/QuemSouEuPage";
 import NotificacoesPage from "@/pages/NotificacoesPage";
 import ReflexaoPage from "@/pages/ReflexaoPage";
 import FrasesGuardadasPage from "@/pages/FrasesGuardadasPage";
+import AcompanhamentoPage from "@/pages/AcompanhamentoPage";
 import TracoPreviewPage from "@/pages/dev/TracoPreviewPage";
 
 function ProtectedRoute({ component: Component, adminOnly = false }: { component: React.ComponentType; adminOnly?: boolean }) {
@@ -73,6 +74,9 @@ function Router() {
         </Route>
         <Route path="/frases-guardadas">
           <ProtectedRoute component={FrasesGuardadasPage} />
+        </Route>
+        <Route path="/acompanhamento">
+          <ProtectedRoute component={AcompanhamentoPage} />
         </Route>
         <Route path="/jornada/:slug">
           <ProtectedRoute component={JornadaHubPage} />

@@ -280,7 +280,7 @@ export default function JornadaPage() {
                           {s !== "locked" && (
                             <div className="flex items-center gap-1 mt-3">
                               <span className="text-[10px]" style={{ color: "rgba(200,165,107,0.4)" }}>
-                                +{xp} XP (análise)
+                                +{xp} Luzes (análise)
                               </span>
                             </div>
                           )}

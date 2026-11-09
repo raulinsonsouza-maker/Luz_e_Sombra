@@ -1,4 +1,4 @@
-import { ANOS_UNIVERSAIS } from "@/lib/numerologia-data";
+import { ANOS_PESSOAIS, ANOS_UNIVERSAIS } from "@/lib/numerologia-data";
 import { DIAS_COLETIVOS } from "@/lib/numerologia/diasColetivos";
 import { DIAS_PESSOAIS } from "@/lib/numerologia/diasPessoais";
 import { MESES_PESSOAIS } from "@/lib/numerologia/mesesPessoais";
@@ -21,9 +21,17 @@ export type MomentoColetivo = BlocoMomento & {
 
 export type MomentoNumerologico = {
   dataLabel: string;
+  /** Ano pessoal vigente (preserva mestres). */
+  anoPessoal: { n: number; titulo?: string };
+  /** Mês pessoal (número). */
+  mesPessoalN: number;
   dia: BlocoMomento;
   mes: BlocoMomento;
   coletivo: MomentoColetivo;
+  /** Rótulos de contexto para a UI. */
+  contextoDia: string;
+  contextoMes: string;
+  contextoColetivo: string;
 };
 
 function blocoDe(
@@ -44,17 +52,32 @@ export function momentoNumerologico(
   const nColetivo = calcularDiaUniversal(data);
   const anoUniv = calcularAnoUniversal(data.getFullYear());
   const analiseAno = ANOS_UNIVERSAIS[anoUniv.reduzido];
+  const anoPessoalInfo = ANOS_PESSOAIS[numeros.ciclo];
+
+  const dia = blocoDe(numeros.hoje, DIAS_PESSOAIS);
+  const mes = blocoDe(numeros.periodo, MESES_PESSOAIS);
+  const coletivoBase = blocoDe(nColetivo, DIAS_COLETIVOS);
 
   return {
     dataLabel: dataDiaMes(data),
-    dia: blocoDe(numeros.hoje, DIAS_PESSOAIS),
-    mes: blocoDe(numeros.periodo, MESES_PESSOAIS),
+    anoPessoal: {
+      n: numeros.ciclo,
+      titulo: anoPessoalInfo?.titulo,
+    },
+    mesPessoalN: numeros.periodo,
+    dia,
+    mes,
     coletivo: {
-      ...blocoDe(nColetivo, DIAS_COLETIVOS),
+      ...coletivoBase,
       anoUniversal: analiseAno
         ? { n: anoUniv.reduzido, tema: analiseAno.temaGeral }
         : undefined,
     },
+    contextoDia: `Dia ${numeros.hoje} · mês pessoal ${numeros.periodo} · ano pessoal ${numeros.ciclo}`,
+    contextoMes: `Mês pessoal ${numeros.periodo} · ano pessoal ${numeros.ciclo}`,
+    contextoColetivo: analiseAno
+      ? `Dia universal ${nColetivo} · ano universal ${anoUniv.reduzido}`
+      : `Dia universal ${nColetivo}`,
   };
 }
 

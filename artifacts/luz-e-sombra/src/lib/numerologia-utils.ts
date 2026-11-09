@@ -8,10 +8,13 @@ export interface MesPessoal {
   energia: string
   descricao: string
   profundidade: string
+  clima: string
+  sombra: string
   reflexao: string
   acoes: string[]
   evitar: string[]
   areas: string[]
+  palavrasChave: string[]
 }
 
 // ─── Digit helpers ─────────────────────────────────────────────────────────
@@ -243,10 +246,13 @@ function gerarDescricaoMesPessoal(numeroMesCalendario: number, numeroEnergia: nu
     titulo: 'Mês para juntar o que já aparece',
     descricao: 'Este mês pede que você junte o que os meses anteriores já mostraram, sem abrir frente nova.',
     profundidade: 'Olhe o que ficou pendente e escolha uma coisa para concluir. O resto pode esperar.',
+    clima: 'Consolidar o que já começou.',
+    sombra: 'Abrir frente nova por ansiedade.',
     reflexao: '"O que este mês já te mostrou e você ainda não usou?"',
     acoes: [] as string[],
     evitar: [] as string[],
     areas: [] as string[],
+    palavrasChave: [] as string[],
   }
 
   return {
@@ -257,9 +263,12 @@ function gerarDescricaoMesPessoal(numeroMesCalendario: number, numeroEnergia: nu
     energia: info.energia,
     descricao: info.descricao,
     profundidade: info.profundidade,
+    clima: info.clima,
+    sombra: info.sombra,
     reflexao: info.reflexao,
     acoes: info.acoes,
     evitar: info.evitar,
     areas: info.areas,
+    palavrasChave: info.palavrasChave,
   }
 }

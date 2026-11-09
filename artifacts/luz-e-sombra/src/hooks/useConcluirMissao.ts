@@ -43,7 +43,7 @@ export function useConcluirMissao(
           if (data.leveledUp) {
             onLevelUp?.({ nivel: data.nivel, nomeNivel: data.nomeNivel });
           } else {
-            toast.success(`+${data.xpGanho} XP`);
+            toast.success(`+${data.xpGanho} Luzes`);
           }
         } else {
           const err = await res.json().catch(() => ({}));

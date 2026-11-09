@@ -16,6 +16,7 @@ import { requireAuth, AuthRequest } from "../lib/authMiddleware";
 import { minicursoCompletoParaUsuario } from "./modulosJornada";
 import { temAnalise } from "../lib/temAnaliseJornada";
 import { awardXp, getOrCreateGamificacao } from "../lib/awardXp";
+import { awardLuzDiaria, temLuzEventoHoje, type TipoLuzEvento } from "../lib/awardLuz";
 
 const router = Router();
 
@@ -137,15 +138,24 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
 
     const numerologiaConcluida = await temAnalise(userId, "numerologia");
 
+    const [momentoLuzHoje, pausaLuzHoje] = await Promise.all([
+      temLuzEventoHoje(userId, "momento"),
+      temLuzEventoHoje(userId, "pausa"),
+    ]);
+
     res.json({
       xp: gam.xp,
       luzes: gam.luzes ?? 0,
       conviteConcluido: !!conviteHoje,
+      momentoLuzHoje,
+      pausaLuzHoje,
       nivel: nivelInfo.nivel,
       nomeNivel: nivelInfo.nome,
       descNivel: nivelInfo.desc,
       xpNoNivel,
       xpParaProximo,
+      luzesNoNivel: xpNoNivel,
+      luzesParaProximo: xpParaProximo,
       streakDias: gam.streakDias,
       melhorStreak: gam.melhorStreak,
       missoes: [],
@@ -162,6 +172,28 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Erro ao buscar progresso" });
+  }
+});
+
+router.post("/luz/:tipo", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const tipoRaw = String(req.params.tipo || "");
+    if (tipoRaw !== "momento" && tipoRaw !== "pausa") {
+      return res.status(400).json({ error: "Tipo de luz inválido" });
+    }
+    const tipo = tipoRaw as TipoLuzEvento;
+    const result = await awardLuzDiaria(req.user!.id, tipo);
+    if (result.already) {
+      return res.status(400).json({
+        error: "Luz já recebida hoje",
+        already: true,
+        luzes: result.luzes,
+      });
+    }
+    return res.json({ success: true, luzes: result.luzes, tipo });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Erro ao conceder luz" });
   }
 });
 

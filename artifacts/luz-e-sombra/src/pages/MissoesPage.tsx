@@ -55,11 +55,11 @@ const CONQUISTAS: ConquistaItem[] = [
   { id: "sete-dias", icon: Flame, titulo: "7 Dias Seguidos", desc: "Mantenha sequência por 7 dias", xp: 100, desbloqueada: false },
   { id: "quinze-dias", icon: Flame, titulo: "Constância de 15 Dias", desc: "Mantenha sequência por 15 dias", xp: 180, desbloqueada: false },
   { id: "trinta-dias", icon: Flame, titulo: "Constância de 30 Dias", desc: "Mantenha sequência por 30 dias", xp: 300, desbloqueada: false },
-  { id: "xp-100", icon: Zap, titulo: "Energia Inicial", desc: "Alcance 100 XP", xp: 70, desbloqueada: false },
-  { id: "xp-300", icon: Star, titulo: "Autoconhecedor", desc: "Alcance 300 XP", xp: 150, desbloqueada: false },
-  { id: "xp-750", icon: Award, titulo: "Disciplina Viva", desc: "Alcance 750 XP", xp: 220, desbloqueada: false },
-  { id: "xp-1500", icon: Award, titulo: "Mente Forte", desc: "Alcance 1500 XP", xp: 320, desbloqueada: false },
-  { id: "xp-3000", icon: Award, titulo: "Mestre da Prática", desc: "Alcance 3000 XP", xp: 500, desbloqueada: false },
+  { id: "xp-100", icon: Zap, titulo: "Energia Inicial", desc: "Alcance 100 Luzes", xp: 70, desbloqueada: false },
+  { id: "xp-300", icon: Star, titulo: "Autoconhecedor", desc: "Alcance 300 Luzes", xp: 150, desbloqueada: false },
+  { id: "xp-750", icon: Award, titulo: "Disciplina Viva", desc: "Alcance 750 Luzes", xp: 220, desbloqueada: false },
+  { id: "xp-1500", icon: Award, titulo: "Mente Forte", desc: "Alcance 1500 Luzes", xp: 320, desbloqueada: false },
+  { id: "xp-3000", icon: Award, titulo: "Mestre da Prática", desc: "Alcance 3000 Luzes", xp: 500, desbloqueada: false },
   { id: "nivel-2", icon: Gem, titulo: "Observador", desc: "Alcance o Nível 2", xp: 200, desbloqueada: false },
   { id: "nivel-3", icon: Compass, titulo: "Explorador", desc: "Alcance o Nível 3", xp: 260, desbloqueada: false },
   { id: "nivel-4", icon: Mountain, titulo: "Transformador", desc: "Alcance o Nível 4", xp: 360, desbloqueada: false },
@@ -296,7 +296,7 @@ export default function MissoesPage() {
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-xs font-bold" style={{ color: c.desbloqueada ? "#c8a56b" : "rgba(200,165,107,0.3)" }}>
-                    +{c.xp} XP
+                    +{c.xp} Luzes
                   </p>
                   {c.desbloqueada ? (
                     <Trophy className="w-4 h-4 mt-1 ml-auto" style={{ color: "#c8a56b" }} />

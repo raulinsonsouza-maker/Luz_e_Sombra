@@ -6,21 +6,28 @@ import { dataDiaMes, dataPorExtenso } from "@/lib/frasesAno";
 import { buscarConteudoDia, type ConteudoDia } from "@/lib/conteudoDia";
 import { momentoNumerologico, type MomentoNumerologico } from "@/lib/momentoDoDia";
 import { coresSobreFoto, detectarTomLogo, srcLogo, type TomLogo } from "@/lib/tomLogoPorFundo";
+import { temPercepcaoHoje } from "@/lib/percepcoes";
+import { pedirLuz } from "@/lib/pedirLuz";
 import { toast } from "sonner";
 import { Bell } from "lucide-react";
 import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
 import { LuzIcon } from "@/components/LuzIcon";
+import { PausaDoDiaModal } from "@/components/PausaDoDiaModal";
 import {
   ChevronRight,
   Map,
   Users2,
   GraduationCap,
   FileText,
+  Leaf,
+  ChartLine,
 } from "lucide-react";
 
 interface Progresso {
   luzes: number;
   conviteConcluido: boolean;
+  momentoLuzHoje?: boolean;
+  pausaLuzHoje?: boolean;
   jornada: {
     traco: boolean;
     temperamento?: boolean;
@@ -41,6 +48,7 @@ function saudacao() {
 const QUICK_ACTIONS = [
   { label: "Comunidade", sub: "Espaço compartilhado", icon: Users2, href: "/comunidade" },
   { label: "Jornada", sub: "Sua trilha", icon: Map, href: "/jornada" },
+  { label: "Acompanhamento", sub: "Revisite suas percepções", icon: ChartLine, href: "/acompanhamento" },
   { label: "Cursos", sub: "Em breve", icon: GraduationCap, href: "/cursos" },
 ] as const;
 
@@ -54,6 +62,12 @@ export default function HomePage() {
   const [tomLogo, setTomLogo] = useState<TomLogo>("claro");
   const [conteudo, setConteudo] = useState<ConteudoDia | null>(null);
   const [abaMomento, setAbaMomento] = useState<"dia" | "mes" | "coletivo">("dia");
+  const [pausaAberta, setPausaAberta] = useState(false);
+  const [temPausaHoje, setTemPausaHoje] = useState(() => temPercepcaoHoje());
+  const [abasMomentoVistas, setAbasMomentoVistas] = useState<Set<"dia" | "mes" | "coletivo">>(
+    () => new Set(["dia"]),
+  );
+  const [pedindoLuzMomento, setPedindoLuzMomento] = useState(false);
   const { count: notiCount } = useNotificacoesCount();
   const hoje = conteudo;
   const fundo = conteudo?.imagemUrl ?? "";
@@ -129,6 +143,54 @@ export default function HomePage() {
       toast.error("Não foi possível marcar o convite.");
     }
     setConcluindoConvite(false);
+  }
+
+  async function tentarLuzMomento(vistas: Set<"dia" | "mes" | "coletivo">) {
+    if (vistas.size < 3 || progresso?.momentoLuzHoje || pedindoLuzMomento) return;
+    setPedindoLuzMomento(true);
+    const result = await pedirLuz("momento");
+    if (result.ok) {
+      setProgresso((atual) =>
+        atual
+          ? {
+              ...atual,
+              luzes: result.luzes,
+              momentoLuzHoje: true,
+            }
+          : atual,
+      );
+      if (result.nova) setAvisoLuz(true);
+    }
+    setPedindoLuzMomento(false);
+  }
+
+  function onAbaMomento(aba: "dia" | "mes" | "coletivo") {
+    setAbaMomento(aba);
+    setAbasMomentoVistas((prev) => {
+      if (prev.has(aba)) return prev;
+      const next = new Set(prev);
+      next.add(aba);
+      void tentarLuzMomento(next);
+      return next;
+    });
+  }
+
+  async function onPausaSaved() {
+    setTemPausaHoje(true);
+    if (progresso?.pausaLuzHoje) return;
+    const result = await pedirLuz("pausa");
+    if (result.ok) {
+      setProgresso((atual) =>
+        atual
+          ? {
+              ...atual,
+              luzes: result.luzes,
+              pausaLuzHoje: true,
+            }
+          : atual,
+      );
+      if (result.nova) setAvisoLuz(true);
+    }
   }
 
   const etapasInicianteConcluidas = progresso
@@ -270,6 +332,56 @@ export default function HomePage() {
             border: "1px solid rgba(200,165,107,0.16)",
           }}
         >
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <p className="text-sm font-semibold" style={{ color: "#c8a56b" }}>
+              Meu caminho
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate("/acompanhamento")}
+              className="text-xs font-semibold flex items-center gap-0.5"
+              style={{ color: "rgba(200,165,107,0.7)" }}
+            >
+              Ver percepções
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => setPausaAberta(true)}
+            className="w-full rounded-2xl p-3.5 text-left flex items-center gap-3 transition-all active:scale-[0.99]"
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(200,165,107,0.14)",
+            }}
+          >
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: "rgba(200,165,107,0.1)" }}
+            >
+              <Leaf className="w-5 h-5" style={{ color: "#c8a56b" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>
+                {temPausaHoje ? "Seu momento foi guardado" : "Um passo de cada vez"}
+              </p>
+              <p className="text-xs leading-relaxed mt-0.5" style={{ color: "rgba(247,242,236,0.45)" }}>
+                {temPausaHoje
+                  ? "Sua percepção de hoje está aqui. Você pode voltar a ela quando quiser."
+                  : "Como você está se sentindo hoje? Reserve um instante para se escutar."}
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "rgba(200,165,107,0.4)" }} />
+          </button>
+        </div>
+
+        <div
+          className="rounded-3xl p-5 mb-4"
+          style={{
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(200,165,107,0.16)",
+          }}
+        >
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: "#5db97a" }}>
             Convite do dia
           </p>
@@ -302,7 +414,7 @@ export default function HomePage() {
             Seu momento: {momento?.dataLabel ?? dataDiaMes()}
           </p>
           {momento ? (
-            <MomentoAbas momento={momento} aba={abaMomento} onAba={setAbaMomento} />
+            <MomentoAbas momento={momento} aba={abaMomento} onAba={onAbaMomento} />
           ) : (
             <div>
               <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.78)" }}>
@@ -325,7 +437,7 @@ export default function HomePage() {
           <p className="text-xs font-semibold tracking-wider uppercase mb-3" style={{ color: "rgba(200,165,107,0.5)" }}>
             Explorar
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {QUICK_ACTIONS.map(({ label, sub, icon: Icon, href }) => (
               <button
                 key={href}
@@ -381,6 +493,12 @@ export default function HomePage() {
           </button>
         )}
       </div>
+
+      <PausaDoDiaModal
+        open={pausaAberta}
+        onClose={() => setPausaAberta(false)}
+        onSaved={() => void onPausaSaved()}
+      />
     </div>
   );
 }
@@ -402,7 +520,13 @@ function MomentoAbas({
 }) {
   const bloco =
     aba === "dia" ? momento.dia : aba === "mes" ? momento.mes : momento.coletivo;
-  const acoes = bloco.acoes.slice(0, 2);
+  const acoes = bloco.acoes.slice(0, 3);
+  const contexto =
+    aba === "dia"
+      ? momento.contextoDia
+      : aba === "mes"
+        ? momento.contextoMes
+        : momento.contextoColetivo;
 
   return (
     <div>
@@ -470,16 +594,44 @@ function MomentoAbas({
           <p className="text-sm font-semibold leading-snug" style={{ color: "#f7f2ec" }}>
             {bloco.titulo}
           </p>
+          <p className="text-[10px] mt-1 leading-snug" style={{ color: "rgba(200,165,107,0.55)" }}>
+            {contexto}
+          </p>
         </div>
       </div>
 
-      <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.78)" }}>
+      <p className="text-sm leading-relaxed mb-2" style={{ color: "rgba(247,242,236,0.78)" }}>
         {bloco.descricao}
+      </p>
+
+      <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.68)" }}>
+        {bloco.profundidade}
       </p>
 
       {aba === "coletivo" && momento.coletivo.anoUniversal && (
         <p className="text-[11px] leading-relaxed mb-3" style={{ color: "rgba(200,165,107,0.65)" }}>
           Ano universal {momento.coletivo.anoUniversal.n}: {momento.coletivo.anoUniversal.tema}
+        </p>
+      )}
+
+      <div className="space-y-2 mb-3">
+        <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
+          <span className="font-semibold" style={{ color: "#c8a56b" }}>
+            Favorece:{" "}
+          </span>
+          {bloco.clima}
+        </p>
+        <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
+          <span className="font-semibold" style={{ color: "rgba(200,165,107,0.85)" }}>
+            Atenção:{" "}
+          </span>
+          {bloco.sombra}
+        </p>
+      </div>
+
+      {bloco.palavrasChave.length > 0 && (
+        <p className="text-[10px] tracking-wide mb-3" style={{ color: "rgba(200,165,107,0.45)" }}>
+          {bloco.palavrasChave.join(" · ")}
         </p>
       )}
 

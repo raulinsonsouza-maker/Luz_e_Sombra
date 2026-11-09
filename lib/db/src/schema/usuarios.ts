@@ -133,6 +133,21 @@ export const convitesDiariosTable = pgTable("convites_diarios", {
   usuarioDataUnico: unique("convites_diarios_usuario_data").on(table.usuarioId, table.dataReferencia),
 }));
 
+/** +1 Luz por tipo/dia (ex.: leitura do momento, pausa do dia). */
+export const luzesEventosTable = pgTable("luzes_eventos", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  tipo: text("tipo").notNull(),
+  dataReferencia: text("data_referencia").notNull(),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+}, (table) => ({
+  usuarioTipoDataUnico: unique("luzes_eventos_usuario_tipo_data").on(
+    table.usuarioId,
+    table.tipo,
+    table.dataReferencia,
+  ),
+}));
+
 export const missoesDiariasTable = pgTable("missoes_diarias", {
   id: serial("id").primaryKey(),
   usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
@@ -352,6 +367,7 @@ export type FotoTraco = typeof fotosTracoTable.$inferSelect;
 export type AnaliseTraco = typeof analiseTracoTable.$inferSelect;
 export type Gamificacao = typeof gamificacaoTable.$inferSelect;
 export type ConviteDiario = typeof convitesDiariosTable.$inferSelect;
+export type LuzEvento = typeof luzesEventosTable.$inferSelect;
 export type MissaoDiaria = typeof missoesDiariasTable.$inferSelect;
 export type Comunidade = typeof comunidadeTable.$inferSelect;
 export type Reacao = typeof reacoesTable.$inferSelect;

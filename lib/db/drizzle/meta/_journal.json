@@ -71,6 +71,13 @@
       "when": 1762800000000,
       "tag": "0010_numerologia_primeiro_passo",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1762900000000,
+      "tag": "0011_luzes_eventos",
+      "breakpoints": true
     }
   ]
 }

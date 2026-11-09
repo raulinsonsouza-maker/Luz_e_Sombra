@@ -2,11 +2,18 @@
 export type EnergiaNumerologica = {
   energia: string;
   titulo: string;
+  /** Lead curto (2–3 frases). */
   descricao: string;
+  /** Parágrafo denso — texto principal na Home. */
   profundidade: string;
+  /** O que favorece nesta escala. */
+  clima: string;
+  /** Armadilha típica nesta escala. */
+  sombra: string;
   reflexao: string;
   acoes: string[];
   evitar: string[];
+  palavrasChave: string[];
 };
 
 export type EnergiaMesPessoal = EnergiaNumerologica & {
@@ -21,6 +28,20 @@ export function raizDoMestre(n: number): number {
   return n;
 }
 
+const FALLBACK: EnergiaNumerologica = {
+  energia: "Equilibrar",
+  titulo: "Um tempo para juntar o que já aparece",
+  descricao: "Use o que já está claro, sem abrir frente nova.",
+  profundidade:
+    "Escolha uma pendência e avance nela. O resto pode esperar. Clareza vem do que você conclui, não do que planeja.",
+  clima: "Consolidar o que já começou.",
+  sombra: "Abrir muita coisa ao mesmo tempo e não terminar nada.",
+  reflexao: '"O que já está claro e você ainda não usou?"',
+  acoes: ["Escolha uma pendência e avance nela.", "Feche um ciclo pequeno antes de abrir outro.", "Anote o que já está óbvio."],
+  evitar: ["Abrir frentes novas por ansiedade.", "Ignorar o que já pediu conclusão."],
+  palavrasChave: ["clareza", "conclusão", "foco", "simples"],
+};
+
 export function energiaDeBase(
   base: Record<number, EnergiaNumerologica>,
   n: number,
@@ -28,13 +49,5 @@ export function energiaDeBase(
   if (base[n]) return base[n];
   const raiz = raizDoMestre(n);
   if (raiz !== n && base[raiz]) return base[raiz];
-  return {
-    energia: "Equilibrar",
-    titulo: "Um dia para juntar o que já aparece",
-    descricao: "Hoje pede que você use o que já está claro, sem abrir frente nova.",
-    profundidade: "Escolha uma coisa pendente e avance nela. O resto pode esperar.",
-    reflexao: '"O que já está claro e você ainda não usou?"',
-    acoes: ["Escolha uma pendência e avance nela hoje."],
-    evitar: ["Abrir muita coisa ao mesmo tempo."],
-  };
+  return FALLBACK;
 }

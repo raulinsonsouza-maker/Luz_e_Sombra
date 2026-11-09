@@ -22,6 +22,11 @@ export async function fetchNotificacoesCount() {
   }
 }
 
+/** Zera o badge imediatamente (ex.: ao abrir a lista). */
+export function zerarNotificacoesCountLocal() {
+  broadcast(0);
+}
+
 export function useNotificacoesCount() {
   const { status } = useAuth();
   const [count, setCount] = useState(_count);

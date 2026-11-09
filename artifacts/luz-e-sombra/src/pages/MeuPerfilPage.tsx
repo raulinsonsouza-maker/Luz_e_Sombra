@@ -7,17 +7,21 @@ import { profilePhotoViewResponseIsImageBody } from "@/lib/profilePhotoView";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import {
-  User, Calendar, Lock, CheckCircle, AlertCircle, Zap, Flame, Target,
+  User, Calendar, Lock, CheckCircle, AlertCircle, Flame, Target,
   Star, Camera, Loader2, Sparkles, ArrowRight, Edit2, X, Save, KeyRound, LogOut, Bookmark,
 } from "lucide-react";
 import { listarFrasesGuardadas } from "@/lib/frasesGuardadas";
+import { LuzIcon } from "@/components/LuzIcon";
 
 interface Progresso {
   xp: number;
+  luzes: number;
   nivel: number;
   nomeNivel: string;
   xpNoNivel: number;
   xpParaProximo: number;
+  luzesNoNivel?: number;
+  luzesParaProximo?: number;
   streakDias: number;
   melhorStreak: number;
   missoes: { concluida: boolean }[];
@@ -197,7 +201,11 @@ export default function MeuPerfilPage() {
   }
 
   const primeiroNome = (user?.nome || "Usuário").split(" ")[0];
-  const xpPct = progresso ? Math.min(100, Math.round((progresso.xpNoNivel / progresso.xpParaProximo) * 100)) : 0;
+  const luzesNoNivel = progresso?.luzesNoNivel ?? progresso?.xpNoNivel ?? 0;
+  const luzesParaProximo = progresso?.luzesParaProximo ?? progresso?.xpParaProximo ?? 1;
+  const luzPct = progresso
+    ? Math.min(100, Math.round((luzesNoNivel / Math.max(1, luzesParaProximo)) * 100))
+    : 0;
   const missoesConc = progresso?.missoes.filter(m => m.concluida).length ?? 0;
   const avatarSrc = fotoPreview || fotoUrl;
 
@@ -347,14 +355,16 @@ export default function MeuPerfilPage() {
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="rounded-2xl p-4" style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.15)" }}>
               <div className="flex items-center gap-2 mb-2">
-                <Zap className="w-4 h-4" style={{ color: "#c8a56b" }} />
-                <span className="text-xs" style={{ color: "rgba(200,165,107,0.6)" }}>XP Total</span>
+                <LuzIcon acesa className="w-4 h-4" />
+                <span className="text-xs" style={{ color: "rgba(200,165,107,0.6)" }}>Luzes</span>
               </div>
-              <p className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>{progresso.xp}</p>
+              <p className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>{progresso.luzes ?? 0}</p>
               <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(200,165,107,0.1)" }}>
-                <div className="h-full rounded-full" style={{ width: `${xpPct}%`, background: "linear-gradient(90deg, #9c7742, #c8a56b)" }} />
+                <div className="h-full rounded-full" style={{ width: `${luzPct}%`, background: "linear-gradient(90deg, #9c7742, #c8a56b)" }} />
               </div>
-              <p className="text-[10px] mt-1" style={{ color: "rgba(247,242,236,0.3)" }}>{progresso.xpNoNivel}/{progresso.xpParaProximo} XP no nível</p>
+              <p className="text-[10px] mt-1" style={{ color: "rgba(247,242,236,0.3)" }}>
+                {luzesNoNivel}/{luzesParaProximo} no nível
+              </p>
             </div>
 
             <div className="rounded-2xl p-4" style={{ background: "rgba(232,108,43,0.07)", border: "1px solid rgba(232,108,43,0.2)" }}>
@@ -380,8 +390,10 @@ export default function MeuPerfilPage() {
                 <Star className="w-4 h-4" style={{ color: "#5b9bd5" }} />
                 <span className="text-xs" style={{ color: "rgba(91,155,213,0.7)" }}>Próximo nível</span>
               </div>
-              <p className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>{progresso.xpParaProximo - progresso.xpNoNivel}</p>
-              <p className="text-[10px]" style={{ color: "rgba(247,242,236,0.3)" }}>XP restantes</p>
+              <p className="font-tan-mon-cheri text-2xl mb-1" style={{ color: "#f7f2ec" }}>
+                {Math.max(0, luzesParaProximo - luzesNoNivel)}
+              </p>
+              <p className="text-[10px]" style={{ color: "rgba(247,242,236,0.3)" }}>Luzes restantes</p>
             </div>
           </div>
         )}

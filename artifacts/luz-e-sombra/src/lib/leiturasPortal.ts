@@ -57,6 +57,8 @@ export function leituraDoMes(mes: {
   acoes?: string[];
   evitar?: string[];
   areas?: string[];
+  sombra?: string;
+  clima?: string;
 } | null | undefined): LeituraPortal | null {
   if (!mes?.descricao && !mes?.profundidade) return null;
   const onde = listaNatural(mes.areas ?? []);
@@ -65,10 +67,10 @@ export function leituraDoMes(mes: {
     {
       quemVoceE: lista(mes.descricao, mes.profundidade),
       noDiaADia: onde
-        ? `Olhe primeiro para ${onde}.`
-        : "Repare em qual parte deste mês esse convite aparece com mais força.",
+        ? `Olhe primeiro para ${onde}.${mes.clima ? ` ${mes.clima}` : ""}`
+        : mes.clima || "Repare em qual parte deste mês esse convite aparece com mais força.",
       sombra: ou(
-        lista(...(mes.evitar ?? [])),
+        lista(mes.sombra, ...(mes.evitar ?? [])),
         "O peso deste mês é forçar um gesto quando o momento pede outro.",
       ),
       oQueFazer: ou(
