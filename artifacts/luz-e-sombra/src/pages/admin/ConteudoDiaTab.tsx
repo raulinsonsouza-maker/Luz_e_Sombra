@@ -2,15 +2,22 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { CalendarDays, ChevronLeft, ChevronRight, ImageIcon, Loader2, RotateCcw, Save, Upload, X } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 import {
-  TOTAL_IMAGENS_DIA,
   pathImagemDia,
-  pathThumbImagemDia,
   thumbDeImagemDia,
   webDeImagemDia,
 } from "@/lib/imagemDoDia";
 import { LOGO_CLARO } from "@/lib/marca";
 import type { ConteudoDia } from "@/lib/conteudoDia";
 import { CARD, C, INPUT_ST, type ShowMsg } from "./shared";
+
+type ItemGaleria = {
+  id: number;
+  ordem: number;
+  path: string;
+  url: string;
+  thumbUrl: string;
+  origem: string;
+};
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -145,6 +152,8 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
   const [dataExibicao, setDataExibicao] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [galeriaAberta, setGaleriaAberta] = useState(false);
+  const [galeriaItens, setGaleriaItens] = useState<ItemGaleria[]>([]);
+  const [galeriaLoading, setGaleriaLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function carregarMes(a = ano, m = mes) {
@@ -183,7 +192,7 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
     setReflexao(dia.reflexao);
     setConvite(dia.convite);
     setImagemUrl(webDeImagemDia(dia.imagemPath || dia.imagemUrl) || dia.imagemUrl);
-    const indice = ((dia.diaCalendario - 1) % TOTAL_IMAGENS_DIA) + 1;
+    const indice = ((dia.diaCalendario - 1) % 100) + 1;
     setImagemPadraoDia(pathImagemDia(indice));
     const fmt = detectarFormato(dia.data, dia.dataExibicao);
     setFormatoData(fmt);
@@ -196,6 +205,22 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
     setEditandoDia(null);
     setGaleriaAberta(false);
     if (fileRef.current) fileRef.current.value = "";
+  }
+
+  async function abrirGaleria() {
+    setGaleriaAberta(true);
+    if (galeriaItens.length > 0) return;
+    setGaleriaLoading(true);
+    try {
+      const res = await apiFetch("/galeria");
+      if (res.ok) {
+        const data = await res.json() as { itens: ItemGaleria[] };
+        setGaleriaItens(data.itens ?? []);
+      }
+    } catch {
+      /* ignore */
+    }
+    setGaleriaLoading(false);
   }
 
   function aplicarFormato(fmt: FormatoData) {
@@ -481,7 +506,7 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setGaleriaAberta(true)}
+                        onClick={() => void abrirGaleria()}
                         className="px-3 py-1.5 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5"
                         style={{ border: "1px solid rgba(200,165,107,0.3)", color: C.gold }}
                       >
@@ -613,7 +638,7 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                   <div>
                     <p className="font-tan-mon-cheri text-lg" style={{ color: C.text }}>Galeria</p>
                     <p className="text-[10px]" style={{ color: C.muted }}>
-                      {TOTAL_IMAGENS_DIA} imagens · role para ver todas
+                      {galeriaLoading ? "Carregando…" : `${galeriaItens.length} imagens · role para ver todas`}
                     </p>
                   </div>
                   <button type="button" onClick={() => setGaleriaAberta(false)} className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ color: C.muted }}>
@@ -621,32 +646,35 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                   </button>
                 </div>
                 <div className="p-4 overflow-y-auto flex-1 min-h-0" style={{ background: "#1a1510" }}>
-                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-                    {Array.from({ length: TOTAL_IMAGENS_DIA }, (_, i) => {
-                      const n = i + 1;
-                      const full = pathImagemDia(n);
-                      const thumb = pathThumbImagemDia(n);
-                      const selecionada =
-                        imagemUrl === full ||
-                        imagemUrl === `/imagens-dia/${n}.png` ||
-                        imagemUrl === thumb;
-                      return (
-                        <button
-                          key={full}
-                          type="button"
-                          onClick={() => {
-                            setImagemUrl(full);
-                            if (fileRef.current) fileRef.current.value = "";
-                            setGaleriaAberta(false);
-                          }}
-                          className="aspect-square rounded-lg overflow-hidden"
-                          style={{ outline: selecionada ? "2px solid #c8a56b" : "1px solid rgba(200,165,107,0.15)" }}
-                        >
-                          <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {galeriaLoading ? (
+                    <div className="flex justify-center py-12">
+                      <Loader2 className="w-6 h-6 animate-spin" style={{ color: C.gold }} />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                      {galeriaItens.map((item) => {
+                        const selecionada =
+                          imagemUrl === item.url ||
+                          imagemUrl === item.path ||
+                          imagemUrl === item.thumbUrl;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              setImagemUrl(item.path.startsWith("/objects/") ? item.url : item.path);
+                              if (fileRef.current) fileRef.current.value = "";
+                              setGaleriaAberta(false);
+                            }}
+                            className="aspect-square rounded-lg overflow-hidden"
+                            style={{ outline: selecionada ? "2px solid #c8a56b" : "1px solid rgba(200,165,107,0.15)" }}
+                          >
+                            <img src={item.thumbUrl} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

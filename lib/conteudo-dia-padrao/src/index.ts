@@ -24,6 +24,14 @@ export function imagemPadrao(data: Date): string {
   return `/imagens-dia/${indice}.jpg`;
 }
 
+/** Escolhe imagem do acervo ativo (galeria). Fallback para o banco estático. */
+export function imagemDeAcervo(data: Date, paths: string[]): string {
+  const ativos = paths.filter((p) => Boolean(p?.trim()));
+  if (ativos.length === 0) return imagemPadrao(data);
+  const indice = (diaDoCalendario(data) - 1) % ativos.length;
+  return ativos[indice]!;
+}
+
 /** YYYY-MM-DD a partir de Date (UTC calendar parts). */
 export function formatarDataISO(data: Date): string {
   const y = data.getUTCFullYear();
@@ -106,7 +114,10 @@ export type ConteudoDiaResolvido = {
   overrideId: number | null;
 };
 
-export function conteudoPadraoParaData(dataISO: string): ConteudoDiaResolvido | null {
+export function conteudoPadraoParaData(
+  dataISO: string,
+  acervoPaths?: string[],
+): ConteudoDiaResolvido | null {
   const dt = parseDataISO(dataISO);
   if (!dt) return null;
   const padrao = frasePadrao(dt);
@@ -116,7 +127,7 @@ export function conteudoPadraoParaData(dataISO: string): ConteudoDiaResolvido | 
     frase: padrao.frase,
     reflexao: padrao.reflexao,
     convite: padrao.convite,
-    imagemUrl: imagemPadrao(dt),
+    imagemUrl: acervoPaths?.length ? imagemDeAcervo(dt, acervoPaths) : imagemPadrao(dt),
     dataExibicao: null,
     dataRotulo: rotuloDataPadrao(dataISO),
     editado: false,
@@ -152,6 +163,9 @@ export function mesclarOverride(
 
 /** Converte path de objeto em URL pública da API. */
 export function urlImagemPublica(imagemUrl: string, overrideId: number | null): string {
+  if (imagemUrl.startsWith("/api/galeria/")) {
+    return imagemUrl;
+  }
   if (imagemUrl.startsWith("/objects/")) {
     if (overrideId != null) return `/api/conteudo-dia/imagem/${overrideId}`;
     return imagemUrl;

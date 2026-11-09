@@ -57,6 +57,13 @@
       "when": 1762720000000,
       "tag": "0008_conteudo_dia_data_exibicao",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1762730000000,
+      "tag": "0009_galeria_imagens",
+      "breakpoints": true
     }
   ]
 }

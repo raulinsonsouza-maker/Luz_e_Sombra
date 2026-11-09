@@ -14,6 +14,7 @@ import linguagensAmorRouter from "./linguagensAmor";
 import modulosJornadaRouter from "./modulosJornada";
 import frasesGuardadasRouter from "./frases-guardadas";
 import conteudoDiaRouter from "./conteudoDia";
+import galeriaRouter from "./galeria";
 import funnelRouter from "./funnel";
 import webhooksCaktoRouter from "./webhooks/cakto";
 import adminOpsRouter from "./adminOps";
@@ -38,5 +39,6 @@ router.use("/linguagens-amor", linguagensAmorRouter);
 router.use("/modulos-jornada", modulosJornadaRouter);
 router.use("/frases-guardadas", frasesGuardadasRouter);
 router.use("/conteudo-dia", conteudoDiaRouter);
+router.use("/galeria", galeriaRouter);
 
 export default router;

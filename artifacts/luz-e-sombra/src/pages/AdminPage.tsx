@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import {
   Users, MessageSquare, GraduationCap, LayoutDashboard, Shield, Layers, Bell, Loader2, CheckCircle, AlertCircle,
-  CreditCard, Webhook, Mail, CalendarDays, Menu, X, Settings, PanelLeftClose, PanelLeft, type LucideIcon,
+  CreditCard, Webhook, Mail, CalendarDays, Menu, X, Settings, PanelLeftClose, PanelLeft, Images, type LucideIcon,
 } from "lucide-react";
 import { LOGO_CLARO } from "@/lib/marca";
 import { BG, C, type Tab } from "./admin/shared";
@@ -17,6 +17,7 @@ import { ComprasTab } from "./admin/ComprasTab";
 import { WebhooksTab } from "./admin/WebhooksTab";
 import { EmailsTab } from "./admin/EmailsTab";
 import { ConteudoDiaTab } from "./admin/ConteudoDiaTab";
+import { GaleriaTab } from "./admin/GaleriaTab";
 
 type NavItem = { key: Tab; label: string; icon: LucideIcon };
 type NavGroup = { titulo: string; itens: NavItem[] };
@@ -37,6 +38,7 @@ const NAV_OPERACIONAL: NavGroup[] = [
     titulo: "Conteúdo",
     itens: [
       { key: "conteudoDia", label: "Conteúdo do dia", icon: CalendarDays },
+      { key: "galeria", label: "Galeria", icon: Images },
       { key: "comunidade", label: "Comunidade", icon: MessageSquare },
       { key: "engajamento", label: "Engajamento", icon: Bell },
       { key: "modulosJornada", label: "Módulos", icon: Layers },
@@ -55,14 +57,43 @@ const TODAS_ABAS: NavItem[] = [
   ...NAV_CONFIG,
 ];
 
+const ABAS_VALIDAS = new Set<string>(TODAS_ABAS.map((i) => i.key));
+
+function lerAbaDaUrl(): Tab {
+  try {
+    const v = new URLSearchParams(window.location.search).get("aba");
+    if (v && ABAS_VALIDAS.has(v)) return v as Tab;
+  } catch {
+    /* ignore */
+  }
+  return "dashboard";
+}
+
+function escreverAbaNaUrl(tab: Tab) {
+  try {
+    const url = new URL(window.location.href);
+    if (tab === "dashboard") url.searchParams.delete("aba");
+    else url.searchParams.set("aba", tab);
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    window.history.replaceState(window.history.state, "", next);
+  } catch {
+    /* ignore */
+  }
+}
+
 export default function AdminPage() {
   const [, navigate] = useLocation();
   const { user, status } = useAuth();
-  const [aba, setAba] = useState<Tab>("dashboard");
+  const [aba, setAbaState] = useState<Tab>(() => lerAbaDaUrl());
   const [menuAberto, setMenuAberto] = useState(false);
   const [recolhido, setRecolhido] = useState(false);
   const [configAberta, setConfigAberta] = useState(false);
   const [mensagem, setMensagem] = useState<{ tipo: "sucesso" | "erro"; texto: string } | null>(null);
+
+  function setAba(tab: Tab) {
+    setAbaState(tab);
+    escreverAbaNaUrl(tab);
+  }
 
   useEffect(() => {
     if (status === "unauthenticated") navigate("/admin/login");
@@ -293,6 +324,7 @@ export default function AdminPage() {
           {aba === "modulosJornada" && <ModulosJornadaTab showMsg={showMsg} />}
           {aba === "cursos" && <CursosTab showMsg={showMsg} />}
           {aba === "conteudoDia" && <ConteudoDiaTab showMsg={showMsg} />}
+          {aba === "galeria" && <GaleriaTab showMsg={showMsg} />}
         </main>
       </div>
 

@@ -12,6 +12,7 @@ import { db } from "@workspace/db";
 import { conteudoDiaTable } from "@workspace/db/schema";
 import { requireAdmin, type AuthRequest } from "../lib/authMiddleware";
 import { ObjectStorageService } from "../lib/objectStorage";
+import { pathsAcervoAtivo } from "../lib/galeriaAcervo";
 
 const router = Router();
 const objectStorage = new ObjectStorageService();
@@ -53,7 +54,8 @@ function diasDoMes(ano: number, mes: number): string[] {
 }
 
 async function resolverData(dataISO: string) {
-  const padrao = conteudoPadraoParaData(dataISO);
+  const acervo = await pathsAcervoAtivo();
+  const padrao = conteudoPadraoParaData(dataISO, acervo);
   if (!padrao) return null;
   const [override] = await db
     .select()
@@ -140,9 +142,10 @@ router.get("/admin", requireAdmin, async (req: AuthRequest, res: Response) => {
       .from(conteudoDiaTable)
       .where(and(gte(conteudoDiaTable.data, inicio), lte(conteudoDiaTable.data, fim)));
     const porData = new Map(overrides.map((o) => [o.data, o]));
+    const acervo = await pathsAcervoAtivo();
 
     const dias = datas.map((dataISO) => {
-      const padrao = conteudoPadraoParaData(dataISO)!;
+      const padrao = conteudoPadraoParaData(dataISO, acervo)!;
       const override = porData.get(dataISO);
       return serializar(
         mesclarOverride(
@@ -192,7 +195,8 @@ router.put("/admin/:data", requireAdmin, async (req: AuthRequest, res: Response)
       return res.status(400).json({ error: parsed.error.issues[0]?.message || "Dados inválidos" });
     }
     const { frase, reflexao, convite, imagemUrl, dataExibicao } = parsed.data;
-    const padrao = conteudoPadraoParaData(dataISO)!;
+    const acervo = await pathsAcervoAtivo();
+    const padrao = conteudoPadraoParaData(dataISO, acervo)!;
 
     const [existente] = await db
       .select()
@@ -268,7 +272,8 @@ router.delete("/admin/:data", requireAdmin, async (req: AuthRequest, res: Respon
       return res.status(400).json({ error: "Data inválida. Use YYYY-MM-DD." });
     }
     await db.delete(conteudoDiaTable).where(eq(conteudoDiaTable.data, dataISO));
-    const padrao = conteudoPadraoParaData(dataISO)!;
+    const acervo = await pathsAcervoAtivo();
+    const padrao = conteudoPadraoParaData(dataISO, acervo)!;
     return res.json(serializar(padrao));
   } catch (err) {
     req.log.error({ err }, "Erro ao restaurar conteúdo do dia");
