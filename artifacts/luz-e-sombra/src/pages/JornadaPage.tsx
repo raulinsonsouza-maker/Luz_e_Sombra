@@ -30,12 +30,6 @@ interface ModuloApi {
   minicursoConcluido: boolean;
 }
 
-interface Progresso {
-  nomeNivel: string;
-  nivel: number;
-  streakDias?: number;
-}
-
 const LUZES_POR_SLUG: Record<string, number> = {
   traco: 100,
   temperamento: 60,
@@ -110,18 +104,13 @@ export default function JornadaPage() {
   const [, navigate] = useLocation();
   const { status } = useAuth();
   const [modulos, setModulos] = useState<ModuloApi[]>([]);
-  const [progresso, setProgresso] = useState<Progresso | null>(null);
   const [carregando, setCarregando] = useState(true);
 
   const buscarTudo = useCallback(async () => {
     setCarregando(true);
     try {
-      const [rMod, rGam] = await Promise.all([
-        apiFetch("/modulos-jornada"),
-        apiFetch("/gamificacao/progresso"),
-      ]);
+      const rMod = await apiFetch("/modulos-jornada");
       if (rMod.ok) setModulos(await rMod.json());
-      if (rGam.ok) setProgresso(await rGam.json());
     } catch {
       /* ignore */
     }
@@ -138,8 +127,6 @@ export default function JornadaPage() {
   }, [status, navigate, buscarTudo]);
 
   const inicianteOrdenado = [...modulos].sort((a, b) => a.ordem - b.ordem);
-  const concluidasIniciante = inicianteOrdenado.filter((m) => m.status === "done").length;
-  const streak = progresso?.streakDias ?? 0;
 
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
@@ -162,19 +149,6 @@ export default function JornadaPage() {
               é, como funciona e o que pode transformar.
             </p>
           </div>
-          {progresso && (
-            <p className="text-sm mt-4" style={{ color: "rgba(247,242,236,0.45)" }}>
-              Nível {progresso.nivel} · {progresso.nomeNivel}
-              {typeof progresso.streakDias === "number"
-                ? ` · 🔥 ${streak} ${streak === 1 ? "dia seguido" : "dias seguidos"}`
-                : ""}
-            </p>
-          )}
-          {!carregando && inicianteOrdenado.length > 0 && (
-            <p className="text-xs mt-2" style={{ color: "rgba(247,242,236,0.35)" }}>
-              Iniciante: {concluidasIniciante}/{inicianteOrdenado.length} módulos concluídos
-            </p>
-          )}
         </div>
 
         <section className="mb-10">
