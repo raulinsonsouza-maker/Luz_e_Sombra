@@ -1,5 +1,5 @@
 import { db } from "@workspace/db";
-import { gamificacaoTable, luzesEventosTable, notificacoesTable } from "@workspace/db/schema";
+import { gamificacaoTable, luzesEventosTable } from "@workspace/db/schema";
 import { and, eq } from "drizzle-orm";
 import { getOrCreateGamificacao } from "./awardXp";
 
@@ -14,12 +14,7 @@ export function todaySaoPaulo(): string {
   }).format(new Date());
 }
 
-const MENSAGENS: Record<TipoLuzEvento, string> = {
-  momento: "Você leu o seu momento do dia.",
-  pausa: "Você registrou a sua pausa do dia.",
-};
-
-/** Concede +1 Luz uma vez por dia para cada tipo (momento | pausa). */
+/** Concede +1 Luz uma vez por dia para cada tipo (momento | pausa). Sem notificação. */
 export async function awardLuzDiaria(usuarioId: number, tipo: TipoLuzEvento) {
   const dataReferencia = todaySaoPaulo();
   const gam = await getOrCreateGamificacao(usuarioId);
@@ -51,14 +46,6 @@ export async function awardLuzDiaria(usuarioId: number, tipo: TipoLuzEvento) {
     .set({ luzes: (gam.luzes ?? 0) + 1, atualizadoEm: new Date() })
     .where(eq(gamificacaoTable.usuarioId, usuarioId))
     .returning();
-
-  await db.insert(notificacoesTable).values({
-    usuarioId,
-    titulo: "+1 Luz",
-    mensagem: MENSAGENS[tipo],
-    tipo: "luz",
-    link: "/",
-  });
 
   return { success: true as const, already: false as const, luzes: updated.luzes };
 }

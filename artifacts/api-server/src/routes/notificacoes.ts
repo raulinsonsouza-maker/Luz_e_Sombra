@@ -2,17 +2,20 @@ import { Router, Response } from "express";
 import { requireAuth, requireAdmin, AuthRequest } from "../lib/authMiddleware";
 import { db } from "@workspace/db";
 import { notificacoesTable, usuariosTable } from "@workspace/db/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, ne } from "drizzle-orm";
 
 const router = Router();
 
-// GET /api/notificacoes — list user's notifications
+// GET /api/notificacoes — list user's notifications (sem tipo "luz")
 router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const notifs = await db
       .select()
       .from(notificacoesTable)
-      .where(eq(notificacoesTable.usuarioId, req.user!.id))
+      .where(and(
+        eq(notificacoesTable.usuarioId, req.user!.id),
+        ne(notificacoesTable.tipo, "luz"),
+      ))
       .orderBy(desc(notificacoesTable.criadoEm))
       .limit(50);
     return res.json(notifs);
@@ -22,7 +25,7 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// GET /api/notificacoes/nao-lidas-count — unread count
+// GET /api/notificacoes/nao-lidas-count — unread count (sem tipo "luz")
 router.get("/nao-lidas-count", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const [result] = await db
@@ -31,6 +34,7 @@ router.get("/nao-lidas-count", requireAuth, async (req: AuthRequest, res: Respon
       .where(and(
         eq(notificacoesTable.usuarioId, req.user!.id),
         eq(notificacoesTable.lida, false),
+        ne(notificacoesTable.tipo, "luz"),
       ));
     return res.json({ count: result?.count ?? 0 });
   } catch (err) {

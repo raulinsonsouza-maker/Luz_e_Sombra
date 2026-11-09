@@ -13,8 +13,6 @@ import {
   Heart,
   Target,
   Sparkles,
-  TrendingUp,
-  Crown,
   Hash,
   FileText,
 } from "lucide-react";
@@ -148,7 +146,7 @@ export default function JornadaPage() {
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-4 h-4" style={{ color: "#c8a56b" }} />
             <h2 className="text-sm font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.65)" }}>
-              Iniciante
+              Análises
             </h2>
           </div>
 
@@ -311,66 +309,6 @@ export default function JornadaPage() {
                   );
                 })
               )}
-            </div>
-          </div>
-        </section>
-
-        <section className="mb-10 opacity-90">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4" style={{ color: "rgba(200,165,107,0.45)" }} />
-            <h2 className="text-sm font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
-              Intermediário
-            </h2>
-          </div>
-          <div
-            className="rounded-2xl p-5 flex gap-4 items-start"
-            style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            <div
-              className="w-14 h-14 rounded-full flex items-center justify-center shrink-0"
-              style={{ background: "rgba(255,255,255,0.04)", border: "2px solid rgba(255,255,255,0.08)" }}
-            >
-              <Lock className="w-5 h-5" style={{ color: "rgba(247,242,236,0.18)" }} />
-            </div>
-            <div>
-              <p className="font-semibold text-sm mb-1" style={{ color: "rgba(247,242,236,0.35)" }}>
-                Em desenvolvimento
-              </p>
-              <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.28)" }}>
-                Aprofunde seu autoconhecimento e explore novas camadas da sua personalidade, emoções e
-                comportamentos. Nesta etapa, você encontrará uma numerologia mais aprofundada, análises
-                emocionais integradas e novos caminhos para compreender melhor a si mesmo.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="opacity-90">
-          <div className="flex items-center gap-2 mb-4">
-            <Crown className="w-4 h-4" style={{ color: "rgba(200,165,107,0.35)" }} />
-            <h2 className="text-sm font-bold tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.4)" }}>
-              Avançado
-            </h2>
-          </div>
-          <div
-            className="rounded-2xl p-5 flex gap-4 items-start"
-            style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            <div
-              className="w-14 h-14 rounded-full flex items-center justify-center shrink-0"
-              style={{ background: "rgba(255,255,255,0.04)", border: "2px solid rgba(255,255,255,0.08)" }}
-            >
-              <Lock className="w-5 h-5" style={{ color: "rgba(247,242,236,0.18)" }} />
-            </div>
-            <div>
-              <p className="font-semibold text-sm mb-1" style={{ color: "rgba(247,242,236,0.35)" }}>
-                Em desenvolvimento
-              </p>
-              <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.28)" }}>
-                Leve suas descobertas para diferentes áreas da vida. Explore conteúdos voltados ao
-                desenvolvimento mental, à consciência financeira e à espiritualidade, ampliando sua
-                percepção e descobrindo novas possibilidades de transformação.
-              </p>
             </div>
           </div>
         </section>
