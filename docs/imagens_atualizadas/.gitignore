@@ -1,0 +1,3 @@
+# Fonte PNG pesada (geração local). No deploy servimos só JPEG + thumbs.
+*.png
+!thumbs/

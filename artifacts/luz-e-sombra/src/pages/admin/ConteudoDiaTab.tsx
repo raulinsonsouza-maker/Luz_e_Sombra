@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, ImageIcon, Loader2, RotateCcw, Save, Upload, X } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
-import { TOTAL_IMAGENS_DIA } from "@/lib/imagemDoDia";
+import {
+  TOTAL_IMAGENS_DIA,
+  pathImagemDia,
+  pathThumbImagemDia,
+  thumbDeImagemDia,
+  webDeImagemDia,
+} from "@/lib/imagemDoDia";
 import { LOGO_CLARO } from "@/lib/marca";
 import type { ConteudoDia } from "@/lib/conteudoDia";
 import { CARD, C, INPUT_ST, type ShowMsg } from "./shared";
@@ -176,9 +182,9 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
     setFrase(dia.frase);
     setReflexao(dia.reflexao);
     setConvite(dia.convite);
-    setImagemUrl(dia.imagemPath || dia.imagemUrl);
+    setImagemUrl(webDeImagemDia(dia.imagemPath || dia.imagemUrl) || dia.imagemUrl);
     const indice = ((dia.diaCalendario - 1) % TOTAL_IMAGENS_DIA) + 1;
-    setImagemPadraoDia(`/imagens-dia/${indice}.png`);
+    setImagemPadraoDia(pathImagemDia(indice));
     const fmt = detectarFormato(dia.data, dia.dataExibicao);
     setFormatoData(fmt);
     setDataExibicao(dia.dataExibicao?.trim() || "");
@@ -293,7 +299,7 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
         ? `/api/conteudo-dia/imagem/${editandoDia.overrideId}`
         : imagemPadraoDia;
     }
-    return imagemUrl || imagemPadraoDia;
+    return webDeImagemDia(imagemUrl) || imagemUrl || imagemPadraoDia;
   })();
 
   const dataRotuloLive = editandoDia
@@ -369,10 +375,11 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                   title={`${num} — clicar para editar`}
                 >
                   <img
-                    src={dia.imagemUrl}
+                    src={thumbDeImagemDia(dia.imagemPath || dia.imagemUrl) || dia.imagemUrl}
                     alt=""
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div
                     className="absolute inset-0"
@@ -613,20 +620,25 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                   <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                     {Array.from({ length: TOTAL_IMAGENS_DIA }, (_, i) => {
                       const n = i + 1;
-                      const src = `/imagens-dia/${n}.png`;
+                      const full = pathImagemDia(n);
+                      const thumb = pathThumbImagemDia(n);
+                      const selecionada =
+                        imagemUrl === full ||
+                        imagemUrl === `/imagens-dia/${n}.png` ||
+                        imagemUrl === thumb;
                       return (
                         <button
-                          key={src}
+                          key={full}
                           type="button"
                           onClick={() => {
-                            setImagemUrl(src);
+                            setImagemUrl(full);
                             if (fileRef.current) fileRef.current.value = "";
                             setGaleriaAberta(false);
                           }}
                           className="aspect-square rounded-lg overflow-hidden"
-                          style={{ outline: imagemUrl === src ? "2px solid #c8a56b" : "1px solid rgba(200,165,107,0.15)" }}
+                          style={{ outline: selecionada ? "2px solid #c8a56b" : "1px solid rgba(200,165,107,0.15)" }}
                         >
-                          <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                          <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </button>
                       );
                     })}

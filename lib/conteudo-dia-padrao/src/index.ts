@@ -21,7 +21,7 @@ export function frasePadrao(data: Date): FraseDiaPadrao {
 export function imagemPadrao(data: Date): string {
   if (TOTAL_IMAGENS_DIA < 1) return FUNDO_RESERVA;
   const indice = ((diaDoCalendario(data) - 1) % TOTAL_IMAGENS_DIA) + 1;
-  return `/imagens-dia/${indice}.png`;
+  return `/imagens-dia/${indice}.jpg`;
 }
 
 /** YYYY-MM-DD a partir de Date (UTC calendar parts). */
@@ -156,5 +156,6 @@ export function urlImagemPublica(imagemUrl: string, overrideId: number | null): 
     if (overrideId != null) return `/api/conteudo-dia/imagem/${overrideId}`;
     return imagemUrl;
   }
-  return imagemUrl;
+  // Legado: PNG fonte → JPEG web otimizado
+  return imagemUrl.replace(/\/imagens-dia\/(\d+)\.png$/i, "/imagens-dia/$1.jpg");
 }

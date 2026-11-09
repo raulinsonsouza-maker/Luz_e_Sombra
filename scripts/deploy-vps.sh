@@ -131,13 +131,27 @@ echo "==> build frontend (@workspace/luz-e-sombra)"
 "$PNPM" --filter @workspace/luz-e-sombra build
 
 echo ""
-echo "==> banco de imagens do dia (docs/imagens_atualizadas → dist/public/imagens-dia)"
+echo "==> banco de imagens do dia (JPEG web + thumbs → dist/public/imagens-dia)"
 IMAGENS_SRC="docs/imagens_atualizadas"
 IMAGENS_DEST="artifacts/luz-e-sombra/dist/public/imagens-dia"
 if [[ -d "$IMAGENS_SRC" ]]; then
-  mkdir -p "$IMAGENS_DEST"
-  # sem -a: mode 700 da pasta de origem impede o nginx (www-data) de servir as fotos
-  cp -r "$IMAGENS_SRC"/. "$IMAGENS_DEST"/
+  mkdir -p "$IMAGENS_DEST/thumbs"
+  # Serve só JPEG otimizado + miniaturas (PNG fonte fica fora do dist)
+  find "$IMAGENS_DEST" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) -delete 2>/dev/null || true
+  shopt -s nullglob
+  for f in "$IMAGENS_SRC"/*.jpg; do
+    cp "$f" "$IMAGENS_DEST"/
+  done
+  for f in "$IMAGENS_SRC"/thumbs/*.jpg; do
+    cp "$f" "$IMAGENS_DEST/thumbs"/
+  done
+  # fallback legado: se ainda não houver JPEG, copia PNG
+  if [[ ! -e "$IMAGENS_DEST/1.jpg" && -e "$IMAGENS_SRC/1.png" ]]; then
+    for f in "$IMAGENS_SRC"/*.png; do
+      cp "$f" "$IMAGENS_DEST"/
+    done
+  fi
+  shopt -u nullglob
   find "$IMAGENS_DEST" -type d -exec chmod 755 {} +
   find "$IMAGENS_DEST" -type f -exec chmod 644 {} +
   echo "   $(find "$IMAGENS_DEST" -type f | wc -l) arquivos em $IMAGENS_DEST"
