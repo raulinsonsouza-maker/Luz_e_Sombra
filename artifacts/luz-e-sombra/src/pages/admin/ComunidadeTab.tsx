@@ -185,7 +185,7 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
                 )}
                 {p.tipo === "audio" && p.mediaUrl && (
                   <div className="px-4 pt-4 pb-1" style={{ borderBottom: "1px solid rgba(200,165,107,0.1)" }}>
-                    <AuthenticatedAudio apiPath={`/comunidade/${p.id}/audio`} className="w-full mb-3" title="Áudio" />
+                    <AuthenticatedAudio apiPath={`/comunidade/${p.id}/audio`} className="w-full mb-3" />
                   </div>
                 )}
                 {p.tipo === "video" && p.mediaUrl && getVideoEmbedUrl(p.mediaUrl) && (

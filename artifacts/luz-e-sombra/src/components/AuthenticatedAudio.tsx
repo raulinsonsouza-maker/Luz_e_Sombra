@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetchGet } from "@/lib/auth";
-import { Loader2, Mic, MicOff, Pause, Play } from "lucide-react";
+import { Loader2, MicOff, Pause, Play } from "lucide-react";
 
 type Props = {
   apiPath: string;
   className?: string;
-  title?: string;
 };
 
 function formatTime(sec: number) {
@@ -15,7 +14,7 @@ function formatTime(sec: number) {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-export function AuthenticatedAudio({ apiPath, className = "", title = "Áudio" }: Props) {
+export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -138,10 +137,6 @@ export function AuthenticatedAudio({ apiPath, className = "", title = "Áudio" }
         </button>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1.5">
-            <Mic className="w-3.5 h-3.5 shrink-0" style={{ color: "#c8a56b" }} />
-            <p className="text-xs font-semibold truncate" style={{ color: "#f7f2ec" }}>{title}</p>
-          </div>
           <input
             type="range"
             min={0}
@@ -156,7 +151,7 @@ export function AuthenticatedAudio({ apiPath, className = "", title = "Áudio" }
             }}
             aria-label="Progresso do áudio"
           />
-          <div className="flex justify-between mt-1 text-[10px] tabular-nums" style={{ color: "rgba(247,242,236,0.45)" }}>
+          <div className="flex justify-between mt-1.5 text-[10px] tabular-nums" style={{ color: "rgba(247,242,236,0.45)" }}>
             <span>{formatTime(current)}</span>
             <span>{formatTime(duration)}</span>
           </div>

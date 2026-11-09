@@ -9,8 +9,8 @@ import { coresSobreFoto, detectarTomLogo, srcLogo, type TomLogo } from "@/lib/to
 import { toast } from "sonner";
 import { Bell } from "lucide-react";
 import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
+import { LuzIcon } from "@/components/LuzIcon";
 import {
-  Check,
   ChevronRight,
   Map,
   Users2,
@@ -156,7 +156,7 @@ export default function HomePage() {
               boxShadow: "0 16px 40px rgba(0,0,0,0.4)",
             }}
           >
-            Mais uma Luz recebida
+            +1 Luz
           </p>
         </div>
       )}
@@ -270,7 +270,7 @@ export default function HomePage() {
           }}
         >
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: "#5db97a" }}>
-            Seu convite de hoje
+            Convite do dia
           </p>
           <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.78)" }}>
             {hoje?.convite ?? ""}
@@ -285,16 +285,8 @@ export default function HomePage() {
               color: progresso?.conviteConcluido ? "#5db97a" : "#1a1208",
             }}
           >
-            {progresso?.conviteConcluido ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <span
-                className="w-4 h-4 rounded-[5px] border-2 shrink-0"
-                style={{ borderColor: "currentColor" }}
-                aria-hidden
-              />
-            )}
-            {progresso?.conviteConcluido ? "Luz de hoje recebida" : "Receber 1 Luz"}
+            <LuzIcon acesa={!!progresso?.conviteConcluido} className="w-5 h-5 shrink-0" />
+            {progresso?.conviteConcluido ? "Luz recebida" : "Concluir meu convite"}
           </button>
         </div>
 

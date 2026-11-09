@@ -576,7 +576,7 @@ function PostCard({
           <div>
             <p className="text-sm font-medium" style={{ color: "#f7f2ec" }}>{post.autorNome}</p>
             <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
-              {post.autorAdmin ? "Portal Iluminando · " : ""}{timeAgo(post.criadoEm)}
+              {timeAgo(post.criadoEm)}
             </p>
           </div>
         </div>
@@ -611,7 +611,7 @@ function PostCard({
 
       {post.tipo === "audio" && post.mediaUrl && (
         <div className="mx-5 mb-3">
-          <AuthenticatedAudio apiPath={`/comunidade/${post.id}/audio`} title="Áudio da publicação" />
+          <AuthenticatedAudio apiPath={`/comunidade/${post.id}/audio`} />
         </div>
       )}
 

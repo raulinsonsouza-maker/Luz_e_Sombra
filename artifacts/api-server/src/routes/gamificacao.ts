@@ -9,6 +9,7 @@ import {
   analiseTemperamento40Table,
   analiseLinguagensAmorTable,
   configuracoesModulosTable,
+  notificacoesTable,
 } from "@workspace/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { requireAuth, AuthRequest } from "../lib/authMiddleware";
@@ -184,6 +185,14 @@ router.post("/convite/concluir", requireAuth, async (req: AuthRequest, res: Resp
       .set({ luzes: (gam.luzes ?? 0) + 1, atualizadoEm: new Date() })
       .where(eq(gamificacaoTable.usuarioId, userId))
       .returning();
+
+    await db.insert(notificacoesTable).values({
+      usuarioId: userId,
+      titulo: "+1 Luz",
+      mensagem: "Você concluiu o convite do dia.",
+      tipo: "luz",
+      link: "/",
+    });
 
     return res.json({ success: true, luzes: updated.luzes });
   } catch (err) {
