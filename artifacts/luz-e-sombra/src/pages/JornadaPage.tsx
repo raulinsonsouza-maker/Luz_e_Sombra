@@ -138,17 +138,10 @@ export default function JornadaPage() {
             titulo="Da Sombra à Luz."
             subtitulo="O caminho para descobrir quem você é."
           />
-          <div className="mt-4 space-y-3">
-            <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
-              Aqui começa sua jornada de autoconhecimento. Por meio de testes, análises e experiências
-              guiadas, você vai explorar seus padrões emocionais e comportamentais, reconhecer suas
-              potencialidades e compreender aspectos de si mesmo que talvez ainda não conheça.
-            </p>
-            <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
-              Cada descoberta ilumina uma parte da sua história e ajuda você a compreender melhor quem
-              é, como funciona e o que pode transformar.
-            </p>
-          </div>
+          <p className="text-sm leading-relaxed mt-4" style={{ color: "rgba(247,242,236,0.55)" }}>
+            Cada descoberta ilumina uma parte da sua história e ajuda você a compreender melhor quem é,
+            como funciona e o que pode transformar.
+          </p>
         </div>
 
         <section className="mb-10">
