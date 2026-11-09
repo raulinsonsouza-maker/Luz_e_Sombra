@@ -23,8 +23,8 @@ function tamanhoReflexao(texto: string) {
 }
 
 export default function ReflexaoPage() {
-  const data = dataCurta();
   const [conteudo, setConteudo] = useState<ConteudoDia | null>(null);
+  const data = conteudo?.dataRotulo?.trim() || dataCurta();
   const [enviando, setEnviando] = useState(false);
   const [tomLogo, setTomLogo] = useState<TomLogo>("claro");
   const [guardada, setGuardada] = useState(false);

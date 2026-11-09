@@ -61,6 +61,36 @@ export function hojeSaoPauloISO(agora: Date = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
+const MESES_PT = [
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+];
+
+/** Rótulo padrão da data no app (ex: "9 de novembro"). */
+export function rotuloDataPadrao(dataISO: string): string {
+  const dt = parseDataISO(dataISO);
+  if (!dt) return dataISO;
+  const dia = dt.getUTCDate();
+  const mes = MESES_PT[dt.getUTCMonth()] ?? "";
+  return `${dia} de ${mes}`;
+}
+
+/** Formato curto com zero (09/11). */
+export function rotuloDataCurta(dataISO: string): string {
+  const dt = parseDataISO(dataISO);
+  if (!dt) return dataISO;
+  const d = String(dt.getUTCDate()).padStart(2, "0");
+  const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
+  return `${d}/${m}`;
+}
+
+/** Formato portal sem zero à esquerda no dia (11/11, 9/11). */
+export function rotuloDataPortal(dataISO: string): string {
+  const dt = parseDataISO(dataISO);
+  if (!dt) return dataISO;
+  return `${dt.getUTCDate()}/${dt.getUTCMonth() + 1}`;
+}
+
 export type ConteudoDiaResolvido = {
   data: string;
   diaCalendario: number;
@@ -68,6 +98,10 @@ export type ConteudoDiaResolvido = {
   reflexao: string;
   convite: string;
   imagemUrl: string;
+  /** Override salvo (null = usar padrão). */
+  dataExibicao: string | null;
+  /** Texto final para a UI. */
+  dataRotulo: string;
   editado: boolean;
   overrideId: number | null;
 };
@@ -83,6 +117,8 @@ export function conteudoPadraoParaData(dataISO: string): ConteudoDiaResolvido | 
     reflexao: padrao.reflexao,
     convite: padrao.convite,
     imagemUrl: imagemPadrao(dt),
+    dataExibicao: null,
+    dataRotulo: rotuloDataPadrao(dataISO),
     editado: false,
     overrideId: null,
   };
@@ -96,15 +132,19 @@ export function mesclarOverride(
     reflexao: string | null;
     convite: string | null;
     imagemUrl: string | null;
+    dataExibicao?: string | null;
   } | null | undefined,
 ): ConteudoDiaResolvido {
   if (!override) return padrao;
+  const dataExibicao = override.dataExibicao?.trim() ? override.dataExibicao.trim() : null;
   return {
     ...padrao,
     frase: override.frase?.trim() ? override.frase : padrao.frase,
     reflexao: override.reflexao?.trim() ? override.reflexao : padrao.reflexao,
     convite: override.convite?.trim() ? override.convite : padrao.convite,
     imagemUrl: override.imagemUrl?.trim() ? override.imagemUrl : padrao.imagemUrl,
+    dataExibicao,
+    dataRotulo: dataExibicao || padrao.dataRotulo,
     editado: true,
     overrideId: override.id,
   };

@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/auth";
-import { fraseDoDia, type FraseDia } from "@/lib/frasesAno";
+import { dataCurta, fraseDoDia, type FraseDia } from "@/lib/frasesAno";
 import { imagemDoDia } from "@/lib/imagemDoDia";
 
 export type ConteudoDia = {
@@ -12,6 +12,10 @@ export type ConteudoDia = {
   imagemUrl: string;
   /** Path armazenado (/imagens-dia/N.png ou /objects/...). */
   imagemPath?: string;
+  /** Override de data na tela (ex: 11/11). Null = padrão. */
+  dataExibicao?: string | null;
+  /** Texto final da data para a UI. */
+  dataRotulo?: string;
   editado: boolean;
   overrideId: number | null;
 };
@@ -32,6 +36,8 @@ function fallbackLocal(data: Date = new Date()): ConteudoDia {
     reflexao: frase.reflexao,
     convite: frase.convite,
     imagemUrl: imagemDoDia(data),
+    dataExibicao: null,
+    dataRotulo: dataCurta(data),
     editado: false,
     overrideId: null,
   };

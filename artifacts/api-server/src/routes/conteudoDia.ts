@@ -21,6 +21,7 @@ const putBodySchema = z.object({
   reflexao: z.string().default(""),
   convite: z.string().default(""),
   imagemUrl: z.string().nullable().optional(),
+  dataExibicao: z.string().nullable().optional(),
 });
 
 function serializar(resolvido: ReturnType<typeof mesclarOverride>) {
@@ -69,6 +70,7 @@ async function resolverData(dataISO: string) {
             reflexao: override.reflexao,
             convite: override.convite,
             imagemUrl: override.imagemUrl,
+            dataExibicao: override.dataExibicao,
           }
         : null,
     ),
@@ -152,6 +154,7 @@ router.get("/admin", requireAdmin, async (req: AuthRequest, res: Response) => {
                 reflexao: override.reflexao,
                 convite: override.convite,
                 imagemUrl: override.imagemUrl,
+                dataExibicao: override.dataExibicao,
               }
             : null,
         ),
@@ -188,7 +191,7 @@ router.put("/admin/:data", requireAdmin, async (req: AuthRequest, res: Response)
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.issues[0]?.message || "Dados inválidos" });
     }
-    const { frase, reflexao, convite, imagemUrl } = parsed.data;
+    const { frase, reflexao, convite, imagemUrl, dataExibicao } = parsed.data;
     const padrao = conteudoPadraoParaData(dataISO)!;
 
     const [existente] = await db
@@ -203,6 +206,13 @@ router.put("/admin/:data", requireAdmin, async (req: AuthRequest, res: Response)
       padrao.imagemUrl,
     );
 
+    const dataExibicaoSalvar =
+      dataExibicao === undefined
+        ? (existente?.dataExibicao ?? null)
+        : dataExibicao?.trim()
+          ? dataExibicao.trim().slice(0, 80)
+          : null;
+
     let row;
     if (existente) {
       [row] = await db
@@ -212,6 +222,7 @@ router.put("/admin/:data", requireAdmin, async (req: AuthRequest, res: Response)
           reflexao,
           convite,
           imagemUrl: imagemFinal,
+          dataExibicao: dataExibicaoSalvar,
           atualizadoEm: new Date(),
           atualizadoPor: req.user!.id,
         })
@@ -226,6 +237,7 @@ router.put("/admin/:data", requireAdmin, async (req: AuthRequest, res: Response)
           reflexao,
           convite,
           imagemUrl: imagemFinal,
+          dataExibicao: dataExibicaoSalvar,
           atualizadoPor: req.user!.id,
         })
         .returning();
@@ -238,6 +250,7 @@ router.put("/admin/:data", requireAdmin, async (req: AuthRequest, res: Response)
         reflexao: row!.reflexao,
         convite: row!.convite,
         imagemUrl: row!.imagemUrl,
+        dataExibicao: row!.dataExibicao,
       }),
     );
     return res.json(resolvido);

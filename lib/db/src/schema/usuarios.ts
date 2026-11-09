@@ -329,6 +329,8 @@ export const conteudoDiaTable = pgTable("conteudo_dia", {
   reflexao: text("reflexao").notNull().default(""),
   convite: text("convite").notNull().default(""),
   imagemUrl: text("imagem_url"),
+  /** Texto da data na tela (ex: 11/11). Null = formato padrão do app. */
+  dataExibicao: text("data_exibicao"),
   atualizadoEm: timestamp("atualizado_em").notNull().defaultNow(),
   atualizadoPor: integer("atualizado_por").references(() => usuariosTable.id, { onDelete: "set null" }),
 }, (table) => ({

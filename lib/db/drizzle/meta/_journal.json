@@ -50,6 +50,13 @@
       "when": 1762710000000,
       "tag": "0007_conteudo_dia",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1762720000000,
+      "tag": "0008_conteudo_dia_data_exibicao",
+      "breakpoints": true
     }
   ]
 }
