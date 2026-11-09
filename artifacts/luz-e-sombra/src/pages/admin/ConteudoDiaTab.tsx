@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, ImageIcon, Loader2, RotateCcw, Save, Upload, X } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 import { TOTAL_IMAGENS_DIA } from "@/lib/imagemDoDia";
@@ -16,7 +16,12 @@ const MESES_MIN = [
 ];
 const DIAS_SEMANA = ["D", "S", "T", "Q", "Q", "S", "S"];
 
-type FormatoData = "padrao" | "curta" | "portal" | "personalizado";
+type FormatoData = "padrao" | "personalizado";
+
+const PANEL: CSSProperties = {
+  background: "#1a1510",
+  border: "1px solid rgba(200,165,107,0.22)",
+};
 
 function hojePartes() {
   const n = new Date();
@@ -48,17 +53,9 @@ function rotuloCurta(dataISO: string) {
   return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}`;
 }
 
-function rotuloPortal(dataISO: string) {
-  const { d, m } = partesData(dataISO);
-  return `${d}/${m}`;
-}
-
 function detectarFormato(dataISO: string, dataExibicao: string | null | undefined): FormatoData {
   if (!dataExibicao?.trim()) return "padrao";
-  const v = dataExibicao.trim();
-  if (v === rotuloPadrao(dataISO)) return "padrao";
-  if (v === rotuloCurta(dataISO)) return "curta";
-  if (v === rotuloPortal(dataISO)) return "portal";
+  if (dataExibicao.trim() === rotuloPadrao(dataISO)) return "padrao";
   return "personalizado";
 }
 
@@ -142,6 +139,7 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
   const [dataExibicao, setDataExibicao] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [galeriaPagina, setGaleriaPagina] = useState(0);
+  const [galeriaAberta, setGaleriaAberta] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const POR_PAGINA = 20;
 
@@ -187,19 +185,19 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
     setFormatoData(fmt);
     setDataExibicao(dia.dataExibicao?.trim() || "");
     setGaleriaPagina(0);
+    setGaleriaAberta(false);
     if (fileRef.current) fileRef.current.value = "";
   }
 
   function cancelarEdicao() {
     setEditandoDia(null);
+    setGaleriaAberta(false);
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  function aplicarFormato(fmt: FormatoData, dataISO: string) {
+  function aplicarFormato(fmt: FormatoData) {
     setFormatoData(fmt);
     if (fmt === "padrao") setDataExibicao("");
-    else if (fmt === "curta") setDataExibicao(rotuloCurta(dataISO));
-    else if (fmt === "portal") setDataExibicao(rotuloPortal(dataISO));
   }
 
   function mudarMes(delta: number) {
@@ -409,11 +407,22 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
       )}
 
       {editandoDia && (
-        <div className="fixed inset-0 z-50 flex items-stretch justify-center" style={{ background: "rgba(10,8,6,0.94)" }}>
-          <div className="flex flex-col w-full h-full max-w-[1280px]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
+          <button
+            type="button"
+            className="absolute inset-0"
+            style={{ background: "#0c0a08" }}
+            aria-label="Fechar"
+            onClick={cancelarEdicao}
+          />
+
+          <div
+            className="relative z-10 flex flex-col w-full max-w-5xl max-h-[min(92vh,900px)] overflow-hidden rounded-2xl shadow-2xl"
+            style={{ background: "#1a1510", border: "1px solid rgba(200,165,107,0.28)" }}
+          >
             <div
-              className="flex items-center justify-between gap-3 px-4 py-3 border-b shrink-0"
-              style={{ borderColor: "rgba(200,165,107,0.15)" }}
+              className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 border-b shrink-0"
+              style={{ borderColor: "rgba(200,165,107,0.18)", background: "#1f1913" }}
             >
               <div className="min-w-0">
                 <p className="text-[10px] tracking-[0.18em] uppercase" style={{ color: C.muted }}>Editando</p>
@@ -421,42 +430,24 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                   {rotuloCurta(editandoDia.data)}/{String(partesData(editandoDia.data).y).slice(2)}
                 </h3>
               </div>
-              <div className="flex flex-wrap items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => void restaurarPadrao()}
-                  disabled={salvando || !editandoDia.editado}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
-                  style={{ border: "1px solid rgba(200,165,107,0.3)", color: C.gold, opacity: !editandoDia.editado || salvando ? 0.4 : 1 }}
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Restaurar</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void salvar()}
-                  disabled={salvando}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold"
-                  style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208", opacity: salvando ? 0.7 : 1 }}
-                >
-                  {salvando ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                  Salvar
-                </button>
-                <button type="button" onClick={cancelarEdicao} className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ color: C.muted }}>
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={cancelarEdicao}
+                className="w-9 h-9 flex items-center justify-center rounded-xl shrink-0"
+                style={{ color: C.muted, border: "1px solid rgba(200,165,107,0.2)" }}
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <div className="flex-1 min-h-0 overflow-hidden p-3 sm:p-4 lg:p-5">
-              <div className="h-full grid grid-cols-1 lg:grid-cols-[minmax(240px,320px)_minmax(0,1fr)] gap-4 lg:gap-5">
-                {/* Coluna esquerda: preview + imagens — altura fixa no desktop */}
-                <div className="flex flex-col gap-3 min-h-0 overflow-y-auto lg:overflow-hidden">
-                  <div className="shrink-0">
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5" style={{ background: "#1a1510" }}>
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(220px,280px)_minmax(0,1fr)] gap-4 lg:gap-5">
+                <div className="space-y-3">
+                  <div>
                     <p className="text-[10px] tracking-[0.16em] uppercase mb-2 font-semibold" style={{ color: C.muted }}>
                       Pré-visualização
                     </p>
-                    <div className="mx-auto w-full max-w-[280px]" style={{ aspectRatio: "9 / 16", maxHeight: "min(58vh, 520px)" }}>
+                    <div className="mx-auto w-full max-w-[260px]" style={{ aspectRatio: "9 / 16" }}>
                       <PreviewReflexao
                         dataRotulo={dataRotuloLive}
                         frase={frase}
@@ -466,7 +457,7 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl p-3 space-y-2.5 shrink-0" style={CARD}>
+                  <div className="space-y-2">
                     <p className="text-[10px] tracking-[0.16em] uppercase font-semibold" style={{ color: C.muted }}>
                       Imagem
                     </p>
@@ -481,6 +472,15 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                         style={{ border: "1px solid rgba(200,165,107,0.3)", color: C.gold }}
                       >
                         Padrão
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setGaleriaAberta(true)}
+                        className="px-3 py-1.5 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5"
+                        style={{ border: "1px solid rgba(200,165,107,0.3)", color: C.gold }}
+                      >
+                        <ImageIcon className="w-3.5 h-3.5" />
+                        Galeria
                       </button>
                       <label
                         className="px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5"
@@ -500,47 +500,10 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                         />
                       </label>
                     </div>
-                    <div className="flex items-center justify-between text-[10px]" style={{ color: C.muted }}>
-                      <span className="inline-flex items-center gap-1">
-                        <ImageIcon className="w-3 h-3" />
-                        Galeria
-                      </span>
-                      <span>{galeriaPagina + 1}/{totalPaginasGaleria}</span>
-                    </div>
-                    <div className="grid grid-cols-5 gap-1">
-                      {Array.from({ length: POR_PAGINA }, (_, i) => {
-                        const n = galeriaPagina * POR_PAGINA + i + 1;
-                        if (n > TOTAL_IMAGENS_DIA) return null;
-                        const src = `/imagens-dia/${n}.png`;
-                        return (
-                          <button
-                            key={src}
-                            type="button"
-                            onClick={() => {
-                              setImagemUrl(src);
-                              if (fileRef.current) fileRef.current.value = "";
-                            }}
-                            className="aspect-square rounded-md overflow-hidden"
-                            style={{ outline: imagemUrl === src ? "2px solid #c8a56b" : "1px solid rgba(200,165,107,0.15)" }}
-                          >
-                            <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div className="flex justify-between">
-                      <button type="button" disabled={galeriaPagina === 0} onClick={() => setGaleriaPagina((p) => Math.max(0, p - 1))} className="text-xs" style={{ color: galeriaPagina === 0 ? C.dim : C.gold }}>
-                        Anterior
-                      </button>
-                      <button type="button" disabled={galeriaPagina >= totalPaginasGaleria - 1} onClick={() => setGaleriaPagina((p) => Math.min(totalPaginasGaleria - 1, p + 1))} className="text-xs" style={{ color: galeriaPagina >= totalPaginasGaleria - 1 ? C.dim : C.gold }}>
-                        Próxima
-                      </button>
-                    </div>
                   </div>
                 </div>
 
-                {/* Coluna direita: formulário */}
-                <div className="rounded-2xl p-4 space-y-3.5 min-h-0 overflow-y-auto" style={CARD}>
+                <div className="space-y-3.5">
                   <div>
                     <p className="text-[10px] tracking-[0.16em] uppercase font-semibold mb-2" style={{ color: C.muted }}>
                       Formato da data
@@ -548,14 +511,12 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                     <div className="flex flex-wrap gap-2 mb-2">
                       {([
                         { key: "padrao" as const, label: `Padrão (${rotuloPadrao(editandoDia.data)})` },
-                        { key: "curta" as const, label: `Curta (${rotuloCurta(editandoDia.data)})` },
-                        { key: "portal" as const, label: `Portal (${rotuloPortal(editandoDia.data)})` },
                         { key: "personalizado" as const, label: "Personalizado" },
                       ]).map((opt) => (
                         <button
                           key={opt.key}
                           type="button"
-                          onClick={() => aplicarFormato(opt.key, editandoDia.data)}
+                          onClick={() => aplicarFormato(opt.key)}
                           className="px-3 py-1.5 rounded-xl text-xs font-semibold"
                           style={{
                             background: formatoData === opt.key ? "rgba(200,165,107,0.16)" : "transparent",
@@ -567,7 +528,7 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                         </button>
                       ))}
                     </div>
-                    {(formatoData === "personalizado" || formatoData !== "padrao") && (
+                    {formatoData === "personalizado" && (
                       <input
                         value={dataExibicao}
                         onChange={(e) => {
@@ -588,7 +549,7 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                   </label>
                   <label className="block space-y-1.5">
                     <span className="text-[10px] font-semibold tracking-wider uppercase" style={{ color: C.muted }}>Reflexão</span>
-                    <textarea value={reflexao} onChange={(e) => setReflexao(e.target.value)} rows={7} className="w-full rounded-xl px-3 py-2.5 text-sm resize-y min-h-[9rem]" style={INPUT_ST} />
+                    <textarea value={reflexao} onChange={(e) => setReflexao(e.target.value)} rows={6} className="w-full rounded-xl px-3 py-2.5 text-sm resize-y min-h-[8rem]" style={INPUT_ST} />
                   </label>
                   <label className="block space-y-1.5">
                     <span className="text-[10px] font-semibold tracking-wider uppercase" style={{ color: C.muted }}>Convite (home)</span>
@@ -597,7 +558,109 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                 </div>
               </div>
             </div>
+
+            <div
+              className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 py-3.5 border-t shrink-0"
+              style={{ borderColor: "rgba(200,165,107,0.18)", background: "#1f1913" }}
+            >
+              <button
+                type="button"
+                onClick={() => void restaurarPadrao()}
+                disabled={salvando || !editandoDia.editado}
+                className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold"
+                style={{ border: "1px solid rgba(200,165,107,0.3)", color: C.gold, opacity: !editandoDia.editado || salvando ? 0.4 : 1 }}
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Restaurar padrão
+              </button>
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  type="button"
+                  onClick={cancelarEdicao}
+                  disabled={salvando}
+                  className="px-4 py-2.5 rounded-xl text-xs font-semibold"
+                  style={{ border: "1px solid rgba(200,165,107,0.25)", color: C.muted }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void salvar()}
+                  disabled={salvando}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-semibold"
+                  style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208", opacity: salvando ? 0.7 : 1 }}
+                >
+                  {salvando ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  Salvar
+                </button>
+              </div>
+            </div>
           </div>
+
+          {galeriaAberta && (
+            <div className="absolute inset-0 z-[60] flex items-center justify-center p-4" style={{ background: "rgba(8,6,4,0.92)" }}>
+              <div
+                className="w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-2xl flex flex-col shadow-2xl"
+                style={{ background: "#1a1510", border: "1px solid rgba(200,165,107,0.28)" }}
+              >
+                <div className="flex items-center justify-between gap-3 px-4 py-3 border-b shrink-0" style={{ borderColor: "rgba(200,165,107,0.15)", background: "#1f1913" }}>
+                  <div>
+                    <p className="font-tan-mon-cheri text-lg" style={{ color: C.text }}>Galeria</p>
+                    <p className="text-[10px]" style={{ color: C.muted }}>
+                      Página {galeriaPagina + 1}/{totalPaginasGaleria}
+                    </p>
+                  </div>
+                  <button type="button" onClick={() => setGaleriaAberta(false)} className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ color: C.muted }}>
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="p-4 overflow-y-auto flex-1 min-h-0" style={{ background: "#1a1510" }}>
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                    {Array.from({ length: POR_PAGINA }, (_, i) => {
+                      const n = galeriaPagina * POR_PAGINA + i + 1;
+                      if (n > TOTAL_IMAGENS_DIA) return null;
+                      const src = `/imagens-dia/${n}.png`;
+                      return (
+                        <button
+                          key={src}
+                          type="button"
+                          onClick={() => {
+                            setImagemUrl(src);
+                            if (fileRef.current) fileRef.current.value = "";
+                            setGaleriaAberta(false);
+                          }}
+                          className="aspect-square rounded-lg overflow-hidden"
+                          style={{ outline: imagemUrl === src ? "2px solid #c8a56b" : "1px solid rgba(200,165,107,0.15)" }}
+                        >
+                          <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex justify-between px-4 py-3 border-t shrink-0" style={{ borderColor: "rgba(200,165,107,0.15)", background: "#1f1913" }}>
+                  <button
+                    type="button"
+                    disabled={galeriaPagina === 0}
+                    onClick={() => setGaleriaPagina((p) => Math.max(0, p - 1))}
+                    className="text-xs font-semibold"
+                    style={{ color: galeriaPagina === 0 ? C.dim : C.gold }}
+                  >
+                    Anterior
+                  </button>
+                  <button
+                    type="button"
+                    disabled={galeriaPagina >= totalPaginasGaleria - 1}
+                    onClick={() => setGaleriaPagina((p) => Math.min(totalPaginasGaleria - 1, p + 1))}
+                    className="text-xs font-semibold"
+                    style={{ color: galeriaPagina >= totalPaginasGaleria - 1 ? C.dim : C.gold }}
+                  >
+                    Próxima
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
