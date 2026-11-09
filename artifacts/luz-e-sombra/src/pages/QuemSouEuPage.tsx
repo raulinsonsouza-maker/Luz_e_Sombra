@@ -11,6 +11,7 @@ import {
   calcularNumerodeExpressao,
   calcularNumerodaAlma,
   calcularNumerodaPersonalidade,
+  anoCivilDoAnoPessoalVigente,
   calcularAnoPessoal,
   formatarDataBrasileira,
 } from "@/lib/numerologia-utils";
@@ -409,8 +410,9 @@ export default function QuemSouEuPage() {
 
   const primeiroNome = user.nome.split(" ")[0];
   const dataNasc = user.dataNascimento;
-  const anoAtual = new Date().getFullYear();
-  const idade = dataNasc ? Math.max(0, anoAtual - Number(dataNasc.slice(0, 4))) : null;
+  const anoCivilHoje = new Date().getFullYear();
+  const idade = dataNasc ? Math.max(0, anoCivilHoje - Number(dataNasc.slice(0, 4))) : null;
+  let anoPessoalVigente: number | null = null;
 
   // ── Compute all numerology ──────────────────────────────────────────────────
   let vidaNum: number | null = null;
@@ -428,7 +430,8 @@ export default function QuemSouEuPage() {
       const e = user.nome.trim() ? calcularNumerodeExpressao(user.nome) : null;
       const a = user.nome.trim() ? calcularNumerodaAlma(user.nome) : null;
       const p = user.nome.trim() ? calcularNumerodaPersonalidade(user.nome) : null;
-      const ap = calcularAnoPessoal(dataFmt, anoAtual);
+      anoPessoalVigente = anoCivilDoAnoPessoalVigente(dataFmt);
+      const ap = anoPessoalVigente != null ? calcularAnoPessoal(dataFmt, anoPessoalVigente) : null;
       vidaNum = v?.valor ?? null;
       expressaoNum = e?.valor ?? null;
       almaNum = a?.valor ?? null;
@@ -502,7 +505,7 @@ export default function QuemSouEuPage() {
         <div className="flex items-center justify-between gap-3">
           <NavBackButton to={JORNADA_MODULE_NAV.dossie.hub} label="Jornada" className="mb-0 hidden md:flex" />
           <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.3)" }}>
-            {anoAtual}
+            {anoCivilHoje}
           </span>
         </div>
         <PageIntroHeader eyebrow="6º passo · Dossiê de Vida" titulo="Quem sou eu" subtitulo="Síntese integrada da fase Iniciante — como você funciona, o que sustenta seus padrões e o que priorizar agora" className="mb-2" hiddenOnMobile />
@@ -679,7 +682,7 @@ export default function QuemSouEuPage() {
 
             {/* ── SEU MOMENTO ATUAL — ANO PESSOAL ── */}
             {anoPessoalNum && anoPessoalInfo && (
-              <SecaoCard titulo="Seu Momento Atual" subtitulo={`Ano Pessoal ${anoPessoalNum} · ${anoAtual}`} icone={Clock}>
+              <SecaoCard titulo="Seu Momento Atual" subtitulo={`Ano Pessoal ${anoPessoalNum} · ${anoPessoalVigente ?? anoCivilHoje}`} icone={Clock}>
                 <DossieLabel num="I" label="O Ciclo em que Você Está" />
 
                 {/* Big year display */}

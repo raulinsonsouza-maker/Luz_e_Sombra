@@ -12,7 +12,7 @@ const ESPIRITUAL =
   "Práticas de gratidão, filantropia consciente, meditação de intenção e trabalho com o karma são especialmente transformadores.";
 
 const MES =
-  "Escolha uma coisa só, aquela que você adia porque ainda não está redonda, e abra ela nesta semana. O que você inicia agora marca o tom dos meses seguintes.";
+  "Escolha uma coisa só, aquela que você adia porque ainda não está redonda, e abra ela neste mês. O que você inicia agora marca o tom dos meses seguintes.";
 
 describe("estruturarTexto", () => {
   it("tira a lista de profissões do meio do parágrafo", () => {

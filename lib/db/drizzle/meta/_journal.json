@@ -64,6 +64,13 @@
       "when": 1762730000000,
       "tag": "0009_galeria_imagens",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1762800000000,
+      "tag": "0010_numerologia_primeiro_passo",
+      "breakpoints": true
     }
   ]
 }

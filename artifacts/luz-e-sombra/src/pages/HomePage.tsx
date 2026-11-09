@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { dataDiaMes, dataPorExtenso } from "@/lib/frasesAno";
 import { buscarConteudoDia, type ConteudoDia } from "@/lib/conteudoDia";
-import { momentoDoDia } from "@/lib/momentoDoDia";
+import { momentoNumerologico, type MomentoNumerologico } from "@/lib/momentoDoDia";
 import { coresSobreFoto, detectarTomLogo, srcLogo, type TomLogo } from "@/lib/tomLogoPorFundo";
 import { toast } from "sonner";
 import { Bell } from "lucide-react";
@@ -53,6 +53,7 @@ export default function HomePage() {
   const [avisoLuz, setAvisoLuz] = useState(false);
   const [tomLogo, setTomLogo] = useState<TomLogo>("claro");
   const [conteudo, setConteudo] = useState<ConteudoDia | null>(null);
+  const [abaMomento, setAbaMomento] = useState<"dia" | "mes" | "coletivo">("dia");
   const { count: notiCount } = useNotificacoesCount();
   const hoje = conteudo;
   const fundo = conteudo?.imagemUrl ?? "";
@@ -106,7 +107,7 @@ export default function HomePage() {
   }, [avisoLuz]);
 
   const primeiroNome = (user?.nome || "").split(" ")[0] || "Usuário";
-  const reflexaoMomento = user?.dataNascimento ? momentoDoDia(user.dataNascimento) : null;
+  const momento = user?.dataNascimento ? momentoNumerologico(user.dataNascimento) : null;
 
   async function concluirConvite() {
     if (progresso?.conviteConcluido || concluindoConvite) return;
@@ -132,11 +133,11 @@ export default function HomePage() {
 
   const etapasInicianteConcluidas = progresso
     ? [
+        progresso.jornada.numerologia,
         progresso.jornada.traco,
         progresso.jornada.temperamento === true,
         progresso.jornada.linguagensAmor === true,
         progresso.jornada.roda,
-        progresso.jornada.numerologia,
         progresso.jornada.dossie === true,
       ].filter(Boolean).length
     : 0;
@@ -298,12 +299,10 @@ export default function HomePage() {
           }}
         >
           <p className="text-sm font-semibold mb-3" style={{ color: "#c8a56b" }}>
-            Seu momento: {dataDiaMes()}
+            Seu momento: {momento?.dataLabel ?? dataDiaMes()}
           </p>
-          {reflexaoMomento ? (
-            <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.78)" }}>
-              {reflexaoMomento}
-            </p>
+          {momento ? (
+            <MomentoAbas momento={momento} aba={abaMomento} onAba={setAbaMomento} />
           ) : (
             <div>
               <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.78)" }}>
@@ -382,6 +381,124 @@ export default function HomePage() {
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+const ABAS_MOMENTO: { id: "dia" | "mes" | "coletivo"; label: string }[] = [
+  { id: "dia", label: "Dia pessoal" },
+  { id: "mes", label: "Mês pessoal" },
+  { id: "coletivo", label: "Momento coletivo" },
+];
+
+function MomentoAbas({
+  momento,
+  aba,
+  onAba,
+}: {
+  momento: MomentoNumerologico;
+  aba: "dia" | "mes" | "coletivo";
+  onAba: (a: "dia" | "mes" | "coletivo") => void;
+}) {
+  const bloco =
+    aba === "dia" ? momento.dia : aba === "mes" ? momento.mes : momento.coletivo;
+  const acoes = bloco.acoes.slice(0, 2);
+
+  return (
+    <div>
+      <div
+        className="flex gap-1 p-1 rounded-2xl mb-4"
+        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.12)" }}
+        role="tablist"
+        aria-label="Seu momento"
+      >
+        {ABAS_MOMENTO.map((item) => {
+          const ativa = aba === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              aria-selected={ativa}
+              onClick={() => onAba(item.id)}
+              className="flex-1 py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-semibold transition-all leading-tight"
+              style={
+                ativa
+                  ? {
+                      background: "linear-gradient(135deg, #c8a56b, #9c7742)",
+                      color: "#1a1208",
+                    }
+                  : { color: "rgba(247,242,236,0.45)" }
+              }
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="flex items-start gap-3 mb-3">
+        <div
+          className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 font-semibold text-lg"
+          style={{
+            background: "linear-gradient(135deg, rgba(200,165,107,0.28), rgba(156,119,66,0.18))",
+            color: "#c8a56b",
+            border: "1px solid rgba(200,165,107,0.35)",
+          }}
+          aria-hidden
+        >
+          {bloco.n}
+        </div>
+        <div className="min-w-0 pt-0.5">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <p className="text-[11px] font-semibold tracking-[0.16em] uppercase" style={{ color: "#c8a56b" }}>
+              {bloco.energia}
+            </p>
+            {(bloco.n === 11 || bloco.n === 22 || bloco.n === 33) && (
+              <span
+                className="text-[10px] font-semibold tracking-[0.12em] uppercase px-1.5 py-0.5 rounded-full"
+                style={{
+                  background: "rgba(200,165,107,0.18)",
+                  color: "#c8a56b",
+                  border: "1px solid rgba(200,165,107,0.35)",
+                }}
+              >
+                Mestre
+              </span>
+            )}
+          </div>
+          <p className="text-sm font-semibold leading-snug" style={{ color: "#f7f2ec" }}>
+            {bloco.titulo}
+          </p>
+        </div>
+      </div>
+
+      <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(247,242,236,0.78)" }}>
+        {bloco.descricao}
+      </p>
+
+      {aba === "coletivo" && momento.coletivo.anoUniversal && (
+        <p className="text-[11px] leading-relaxed mb-3" style={{ color: "rgba(200,165,107,0.65)" }}>
+          Ano universal {momento.coletivo.anoUniversal.n}: {momento.coletivo.anoUniversal.tema}
+        </p>
+      )}
+
+      <p className="text-xs italic mb-3" style={{ color: "rgba(247,242,236,0.5)" }}>
+        {bloco.reflexao.replace(/^["“]|["”]$/g, "")}
+      </p>
+
+      {acoes.length > 0 && (
+        <ul className="space-y-1.5">
+          {acoes.map((acao) => (
+            <li key={acao} className="text-xs leading-relaxed flex gap-2" style={{ color: "rgba(247,242,236,0.62)" }}>
+              <span style={{ color: "#c8a56b" }} aria-hidden>
+                ·
+              </span>
+              <span>{acao}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

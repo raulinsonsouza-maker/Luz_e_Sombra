@@ -147,7 +147,7 @@ export function PerfilAdminTab({ showMsg }: { showMsg: ShowMsg }) {
             style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
           >
             {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Salvar nome
+            Salvar
           </button>
         </form>
       </div>

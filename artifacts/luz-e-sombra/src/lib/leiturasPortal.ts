@@ -66,14 +66,14 @@ export function leituraDoMes(mes: {
       quemVoceE: lista(mes.descricao, mes.profundidade),
       noDiaADia: onde
         ? `Olhe primeiro para ${onde}.`
-        : "Repare em qual parte da sua semana esse convite aparece com mais força.",
+        : "Repare em qual parte deste mês esse convite aparece com mais força.",
       sombra: ou(
         lista(...(mes.evitar ?? [])),
         "O peso deste mês é forçar um gesto quando o momento pede outro.",
       ),
       oQueFazer: ou(
         lista(...(mes.acoes ?? []), pergunta),
-        "Escolha um gesto pequeno desta leitura e faça ainda nesta semana.",
+        "Escolha um gesto pequeno desta leitura e faça ainda neste mês.",
       ),
     },
     {

@@ -101,16 +101,16 @@ export const JORNADA_HUB_COPY: Record<
   },
   numerologia: {
     introFallback:
-      "Seus números de vida, expressão, alma e ciclos anuais revelam padrões que cruzam com o resto da sua jornada.",
+      "Primeiro passo da jornada: seus números de vida, expressão, alma e ciclos anuais — a partir da data de nascimento do perfil.",
     introTexto: [
-      "A numerologia traduz sua data de nascimento em um mapa de padrões: número de vida (missão central), expressão (talentos naturais), alma (desejos profundos) e ciclos anuais que marcam fases de crescimento e desafio.",
-      "Para gerar seu relatório, confirme a data de nascimento no seu perfil. O sistema calcula automaticamente os números e cruza com as outras análises da jornada — traço, temperamento e roda da vida — para uma visão mais integrada de quem você é.",
+      "A numerologia é o primeiro passo da fase Iniciante. Ela traduz sua data de nascimento em um mapa de padrões: número de vida (missão central), expressão (talentos naturais), alma (desejos profundos) e ciclos anuais que marcam fases de crescimento e desafio.",
+      "O relatório usa a data de nascimento do seu perfil. O Ano Pessoal vira no seu aniversário — não no dia 1º de janeiro.",
       "Leva poucos minutos após confirmar a data. Seu mapa fica disponível aqui e se atualiza se você ajustar a data no perfil.",
     ],
     introBullets: [
+      "Primeiro passo da jornada Iniciante",
       "Números de vida, expressão, alma e ciclos pessoais",
-      "Relatório baseado na sua data de nascimento",
-      "Conexão com as demais análises da jornada",
+      "Ano pessoal que vira no aniversário",
     ],
     analiseTitulo: "Mapa Numerológico",
     analiseDescricaoSem:

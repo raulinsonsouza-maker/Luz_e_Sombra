@@ -13,7 +13,7 @@ import { tryAwardJornadaModuloXp } from "../lib/jornadaXp";
 
 const router = Router();
 
-export const SLUGS_MODULO_JORNADA = ["traco", "temperamento", "linguagens-amor", "roda", "numerologia", "dossie"] as const;
+export const SLUGS_MODULO_JORNADA = ["numerologia", "traco", "temperamento", "linguagens-amor", "roda", "dossie"] as const;
 export type SlugModuloJornada = (typeof SLUGS_MODULO_JORNADA)[number];
 
 function hrefAnalise(slug: string): string {
@@ -216,7 +216,7 @@ router.post("/dossie/concluir-analise", requireAuth, async (req: AuthRequest, re
   }
 });
 
-// POST /modulos-jornada/numerologia/concluir-analise — marca passo 5 concluído na jornada
+// POST /modulos-jornada/numerologia/concluir-analise — marca passo 1 concluído na jornada
 router.post("/numerologia/concluir-analise", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const usuarioId = req.user!.id;
@@ -226,7 +226,7 @@ router.post("/numerologia/concluir-analise", requireAuth, async (req: AuthReques
       return res.status(404).json({ error: "Módulo numerologia não configurado." });
     }
     if (numerologia.status === "locked") {
-      return res.status(403).json({ error: "Conclua os módulos anteriores da jornada para desbloquear a numerologia." });
+      return res.status(403).json({ error: "Numerologia ainda não está liberada nesta jornada." });
     }
 
     const [usuario] = await db

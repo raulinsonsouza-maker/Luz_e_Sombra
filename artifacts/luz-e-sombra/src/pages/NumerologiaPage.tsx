@@ -20,6 +20,7 @@ import AppPageShell from "@/components/AppPageShell";
 import { JORNADA_MODULE_NAV, JORNADA_ROOT } from "@/lib/jornadaHubConfig";
 import {
   MesPessoal,
+  anoCivilDoAnoPessoalVigente,
   calcularAnoPessoal,
   calcularAnoUniversal,
   calcularMesesPessoais,
@@ -112,19 +113,31 @@ export default function NumerologiaPage() {
   );
 
   const ANOS_DISPONIVEIS = [2025, 2026, 2027];
-  const anoAtual = new Date().getFullYear();
-  const anoDefault = ANOS_DISPONIVEIS.includes(anoAtual) ? anoAtual : ANOS_DISPONIVEIS[0];
+  const anoCivilHoje = new Date().getFullYear();
+  const mesCivilHoje = new Date().getMonth() + 1;
+  const anoDefault = ANOS_DISPONIVEIS.includes(anoCivilHoje) ? anoCivilHoje : ANOS_DISPONIVEIS[0];
   const [anoAnalise, setAnoAnalise] = useState(anoDefault);
+  const [anoInicializado, setAnoInicializado] = useState(false);
   const [erro, setErro] = useState("");
   const [resultado, setResultado] = useState<ReturnType<typeof calcular> | null>(null);
   const [abaAtiva, setAbaAtiva] = useState<"perfil" | "ano" | "meses">("perfil");
-  const [mesAberto, setMesAberto] = useState<number | null>(null);
+  const [mesAberto, setMesAberto] = useState<number | null>(mesCivilHoje);
   const marcouConclusao = useRef(false);
 
   useEffect(() => {
     if (status === "loading") return;
     if (status === "unauthenticated") { navigate("/login"); return; }
   }, [status, user]);
+
+  useEffect(() => {
+    if (anoInicializado || !user?.dataNascimento) return;
+    const fmt = formatarDataBrasileira(user.dataNascimento);
+    const vigente = anoCivilDoAnoPessoalVigente(fmt);
+    if (vigente != null) {
+      setAnoAnalise(ANOS_DISPONIVEIS.includes(vigente) ? vigente : anoDefault);
+    }
+    setAnoInicializado(true);
+  }, [user?.dataNascimento, anoInicializado, anoDefault]);
 
   // ── Calculation ──────────────────────────────────────────────────────────
 
@@ -543,9 +556,17 @@ export default function NumerologiaPage() {
           {resultado.meses.map((mes: MesPessoal) => {
             const aberto = mesAberto === mes.mesNumero;
             const leitura = leituraDoMes(mes);
+            const ehMesAtual = resultado.ano === anoCivilHoje && mes.mesNumero === mesCivilHoje;
             return (
-              <div key={mes.mesNumero} className="num-panel overflow-hidden"
-                style={{ border: "1px solid rgba(200,165,107,0.18)" }}>
+              <div
+                key={mes.mesNumero}
+                className="num-panel overflow-hidden"
+                style={{
+                  border: ehMesAtual ? "1px solid rgba(200,165,107,0.55)" : "1px solid rgba(200,165,107,0.18)",
+                  background: ehMesAtual ? "rgba(200,165,107,0.08)" : undefined,
+                  boxShadow: ehMesAtual ? "0 0 0 1px rgba(200,165,107,0.12)" : undefined,
+                }}
+              >
                 <button
                   type="button"
                   aria-expanded={aberto}
@@ -553,7 +574,21 @@ export default function NumerologiaPage() {
                   className="flex w-full items-center justify-between gap-3 p-4 text-left md:p-5"
                 >
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-lg text-on-dark">{mes.mesNome}</h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-lg text-on-dark">{mes.mesNome}</h3>
+                      {ehMesAtual && (
+                        <span
+                          className="text-[10px] font-semibold tracking-[0.14em] uppercase px-2 py-0.5 rounded-full"
+                          style={{
+                            background: "rgba(200,165,107,0.2)",
+                            color: "#c8a56b",
+                            border: "1px solid rgba(200,165,107,0.35)",
+                          }}
+                        >
+                          Mês atual
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-brand-gold mt-0.5 font-semibold tracking-wide uppercase">{mes.energia}</p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
@@ -594,8 +629,7 @@ export default function NumerologiaPage() {
               Numerologia bloqueada
             </h1>
             <p className="text-sm mb-6" style={{ color: "rgba(247,242,236,0.45)" }}>
-              Conclua os quatro módulos anteriores da jornada (Traço, Temperamento, Linguagens do amor e Roda da Vida)
-              para desbloquear este passo.
+              A Numerologia é o primeiro passo da jornada. Cadastre sua data de nascimento no perfil para liberar a leitura.
             </p>
             <button
               type="button"
@@ -695,9 +729,12 @@ export default function NumerologiaPage() {
 
             {/* Year selection */}
             <div className="mb-1">
-              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-center mb-4"
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-center mb-2"
                 style={{ color: "rgba(200,165,107,0.9)" }}>
                 Selecione o ano de análise
+              </p>
+              <p className="text-[11px] text-center mb-4" style={{ color: "rgba(247,242,236,0.45)" }}>
+                O Ano Pessoal vira no seu aniversário.
               </p>
               <div className="flex gap-2.5 md:gap-3 justify-center max-w-xs mx-auto w-full">
                 {ANOS_DISPONIVEIS.map(ano => (
