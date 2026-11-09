@@ -3,8 +3,9 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import {
   Users, MessageSquare, GraduationCap, LayoutDashboard, Shield, Layers, Bell, Loader2, CheckCircle, AlertCircle,
-  CreditCard, Webhook, Mail, CalendarDays, Menu, X, type LucideIcon,
+  CreditCard, Webhook, Mail, CalendarDays, Menu, X, Settings, PanelLeftClose, PanelLeft, type LucideIcon,
 } from "lucide-react";
+import { LOGO_CLARO } from "@/lib/marca";
 import { BG, C, type Tab } from "./admin/shared";
 import { DashboardTab } from "./admin/DashboardTab";
 import { UsuariosTab } from "./admin/UsuariosTab";
@@ -20,20 +21,16 @@ import { ConteudoDiaTab } from "./admin/ConteudoDiaTab";
 type NavItem = { key: Tab; label: string; icon: LucideIcon };
 type NavGroup = { titulo: string; itens: NavItem[] };
 
-const NAV: NavGroup[] = [
+const NAV_OPERACIONAL: NavGroup[] = [
   {
-    titulo: "Visão geral",
-    itens: [
-      { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    ],
+    titulo: "Início",
+    itens: [{ key: "dashboard", label: "Dashboard", icon: LayoutDashboard }],
   },
   {
-    titulo: "Pessoas e vendas",
+    titulo: "Pessoas",
     itens: [
       { key: "usuarios", label: "Usuários", icon: Users },
       { key: "compras", label: "Compras", icon: CreditCard },
-      { key: "webhooks", label: "Webhooks", icon: Webhook },
-      { key: "emails", label: "E-mails", icon: Mail },
     ],
   },
   {
@@ -48,11 +45,23 @@ const NAV: NavGroup[] = [
   },
 ];
 
+const NAV_CONFIG: NavItem[] = [
+  { key: "webhooks", label: "Webhooks", icon: Webhook },
+  { key: "emails", label: "E-mails", icon: Mail },
+];
+
+const TODAS_ABAS: NavItem[] = [
+  ...NAV_OPERACIONAL.flatMap((g) => g.itens),
+  ...NAV_CONFIG,
+];
+
 export default function AdminPage() {
   const [, navigate] = useLocation();
   const { user, status } = useAuth();
   const [aba, setAba] = useState<Tab>("dashboard");
   const [menuAberto, setMenuAberto] = useState(false);
+  const [recolhido, setRecolhido] = useState(false);
+  const [configAberta, setConfigAberta] = useState(false);
   const [mensagem, setMensagem] = useState<{ tipo: "sucesso" | "erro"; texto: string } | null>(null);
 
   useEffect(() => {
@@ -62,6 +71,10 @@ export default function AdminPage() {
 
   useEffect(() => {
     setMenuAberto(false);
+  }, [aba]);
+
+  useEffect(() => {
+    if (NAV_CONFIG.some((i) => i.key === aba)) setConfigAberta(true);
   }, [aba]);
 
   function showMsg(tipo: "sucesso" | "erro", texto: string) {
@@ -77,40 +90,45 @@ export default function AdminPage() {
     );
   }
 
-  const tituloAba =
-    NAV.flatMap((g) => g.itens).find((i) => i.key === aba)?.label ?? "Administração";
+  const tituloAba = TODAS_ABAS.find((i) => i.key === aba)?.label ?? "Administração";
+  const configAtiva = NAV_CONFIG.some((i) => i.key === aba);
 
-  function NavButtons({ compact = false }: { compact?: boolean }) {
+  function ItemBotao({ item, soIcone = false }: { item: NavItem; soIcone?: boolean }) {
+    const Icon = item.icon;
+    const ativo = aba === item.key;
     return (
-      <nav className="flex flex-col gap-5">
-        {NAV.map((grupo) => (
+      <button
+        key={item.key}
+        type="button"
+        title={item.label}
+        onClick={() => setAba(item.key)}
+        className={`flex items-center rounded-xl text-left text-sm transition-colors ${soIcone ? "justify-center w-10 h-10 mx-auto" : "gap-3 px-3 py-2.5 w-full"}`}
+        style={{
+          background: ativo ? "rgba(200,165,107,0.12)" : "transparent",
+          color: ativo ? C.gold : "rgba(247,242,236,0.55)",
+          border: ativo ? "1px solid rgba(200,165,107,0.28)" : "1px solid transparent",
+        }}
+      >
+        <Icon className="w-4 h-4 shrink-0" />
+        {!soIcone && <span className="truncate">{item.label}</span>}
+      </button>
+    );
+  }
+
+  function NavOperacional({ soIcone = false }: { soIcone?: boolean }) {
+    return (
+      <nav className={`flex flex-col ${soIcone ? "gap-2" : "gap-5"}`}>
+        {NAV_OPERACIONAL.map((grupo) => (
           <div key={grupo.titulo}>
-            <p
-              className="px-3 mb-2 text-[10px] font-semibold tracking-[0.18em] uppercase"
-              style={{ color: "rgba(200,165,107,0.4)" }}
-            >
-              {grupo.titulo}
-            </p>
-            <div className="flex flex-col gap-0.5">
-              {grupo.itens.map(({ key, label, icon: Icon }) => {
-                const ativo = aba === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setAba(key)}
-                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors"
-                    style={{
-                      background: ativo ? "rgba(200,165,107,0.12)" : "transparent",
-                      color: ativo ? C.gold : "rgba(247,242,236,0.55)",
-                      border: ativo ? "1px solid rgba(200,165,107,0.28)" : "1px solid transparent",
-                    }}
-                  >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span className={compact ? "truncate" : ""}>{label}</span>
-                  </button>
-                );
-              })}
+            {!soIcone && (
+              <p className="px-3 mb-2 text-[10px] font-semibold tracking-[0.18em] uppercase" style={{ color: "rgba(200,165,107,0.4)" }}>
+                {grupo.titulo}
+              </p>
+            )}
+            <div className={`flex flex-col ${soIcone ? "gap-1" : "gap-0.5"}`}>
+              {grupo.itens.map((item) => (
+                <ItemBotao key={item.key} item={item} soIcone={soIcone} />
+              ))}
             </div>
           </div>
         ))}
@@ -118,57 +136,97 @@ export default function AdminPage() {
     );
   }
 
+  function NavConfig({ soIcone = false }: { soIcone?: boolean }) {
+    if (soIcone) {
+      return (
+        <div className="flex flex-col gap-1">
+          {NAV_CONFIG.map((item) => (
+            <ItemBotao key={item.key} item={item} soIcone />
+          ))}
+        </div>
+      );
+    }
+    return (
+      <div className="flex flex-col gap-0.5">
+        {NAV_CONFIG.map((item) => (
+          <ItemBotao key={item.key} item={item} />
+        ))}
+      </div>
+    );
+  }
+
+  const larguraAside = recolhido ? "w-[4.5rem]" : "w-60";
+
   return (
     <div className="min-h-screen flex" style={{ background: BG }}>
-      {/* Sidebar desktop */}
       <aside
-        className="hidden lg:flex w-60 shrink-0 flex-col sticky top-0 h-screen border-r"
-        style={{
-          background: "rgba(19,15,9,0.96)",
-          borderColor: "rgba(200,165,107,0.12)",
-        }}
+        className={`hidden lg:flex ${larguraAside} shrink-0 flex-col sticky top-0 h-screen border-r transition-[width] duration-200`}
+        style={{ background: "rgba(19,15,9,0.96)", borderColor: "rgba(200,165,107,0.12)" }}
       >
-        <div className="px-4 pt-5 pb-4 border-b" style={{ borderColor: "rgba(200,165,107,0.1)" }}>
-          <div className="flex items-center gap-3">
-            <div
-              className="flex items-center justify-center w-9 h-9 rounded-xl font-semibold text-sm shrink-0"
-              style={{
-                background: "linear-gradient(135deg, rgba(200,165,107,0.15), rgba(156,119,66,0.05))",
-                border: "1px solid rgba(200,165,107,0.3)",
-                color: C.gold,
-              }}
-            >
-              SL
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] tracking-[0.2em] uppercase leading-none mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>
-                Painel
+        <div className={`border-b ${recolhido ? "px-2 py-4" : "px-4 pt-5 pb-4"}`} style={{ borderColor: "rgba(200,165,107,0.1)" }}>
+          <div className={`flex items-center ${recolhido ? "justify-center" : "gap-3"}`}>
+            <img src={LOGO_CLARO} alt="Portal Iluminando" className={recolhido ? "h-8 w-auto" : "h-9 w-auto max-w-[9.5rem]"} />
+          </div>
+        </div>
+
+        <div className={`flex-1 overflow-y-auto py-4 ${recolhido ? "px-2" : "px-3"}`}>
+          <NavOperacional soIcone={recolhido} />
+        </div>
+
+        <div className={`border-t space-y-2 ${recolhido ? "px-2 py-3" : "px-3 py-3"}`} style={{ borderColor: "rgba(200,165,107,0.1)" }}>
+          {!recolhido && configAberta && (
+            <div className="mb-1">
+              <p className="px-3 mb-2 text-[10px] font-semibold tracking-[0.18em] uppercase" style={{ color: "rgba(200,165,107,0.4)" }}>
+                Configurações
               </p>
-              <h1 className="font-tan-mon-cheri text-base leading-none truncate" style={{ color: C.gold }}>
-                Administração
-              </h1>
+              <NavConfig />
             </div>
-          </div>
-        </div>
+          )}
+          {recolhido && configAberta && <NavConfig soIcone />}
 
-        <div className="flex-1 overflow-y-auto px-3 py-4">
-          <NavButtons />
-        </div>
-
-        <div className="px-4 py-4 border-t" style={{ borderColor: "rgba(200,165,107,0.1)" }}>
-          <div
-            className="flex items-center gap-2 px-3 py-2 rounded-xl"
-            style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.15)" }}
+          <button
+            type="button"
+            title="Configurações"
+            onClick={() => {
+              setConfigAberta((v) => !v);
+              if (!configAberta) setAba("webhooks");
+            }}
+            className={`flex items-center rounded-xl text-sm w-full ${recolhido ? "justify-center w-10 h-10 mx-auto" : "gap-3 px-3 py-2.5"}`}
+            style={{
+              background: configAtiva || configAberta ? "rgba(200,165,107,0.12)" : "transparent",
+              color: configAtiva || configAberta ? C.gold : "rgba(247,242,236,0.55)",
+              border: configAtiva || configAberta ? "1px solid rgba(200,165,107,0.28)" : "1px solid transparent",
+            }}
           >
-            <Shield className="w-3.5 h-3.5 shrink-0" style={{ color: C.bronze }} />
-            <span className="text-xs truncate" style={{ color: C.muted }}>
-              {user?.nome?.split(" ")[0] || user?.username}
-            </span>
-          </div>
+            <Settings className="w-4 h-4 shrink-0" />
+            {!recolhido && <span>Configurações</span>}
+          </button>
+
+          {!recolhido && (
+            <div
+              className="flex items-center gap-2 px-3 py-2 rounded-xl"
+              style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.15)" }}
+            >
+              <Shield className="w-3.5 h-3.5 shrink-0" style={{ color: C.bronze }} />
+              <span className="text-xs truncate" style={{ color: C.muted }}>
+                {user?.nome?.split(" ")[0] || user?.username}
+              </span>
+            </div>
+          )}
+
+          <button
+            type="button"
+            title={recolhido ? "Expandir menu" : "Recolher menu"}
+            onClick={() => setRecolhido((v) => !v)}
+            className={`flex items-center rounded-xl text-sm w-full ${recolhido ? "justify-center w-10 h-10 mx-auto" : "gap-3 px-3 py-2"}`}
+            style={{ color: "rgba(247,242,236,0.45)" }}
+          >
+            {recolhido ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+            {!recolhido && <span className="text-xs">Recolher</span>}
+          </button>
         </div>
       </aside>
 
-      {/* Conteúdo */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         <header
           className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3 lg:px-6"
@@ -189,9 +247,6 @@ export default function AdminPage() {
           </button>
 
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] tracking-[0.16em] uppercase lg:hidden" style={{ color: C.muted }}>
-              Administração
-            </p>
             <h2 className="font-tan-mon-cheri text-xl truncate" style={{ color: C.text }}>
               {tituloAba}
             </h2>
@@ -208,14 +263,6 @@ export default function AdminPage() {
               <span className="truncate">{mensagem.texto}</span>
             </div>
           )}
-
-          <div
-            className="lg:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl shrink-0"
-            style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.15)" }}
-          >
-            <Shield className="w-3.5 h-3.5" style={{ color: C.bronze }} />
-            <span className="text-xs" style={{ color: C.muted }}>{user?.nome?.split(" ")[0] || user?.username}</span>
-          </div>
         </header>
 
         {mensagem && (
@@ -230,7 +277,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        <main className="flex-1 px-4 py-5 lg:px-6 lg:py-6 max-w-7xl w-full mx-auto">
+        <main className={`flex-1 w-full mx-auto ${aba === "conteudoDia" ? "px-3 py-4 lg:px-5 lg:py-5 max-w-[1400px]" : "px-4 py-5 lg:px-6 lg:py-6 max-w-7xl"}`}>
           {aba === "dashboard" && <DashboardTab showMsg={showMsg} />}
           {aba === "usuarios" && <UsuariosTab showMsg={showMsg} />}
           {aba === "compras" && <ComprasTab showMsg={showMsg} />}
@@ -244,33 +291,24 @@ export default function AdminPage() {
         </main>
       </div>
 
-      {/* Drawer mobile */}
       {menuAberto && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <button
-            type="button"
-            className="absolute inset-0"
-            style={{ background: "rgba(0,0,0,0.65)" }}
-            aria-label="Fechar menu"
-            onClick={() => setMenuAberto(false)}
-          />
-          <aside
-            className="absolute left-0 top-0 bottom-0 w-[min(18rem,86vw)] flex flex-col"
-            style={{ background: "#16110c", borderRight: "1px solid rgba(200,165,107,0.15)" }}
-          >
+          <button type="button" className="absolute inset-0" style={{ background: "rgba(0,0,0,0.65)" }} aria-label="Fechar menu" onClick={() => setMenuAberto(false)} />
+          <aside className="absolute left-0 top-0 bottom-0 w-[min(18rem,86vw)] flex flex-col" style={{ background: "#16110c", borderRight: "1px solid rgba(200,165,107,0.15)" }}>
             <div className="flex items-center justify-between px-4 pt-4 pb-3">
-              <p className="font-tan-mon-cheri text-lg" style={{ color: C.gold }}>Menu</p>
-              <button
-                type="button"
-                onClick={() => setMenuAberto(false)}
-                className="w-9 h-9 flex items-center justify-center"
-                style={{ color: C.muted }}
-              >
+              <img src={LOGO_CLARO} alt="Portal Iluminando" className="h-8 w-auto" />
+              <button type="button" onClick={() => setMenuAberto(false)} className="w-9 h-9 flex items-center justify-center" style={{ color: C.muted }}>
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-3 pb-6">
-              <NavButtons compact />
+            <div className="flex-1 overflow-y-auto px-3 pb-4">
+              <NavOperacional />
+              <div className="mt-6">
+                <p className="px-3 mb-2 text-[10px] font-semibold tracking-[0.18em] uppercase" style={{ color: "rgba(200,165,107,0.4)" }}>
+                  Configurações
+                </p>
+                <NavConfig />
+              </div>
             </div>
           </aside>
         </div>
