@@ -61,6 +61,9 @@ export function leituraDoMes(mes: {
   areas?: string[];
   sombra?: string;
   clima?: string;
+  carreira?: string;
+  relacoes?: string;
+  saude?: string;
 } | null | undefined): LeituraPortal | null {
   if (!mes?.descricao && !mes?.profundidade) return null;
   const onde = listaNatural(mes.areas ?? []);
@@ -68,15 +71,28 @@ export function leituraDoMes(mes: {
   return comporLeitura(
     {
       quemVoceE: lista(mes.descricao, mes.profundidade),
-      noDiaADia: onde
-        ? `Olhe primeiro para ${onde}.${mes.clima ? ` ${mes.clima}` : ""}`
-        : mes.clima || "Repare em qual parte deste mês esse convite aparece com mais força.",
+      noDiaADia: ou(
+        lista(
+          item("No trabalho e nas metas", mes.carreira),
+          item("Nas relações", mes.relacoes),
+          item("No corpo e na rotina", mes.saude),
+          onde ? { rotulo: "Olhe primeiro para", texto: `${onde}.` } : null,
+          item("Clima do mês", mes.clima),
+        ),
+        "Repare em qual parte deste mês esse convite aparece com mais força.",
+      ),
       sombra: ou(
-        lista(mes.sombra, ...(mes.evitar ?? [])),
+        lista(
+          item("O excesso deste mês", mes.sombra),
+          comTitulo("Evite", mes.evitar ?? []),
+        ),
         "O peso deste mês é forçar um gesto quando o momento pede outro.",
       ),
       oQueFazer: ou(
-        lista(...(mes.acoes ?? []), pergunta),
+        lista(
+          comTitulo("Gestos do mês", mes.acoes ?? []),
+          pergunta ? { rotulo: "Para pensar", texto: pergunta } : null,
+        ),
         "Escolha um gesto pequeno desta leitura e faça ainda neste mês.",
       ),
     },
@@ -85,6 +101,69 @@ export function leituraDoMes(mes: {
       noDiaADia: "Onde olhar",
       sombra: "O que pesa",
       oQueFazer: "O que fazer",
+    },
+  );
+}
+
+/** Leitura do Ano Pessoal — mais densa, com áreas da vida. */
+export function leituraAnoPessoal(ano: {
+  titulo?: string;
+  essencia?: string;
+  descricao?: string;
+  detalhado?: string;
+  temas?: {
+    carreira?: string;
+    financas?: string;
+    relacionamentos?: string;
+    saude?: string;
+    desenvolvimento?: string;
+    espiritualidade?: string;
+  };
+  desafios?: string[];
+  areasDeAtencao?: string[];
+  praticasSugeridas?: string[];
+  afirmacoes?: string[];
+} | null | undefined): LeituraPortal | null {
+  if (!ano?.essencia && !ano?.descricao) return null;
+  const t = ano.temas ?? {};
+  return comporLeitura(
+    {
+      quemVoceE: lista(
+        ano.essencia,
+        ano.descricao,
+        item("O chamado deste ciclo", ano.detalhado),
+      ),
+      noDiaADia: ou(
+        lista(
+          item("Carreira e vocação", t.carreira),
+          item("Finanças", t.financas),
+          item("Relações", t.relacionamentos),
+          item("Corpo e saúde", t.saude),
+          item("Desenvolvimento", t.desenvolvimento),
+          item("Espiritualidade", t.espiritualidade),
+        ),
+        "Olhe para trabalho, dinheiro, vínculos e corpo — o ano toca os quatro.",
+      ),
+      sombra: ou(
+        lista(
+          comTitulo("Desafios do ciclo", ano.desafios ?? []),
+          comTitulo("Áreas de atenção", ano.areasDeAtencao ?? []),
+        ),
+        "A sombra deste ano é forçar o ritmo de outro número do ciclo.",
+      ),
+      oQueFazer: ou(
+        lista(
+          comTitulo("Práticas do ano", ano.praticasSugeridas ?? []),
+          ...(ano.afirmacoes ?? []).map((a) => ({ rotulo: "Para lembrar", texto: a })),
+        ),
+        "Escolha um gesto alinhado a este ciclo e sustente por 90 dias.",
+      ),
+    },
+    {
+      quemVoceE: "O clima do seu ano",
+      noDiaADia: "Como isso aparece na vida",
+      sombra: "O que pesa",
+      oQueFazer: "O que fazer com o ciclo",
     },
   );
 }

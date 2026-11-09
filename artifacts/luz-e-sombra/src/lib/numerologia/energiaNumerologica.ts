@@ -18,6 +18,12 @@ export type EnergiaNumerologica = {
 
 export type EnergiaMesPessoal = EnergiaNumerologica & {
   areas: string[];
+  /** Como a energia do mês aparece no trabalho e nas metas. */
+  carreira?: string;
+  /** Como aparece nos vínculos e na convivência. */
+  relacoes?: string;
+  /** Como aparece no corpo, nervos e rotina. */
+  saude?: string;
 };
 
 /** Raiz 1–9 de um mestre (11→2, 22→4, 33→6). */

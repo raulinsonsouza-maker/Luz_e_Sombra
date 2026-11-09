@@ -2,17 +2,17 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import {
-  Calendar, TrendingUp, Heart, Briefcase, DollarSign, Activity,
+  Calendar, TrendingUp, Heart, Briefcase, DollarSign,
   AlertCircle, Brain, Lightbulb, ChevronDown, ChevronRight,
-  User, Star, Zap, Shield, Hash, BookOpen, Compass, Lock,
+  User, Zap, Shield, Hash, Lock,
 } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 import { useJornadaModulo } from "@/hooks/useJornadaModulo";
 
-import { ANOS_UNIVERSAIS, ANOS_PESSOAIS, COMBINACOES, NUMEROS_DE_VIDA, type AnaliseNumero } from "@/lib/numerologia-data";
+import { ANOS_UNIVERSAIS, ANOS_PESSOAIS, COMBINACOES, NUMEROS_DE_VIDA } from "@/lib/numerologia-data";
 import LeituraBlocos from "@/components/LeituraBlocos";
 import { ListaItens, TextoFormatado } from "@/components/TextoLeitura";
-import { leituraDoMes, leituraNumerologia } from "@/lib/leiturasPortal";
+import { leituraAnoPessoal, leituraDoMes, leituraNumerologia } from "@/lib/leiturasPortal";
 import MobileTopBar from "@/components/MobileTopBar";
 import NavBackButton from "@/components/NavBackButton";
 import PageIntroHeader from "@/components/PageIntroHeader";
@@ -36,18 +36,6 @@ import {
 } from "@/lib/numerologia/sinteseNumerologica";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function perfilDoAno(interp: AnaliseNumero) {
-  return {
-    essencia: interp.essencia,
-    descricao: interp.descricao,
-    missao: interp.detalhado,
-    carreira: interp.temas.carreira,
-    relacionamentos: interp.temas.relacionamentos,
-    desafios: interp.desafios,
-    praticas: interp.praticasSugeridas,
-  };
-}
 
 function NumBadge({ n, size = "lg" }: { n: number; size?: "sm" | "md" | "lg" | "xl" }) {
   const s = { sm: "w-10 h-10 text-lg", md: "w-14 h-14 text-2xl", lg: "w-20 h-20 text-4xl", xl: "w-28 h-28 text-6xl" }[size];
@@ -447,79 +435,64 @@ export default function NumerologiaPage() {
         {/* Year numbers summary */}
         <div className="num-panel p-6 md:p-8">
           <SectionLabel>Contexto temporal de {resultado.ano}</SectionLabel>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="p-6 rounded-2xl"
-              style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.35)" }}>
-              <p className="text-xs tracking-widest uppercase text-on-dark-soft mb-4">Seu Ano Pessoal</p>
-              <div className="flex items-end gap-4 mb-4">
-                <span className="font-tan-mon-cheri text-6xl md:text-8xl text-brand-gold leading-none">{anoPessoal.reduzido}</span>
-                <div className="mb-3">
-                  <p className="text-xs text-on-dark-soft">Ciclo pessoal</p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div
+              className="p-5 rounded-2xl"
+              style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.35)" }}
+            >
+              <p className="text-xs tracking-widest uppercase text-on-dark-soft mb-3">Seu Ano Pessoal</p>
+              <div className="flex items-end gap-4">
+                <span className="font-tan-mon-cheri text-6xl md:text-7xl text-brand-gold leading-none">
+                  {anoPessoal.reduzido}
+                </span>
+                <div className="mb-2 min-w-0">
+                  <p className="text-sm font-medium text-on-dark leading-snug">
+                    {interp?.titulo ?? "Ciclo pessoal"}
+                  </p>
                   <p className="text-xs font-mono text-on-dark-soft/60 mt-1">{anoPessoal.passos}</p>
                 </div>
               </div>
-              {interp && leituraNumerologia(perfilDoAno(interp)) && (
-                <div className="mb-2">
-                  <LeituraBlocos fluida leitura={leituraNumerologia(perfilDoAno(interp))!} />
-                </div>
-              )}
             </div>
-            <div className="p-6 rounded-2xl"
-              style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}>
-              <p className="text-xs tracking-widest uppercase text-on-dark-soft mb-4">Ano Universal {resultado.ano}</p>
-              <div className="flex items-end gap-4 mb-4">
-                <span className="font-tan-mon-cheri text-6xl md:text-8xl text-on-dark leading-none" style={{ opacity: 0.65 }}>{anoUniversal.reduzido}</span>
-                <div className="mb-3">
-                  <p className="text-xs text-on-dark-soft">Energia coletiva global</p>
+            <div
+              className="p-5 rounded-2xl"
+              style={{ background: "rgba(200,165,107,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}
+            >
+              <p className="text-xs tracking-widest uppercase text-on-dark-soft mb-3">
+                Ano Universal {resultado.ano}
+              </p>
+              <div className="flex items-end gap-4">
+                <span
+                  className="font-tan-mon-cheri text-6xl md:text-7xl text-on-dark leading-none"
+                  style={{ opacity: 0.65 }}
+                >
+                  {anoUniversal.reduzido}
+                </span>
+                <div className="mb-2 min-w-0">
+                  <p className="text-sm font-medium text-on-dark leading-snug">
+                    {univ?.titulo ?? "Energia coletiva"}
+                  </p>
+                  <p className="text-xs text-on-dark-soft mt-1">Clima do mundo neste ano</p>
                 </div>
               </div>
-              {univ && <TextoFormatado texto={univ.climaColetivo} />}
             </div>
           </div>
         </div>
 
-        {/* Personal year full interpretation */}
-        {interp && (
+        {/* Personal year deep reading */}
+        {interp && leituraAnoPessoal(interp) && (
           <div className="num-panel p-6 md:p-8">
             <div className="flex items-center gap-3 mb-6">
               <Brain className="w-5 h-5 text-brand-gold" />
               <div>
-                <SectionLabel>Interpretação Completa</SectionLabel>
+                <SectionLabel>Leitura do seu ano</SectionLabel>
                 <p className="text-on-dark font-medium">{interp.titulo}</p>
               </div>
             </div>
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <InfoCard icon={DollarSign} label="Finanças">{interp.temas.financas}</InfoCard>
-              <InfoCard icon={Activity} label="Saúde">{interp.temas.saude}</InfoCard>
-            </div>
-            {interp.temas.desenvolvimento && (
-              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                <InfoCard icon={BookOpen} label="Desenvolvimento">{interp.temas.desenvolvimento}</InfoCard>
-                {interp.temas.espiritualidade && (
-                  <InfoCard icon={Star} label="Espiritualidade">{interp.temas.espiritualidade}</InfoCard>
-                )}
-              </div>
-            )}
-            <div className="grid md:grid-cols-2 gap-4 mb-4">
-              {interp.areasDeAtencao && interp.areasDeAtencao.length > 0 && (
-                <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.04)", border: "1px solid rgba(200,165,107,0.15)" }}>
-                  <h3 className="font-semibold text-on-dark text-sm mb-3">Áreas de Atenção</h3>
-                  <ListaItens itens={interp.areasDeAtencao} />
-                </div>
-              )}
-            </div>
-            {interp.afirmacoes && interp.afirmacoes.length > 0 && (
-              <div className="p-5 rounded-xl" style={{ background: "rgba(200,165,107,0.07)", border: "1px solid rgba(200,165,107,0.25)" }}>
-                <h3 className="font-semibold text-on-dark text-sm mb-3">Afirmações do Ano</h3>
-                <div className="space-y-3">
-                  {interp.afirmacoes.map((a, i) => (
-                    <TextoFormatado key={i} texto={a.startsWith('"') ? a : `"${a}"`} />
-                  ))}
-                </div>
-              </div>
-            )}
-            <div className="flex flex-wrap gap-2 pt-4" style={{ borderTop: "1px solid rgba(200,165,107,0.15)" }}>
-              {interp.palavrasChave.map((p, i) => <Tag key={i}>{p}</Tag>)}
+            <LeituraBlocos fluida leitura={leituraAnoPessoal(interp)!} />
+            <div className="flex flex-wrap gap-2 mt-8 pt-5" style={{ borderTop: "1px solid rgba(200,165,107,0.15)" }}>
+              {interp.palavrasChave.map((p, i) => (
+                <Tag key={i}>{p}</Tag>
+              ))}
             </div>
           </div>
         )}
