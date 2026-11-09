@@ -73,6 +73,32 @@ router.get("/me/foto-perfil/view", requireAuth, async (req: AuthRequest, res: Re
   }
 });
 
+// GET /api/usuarios/:id/foto-perfil — foto pública autenticada (comunidade)
+router.get("/:id/foto-perfil", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const id = parseInt(String(req.params.id), 10);
+    if (!Number.isFinite(id)) return res.status(400).json({ error: "ID inválido" });
+
+    const [usuario] = await db
+      .select({ fotoPerfil: usuariosTable.fotoPerfil })
+      .from(usuariosTable)
+      .where(eq(usuariosTable.id, id))
+      .limit(1);
+
+    if (!usuario?.fotoPerfil) return res.status(404).json({ error: "Sem foto de perfil" });
+
+    const file = await objectStorage.getObjectEntityFile(usuario.fotoPerfil);
+    const response = await objectStorage.downloadObject(file, 3600);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    res.set("Content-Type", response.headers.get("content-type") || "image/jpeg");
+    res.set("Cache-Control", "private, max-age=3600");
+    return res.send(buffer);
+  } catch (err) {
+    req.log.error({ err }, "Erro ao carregar foto de perfil de usuário");
+    return res.status(404).json({ error: "Foto não encontrada" });
+  }
+});
+
 // PUT /api/usuarios/me — update own profile (name, birth date, password)
 router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
@@ -118,6 +144,7 @@ router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {
         nome: usuariosTable.nome,
         email: usuariosTable.email,
         dataNascimento: usuariosTable.dataNascimento,
+        fotoPerfil: usuariosTable.fotoPerfil,
         primeiroAcesso: usuariosTable.primeiroAcesso,
         ativo: usuariosTable.ativo,
         isAdmin: usuariosTable.isAdmin,

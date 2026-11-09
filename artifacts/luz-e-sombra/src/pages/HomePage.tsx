@@ -15,17 +15,8 @@ import {
   Map,
   Users2,
   GraduationCap,
-  Sparkles,
   FileText,
 } from "lucide-react";
-
-interface ModuloJornada {
-  slug: string;
-  tituloIntro: string;
-  status: "done" | "active" | "locked";
-  hubHref: string;
-  hrefAnalise: string;
-}
 
 interface Progresso {
   luzes: number;
@@ -57,7 +48,6 @@ export default function HomePage() {
   const [, navigate] = useLocation();
   const { user, status } = useAuth();
   const [progresso, setProgresso] = useState<Progresso | null>(null);
-  const [modulosJornada, setModulosJornada] = useState<ModuloJornada[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [concluindoConvite, setConcluindoConvite] = useState(false);
   const [avisoLuz, setAvisoLuz] = useState(false);
@@ -101,12 +91,8 @@ export default function HomePage() {
 
   async function buscarDados() {
     try {
-      const [resProg, resMod] = await Promise.all([
-        apiFetch("/gamificacao/progresso"),
-        apiFetch("/modulos-jornada"),
-      ]);
+      const resProg = await apiFetch("/gamificacao/progresso");
       if (resProg.ok) setProgresso(await resProg.json());
-      if (resMod.ok) setModulosJornada(await resMod.json());
     } catch {
       /* noop */
     }
@@ -156,8 +142,6 @@ export default function HomePage() {
     : 0;
 
   const TOTAL_ETAPAS_INICIANTE = 6;
-
-  const moduloAtivo = modulosJornada.find((m) => m.status === "active");
 
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
@@ -244,43 +228,6 @@ export default function HomePage() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 pt-4">
-
-        {/* Seu próximo passo */}
-        {moduloAtivo && (
-          <div
-            className="rounded-3xl p-5 mb-4"
-            style={{
-              background: "linear-gradient(135deg, rgba(200,165,107,0.14) 0%, rgba(60,42,28,0.35) 100%)",
-              border: "1px solid rgba(200,165,107,0.28)",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
-            }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4" style={{ color: "#c8a56b" }} />
-              <p className="text-xs font-bold tracking-wider uppercase" style={{ color: "#c8a56b" }}>
-                Seu próximo passo
-              </p>
-            </div>
-            <p className="text-base font-semibold mb-1" style={{ color: "#f7f2ec" }}>
-              {moduloAtivo.tituloIntro}
-            </p>
-            <p className="text-xs mb-4 leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
-              Continue sua jornada por aqui — é o módulo ativo agora.
-            </p>
-            <button
-              type="button"
-              onClick={() => navigate(moduloAtivo.hubHref)}
-              className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-              style={{
-                background: "linear-gradient(135deg, #c8a56b, #9c7742)",
-                color: "#1a1208",
-              }}
-            >
-              Ir para o módulo
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
 
         {/* Dossiê integrado — passo 6 da jornada */}
         {etapasInicianteConcluidas >= 4 && progresso?.jornada.dossie !== true && (

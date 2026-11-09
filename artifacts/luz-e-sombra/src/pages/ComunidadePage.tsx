@@ -28,6 +28,8 @@ interface Post {
   id: number;
   autorId: number;
   autorNome: string;
+  autorAdmin?: boolean;
+  autorFotoUrl?: string | null;
   tipo: "texto" | "imagem" | "video" | "audio";
   conteudo: string;
   mediaUrl: string | null;
@@ -65,7 +67,7 @@ function timeAgo(dateStr: string): string {
 }
 
 function userBadge(nome: string, admin?: boolean): string {
-  if (admin) return "Administrador";
+  if (admin) return "Portal Iluminando";
   const n = nome.toLowerCase();
   if (n.includes("monitor")) return "Monitor";
   if (n.includes("equipe")) return "Equipe";
@@ -557,14 +559,25 @@ function PostCard({
       <div className="flex items-center justify-between px-5 pt-4 pb-3">
         <div className="flex items-center gap-3">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+            className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold shrink-0"
             style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.2), rgba(156,119,66,0.1))", color: "#c8a56b", border: "1px solid rgba(200,165,107,0.25)" }}
           >
-            {(post.autorNome || "A")[0].toUpperCase()}
+            {post.autorFotoUrl ? (
+              <AuthenticatedImage
+                apiPath={post.autorFotoUrl}
+                alt=""
+                className="w-full h-full"
+                imgClassName="w-full h-full object-cover"
+              />
+            ) : (
+              (post.autorNome || "A")[0].toUpperCase()
+            )}
           </div>
           <div>
             <p className="text-sm font-medium" style={{ color: "#f7f2ec" }}>{post.autorNome}</p>
-            <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>{timeAgo(post.criadoEm)}</p>
+            <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
+              {post.autorAdmin ? "Portal Iluminando · " : ""}{timeAgo(post.criadoEm)}
+            </p>
           </div>
         </div>
         {isAdmin && (
@@ -597,8 +610,8 @@ function PostCard({
       )}
 
       {post.tipo === "audio" && post.mediaUrl && (
-        <div className="mx-5 mb-3 rounded-xl px-3 py-3" style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.15)" }}>
-          <AuthenticatedAudio apiPath={`/comunidade/${post.id}/audio`} />
+        <div className="mx-5 mb-3">
+          <AuthenticatedAudio apiPath={`/comunidade/${post.id}/audio`} title="Áudio da publicação" />
         </div>
       )}
 

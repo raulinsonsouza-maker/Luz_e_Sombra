@@ -29,6 +29,8 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
         mediaUrl: comunidadeTable.mediaUrl,
         criadoEm: comunidadeTable.criadoEm,
         autorNome: usuariosTable.nome,
+        autorFoto: usuariosTable.fotoPerfil,
+        autorAdmin: usuariosTable.isAdmin,
       })
       .from(comunidadeTable)
       .leftJoin(usuariosTable, eq(usuariosTable.id, comunidadeTable.autorId))
@@ -120,8 +122,12 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
       const totalSalvos = postSalvos.reduce((sum, it) => sum + Number(it.count), 0);
       const salvoPorMim = postSalvos.some((it) => it.usuarioId === userId);
 
+      const { autorFoto, ...rest } = post;
       return {
-        ...post,
+        ...rest,
+        autorNome: post.autorNome ?? "Usuário",
+        autorAdmin: Boolean(post.autorAdmin),
+        autorFotoUrl: autorFoto && post.autorId ? `/usuarios/${post.autorId}/foto-perfil` : null,
         reacoes: contagens,
         minhasReacoes,
         comentarios: postComentarios.map((c) => ({
