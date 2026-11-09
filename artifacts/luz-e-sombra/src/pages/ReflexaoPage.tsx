@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Bookmark, BookmarkCheck, Share2 } from "lucide-react";
+import { Bookmark, BookmarkCheck, Share2 } from "lucide-react";
+import MobileTopBar from "@/components/MobileTopBar";
 import { dataCurta, fraseDoDia } from "@/lib/frasesAno";
 import { compartilharFrase } from "@/lib/compartilharFrase";
 import { imagemDoDia } from "@/lib/imagemDoDia";
 import { alternarFraseGuardada, statusFraseGuardada } from "@/lib/frasesGuardadas";
-import { detectarTomLogo, srcLogo, type TomLogo } from "@/lib/tomLogoPorFundo";
+import { coresSobreFoto, detectarTomLogo, srcLogo, type TomLogo } from "@/lib/tomLogoPorFundo";
 import { toast } from "sonner";
 
 function tamanhoFrase(texto: string) {
@@ -31,6 +32,8 @@ export default function ReflexaoPage() {
   const [tomLogo, setTomLogo] = useState<TomLogo>("claro");
   const [guardada, setGuardada] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const cores = coresSobreFoto(tomLogo);
+  const fotoClara = tomLogo === "ouro";
 
   useEffect(() => {
     let ativo = true;
@@ -85,47 +88,60 @@ export default function ReflexaoPage() {
 
   return (
     <div className="min-h-screen pb-28 journey-forest-bg">
-      <div className="max-w-lg mx-auto px-4 pt-3 flex flex-col" style={{ minHeight: "calc(100vh - 7rem)" }}>
-        <button
-          type="button"
-          onClick={() => navigate("/dashboard")}
-          className="mb-3 inline-flex items-center gap-2 text-xs tracking-wider uppercase self-start"
-          style={{ color: "rgba(247,242,236,0.85)" }}
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Início
-        </button>
+      <MobileTopBar titulo="Reflexão" voltar="/dashboard" />
+      <div className="max-w-lg mx-auto px-4 pt-4 flex flex-col" style={{ minHeight: "calc(100vh - 7rem)" }}>
         <div className="relative flex-1 overflow-hidden rounded-3xl min-h-[420px]">
           <img src={fundo} alt="" className="absolute inset-0 h-full w-full object-cover" />
-          <div
-            className="absolute inset-0"
-            style={{ background: "linear-gradient(180deg, rgba(18,12,8,0.28) 0%, rgba(18,12,8,0.48) 42%, rgba(18,12,8,0.78) 100%)" }}
-          />
-          <div className="relative flex h-full min-h-[420px] flex-col items-center text-center px-7 pt-9 pb-7">
+          <div className="absolute inset-0" style={{ background: cores.velatura }} />
+          <div className="relative flex h-full min-h-[420px] flex-col items-center text-center px-7 pt-8 pb-6">
             <div className="flex flex-1 w-full flex-col items-center justify-center">
-              <p className="text-[12px] tracking-[0.18em] uppercase" style={{ color: "#c8a56b" }}>
+              <p
+                className="text-[12px] tracking-[0.18em] uppercase font-semibold"
+                style={{
+                  color: cores.destaque,
+                  textShadow: fotoClara ? "0 1px 0 rgba(255,255,255,0.55)" : "0 1px 8px rgba(0,0,0,0.35)",
+                }}
+              >
                 {data}
               </p>
               <p
                 className="font-tan-mon-cheri leading-snug max-w-[17.5rem] mt-5"
-                style={{ color: "#f7f2ec", fontSize: tamanhoFrase(hoje.frase) }}
+                style={{
+                  color: fotoClara ? cores.titulo : "#f7f2ec",
+                  fontSize: tamanhoFrase(hoje.frase),
+                  textShadow: fotoClara ? "none" : "0 2px 14px rgba(0,0,0,0.4)",
+                }}
               >
                 {hoje.frase}
               </p>
-              <div className="my-5 h-px w-10" style={{ background: "rgba(200,165,107,0.85)" }} />
+              <div
+                className="my-5 h-px w-10"
+                style={{ background: fotoClara ? "rgba(95,74,47,0.55)" : "rgba(200,165,107,0.85)" }}
+              />
               <p
                 className="font-tan-mon-cheri max-w-[18.5rem] leading-relaxed"
-                style={{ color: "rgba(247,242,236,0.9)", fontSize: tamanhoReflexao(hoje.reflexao) }}
+                style={{
+                  color: fotoClara ? cores.apoio : "rgba(247,242,236,0.92)",
+                  fontSize: tamanhoReflexao(hoje.reflexao),
+                }}
               >
                 {hoje.reflexao}
               </p>
             </div>
 
-            <img
-              src={srcLogo(tomLogo)}
-              alt="Portal Iluminando"
-              className="mt-8 h-auto w-[7.5rem]"
-            />
+            <div className="mt-6 flex flex-col items-center gap-1.5">
+              <p
+                className="text-[10px] font-semibold tracking-[0.28em] uppercase"
+                style={{ color: "#e8d5b0", textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}
+              >
+                Letícia Galloni
+              </p>
+              <img
+                src={srcLogo("claro")}
+                alt="Portal Iluminando"
+                className="h-auto w-[6.5rem] opacity-95"
+              />
+            </div>
           </div>
         </div>
 

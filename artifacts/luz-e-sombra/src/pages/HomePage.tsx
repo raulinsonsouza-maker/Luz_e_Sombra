@@ -5,6 +5,7 @@ import { apiFetch } from "@/lib/auth";
 import { dataDiaMes, dataPorExtenso, fraseDoDia } from "@/lib/frasesAno";
 import { imagemDoDia } from "@/lib/imagemDoDia";
 import { momentoDoDia } from "@/lib/momentoDoDia";
+import { coresSobreFoto, detectarTomLogo, srcLogo, type TomLogo } from "@/lib/tomLogoPorFundo";
 import { toast } from "sonner";
 import { Bell } from "lucide-react";
 import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
@@ -60,8 +61,12 @@ export default function HomePage() {
   const [carregando, setCarregando] = useState(true);
   const [concluindoConvite, setConcluindoConvite] = useState(false);
   const [avisoLuz, setAvisoLuz] = useState(false);
+  const [tomLogo, setTomLogo] = useState<TomLogo>("claro");
   const { count: notiCount } = useNotificacoesCount();
   const hoje = fraseDoDia();
+  const fundo = imagemDoDia();
+  const cores = coresSobreFoto(tomLogo);
+  const fotoClara = tomLogo === "ouro";
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -71,6 +76,16 @@ export default function HomePage() {
     if (status === "loading") return;
     buscarDados();
   }, [status, user]);
+
+  useEffect(() => {
+    let ativo = true;
+    void detectarTomLogo(fundo).then((tom) => {
+      if (ativo) setTomLogo(tom);
+    });
+    return () => {
+      ativo = false;
+    };
+  }, [fundo]);
 
   async function buscarDados() {
     try {
@@ -151,20 +166,20 @@ export default function HomePage() {
       )}
       <div className="max-w-lg mx-auto">
         <div className="relative overflow-hidden" style={{ minHeight: 460 }}>
-          <img src={imagemDoDia()} alt="" className="absolute inset-0 h-full w-full object-cover" />
-          <div
-            className="absolute inset-0"
-            style={{ background: "linear-gradient(180deg, rgba(18,12,8,0.28) 0%, rgba(18,12,8,0.45) 42%, rgba(18,12,8,0.82) 100%)" }}
-          />
+          <img src={fundo} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-0" style={{ background: cores.velatura }} />
           <div className="relative flex min-h-[460px] flex-col px-6 pt-5 pb-8">
             <button
               type="button"
               onClick={() => navigate("/notificacoes")}
               className="absolute top-4 right-4 md:hidden flex items-center justify-center w-9 h-9 rounded-full"
-              style={{ background: "rgba(18,12,8,0.35)", border: "1px solid rgba(247,242,236,0.2)" }}
+              style={{
+                background: fotoClara ? "rgba(247,242,236,0.55)" : "rgba(18,12,8,0.35)",
+                border: fotoClara ? "1px solid rgba(95,74,47,0.25)" : "1px solid rgba(247,242,236,0.2)",
+              }}
               title="Notificações"
             >
-              <Bell className="w-4 h-4" style={{ color: "#f7f2ec" }} />
+              <Bell className="w-4 h-4" style={{ color: fotoClara ? "#5f4a2f" : "#f7f2ec" }} />
               {notiCount > 0 && (
                 <span
                   className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-0.5"
@@ -176,19 +191,27 @@ export default function HomePage() {
             </button>
 
             <div className="pr-12 md:pr-0">
-              <p className="text-[11px] font-semibold tracking-[0.22em] uppercase" style={{ color: "#c8a56b" }}>
+              <img
+                src={srcLogo(tomLogo)}
+                alt="Portal Iluminando"
+                className="h-auto w-[7.25rem] mb-4"
+              />
+              <p
+                className="text-[11px] font-semibold tracking-[0.22em] uppercase"
+                style={{ color: cores.destaque, textShadow: fotoClara ? "0 1px 0 rgba(255,255,255,0.55)" : "0 1px 8px rgba(0,0,0,0.35)" }}
+              >
                 {dataPorExtenso()}
               </p>
-              <p className="text-xs tracking-[0.16em] uppercase mt-3" style={{ color: "rgba(247,242,236,0.72)" }}>
+              <p className="text-xs tracking-[0.16em] uppercase mt-3" style={{ color: cores.apoio }}>
                 {saudacao()},
               </p>
-              <h1 className="font-tan-mon-cheri text-4xl leading-none mt-1" style={{ color: "#f7f2ec" }}>
+              <h1 className="font-tan-mon-cheri text-4xl leading-none mt-1" style={{ color: cores.titulo }}>
                 {primeiroNome}
               </h1>
             </div>
 
             <div className="mt-auto flex flex-col items-center text-center pt-8">
-              <p className="font-tan-mon-cheri text-2xl leading-snug max-w-[18rem]" style={{ color: "#f7f2ec" }}>
+              <p className="font-tan-mon-cheri text-2xl leading-snug max-w-[18rem]" style={{ color: "#f7f2ec", textShadow: "0 2px 16px rgba(0,0,0,0.45)" }}>
                 {hoje.frase}
               </p>
               <button

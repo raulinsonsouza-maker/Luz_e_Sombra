@@ -36,6 +36,19 @@ export function srcLogo(tom: TomLogo): string {
   return tom === "ouro" ? LOGO_OURO : LOGO_CLARO;
 }
 
+/** Cores de texto legíveis sobre a foto do dia. */
+export function coresSobreFoto(tom: TomLogo) {
+  const claro = tom === "ouro";
+  return {
+    destaque: claro ? "#5f4a2f" : "#c8a56b",
+    titulo: claro ? "#1e1812" : "#f7f2ec",
+    apoio: claro ? "rgba(30,24,18,0.78)" : "rgba(247,242,236,0.78)",
+    velatura: claro
+      ? "linear-gradient(180deg, rgba(247,242,236,0.72) 0%, rgba(247,242,236,0.48) 34%, rgba(18,12,8,0.55) 72%, rgba(18,12,8,0.82) 100%)"
+      : "linear-gradient(180deg, rgba(18,12,8,0.48) 0%, rgba(18,12,8,0.58) 42%, rgba(18,12,8,0.84) 100%)",
+  };
+}
+
 export async function detectarTomLogo(src: string): Promise<TomLogo> {
   const cached = cache.get(src);
   if (cached) return cached;
