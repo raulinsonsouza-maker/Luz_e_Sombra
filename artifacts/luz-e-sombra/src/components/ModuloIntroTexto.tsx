@@ -54,13 +54,8 @@ export function ModuloIntroTexto({
   const [aberto, setAberto] = useState(false);
   const temMais =
     paragrafos.length > previewParagrafos || (bullets != null && bullets.length > 0);
-  const paragrafosVisiveis = (() => {
-    if (aberto || !temMais) return paragrafos;
-    const base = paragrafos.slice(0, previewParagrafos);
-    const comData = paragrafos.find((p) => p.includes("__DATA__"));
-    if (comData && !base.includes(comData)) return [...base, comData];
-    return base;
-  })();
+  const paragrafosVisiveis =
+    aberto || !temMais ? paragrafos : paragrafos.slice(0, previewParagrafos);
   const mostrarBullets = aberto && bullets && bullets.length > 0;
 
   return (

@@ -30,6 +30,10 @@ import {
   calcularNumerodaPersonalidade,
   formatarDataBrasileira,
 } from "@/lib/numerologia-utils";
+import {
+  sinteseCaminhoAno,
+  sinteseTriangulo,
+} from "@/lib/numerologia/sinteseNumerologica";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -247,7 +251,7 @@ export default function NumerologiaPage() {
               </div>
             )}
 
-            <div className="mt-10 grid md:grid-cols-2 gap-8">
+            <div className="mt-8 grid md:grid-cols-2 gap-8">
               <div>
                 <p className="text-[11px] font-semibold tracking-[0.16em] uppercase mb-2" style={{ color: "#c8a56b" }}>Saúde e corpo</p>
                 <TextoFormatado texto={numerodeVidaInfo.saude} />
@@ -263,113 +267,172 @@ export default function NumerologiaPage() {
               <ListaItens itens={numerodeVidaInfo.talentos} />
             </div>
 
-            {/* Keywords */}
             <div className="flex flex-wrap gap-2 mt-8 pt-5" style={{ borderTop: "1px solid rgba(200,165,107,0.15)" }}>
               {numerodeVidaInfo.palavrasChave.map((p, i) => <Tag key={i}>{p}</Tag>)}
             </div>
           </div>
         )}
 
-        {/* Expression + Soul side by side */}
-        {(expressaoVal || almaVal) && (
-          <div className="grid md:grid-cols-2 gap-4">
-            {expressaoVal && expressaoInfo && (
-              <div className="num-panel p-6">
-                <SectionLabel>Número de Expressão</SectionLabel>
-                <div className="flex items-start gap-4 mb-4">
-                  <NumBadge n={expressaoVal} size="md" />
-                  <div>
-                    <h3 className="font-semibold text-xl text-on-dark">{expressaoInfo.arquetipo}</h3>
-                    <p className="text-xs text-on-dark-soft mt-0.5">Do nome completo</p>
-                  </div>
-                </div>
-                <p className="text-sm text-on-dark-muted leading-relaxed mb-4">
-                  Como você se expressa no mundo e os talentos que manifesta naturalmente, sua "máscara" mais elevada.
+        {/* Expression */}
+        {expressaoVal && expressaoInfo && (
+          <div className="num-panel p-6 md:p-8">
+            <SectionLabel>Número de Expressão</SectionLabel>
+            <div className="flex items-start gap-4 md:gap-6 mb-5">
+              <NumBadge n={expressaoVal} size="md" />
+              <div>
+                <h3 className="font-tan-mon-cheri text-2xl md:text-3xl text-on-dark mb-1">
+                  {expressaoInfo.arquetipo}
+                </h3>
+                <p className="text-xs text-on-dark-soft">
+                  Do nome completo — como você se expressa e os talentos que manifesta no mundo
                 </p>
-                {leituraNumerologia(expressaoInfo) && (
-                  <div className="mb-4">
-                    <LeituraBlocos fluida leitura={leituraNumerologia(expressaoInfo)!} />
-                  </div>
-                )}
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {expressaoInfo.palavrasChave.slice(0, 4).map((p, i) => <Tag key={i}>{p}</Tag>)}
-                </div>
+              </div>
+            </div>
+            {leituraNumerologia(expressaoInfo) && (
+              <div className="mb-5">
+                <LeituraBlocos fluida leitura={leituraNumerologia(expressaoInfo)!} />
               </div>
             )}
+            <div className="flex flex-wrap gap-2 pt-4" style={{ borderTop: "1px solid rgba(200,165,107,0.15)" }}>
+              {expressaoInfo.palavrasChave.map((p, i) => <Tag key={i}>{p}</Tag>)}
+            </div>
+          </div>
+        )}
 
-            {almaVal && almaInfo && (
-              <div className="num-panel p-6">
-                <SectionLabel>Número da Alma</SectionLabel>
-                <div className="flex items-start gap-4 mb-4">
-                  <NumBadge n={almaVal} size="md" />
-                  <div>
-                    <h3 className="font-semibold text-xl text-on-dark">{almaInfo.arquetipo}</h3>
-                    <p className="text-xs text-on-dark-soft mt-0.5">Das vogais do nome</p>
-                  </div>
-                </div>
-                <p className="text-sm text-on-dark-muted leading-relaxed mb-4">
-                  O que você deseja profundamente no íntimo, sua motivação mais oculta, o que move sua alma.
+        {/* Soul */}
+        {almaVal && almaInfo && (
+          <div className="num-panel p-6 md:p-8">
+            <SectionLabel>Número da Alma</SectionLabel>
+            <div className="flex items-start gap-4 md:gap-6 mb-5">
+              <NumBadge n={almaVal} size="md" />
+              <div>
+                <h3 className="font-tan-mon-cheri text-2xl md:text-3xl text-on-dark mb-1">
+                  {almaInfo.arquetipo}
+                </h3>
+                <p className="text-xs text-on-dark-soft">
+                  Das vogais do nome — o desejo íntimo, a motivação que move você por dentro
                 </p>
-                {leituraNumerologia(almaInfo) && (
-                  <div className="mb-4">
-                    <LeituraBlocos fluida leitura={leituraNumerologia(almaInfo)!} />
-                  </div>
-                )}
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {almaInfo.palavrasChave.slice(0, 4).map((p, i) => <Tag key={i}>{p}</Tag>)}
-                </div>
+              </div>
+            </div>
+            {leituraNumerologia(almaInfo) && (
+              <div className="mb-5">
+                <LeituraBlocos fluida leitura={leituraNumerologia(almaInfo)!} />
               </div>
             )}
+            <div className="flex flex-wrap gap-2 pt-4" style={{ borderTop: "1px solid rgba(200,165,107,0.15)" }}>
+              {almaInfo.palavrasChave.map((p, i) => <Tag key={i}>{p}</Tag>)}
+            </div>
           </div>
         )}
 
         {/* Personality number */}
-        {persVal && NUMEROS_DE_VIDA[persVal] && (
-          <div className="num-panel p-6">
-            <SectionLabel>Número da Personalidade</SectionLabel>
-            <div className="flex items-start gap-4">
-              <NumBadge n={persVal} size="sm" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg text-on-dark mb-1">
-                  {NUMEROS_DE_VIDA[persVal].arquetipo}
-                </h3>
-                <p className="text-xs text-on-dark-soft mb-3">Das consoantes do nome, como os outros te percebem</p>
-                <TextoFormatado texto={NUMEROS_DE_VIDA[persVal].missao} />
+        {persVal && NUMEROS_DE_VIDA[persVal] && (() => {
+          const persInfo = NUMEROS_DE_VIDA[persVal];
+          const leituraPers = leituraNumerologia(persInfo);
+          return (
+            <div className="num-panel p-6 md:p-8">
+              <SectionLabel>Número da Personalidade</SectionLabel>
+              <div className="flex items-start gap-4 md:gap-6 mb-5">
+                <NumBadge n={persVal} size="md" />
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-tan-mon-cheri text-2xl md:text-3xl text-on-dark mb-1">
+                    {persInfo.arquetipo}
+                  </h3>
+                  <p className="text-xs text-on-dark-soft mb-1">
+                    Das consoantes do nome — a imagem que você projeta e como os outros te percebem
+                  </p>
+                  {resultado.nomeCompleto?.trim() ? (
+                    <p className="text-[11px] text-on-dark-soft/70">
+                      A partir do nome: {resultado.nomeCompleto.trim()}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+
+              <p className="text-sm text-on-dark-muted leading-relaxed mb-5">
+                Enquanto o Caminho de Vida fala da essência e a Alma dos desejos íntimos,
+                a Personalidade revela a primeira impressão: o que você transmite sem precisar explicar.
+              </p>
+
+              {leituraPers ? (
+                <div className="mb-5">
+                  <LeituraBlocos fluida leitura={leituraPers} />
+                </div>
+              ) : null}
+
+              <div className="flex flex-wrap gap-2 pt-4" style={{ borderTop: "1px solid rgba(200,165,107,0.15)" }}>
+                {persInfo.palavrasChave.map((p, i) => (
+                  <Tag key={i}>{p}</Tag>
+                ))}
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Triangle synthesis */}
-        {numerodeVida && expressaoVal && almaVal && (
-          <div className="num-panel p-6 md:p-8"
-            style={{ background: "linear-gradient(160deg, #1e1812 0%, #2f251b 60%, #3d2f1f 100%)" }}>
-            <SectionLabel><span style={{ color: "rgba(200,165,107,0.9)" }}>Síntese do Perfil</span></SectionLabel>
-            <h3 className="font-tan-mon-cheri text-2xl mb-6" style={{ color: "#f7f2ec" }}>
-              O Triângulo Numerológico
-            </h3>
-            <div className="grid md:grid-cols-3 gap-4">
-              {[
-                { label: "Caminho de Vida", desc: "Quem você é na essência e sua missão", n: numerodeVida },
-                { label: "Expressão", desc: "Como você manifesta seus talentos no mundo", n: expressaoVal },
-                { label: "Alma", desc: "O que motiva você no nível mais profundo", n: almaVal },
-              ].map(({ label, desc, n }) => (
-                <div key={label} className="text-center p-5 rounded-xl"
-                  style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.2)" }}>
-                  <div className="font-tan-mon-cheri text-5xl mb-3" style={{ color: "#c8a56b" }}>{n}</div>
-                  <p className="text-sm font-semibold mb-1" style={{ color: "#f7f2ec" }}>{label}</p>
-                  <p className="text-xs" style={{ color: "rgba(247,242,236,0.65)" }}>{desc}</p>
-                </div>
-              ))}
+        {numerodeVida && expressaoVal && almaVal && (() => {
+          const s = sinteseTriangulo(numerodeVida, expressaoVal, almaVal, persVal);
+          return (
+            <div
+              className="num-panel p-6 md:p-8"
+              style={{ background: "linear-gradient(160deg, #1e1812 0%, #2f251b 60%, #3d2f1f 100%)" }}
+            >
+              <SectionLabel>
+                <span style={{ color: "rgba(200,165,107,0.9)" }}>Síntese personalizada</span>
+              </SectionLabel>
+              <h3 className="font-tan-mon-cheri text-2xl mb-2" style={{ color: "#f7f2ec" }}>
+                {s.titulo}
+              </h3>
+              <p className="text-sm leading-relaxed mb-5" style={{ color: "rgba(247,242,236,0.82)" }}>
+                {s.leitura}
+              </p>
+
+              <div className="flex flex-wrap gap-2 mb-5">
+                {s.chips.map((c) => (
+                  <span
+                    key={c.label}
+                    className="text-[11px] px-2.5 py-1 rounded-full"
+                    style={{
+                      background: "rgba(200,165,107,0.1)",
+                      border: "1px solid rgba(200,165,107,0.25)",
+                      color: "#e8d5b0",
+                    }}
+                  >
+                    <span style={{ color: "rgba(200,165,107,0.7)" }}>{c.label}: </span>
+                    {c.valor}
+                  </span>
+                ))}
+              </div>
+
+              <div className="grid gap-3">
+                {[
+                  { rotulo: "Onde flui", texto: s.alinhamento },
+                  { rotulo: "Onde trava", texto: s.tensao },
+                  { rotulo: "Foco agora", texto: s.foco },
+                ].map((bloco) => (
+                  <div
+                    key={bloco.rotulo}
+                    className="rounded-xl px-4 py-3"
+                    style={{
+                      background: "rgba(200,165,107,0.07)",
+                      border: "1px solid rgba(200,165,107,0.2)",
+                    }}
+                  >
+                    <p
+                      className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-1.5"
+                      style={{ color: "#c8a56b" }}
+                    >
+                      {bloco.rotulo}
+                    </p>
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.85)" }}>
+                      {bloco.texto}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="text-sm mt-6 leading-relaxed" style={{ color: "rgba(247,242,236,0.88)" }}>
-              Seu Caminho de Vida ({numerodeVida}) define sua jornada central.
-              Seu número de Expressão ({expressaoVal}) mostra como você manifesta seus dons no mundo.
-              Seu número da Alma ({almaVal}) revela o que sua essência mais profunda anseia viver.
-              Quando esses três números trabalham em harmonia, sua vida flui com autenticidade e propósito.
-            </p>
-          </div>
-        )}
+          );
+        })()}
       </div>
     );
   };
@@ -523,18 +586,61 @@ export default function NumerologiaPage() {
           </div>
         )}
 
-        {/* Life path × personal year synthesis when combination isn't in DB */}
-        {!combinacao && resultado.numerodeVida && (
-          <div className="num-panel p-6">
-            <SectionLabel>Síntese Personalizada</SectionLabel>
-            <p className="text-sm text-on-darker leading-relaxed">
-              Seu Caminho de Vida <strong>{resultado.numerodeVida}</strong> encontra a energia do Ano Pessoal <strong>{anoPessoal.reduzido}</strong> e do Ano Universal <strong>{anoUniversal.reduzido}</strong>.
-              Cada ciclo anual amplifica ou desafia aspectos específicos do seu Caminho de Vida.
-              Considere como as qualidades do seu número <strong>{resultado.numerodeVida}</strong> ({resultado.numerodeVidaInfo?.arquetipo})
-              podem ser expressas neste ciclo anual.
-            </p>
-          </div>
-        )}
+        {/* Life path × personal year synthesis */}
+        {resultado.numerodeVida && (() => {
+          const s = sinteseCaminhoAno(
+            resultado.numerodeVida,
+            anoPessoal.reduzido,
+            anoUniversal.reduzido,
+            resultado.ano,
+          );
+          return (
+            <div
+              className="num-panel p-6 md:p-8"
+              style={{
+                background: combinacao
+                  ? undefined
+                  : "linear-gradient(160deg, #1e1812 0%, #2f251b 60%, #3d2f1f 100%)",
+              }}
+            >
+              <SectionLabel>
+                <span style={{ color: "rgba(200,165,107,0.9)" }}>Síntese personalizada</span>
+              </SectionLabel>
+              <h3 className="font-tan-mon-cheri text-2xl mb-2" style={{ color: "#f7f2ec" }}>
+                {s.titulo}
+              </h3>
+              <p className="text-sm leading-relaxed mb-5" style={{ color: "rgba(247,242,236,0.82)" }}>
+                {s.leitura}
+              </p>
+              <div className="grid gap-3">
+                {[
+                  { rotulo: "O que amplifica", texto: s.amplifica },
+                  { rotulo: "O que cuidar", texto: s.cuidado },
+                  { rotulo: "Um gesto concreto", texto: s.gesto },
+                ].map((bloco) => (
+                  <div
+                    key={bloco.rotulo}
+                    className="rounded-xl px-4 py-3"
+                    style={{
+                      background: "rgba(200,165,107,0.07)",
+                      border: "1px solid rgba(200,165,107,0.2)",
+                    }}
+                  >
+                    <p
+                      className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-1.5"
+                      style={{ color: "#c8a56b" }}
+                    >
+                      {bloco.rotulo}
+                    </p>
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.85)" }}>
+                      {bloco.texto}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     );
   };

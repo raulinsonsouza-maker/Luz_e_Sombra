@@ -189,9 +189,19 @@ function LeituraFluida({ leitura }: { leitura: LeituraPortal }) {
 }
 
 function ParagrafosFluidos({ secao }: { secao: SecaoLeitura }) {
+  const itens = itensDa(secao);
+  const abreComFaixa =
+    secao.id === "quemVoceE" &&
+    itens.length > 1 &&
+    !itens[0]?.rotulo &&
+    (itens[0]?.texto.length ?? 0) <= 180;
+  const faixa = abreComFaixa ? itens[0]?.texto : undefined;
+  const corpo = abreComFaixa ? itens.slice(1) : itens;
+
   return (
     <div className="space-y-5">
-      {grupos(itensDa(secao)).map((grupo, i) => (
+      {faixa ? <Faixa texto={faixa} /> : null}
+      {grupos(corpo).map((grupo, i) => (
         <div key={i}>
           {grupo.rotulo && (
             <p className="text-[11px] font-semibold tracking-[0.16em] uppercase mb-1.5" style={{ color: OURO }}>

@@ -32,6 +32,8 @@ function comTitulo(rotulo: string, textos: Array<string | null | undefined>): Pe
 }
 
 type PerfilNumero = {
+  arquetipo?: string;
+  titulo?: string;
   essencia?: string;
   descricao?: string;
   missao?: string;
@@ -89,25 +91,50 @@ export function leituraDoMes(mes: {
 
 export function leituraNumerologia(perfil: PerfilNumero | null | undefined): LeituraPortal | null {
   if (!perfil?.essencia && !perfil?.descricao) return null;
-  return comporLeitura({
-    quemVoceE: lista(
-      item("Essência", perfil.essencia),
-      item("O retrato", perfil.descricao),
-      item("A missão", perfil.missao),
-    ),
-    noDiaADia: ou(
-      lista(item("No trabalho", perfil.carreira), item("Nas relações", perfil.relacionamentos)),
-      "Olhe para o trabalho e para as relações desta semana e veja onde esse número aparece.",
-    ),
-    sombra: ou(
-      lista(item("O excesso", perfil.sombra), comTitulo("O que pede cuidado", perfil.desafios ?? [])),
-      "A sombra deste número é o excesso do próprio talento, quando ele vira hábito sem consciência.",
-    ),
-    oQueFazer: ou(
-      lista(perfil.afirmacao, ...(perfil.praticas ?? [])),
-      "Escolha uma situação de hoje e aja um pouco mais perto do que este número pede, em um gesto só.",
-    ),
-  });
+
+  const abertura = perfil.arquetipo
+    ? `Você carrega a vibração de ${perfil.arquetipo}.`
+    : perfil.titulo
+      ? `${perfil.titulo}.`
+      : null;
+
+  return comporLeitura(
+    {
+      quemVoceE: lista(
+        abertura,
+        perfil.essencia,
+        item("O chamado desta vibração", perfil.missao),
+      ),
+      noDiaADia: ou(
+        lista(
+          item("Como essa energia se mostra", perfil.descricao),
+          item("No trabalho e na vocação", perfil.carreira),
+          item("Nas relações", perfil.relacionamentos),
+        ),
+        "Olhe para o trabalho e para as relações desta semana e veja onde esse número aparece.",
+      ),
+      sombra: ou(
+        lista(
+          item("Quando passa do ponto", perfil.sombra),
+          comTitulo("Sinais de atenção", (perfil.desafios ?? []).slice(0, 4)),
+        ),
+        "A sombra deste número é o excesso do próprio talento, quando ele vira hábito sem consciência.",
+      ),
+      oQueFazer: ou(
+        lista(
+          item("Para lembrar", perfil.afirmacao),
+          ...(perfil.praticas ?? []),
+        ),
+        "Escolha uma situação de hoje e aja um pouco mais perto do que este número pede, em um gesto só.",
+      ),
+    },
+    {
+      quemVoceE: "Quem você é",
+      noDiaADia: "Como isso aparece na vida",
+      sombra: "Quando passa do ponto",
+      oQueFazer: "O que fazer com isso",
+    },
+  );
 }
 
 

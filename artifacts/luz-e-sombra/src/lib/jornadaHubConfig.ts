@@ -104,9 +104,9 @@ export const JORNADA_HUB_COPY: Record<
       "A numerologia usa sua data de nascimento e seu nome para interpretar os números da sua trajetória.",
     introTexto: [
       "A numerologia é uma ferramenta de autoconhecimento que utiliza sua data de nascimento e seu nome para interpretar os significados simbólicos dos números presentes na sua trajetória.",
+      "A análise utiliza os dados de nascimento cadastrados no seu perfil (__DATA__). Seu Ano Pessoal começa a partir do seu aniversário, e não em 1º de janeiro.",
       "Por meio desta análise, você vai conhecer aspectos relacionados à sua personalidade, seus talentos, seus desejos e os ciclos que marcam diferentes momentos da sua vida.",
       "Seu mapa reúne diferentes números, cada um trazendo uma perspectiva sobre quem você é e sobre as experiências que podem fazer parte do seu caminho.",
-      "A análise utiliza os dados de nascimento cadastrados no seu perfil (__DATA__). Seu Ano Pessoal começa a partir do seu aniversário, e não em 1º de janeiro.",
       "Após confirmar seus dados, seu mapa estará disponível nesta página para você consultar sempre que quiser.",
     ],
     introBullets: [
