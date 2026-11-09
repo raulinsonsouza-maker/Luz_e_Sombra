@@ -1,4 +1,5 @@
-import { Check } from "lucide-react";
+import { useState } from "react";
+import { Check, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Props {
   titulo?: string;
@@ -6,6 +7,8 @@ interface Props {
   bullets?: string[];
   /** Substitui o marcador `__DATA__` por um botão clicável. */
   dataClicavel?: { texto: string; onClick: () => void } | null;
+  /** Quantos parágrafos mostrar antes do "Ler mais". */
+  previewParagrafos?: number;
 }
 
 function ParagrafoComData({
@@ -46,7 +49,20 @@ export function ModuloIntroTexto({
   paragrafos,
   bullets,
   dataClicavel,
+  previewParagrafos = 2,
 }: Props) {
+  const [aberto, setAberto] = useState(false);
+  const temMais =
+    paragrafos.length > previewParagrafos || (bullets != null && bullets.length > 0);
+  const paragrafosVisiveis = (() => {
+    if (aberto || !temMais) return paragrafos;
+    const base = paragrafos.slice(0, previewParagrafos);
+    const comData = paragrafos.find((p) => p.includes("__DATA__"));
+    if (comData && !base.includes(comData)) return [...base, comData];
+    return base;
+  })();
+  const mostrarBullets = aberto && bullets && bullets.length > 0;
+
   return (
     <div
       className="rounded-2xl p-5 sm:p-6"
@@ -63,12 +79,12 @@ export function ModuloIntroTexto({
       </p>
 
       <div className="space-y-3">
-        {paragrafos.map((p) => (
+        {paragrafosVisiveis.map((p) => (
           <ParagrafoComData key={p.slice(0, 48)} texto={p} dataClicavel={dataClicavel} />
         ))}
       </div>
 
-      {bullets && bullets.length > 0 && (
+      {mostrarBullets ? (
         <div className="mt-5 pt-5" style={{ borderTop: "1px solid rgba(200,165,107,0.1)" }}>
           <p className="text-xs font-semibold mb-3" style={{ color: "rgba(200,165,107,0.7)" }}>
             O que você vai descobrir
@@ -89,7 +105,30 @@ export function ModuloIntroTexto({
             ))}
           </ul>
         </div>
-      )}
+      ) : null}
+
+      {temMais ? (
+        <button
+          type="button"
+          onClick={() => setAberto((v) => !v)}
+          className="mt-4 w-full py-2.5 rounded-xl text-sm font-semibold inline-flex items-center justify-center gap-1.5"
+          style={{
+            color: "#c8a56b",
+            background: "rgba(200,165,107,0.08)",
+            border: "1px solid rgba(200,165,107,0.2)",
+          }}
+        >
+          {aberto ? (
+            <>
+              Ver menos <ChevronUp className="w-4 h-4" />
+            </>
+          ) : (
+            <>
+              Ler mais <ChevronDown className="w-4 h-4" />
+            </>
+          )}
+        </button>
+      ) : null}
     </div>
   );
 }
