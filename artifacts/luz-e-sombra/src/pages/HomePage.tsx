@@ -145,8 +145,18 @@ export default function HomePage() {
     setConcluindoConvite(false);
   }
 
-  async function tentarLuzMomento(vistas: Set<"dia" | "mes" | "coletivo">) {
-    if (vistas.size < 3 || progresso?.momentoLuzHoje || pedindoLuzMomento) return;
+  function onAbaMomento(aba: "dia" | "mes" | "coletivo") {
+    setAbaMomento(aba);
+    setAbasMomentoVistas((prev) => {
+      if (prev.has(aba)) return prev;
+      const next = new Set(prev);
+      next.add(aba);
+      return next;
+    });
+  }
+
+  async function receberLuzMomento() {
+    if (abasMomentoVistas.size < 3 || progresso?.momentoLuzHoje || pedindoLuzMomento) return;
     setPedindoLuzMomento(true);
     const result = await pedirLuz("momento");
     if (result.ok) {
@@ -162,35 +172,6 @@ export default function HomePage() {
       if (result.nova) setAvisoLuz(true);
     }
     setPedindoLuzMomento(false);
-  }
-
-  function onAbaMomento(aba: "dia" | "mes" | "coletivo") {
-    setAbaMomento(aba);
-    setAbasMomentoVistas((prev) => {
-      if (prev.has(aba)) return prev;
-      const next = new Set(prev);
-      next.add(aba);
-      void tentarLuzMomento(next);
-      return next;
-    });
-  }
-
-  async function onPausaSaved() {
-    setTemPausaHoje(true);
-    if (progresso?.pausaLuzHoje) return;
-    const result = await pedirLuz("pausa");
-    if (result.ok) {
-      setProgresso((atual) =>
-        atual
-          ? {
-              ...atual,
-              luzes: result.luzes,
-              pausaLuzHoje: true,
-            }
-          : atual,
-      );
-      if (result.nova) setAvisoLuz(true);
-    }
   }
 
   const etapasInicianteConcluidas = progresso
@@ -334,7 +315,7 @@ export default function HomePage() {
         >
           <div className="flex items-center justify-between gap-3 mb-3">
             <p className="text-sm font-semibold" style={{ color: "#c8a56b" }}>
-              Meu caminho
+              Meu espaço
             </p>
             <button
               type="button"
@@ -342,7 +323,7 @@ export default function HomePage() {
               className="text-xs font-semibold flex items-center gap-0.5"
               style={{ color: "rgba(200,165,107,0.7)" }}
             >
-              Ver percepções
+              Ver minhas percepções
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -363,12 +344,12 @@ export default function HomePage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>
-                {temPausaHoje ? "Seu momento foi guardado" : "Um passo de cada vez"}
+                {temPausaHoje ? "Seu momento foi guardado" : "Um espaço para se reconhecer."}
               </p>
               <p className="text-xs leading-relaxed mt-0.5" style={{ color: "rgba(247,242,236,0.45)" }}>
                 {temPausaHoje
                   ? "Sua percepção de hoje está aqui. Você pode voltar a ela quando quiser."
-                  : "Como você está se sentindo hoje? Reserve um instante para se escutar."}
+                  : "Como você está se sentindo hoje? Reserve um instante para se escutar, acolher o que está presente e perceber o que acontece dentro de você."}
               </p>
             </div>
             <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "rgba(200,165,107,0.4)" }} />
@@ -414,7 +395,15 @@ export default function HomePage() {
             Seu momento: {momento?.dataLabel ?? dataDiaMes()}
           </p>
           {momento ? (
-            <MomentoAbas momento={momento} aba={abaMomento} onAba={onAbaMomento} />
+            <MomentoAbas
+              momento={momento}
+              aba={abaMomento}
+              onAba={onAbaMomento}
+              abasCompletas={abasMomentoVistas.size >= 3}
+              luzRecebida={!!progresso?.momentoLuzHoje}
+              pedindoLuz={pedindoLuzMomento}
+              onReceberLuz={() => void receberLuzMomento()}
+            />
           ) : (
             <div>
               <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.78)" }}>
@@ -497,7 +486,7 @@ export default function HomePage() {
       <PausaDoDiaModal
         open={pausaAberta}
         onClose={() => setPausaAberta(false)}
-        onSaved={() => void onPausaSaved()}
+        onSaved={() => setTemPausaHoje(true)}
       />
     </div>
   );
@@ -513,20 +502,23 @@ function MomentoAbas({
   momento,
   aba,
   onAba,
+  abasCompletas,
+  luzRecebida,
+  pedindoLuz,
+  onReceberLuz,
 }: {
   momento: MomentoNumerologico;
   aba: "dia" | "mes" | "coletivo";
   onAba: (a: "dia" | "mes" | "coletivo") => void;
+  abasCompletas: boolean;
+  luzRecebida: boolean;
+  pedindoLuz: boolean;
+  onReceberLuz: () => void;
 }) {
   const bloco =
     aba === "dia" ? momento.dia : aba === "mes" ? momento.mes : momento.coletivo;
   const acoes = bloco.acoes.slice(0, 3);
-  const contexto =
-    aba === "dia"
-      ? momento.contextoDia
-      : aba === "mes"
-        ? momento.contextoMes
-        : momento.contextoColetivo;
+  const luzLiberada = abasCompletas && !luzRecebida;
 
   return (
     <div>
@@ -587,15 +579,12 @@ function MomentoAbas({
                   border: "1px solid rgba(200,165,107,0.35)",
                 }}
               >
-                Mestre
+                Especial
               </span>
             )}
           </div>
           <p className="text-sm font-semibold leading-snug" style={{ color: "#f7f2ec" }}>
             {bloco.titulo}
-          </p>
-          <p className="text-[10px] mt-1 leading-snug" style={{ color: "rgba(200,165,107,0.55)" }}>
-            {contexto}
           </p>
         </div>
       </div>
@@ -610,20 +599,20 @@ function MomentoAbas({
 
       {aba === "coletivo" && momento.coletivo.anoUniversal && (
         <p className="text-[11px] leading-relaxed mb-3" style={{ color: "rgba(200,165,107,0.65)" }}>
-          Ano universal {momento.coletivo.anoUniversal.n}: {momento.coletivo.anoUniversal.tema}
+          No clima deste ano: {momento.coletivo.anoUniversal.tema}
         </p>
       )}
 
       <div className="space-y-2 mb-3">
         <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
           <span className="font-semibold" style={{ color: "#c8a56b" }}>
-            Favorece:{" "}
+            O que ajuda:{" "}
           </span>
           {bloco.clima}
         </p>
         <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.62)" }}>
           <span className="font-semibold" style={{ color: "rgba(200,165,107,0.85)" }}>
-            Atenção:{" "}
+            Com cuidado:{" "}
           </span>
           {bloco.sombra}
         </p>
@@ -640,7 +629,7 @@ function MomentoAbas({
       </p>
 
       {acoes.length > 0 && (
-        <ul className="space-y-1.5">
+        <ul className="space-y-1.5 mb-4">
           {acoes.map((acao) => (
             <li key={acao} className="text-xs leading-relaxed flex gap-2" style={{ color: "rgba(247,242,236,0.62)" }}>
               <span style={{ color: "#c8a56b" }} aria-hidden>
@@ -651,6 +640,40 @@ function MomentoAbas({
           ))}
         </ul>
       )}
+
+      <button
+        type="button"
+        onClick={onReceberLuz}
+        disabled={!luzLiberada || pedindoLuz}
+        className="w-full py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+        style={
+          luzRecebida
+            ? {
+                background: "rgba(93,185,122,0.16)",
+                color: "#5db97a",
+              }
+            : luzLiberada
+              ? {
+                  background: "linear-gradient(135deg, #c8a56b, #9c7742)",
+                  color: "#1a1208",
+                }
+              : {
+                  background: "rgba(255,255,255,0.04)",
+                  color: "rgba(247,242,236,0.35)",
+                  border: "1px solid rgba(247,242,236,0.1)",
+                }
+        }
+      >
+        <LuzIcon
+          acesa={luzRecebida || luzLiberada}
+          className="w-5 h-5 shrink-0"
+        />
+        {luzRecebida
+          ? "Luz recebida"
+          : luzLiberada
+            ? "Receber minha luz"
+            : "Abra as 3 abas para liberar a luz"}
+      </button>
     </div>
   );
 }

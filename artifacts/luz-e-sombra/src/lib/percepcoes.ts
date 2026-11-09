@@ -1,18 +1,25 @@
 export const MOODS_PAUSA = [
-  "Em paz",
-  "Com esperança",
-  "Sem energia",
-  "Sensível",
-  "Ainda não sei",
+  { id: "Difícil", emoji: "☹️", label: "Difícil" },
+  { id: "Pra baixo", emoji: "🙁", label: "Pra baixo" },
+  { id: "Neutro", emoji: "😐", label: "Neutro" },
+  { id: "Bem", emoji: "🙂", label: "Bem" },
+  { id: "Muito bem", emoji: "😀", label: "Muito bem" },
 ] as const;
 
-export type MoodPausa = (typeof MOODS_PAUSA)[number];
+export type MoodPausa = (typeof MOODS_PAUSA)[number]["id"];
 
 export type Percepcao = {
   date: string;
   text: string;
   mood: string | null;
 };
+
+export function rotuloMood(mood: string | null | undefined): string {
+  if (!mood) return "Um momento comigo";
+  const encontrado = MOODS_PAUSA.find((m) => m.id === mood || m.emoji === mood);
+  if (encontrado) return `${encontrado.emoji} ${encontrado.label}`;
+  return mood;
+}
 
 const PREFIX = "portal-iluminando-reflection-";
 const LEGACY_PREFIX = "iluminando-reflection-";

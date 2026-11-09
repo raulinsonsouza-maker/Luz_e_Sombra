@@ -1,6 +1,6 @@
 import type { EnergiaMesPessoal } from "./energiaNumerologica";
 
-/** Foco do mês pessoal — ciclo mensal (não o gesto de um dia). */
+/** Foco do mês — voz acolhedora, didática, sem jargão técnico. */
 export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
   1: {
     energia: "Iniciar",
@@ -8,12 +8,12 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
     descricao:
       "Este mês pede autoria: o que ficou parado só anda se você plantar com coragem. Um começo consciente vale mais do que cinco aberturas por pressa.",
     profundidade:
-      "O Mês Pessoal 1 define o tom dos próximos ciclos curtos: independência, liderança pessoal e reinício. É o mês de assumir o volante — carreira, hábito, relação ou projeto. Plante uma semente principal e regue. A sombra mensal do 1 é querer reinventar tudo ao mesmo tempo ou empurrar os outros para fora. Liderar não é isolar-se: é decidir e seguir, com clareza sobre o que você não vai carregar.",
-    clima: "Novos projetos, postura de liderança, decisões de rumo, autodisciplina inicial.",
-    sombra: "Impulsividade de reinício, egocentrismo de ciclo, abandono do que ainda precisava fechar.",
-    reflexao: '"Qual começo deste mês você ainda espera que alguém autorize?"',
+      "É um mês de assumir o volante — carreira, hábito, relação ou projeto. Independência e reinício ganham espaço. Plante uma semente principal e regue. Querer reinventar tudo ao mesmo tempo ou empurrar os outros para fora só atrapalha. Liderar não é isolar-se: é decidir e seguir, com clareza sobre o que você não vai carregar.",
+    clima: "Novos projetos, postura de liderança, decisões de rumo e disciplina inicial.",
+    sombra: "Reinício impulsivo, egocentrismo do ciclo ou abandono do que ainda precisava fechar.",
+    reflexao: "Qual começo deste mês você ainda espera que alguém autorize?",
     acoes: [
-      "Escolha UM projeto-eixo do mês e dê o primeiro passo concreto na primeira quinzena.",
+      "Escolha um projeto-eixo do mês e dê o primeiro passo concreto na primeira quinzena.",
       "Declare o compromisso em voz alta para alguém de confiança.",
       "Revise no meio do mês: o que avançou de verdade e o que era só intenção.",
     ],
@@ -30,13 +30,13 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
     descricao:
       "Este mês anda melhor em dois. Acordos, escuta e timing pesam mais do que a pressa de resolver sozinho.",
     profundidade:
-      "O Mês Pessoal 2 pede receptividade sustentada: relacionamentos, diplomacia, construção lenta de confiança. É mês de ouvir o mercado, a família, o corpo — e de não forçar colheita. Sensibilidade sobe; conflitos mal resolvidos doem mais. Paciente não é passivo: é quem prepara o terreno. Evite decisões grandes só para acabar com a ansiedade da espera.",
-    clima: "Alianças, negociação, cuidado relacional, informação, ritmo mais lento.",
-    sombra: "Dependência, indecisão crônica, absorver o clima emocional alheio o mês inteiro.",
-    reflexao: '"Com quem este mês pede conversa verdadeira — não só educada?"',
+      "É um mês de receptividade: relacionamentos, diplomacia e construção lenta de confiança. Ouça o mercado, a família, o corpo — e não force a colheita. A sensibilidade sobe; conflitos mal resolvidos doem mais. Paciente não é passivo: é quem prepara o terreno. Evite decisões grandes só para acabar com a ansiedade da espera.",
+    clima: "Alianças, negociação, cuidado relacional, informação e um ritmo mais lento.",
+    sombra: "Dependência, indecisão crônica ou absorver o clima emocional alheio o mês inteiro.",
+    reflexao: "Com quem este mês pede conversa verdadeira — não só educada?",
     acoes: [
       "Feche ou avance um acordo que está pela metade.",
-      "Reserve espaços do mês só para escuta (sem agenda de ‘resolver’).",
+      "Reserve espaços do mês só para escuta, sem agenda de ‘resolver’.",
       "Peça ajuda em um ponto que você insiste em carregar sozinho.",
     ],
     evitar: [
@@ -52,14 +52,14 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
     descricao:
       "Este mês pede que você se mostre: diga, crie, conecte. O que fica só na cabeça perde força ao longo das semanas.",
     profundidade:
-      "O Mês Pessoal 3 é expansão criativa e social. Ideias, humor, conteúdo, encontros e aprendizado leve florescem. É mês de praticar a voz — profissional ou íntima. O risco é espalhar-se: muitos planos, pouca entrega, gastos por entusiasmo. Escolha um veículo de expressão (texto, produto, conversa-chave) e leve até um marco visível até o fim do mês.",
-    clima: "Criação, comunicação, rede, otimismo, visibilidade.",
-    sombra: "Dispersão, superficialidade, fofoca, consumo impulsivo de prazer.",
-    reflexao: '"O que este mês precisa ver de você — não só ouvir planejar?"',
+      "É um mês de expansão criativa e social. Ideias, humor, conteúdo e encontros florescem. Pratique a voz — profissional ou íntima. O risco é espalhar-se: muitos planos, pouca entrega, gastos por entusiasmo. Escolha um veículo de expressão e leve até um marco visível até o fim do mês. Mostrar-se com verdade abre mais portas do que planejar em silêncio.",
+    clima: "Criação, comunicação, rede, otimismo e visibilidade leve.",
+    sombra: "Dispersão, superficialidade ou consumo impulsivo de prazer.",
+    reflexao: "O que este mês precisa ver de você — não só ouvir planejar?",
     acoes: [
       "Publique, apresente ou entregue uma peça criativa até o fim do mês.",
       "Retome três contatos que importam e nutra a relação.",
-      "Defina um limite de ‘novas ideias’ para não matar a que já está em curso.",
+      "Defina um limite de novas ideias para não matar a que já está em curso.",
     ],
     evitar: [
       "Abrir dez projetos criativos.",
@@ -74,14 +74,14 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
     descricao:
       "Este mês pede base: contas, hábitos, sistemas e trabalho constante. O que está solto pede ordem que você consiga manter.",
     profundidade:
-      "O Mês Pessoal 4 é construção paciente. Casa, corpo, finanças, processos e disciplina definem o rendimento do ciclo. Pode parecer ‘sem brilho’ — e é exatamente por isso que sustenta os meses seguintes. Frustração com a lentidão é normal. Responda com sistemas pequenos e repetíveis, não com heroísmo de um dia. Em ecos de 22, a tentação de obra gigante aparece: fundação primeiro.",
-    clima: "Rotina, trabalho, organização, saúde prática, estabilidade.",
-    sombra: "Rigidez, workaholism, perfeccionismo, ressentir a ‘falta de magia’.",
-    reflexao: '"Qual estrutura deste mês, se bem feita, te carrega nos próximos?"',
+      "É um mês de construção paciente. Casa, corpo, finanças e processos definem o rendimento do ciclo. Pode parecer sem brilho — e é exatamente por isso que sustenta os meses seguintes. Frustração com a lentidão é normal. Responda com sistemas pequenos e repetíveis, não com heroísmo de um dia. Se surgir vontade de obra gigante, fundação primeiro.",
+    clima: "Rotina, trabalho, organização, saúde prática e estabilidade.",
+    sombra: "Rigidez, trabalho sem limite, perfeccionismo ou ressentir a ‘falta de magia’.",
+    reflexao: "Qual estrutura deste mês, se bem feita, te carrega nos próximos?",
     acoes: [
-      "Monte ou ajuste um sistema (dinheiro, agenda ou casa) e mantenha até o fim do mês.",
+      "Monte ou ajuste um sistema — dinheiro, agenda ou casa — e mantenha até o fim do mês.",
       "Feche as contas e veja o que entra, sai e some.",
-      "Escolha um hábito físico sustentado (sono, movimento, alimentação).",
+      "Escolha um hábito físico sustentado: sono, movimento ou alimentação.",
     ],
     evitar: [
       "Querer deixar tudo perfeito e não implantar nada.",
@@ -96,10 +96,10 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
     descricao:
       "Este mês mexe no que estava parado. Convites, viagens, pivôs e solturas pedem flexibilidade — sem abandonar o essencial.",
     profundidade:
-      "O Mês Pessoal 5 é vento: variação, aprendizado rápido, quebra de rotina, marketing de si, desejo de ar. Planos rígidos sofrem. Quem se adapta colhe experiência; quem se agarra ao conhecido sofre duas vezes. A sombra é dispersão, excesso e decisões definitivas no calor. Mude o passo do mês, não a vida inteira numa tarde. Liberdade com critério.",
-    clima: "Mudança, deslocamento, promoção, experimentação, renovação.",
-    sombra: "Impulsividade, fuga, vícios de estímulo, irresponsabilidade disfarçada de liberdade.",
-    reflexao: '"O que você segura só porque já está acostumado?"',
+      "É um mês de vento: variação, aprendizado rápido, quebra de rotina e desejo de ar. Planos rígidos sofrem. Quem se adapta colhe experiência; quem se agarra ao conhecido sofre duas vezes. Cuidado com dispersão, excesso e decisões definitivas no calor. Mude o passo do mês, não a vida inteira numa tarde. Liberdade com critério.",
+    clima: "Mudança, deslocamento, promoção, experimentação e renovação.",
+    sombra: "Impulsividade, fuga, estímulo em excesso ou irresponsabilidade disfarçada de liberdade.",
+    reflexao: "O que você segura só porque já está acostumado?",
     acoes: [
       "Aceite um convite ou rota nova alinhada ao que você quer viver.",
       "Solte um compromisso ou hábito do mês que só cansa.",
@@ -118,10 +118,10 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
     descricao:
       "Este mês pede presença em casa e nas relações próximas. Responsabilidade com afeto — sem se apagar.",
     profundidade:
-      "O Mês Pessoal 6 coloca o coração e o dever no centro: família, parceria, casa, cuidado, beleza útil, serviço. Demandas aumentam; o aprendizado é servir sem martírio. É mês poderoso para reconciliar, cuidar da saúde e alinhar o amor com ação. Se você só cuida dos outros, o mês cobra. Inclua-se na lista de quem merece presença.",
-    clima: "Família, casa, amor, deveres, cura relacional, estética do cotidiano.",
-    sombra: "Controle disfarçado de cuidado, culpa, anulação, resgate compulsivo.",
-    reflexao: '"Onde o cuidado deste mês é amor — e onde é medo de decepcionar?"',
+      "É um mês em que o coração e o dever ficam no centro: família, parceria, casa, cuidado e serviço. Demandas aumentam; o aprendizado é servir sem martírio. Bom para reconciliar, cuidar da saúde e alinhar o amor com ação. Se você só cuida dos outros, o mês cobra. Inclua-se na lista de quem merece presença.",
+    clima: "Família, casa, amor, deveres, cura relacional e beleza do cotidiano.",
+    sombra: "Controle disfarçado de cuidado, culpa, anulação ou resgate compulsivo.",
+    reflexao: "Onde o cuidado deste mês é amor — e onde é medo de decepcionar?",
     acoes: [
       "Faça a conversa de casa ou de vínculo que está esperando.",
       "Melhore um aspecto concreto do lar ou da rotina de cuidado.",
@@ -140,14 +140,14 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
     descricao:
       "Este mês pede menos barulho e mais verdade. Estudo, silêncio e perguntas honestas esclarecem o que a pressa embaça.",
     profundidade:
-      "O Mês Pessoal 7 é retiro ativo: pesquisa, espiritualidade prática, análise, descanso nervoso, discernimento. Não é mês ideal para forçar expansão social o tempo todo. A qualidade das decisões sobe quando você reduz estímulo. A sombra é isolar-se por superioridade ou sumir das contas da vida. Vá para dentro — e volte com uma clareza utilizável.",
-    clima: "Estudo, introspecção, espiritualidade, análise, refinamento.",
-    sombra: "Isolamento frio, cinismo, overthinking, negligência prática.",
-    reflexao: '"O que este mês já te mostrou e você ainda não admite?"',
+      "É um mês de retiro ativo: pesquisa, espiritualidade prática, análise e descanso nervoso. Não é ideal forçar expansão social o tempo todo. A qualidade das decisões sobe quando você reduz estímulo. Cuidado para não isolar-se por superioridade nem sumir das contas da vida. Vá para dentro — e volte com uma clareza utilizável.",
+    clima: "Estudo, introspecção, espiritualidade, análise e refinamento.",
+    sombra: "Isolamento frio, cinismo, excesso de pensamento ou negligência prática.",
+    reflexao: "O que este mês já te mostrou e você ainda não admite?",
     acoes: [
-      "Estabeleça um ritual mensal de silêncio/estudo (horários fixos).",
+      "Estabeleça um ritual mensal de silêncio ou estudo, com horários fixos.",
       "Estude uma questão de verdade — sem transformar em performance.",
-      "Cuide de sono e nervos: o corpo é o laboratório do 7.",
+      "Cuide de sono e nervos: o corpo é o laboratório deste mês.",
     ],
     evitar: [
       "Sumir das pessoas e chamar isso de sabedoria.",
@@ -162,10 +162,10 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
     descricao:
       "Este mês pede resultado: acordo, preço, meta, visibilidade profissional. Conduza com responsabilidade — a colheita responde ao que foi plantado.",
     profundidade:
-      "O Mês Pessoal 8 é manifestação material e autoridade. Negociações, reconhecimento, dinheiro e estrutura de poder entram em cena. É mês de cobrar o justo e de ocupar espaço. A sombra é obsessão por status, domínio e trabalho sem limite. Ética e presença sustentam o 8; arrogância o derruba. Olhe números reais, não só ambição.",
-    clima: "Carreira, finanças, autoridade, metas, reconhecimento.",
-    sombra: "Controle, ganância, workaholism, medir valor só por conquista.",
-    reflexao: '"Onde você cobra menos — ou exige mais — do que o trabalho vale?"',
+      "É um mês de manifestação material e autoridade. Negociações, reconhecimento, dinheiro e estrutura de poder entram em cena. Hora de cobrar o justo e ocupar espaço. Ética e presença sustentam; arrogância derruba. Olhe números reais, não só ambição. Resultado com responsabilidade pesa mais do que status.",
+    clima: "Carreira, finanças, autoridade, metas e reconhecimento.",
+    sombra: "Controle, ganância, trabalho sem limite ou medir valor só por conquista.",
+    reflexao: "Onde você cobra menos — ou exige mais — do que o trabalho vale?",
     acoes: [
       "Feche o acordo, preço ou promoção em aberto: diga o número.",
       "Corte um gasto recorrente que não serve.",
@@ -184,10 +184,10 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
     descricao:
       "Este mês pede conclusão e liberação. Termine, agradeça, doe e solte — para o próximo ciclo ter chão limpo.",
     profundidade:
-      "O Mês Pessoal 9 é colheita emocional e limpeza: fim de projetos, relações que já cumpriram, perdão prático, generosidade, visão mais ampla. Não é o melhor mês para lançar obra de longo prazo. É o mês de completar. Nostalgia e martírio são as armadilhas. Encerrar bem é inteligência de ciclo, não fracasso.",
-    clima: "Conclusões, doação, perdão, limpeza, compaixão, descanso de ciclo.",
-    sombra: "Segurar o passado, martírio, começar o que deveria terminar.",
-    reflexao: '"O que já acabou e você ainda carrega como se fosse presente?"',
+      "É um mês de colheita emocional e limpeza: fim de projetos, relações que já cumpriram, perdão prático e generosidade. Não é o melhor momento para lançar obra de longo prazo. É o mês de completar. Nostalgia e martírio são as armadilhas. Encerrar bem é inteligência de ciclo, não fracasso.",
+    clima: "Conclusões, doação, perdão, limpeza, compaixão e descanso de ciclo.",
+    sombra: "Segurar o passado, martírio ou começar o que deveria terminar.",
+    reflexao: "O que já acabou e você ainda carrega como se fosse presente?",
     acoes: [
       "Liste o incompleto e feche o que der para fechar neste mês.",
       "Doe, venda ou descarte o que guarda sem uso.",
@@ -202,14 +202,14 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
   },
   11: {
     energia: "Intuir",
-    titulo: "Mês mestre 11 — visão",
+    titulo: "Mês de visão fina",
     descricao:
       "Este mês a antena fica mais fina. Insights e sensibilidade pedem ancoragem: visionar e aterrar, não só sentir.",
     profundidade:
-      "O Mês 11 eleva o 2: intuição, inspiração, nervosismo criativo, desejo de significado. É mês de canal — ideias, arte, espiritualidade vivida, liderança suave pela presença. Proteja o sistema nervoso. Sem ancoragem, o 11 vira ansiedade e promessa vazia. Com ancoragem, vira mês de clareza que orienta os próximos ciclos.",
-    clima: "Intuição, inspiração, sensibilidade, visão, conexão sutil.",
-    sombra: "Ansiedade, desconexão do corpo, idealismo sem passo, absorção emocional.",
-    reflexao: '"Qual visão deste mês ainda não tem um passo no chão?"',
+      "É um mês de intuição, inspiração e nervosismo criativo — desejo de significado sobe. Ideias, arte e espiritualidade vivida pedem espaço. Proteja o sistema nervoso. Sem ancoragem, vira ansiedade e promessa vazia. Com ancoragem, vira clareza que orienta os próximos ciclos. Escolha o que merece chão.",
+    clima: "Intuição, inspiração, sensibilidade, visão e conexão sutil.",
+    sombra: "Ansiedade, desconexão do corpo, idealismo sem passo ou absorção emocional.",
+    reflexao: "Qual visão deste mês ainda não tem um passo no chão?",
     acoes: [
       "Mantenha um diário de insights e escolha um por quinzena para agir.",
       "Reduza barulho em horários fixos do mês.",
@@ -219,19 +219,19 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
       "Absorver o clima emocional de todos.",
       "Idealizar tanto que nada se realiza.",
     ],
-    palavrasChave: ["mestre", "visão", "intuição", "ancoragem", "inspiração"],
+    palavrasChave: ["visão", "intuição", "ancoragem", "inspiração", "clareza"],
     areas: ["intuição e decisão", "nervos e descanso", "projeto inspirado"],
   },
   22: {
     energia: "Construir",
-    titulo: "Mês mestre 22 — legado",
+    titulo: "Mês de legado prático",
     descricao:
       "Este mês pede construir em escala. Visão grande com estrutura: gente, prazo e recurso alinhados a um propósito maior.",
     profundidade:
-      "O Mês 22 une visão de 11 com força de 4: capacidade de erguer o que serve a muitos. A responsabilidade pode pesar. Não precisa concluir o monumento — precisa de fundação séria e ritmo sustentável. Delegue. Cuide do corpo. Legado sem saúde vira ruína. Legado com método vira história.",
-    clima: "Projetos de impacto, sistemas, liderança estruturada, mobilização.",
-    sombra: "Paralisia pela grandeza, tirania benevolente, negar necessidades pessoais.",
-    reflexao: '"Qual estrutura deste mês deixa legado além de você?"',
+      "É um mês de capacidade de erguer o que serve a muitos. A responsabilidade pode pesar. Não precisa concluir o monumento — precisa de fundação séria e ritmo sustentável. Delegue. Cuide do corpo. Legado sem saúde vira ruína; legado com método vira história. Uma etapa clara por vez.",
+    clima: "Projetos de impacto, sistemas, liderança estruturada e mobilização.",
+    sombra: "Paralisia pela grandeza, tirania benevolente ou negar necessidades pessoais.",
+    reflexao: "Qual estrutura deste mês deixa legado além de você?",
     acoes: [
       "Defina a próxima etapa mensurável do projeto maior e cumpra.",
       "Organize papéis: quem faz o quê até quando.",
@@ -241,21 +241,21 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
       "Paralisar pelo tamanho da missão.",
       "Justificar qualquer meio pela grandeza do fim.",
     ],
-    palavrasChave: ["mestre", "legado", "estrutura", "escala", "método"],
+    palavrasChave: ["legado", "estrutura", "escala", "método", "visão"],
     areas: ["projeto de impacto", "equipe e recursos", "saúde sob pressão"],
   },
   33: {
     energia: "Curar",
-    titulo: "Mês mestre 33 — amor em ação",
+    titulo: "Mês de amor em ação",
     descricao:
       "Este mês pede cura e serviço conscientes. Ensinar e acolher a partir da plenitude, com limites claros.",
     profundidade:
-      "O Mês 33 é compaixão em escala (6 elevado): ensino, cura, cuidado comunitário, amor que transforma. Sem limites, vira martírio mensal. Escolha uma frente de serviço e diga não ao resto. Peça cuidado de volta. Amor que esgota não eleva ninguém — só alimenta culpa.",
-    clima: "Cura, ensino, serviço, compaixão, elevação de vínculos.",
-    sombra: "Martírio, culpa, responsabilidade pela felicidade alheia, fuga na ‘missão’.",
-    reflexao: '"Onde você serve por missão — e onde por obrigação?"',
+      "É um mês de compaixão em escala: ensino, cura, cuidado comunitário e amor que transforma. Sem limites, vira martírio. Escolha uma frente de serviço e diga não ao resto. Peça cuidado de volta. Amor que esgota não eleva ninguém — só alimenta culpa. Inclua você na conta.",
+    clima: "Cura, ensino, serviço, compaixão e elevação de vínculos.",
+    sombra: "Martírio, culpa, responsabilidade pela felicidade alheia ou fuga na ‘missão’.",
+    reflexao: "Onde você serve por missão — e onde por obrigação?",
     acoes: [
-      "Escolha uma frente de cuidado/ensino e sustente o mês todo.",
+      "Escolha uma frente de cuidado ou ensino e sustente o mês todo.",
       "Pratique um limite semanal de descanso como ato sagrado.",
       "Peça e aceite cuidado — não só ofereça.",
     ],
@@ -263,7 +263,7 @@ export const MESES_PESSOAIS: Record<number, EnergiaMesPessoal> = {
       "Absorver o sofrimento de todos.",
       "Usar a missão espiritual para não viver a própria vida.",
     ],
-    palavrasChave: ["mestre", "cura", "serviço", "compaixão", "limite"],
+    palavrasChave: ["cura", "serviço", "compaixão", "limite", "presença"],
     areas: ["serviço e limites", "relações de cuidado", "autocuidado"],
   },
 };

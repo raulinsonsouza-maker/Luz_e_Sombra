@@ -1,4 +1,4 @@
-/** Energia 1–9 e mestres 11/22/33 — mesma voz, escalas dia/mês/coletivo. */
+/** Energia 1–9 e intensidades 11/22/33 — mesma voz, escalas dia/mês/coletivo. */
 export type EnergiaNumerologica = {
   energia: string;
   titulo: string;

@@ -114,32 +114,45 @@ export function PausaDoDiaModal({ open, onClose, prompt, onSaved }: Props) {
           </div>
         ) : null}
 
-        <div className="flex flex-wrap gap-2 mb-5" role="group" aria-label="Como você se sente">
+        <div
+          className="flex justify-between gap-2 mb-5"
+          role="group"
+          aria-label="Como você se sente"
+        >
           {MOODS_PAUSA.map((m) => {
-            const selected = mood === m;
+            const selected = mood === m.id;
             return (
               <button
-                key={m}
+                key={m.id}
                 type="button"
-                data-mood={m}
+                data-mood={m.id}
                 aria-pressed={selected}
-                onClick={() => setMood(selected ? null : m)}
-                className="px-3.5 py-2 rounded-full text-xs font-semibold transition-all"
+                aria-label={m.label}
+                title={m.label}
+                onClick={() => setMood(selected ? null : m.id)}
+                className="flex flex-col items-center gap-1.5 flex-1 min-w-0 py-2 rounded-2xl transition-all"
                 style={
                   selected
                     ? {
-                        background: "linear-gradient(135deg, #c8a56b, #9c7742)",
-                        color: "#1a1208",
-                        border: "1px solid transparent",
+                        background: "rgba(200,165,107,0.18)",
+                        border: "1px solid rgba(200,165,107,0.55)",
+                        boxShadow: "0 0 0 1px rgba(200,165,107,0.2)",
                       }
                     : {
-                        background: "transparent",
-                        color: "rgba(247,242,236,0.72)",
-                        border: "1px solid rgba(200,165,107,0.35)",
+                        background: "rgba(255,255,255,0.02)",
+                        border: "1px solid rgba(200,165,107,0.14)",
                       }
                 }
               >
-                {m}
+                <span className="text-[1.75rem] leading-none" aria-hidden>
+                  {m.emoji}
+                </span>
+                <span
+                  className="text-[10px] font-medium leading-tight text-center px-0.5"
+                  style={{ color: selected ? "#c8a56b" : "rgba(247,242,236,0.45)" }}
+                >
+                  {m.label}
+                </span>
               </button>
             );
           })}

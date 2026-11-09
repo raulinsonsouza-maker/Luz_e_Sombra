@@ -8,11 +8,10 @@ import {
   dateKeyPercepcao,
   formatarDataPercepcao,
   listarPercepcoes,
+  rotuloMood,
   type Percepcao,
 } from "@/lib/percepcoes";
 import { listarFrasesGuardadas } from "@/lib/frasesGuardadas";
-import { pedirLuz } from "@/lib/pedirLuz";
-import { toast } from "sonner";
 
 export default function AcompanhamentoPage() {
   const [, navigate] = useLocation();
@@ -24,14 +23,6 @@ export default function AcompanhamentoPage() {
   const recarregar = useCallback(() => {
     setEntradas(listarPercepcoes());
   }, []);
-
-  async function onPausaSaved() {
-    recarregar();
-    const result = await pedirLuz("pausa");
-    if (result.ok && result.nova) {
-      toast.success("+1 Luz");
-    }
-  }
 
   useEffect(() => {
     recarregar();
@@ -155,7 +146,7 @@ export default function AcompanhamentoPage() {
                   {formatarDataPercepcao(entry.date)}
                 </time>
                 <h3 className="text-sm font-semibold mt-1.5" style={{ color: "#f7f2ec" }}>
-                  {entry.mood || "Um momento comigo"}
+                  {rotuloMood(entry.mood)}
                 </h3>
                 {entry.text ? (
                   <p className="text-sm leading-relaxed mt-2" style={{ color: "rgba(247,242,236,0.55)" }}>
@@ -187,7 +178,7 @@ export default function AcompanhamentoPage() {
       <PausaDoDiaModal
         open={pausaAberta}
         onClose={() => setPausaAberta(false)}
-        onSaved={() => void onPausaSaved()}
+        onSaved={recarregar}
       />
     </div>
   );

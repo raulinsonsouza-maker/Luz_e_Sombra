@@ -73,11 +73,11 @@ export function momentoNumerologico(
         ? { n: anoUniv.reduzido, tema: analiseAno.temaGeral }
         : undefined,
     },
-    contextoDia: `Dia ${numeros.hoje} · mês pessoal ${numeros.periodo} · ano pessoal ${numeros.ciclo}`,
-    contextoMes: `Mês pessoal ${numeros.periodo} · ano pessoal ${numeros.ciclo}`,
+    contextoDia: `Neste dia · no seu mês ${numeros.periodo} · no seu ano ${numeros.ciclo}`,
+    contextoMes: `No seu mês ${numeros.periodo} · no seu ano ${numeros.ciclo}`,
     contextoColetivo: analiseAno
-      ? `Dia universal ${nColetivo} · ano universal ${anoUniv.reduzido}`
-      : `Dia universal ${nColetivo}`,
+      ? `No ar de hoje · no ano coletivo ${anoUniv.reduzido}`
+      : `No ar de hoje`,
   };
 }
 
