@@ -5,6 +5,7 @@ import { toastApiError } from "@/lib/apiError";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import { AuthenticatedImage } from "@/components/AuthenticatedImage";
+import { AuthenticatedAudio } from "@/components/AuthenticatedAudio";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 import {
   Plus,
@@ -27,7 +28,7 @@ interface Post {
   id: number;
   autorId: number;
   autorNome: string;
-  tipo: "texto" | "imagem" | "video";
+  tipo: "texto" | "imagem" | "video" | "audio";
   conteudo: string;
   mediaUrl: string | null;
   criadoEm: string;
@@ -592,6 +593,12 @@ function PostCard({
               imgClassName="w-full h-full max-h-[min(70vh,420px)] object-cover object-center"
             />
           </div>
+        </div>
+      )}
+
+      {post.tipo === "audio" && post.mediaUrl && (
+        <div className="mx-5 mb-3 rounded-xl px-3 py-3" style={{ background: "rgba(200,165,107,0.06)", border: "1px solid rgba(200,165,107,0.15)" }}>
+          <AuthenticatedAudio apiPath={`/comunidade/${post.id}/audio`} />
         </div>
       )}
 

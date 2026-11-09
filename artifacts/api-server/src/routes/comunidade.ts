@@ -199,11 +199,19 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
     const texto = (conteudo ?? "").trim();
     const midia = (mediaUrl ?? "").trim();
     if (!texto && !midia) {
-      return res.status(400).json({ error: "Inclua um texto ou uma mídia (imagem / link de vídeo)" });
+      return res.status(400).json({ error: "Inclua um texto ou uma mídia (imagem / áudio / link de vídeo)" });
     }
-    const tiposValidos = ["texto", "imagem", "video"];
+    const tiposValidos = ["texto", "imagem", "video", "audio"];
     if (tipo && !tiposValidos.includes(tipo)) {
       return res.status(400).json({ error: "Tipo inválido" });
+    }
+    if (tipo === "imagem" || tipo === "audio") {
+      if (!midia) {
+        return res.status(400).json({ error: tipo === "audio" ? "Áudio obrigatório" : "Imagem obrigatória" });
+      }
+    }
+    if (tipo === "video" && !midia) {
+      return res.status(400).json({ error: "Link de vídeo obrigatório" });
     }
 
     const [post] = await db
@@ -442,6 +450,34 @@ router.get("/:id/imagem", requireAuth, async (req: AuthRequest, res: Response) =
   } catch (err) {
     req.log.error({ err }, "Erro ao carregar imagem");
     return res.status(500).json({ error: "Erro ao carregar imagem" });
+  }
+});
+
+// GET /api/comunidade/:id/audio — stream audio
+router.get("/:id/audio", requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const id = parseInt(String(req.params.id), 10);
+    if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
+
+    const [post] = await db
+      .select({ mediaUrl: comunidadeTable.mediaUrl, tipo: comunidadeTable.tipo })
+      .from(comunidadeTable)
+      .where(eq(comunidadeTable.id, id))
+      .limit(1);
+
+    if (!post || post.tipo !== "audio" || !post.mediaUrl) {
+      return res.status(404).json({ error: "Áudio não encontrado" });
+    }
+
+    const file = await objectStorage.getObjectEntityFile(post.mediaUrl);
+    const response = await objectStorage.downloadObject(file, 3600);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    res.set("Content-Type", response.headers.get("content-type") || "audio/mpeg");
+    res.set("Cache-Control", "private, max-age=3600");
+    return res.send(buffer);
+  } catch (err) {
+    req.log.error({ err }, "Erro ao carregar áudio");
+    return res.status(500).json({ error: "Erro ao carregar áudio" });
   }
 });
 

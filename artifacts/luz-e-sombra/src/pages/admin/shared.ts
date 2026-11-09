@@ -76,7 +76,7 @@ export interface ComentarioEngajamento {
   autorId: number;
   autorNome: string;
   autorAdmin: boolean;
-  publicacaoTipo: "texto" | "imagem" | "video";
+  publicacaoTipo: "texto" | "imagem" | "video" | "audio";
   publicacaoConteudo: string;
   publicacaoAutorId: number;
 }

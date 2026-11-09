@@ -11,6 +11,7 @@ interface AuthContextType {
     code?: string;
     checkoutToken?: string | null;
     primeiroAcesso?: boolean;
+    user?: User | null;
   }>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -71,7 +72,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAuth(data.token, data.user);
         setUser(data.user);
         setStatus("authenticated");
-        return { ok: true, primeiroAcesso: data.user?.primeiroAcesso === true };
+        return {
+          ok: true,
+          primeiroAcesso: data.user?.primeiroAcesso === true,
+          user: data.user ?? null,
+        };
       }
       if (res.status === 402) {
         return {

@@ -163,10 +163,15 @@ export default function AdminPage() {
         className={`hidden lg:flex ${larguraAside} shrink-0 flex-col sticky top-0 h-screen border-r transition-[width] duration-200`}
         style={{ background: "rgba(19,15,9,0.96)", borderColor: "rgba(200,165,107,0.12)" }}
       >
-        <div className={`border-b ${recolhido ? "px-2 py-4" : "px-4 pt-5 pb-4"}`} style={{ borderColor: "rgba(200,165,107,0.1)" }}>
-          <div className={`flex items-center ${recolhido ? "justify-center" : "gap-3"}`}>
-            <img src={LOGO_CLARO} alt="Portal Iluminando" className={recolhido ? "h-8 w-auto" : "h-9 w-auto max-w-[9.5rem]"} />
-          </div>
+        <div
+          className={`border-b h-[53px] flex items-center shrink-0 ${recolhido ? "justify-center px-2" : "px-4"}`}
+          style={{ borderColor: "rgba(200,165,107,0.1)" }}
+        >
+          <img
+            src={LOGO_CLARO}
+            alt="Portal Iluminando"
+            className={recolhido ? "h-8 w-auto max-w-[2.75rem] object-contain object-center" : "h-8 w-auto max-w-[9.5rem] object-contain"}
+          />
         </div>
 
         <div className={`flex-1 overflow-y-auto py-4 ${recolhido ? "px-2" : "px-3"}`}>
@@ -229,7 +234,7 @@ export default function AdminPage() {
 
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         <header
-          className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3 lg:px-6"
+          className="sticky top-0 z-20 h-[53px] flex items-center gap-3 px-4 lg:px-6"
           style={{
             background: "rgba(19,15,9,0.92)",
             borderBottom: "1px solid rgba(200,165,107,0.1)",
@@ -278,7 +283,7 @@ export default function AdminPage() {
         )}
 
         <main className={`flex-1 w-full mx-auto ${aba === "conteudoDia" ? "px-3 py-4 lg:px-5 lg:py-5 max-w-[1400px]" : "px-4 py-5 lg:px-6 lg:py-6 max-w-7xl"}`}>
-          {aba === "dashboard" && <DashboardTab showMsg={showMsg} />}
+          {aba === "dashboard" && <DashboardTab showMsg={showMsg} onIrPara={(t) => setAba(t as Tab)} />}
           {aba === "usuarios" && <UsuariosTab showMsg={showMsg} />}
           {aba === "compras" && <ComprasTab showMsg={showMsg} />}
           {aba === "webhooks" && <WebhooksTab />}

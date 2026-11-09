@@ -39,7 +39,7 @@ export default function LoginPage() {
     setCarregando(true);
     const result = await login(username.trim().toLowerCase(), password);
     if (result.ok) {
-      navigate("/dashboard");
+      navigate(result.user?.isAdmin ? "/admin" : "/dashboard");
       return;
     }
     if (result.code === "pagamento_pendente") {

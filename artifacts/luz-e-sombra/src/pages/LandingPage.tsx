@@ -43,14 +43,14 @@ const HERO_ANALYSES = [
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const trackedView = useRef(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    if (status === "authenticated") navigate("/dashboard");
-  }, [status, navigate]);
+    if (status === "authenticated") navigate(user?.isAdmin ? "/admin" : "/dashboard");
+  }, [status, user, navigate]);
 
   useEffect(() => {
     captureUtmsFromUrl();

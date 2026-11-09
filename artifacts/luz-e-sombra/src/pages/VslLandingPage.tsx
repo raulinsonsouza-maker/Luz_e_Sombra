@@ -27,15 +27,15 @@ function readUnlocked(): boolean {
 
 export default function VslLandingPage() {
   const [, navigate] = useLocation();
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const [unlocked, setUnlocked] = useState(readUnlocked);
   const [signupOpen, setSignupOpen] = useState(false);
   const trackedView = useRef(false);
   const trackedUnlock = useRef(false);
 
   useEffect(() => {
-    if (status === "authenticated") navigate("/dashboard");
-  }, [status, navigate]);
+    if (status === "authenticated") navigate(user?.isAdmin ? "/admin" : "/dashboard");
+  }, [status, user, navigate]);
 
   useEffect(() => {
     captureUtmsFromUrl();
