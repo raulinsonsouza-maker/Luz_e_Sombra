@@ -375,7 +375,11 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                   title={`${num} — clicar para editar`}
                 >
                   <img
-                    src={thumbDeImagemDia(dia.imagemPath || dia.imagemUrl) || dia.imagemUrl}
+                    src={
+                      thumbDeImagemDia(dia.imagemPath) ||
+                      thumbDeImagemDia(dia.imagemUrl) ||
+                      dia.imagemUrl
+                    }
                     alt=""
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"

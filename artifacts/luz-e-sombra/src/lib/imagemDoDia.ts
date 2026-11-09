@@ -35,10 +35,10 @@ export function webDeImagemDia(src: string | null | undefined): string | null {
   return src.replace(/\/imagens-dia\/(\d+)\.png$/i, "/imagens-dia/$1.jpg");
 }
 
-/** Converte path/url do banco de imagens para a miniatura correspondente. */
+/** Miniatura só para o banco /imagens-dia. Uploads (/objects, /api/...) retornam null. */
 export function thumbDeImagemDia(src: string | null | undefined): string | null {
   if (!src) return null;
   const m = src.match(/\/imagens-dia\/(?:thumbs\/)?(\d+)\.(?:png|jpe?g|webp)$/i);
   if (m) return pathThumbImagemDia(Number(m[1]));
-  return src;
+  return null;
 }
