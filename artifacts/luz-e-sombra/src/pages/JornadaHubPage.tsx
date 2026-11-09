@@ -21,6 +21,7 @@ import AppPageShell from "@/components/AppPageShell";
 import { getVideoEmbedUrl } from "@/lib/mediaEmbed";
 import { FEATURE_FLAGS } from "@/lib/featureFlags";
 import { ModuloIntroTexto } from "@/components/ModuloIntroTexto";
+import { DataNascimentoModal } from "@/components/DataNascimentoModal";
 import { MinicursoEmbedido } from "@/components/MinicursoEmbedido";
 import {
   JORNADA_HUB_COPY,
@@ -283,6 +284,7 @@ export default function JornadaHubPage() {
   const [addNome, setAddNome] = useState("");
   const [addRelacao, setAddRelacao] = useState("cônjuge");
   const [addErro, setAddErro] = useState<string | null>(null);
+  const [modalDataNasc, setModalDataNasc] = useState(false);
 
   const multiPessoa = slug ? MODULOS_MULTI_PESSOA.has(slug) : false;
   const pessoaAtiva = useMemo(
@@ -323,20 +325,22 @@ export default function JornadaHubPage() {
   const modulo = useMemo(() => lista.find((m) => m.slug === slug), [lista, slug]);
   const copy = slug ? JORNADA_HUB_COPY[slug] : undefined;
 
-  const introParagrafos = useMemo(() => {
-    const base =
+  const introParagrafos = useMemo(
+    () =>
       copy?.introTexto ??
-      [copy?.introFallback ?? modulo?.descricaoIntro ?? ""].filter(Boolean);
-    if (slug !== "numerologia") return base;
-    const dataFmt = user?.dataNascimento
-      ? formatarDataBrasileira(user.dataNascimento)
+      [copy?.introFallback ?? modulo?.descricaoIntro ?? ""].filter(Boolean),
+    [copy, modulo?.descricaoIntro],
+  );
+
+  const dataClicavelIntro =
+    slug === "numerologia"
+      ? {
+          texto: user?.dataNascimento
+            ? formatarDataBrasileira(user.dataNascimento)
+            : "informar data",
+          onClick: () => setModalDataNasc(true),
+        }
       : null;
-    return base.map((p) => {
-      if (!p.includes("O relatório usa a data de nascimento do seu perfil")) return p;
-      if (!dataFmt) return p;
-      return `O relatório usa a data de nascimento do seu perfil (${dataFmt}). O Ano Pessoal vira no seu aniversário — não no dia 1º de janeiro.`;
-    });
-  }, [copy, modulo?.descricaoIntro, slug, user?.dataNascimento]);
 
   const isCapstone = slug === "dossie";
 
@@ -403,9 +407,6 @@ export default function JornadaHubPage() {
 
   const moduloTotalmenteConcluido =
     modulo?.analiseConcluida && minicursoDisponivel && modulo.minicursoConcluido;
-
-  const podeSeguirJornada =
-    modulo?.analiseConcluida && (!minicursoDisponivel || modulo.minicursoConcluido);
 
   const embedIntro =
     FEATURE_FLAGS.SHOW_COURSE_INTRO_VIDEOS && modulo?.videoIntroUrl
@@ -497,9 +498,17 @@ export default function JornadaHubPage() {
             <ModuloIntroTexto
               paragrafos={introParagrafos}
               bullets={copy?.introBullets}
+              dataClicavel={dataClicavelIntro}
             />
           )}
         </section>
+
+        {slug === "numerologia" && (
+          <DataNascimentoModal
+            open={modalDataNasc}
+            onClose={() => setModalDataNasc(false)}
+          />
+        )}
 
         {/* 2 — Análise */}
         <section className="mb-8">
@@ -598,13 +607,21 @@ export default function JornadaHubPage() {
                       onClick={() =>
                         navigate(hrefVerResultado(modulo.slug, modulo.hrefAnalise, selectedPessoaId))
                       }
-                      className="flex-1 py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                      className={
+                        modulo.slug === "numerologia"
+                          ? "flex-1 py-4 px-4 rounded-xl text-base font-bold flex items-center justify-center gap-2 shadow-lg"
+                          : "flex-1 py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                      }
                       style={{
-                        background: "linear-gradient(135deg, #c8a56b, #9c7742)",
+                        background: "linear-gradient(135deg, #d4b87a, #c8a56b, #9c7742)",
                         color: "#1a1208",
+                        boxShadow:
+                          modulo.slug === "numerologia"
+                            ? "0 10px 28px rgba(200,165,107,0.35)"
+                            : undefined,
                       }}
                     >
-                      <Eye className="w-4 h-4" />
+                      <Eye className={modulo.slug === "numerologia" ? "w-5 h-5" : "w-4 h-4"} />
                       {verResultadoLabel}
                     </button>
                     {modulo.slug !== "numerologia" && (
@@ -772,32 +789,6 @@ export default function JornadaHubPage() {
             >
               Próximo módulo
             </button>
-          </div>
-        )}
-
-        {podeSeguirJornada && !moduloTotalmenteConcluido && proximoHub && modulo.analiseConcluida && (
-          <div
-            className="rounded-2xl p-5 flex flex-col gap-3"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}
-          >
-            <p className="text-sm" style={{ color: "rgba(247,242,236,0.6)" }}>
-              Sua análise está pronta
-              {FEATURE_FLAGS.SHOW_MINICURSOS
-                ? minicursoDisponivel
-                  ? ", falta concluir o minicurso acima."
-                  : ", o minicurso será liberado em breve."
-                : "."}
-            </p>
-            {!minicursoDisponivel && (
-              <button
-                type="button"
-                onClick={() => navigate(proximoHub)}
-                className="py-2.5 rounded-xl text-sm font-medium"
-                style={{ color: "#c8a56b", border: "1px solid rgba(200,165,107,0.25)" }}
-              >
-                Continuar jornada →
-              </button>
-            )}
           </div>
         )}
 

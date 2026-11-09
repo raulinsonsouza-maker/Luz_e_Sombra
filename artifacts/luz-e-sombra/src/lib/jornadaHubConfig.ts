@@ -101,23 +101,27 @@ export const JORNADA_HUB_COPY: Record<
   },
   numerologia: {
     introFallback:
-      "Primeiro passo da jornada: seus números de vida, expressão, alma e ciclos anuais — a partir da data de nascimento do perfil.",
+      "A numerologia usa sua data de nascimento e seu nome para interpretar os números da sua trajetória.",
     introTexto: [
-      "A numerologia é o primeiro passo da fase Iniciante. Ela traduz sua data de nascimento em um mapa de padrões: número de vida (missão central), expressão (talentos naturais), alma (desejos profundos) e ciclos anuais que marcam fases de crescimento e desafio.",
-      "O relatório usa a data de nascimento do seu perfil. O Ano Pessoal vira no seu aniversário — não no dia 1º de janeiro.",
-      "Leva poucos minutos após confirmar a data. Seu mapa fica disponível aqui e se atualiza se você ajustar a data no perfil.",
+      "A numerologia é uma ferramenta de autoconhecimento que utiliza sua data de nascimento e seu nome para interpretar os significados simbólicos dos números presentes na sua trajetória.",
+      "Por meio desta análise, você vai conhecer aspectos relacionados à sua personalidade, seus talentos, seus desejos e os ciclos que marcam diferentes momentos da sua vida.",
+      "Seu mapa reúne diferentes números, cada um trazendo uma perspectiva sobre quem você é e sobre as experiências que podem fazer parte do seu caminho.",
+      "A análise utiliza os dados de nascimento cadastrados no seu perfil (__DATA__). Seu Ano Pessoal começa a partir do seu aniversário, e não em 1º de janeiro.",
+      "Após confirmar seus dados, seu mapa estará disponível nesta página para você consultar sempre que quiser.",
     ],
     introBullets: [
-      "Primeiro passo da jornada Iniciante",
-      "Números de vida, expressão, alma e ciclos pessoais",
-      "Ano pessoal que vira no aniversário",
+      "Seu Caminho de Vida: compreenda os significados associados à sua trajetória e aos aprendizados que ela representa.",
+      "Seu Número de Expressão: conheça os talentos, as características e as formas de expressão associadas ao seu nome.",
+      "Seu Número da Alma: explore os desejos, as motivações e os aspectos mais profundos da sua essência.",
+      "Seus ciclos pessoais: descubra os significados dos períodos e das fases que fazem parte da sua trajetória.",
+      "Seu Ano Pessoal: conheça a energia simbólica associada ao momento que você está vivendo.",
     ],
     analiseTitulo: "Mapa Numerológico",
     analiseDescricaoSem:
       "Confirme a data de nascimento no perfil e gere seu relatório. Leva poucos minutos.",
     analiseDescricaoCom: "Seu mapa numerológico já está disponível com base no perfil.",
     novaAnaliseLabel: "Atualizar data no perfil",
-    verResultadoLabel: "Ver meu mapa",
+    verResultadoLabel: "Sua análise está pronta",
   },
   dossie: {
     introFallback:

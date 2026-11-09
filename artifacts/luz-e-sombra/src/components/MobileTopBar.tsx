@@ -45,12 +45,19 @@ export default function MobileTopBar({
           </button>
         ) : null}
 
-        <img
-          src={MARCA_ARCO}
-          alt=""
-          className="h-7 w-7 shrink-0 rounded-lg object-cover"
-          aria-hidden
-        />
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard")}
+          aria-label="Ir para o início"
+          className="shrink-0 rounded-lg"
+        >
+          <img
+            src={MARCA_ARCO}
+            alt=""
+            className="h-7 w-7 rounded-lg object-cover"
+            aria-hidden
+          />
+        </button>
 
         {(titulo || subtitulo) ? (
           <div className="min-w-0 flex-1">

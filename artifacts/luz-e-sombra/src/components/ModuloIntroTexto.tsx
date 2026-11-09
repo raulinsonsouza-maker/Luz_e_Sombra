@@ -4,12 +4,48 @@ interface Props {
   titulo?: string;
   paragrafos: string[];
   bullets?: string[];
+  /** Substitui o marcador `__DATA__` por um botão clicável. */
+  dataClicavel?: { texto: string; onClick: () => void } | null;
+}
+
+function ParagrafoComData({
+  texto,
+  dataClicavel,
+}: {
+  texto: string;
+  dataClicavel?: { texto: string; onClick: () => void } | null;
+}) {
+  if (!dataClicavel || !texto.includes("__DATA__")) {
+    return (
+      <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)" }}>
+        {texto}
+      </p>
+    );
+  }
+
+  const [antes, depois] = texto.split("__DATA__");
+  return (
+    <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)" }}>
+      {antes}
+      <button
+        type="button"
+        onClick={dataClicavel.onClick}
+        className="font-semibold underline underline-offset-2 decoration-dotted mx-0.5"
+        style={{ color: "#c8a56b" }}
+        title="Alterar data de nascimento"
+      >
+        {dataClicavel.texto}
+      </button>
+      {depois}
+    </p>
+  );
 }
 
 export function ModuloIntroTexto({
   titulo = "Sobre esta análise",
   paragrafos,
   bullets,
+  dataClicavel,
 }: Props) {
   return (
     <div
@@ -28,9 +64,7 @@ export function ModuloIntroTexto({
 
       <div className="space-y-3">
         {paragrafos.map((p) => (
-          <p key={p.slice(0, 40)} className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.72)" }}>
-            {p}
-          </p>
+          <ParagrafoComData key={p.slice(0, 48)} texto={p} dataClicavel={dataClicavel} />
         ))}
       </div>
 
