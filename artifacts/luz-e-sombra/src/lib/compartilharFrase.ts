@@ -1,6 +1,6 @@
 const PORTAL_URL = "https://portaliluminando.com.br";
 const FUNDO = "/images/peao.jpeg";
-import { LOGO_CLARO } from "@/lib/marca";
+import { detectarTomLogo, srcLogo } from "@/lib/tomLogoPorFundo";
 
 function quebrar(ctx: CanvasRenderingContext2D, texto: string, max: number): string[] {
   const palavras = texto.split(" ");
@@ -41,18 +41,25 @@ function textoEspacado(ctx: CanvasRenderingContext2D, texto: string, x: number, 
   ctx.textAlign = alinhamento;
 }
 
-function linhasQueCabem(ctx: CanvasRenderingContext2D, frase: string, maxLargura: number, maxAltura: number) {
-  let tamanho = 78;
-  while (tamanho >= 42) {
+function linhasQueCabem(
+  ctx: CanvasRenderingContext2D,
+  frase: string,
+  maxLargura: number,
+  maxAltura: number,
+  tamanhoMax: number,
+  tamanhoMin: number,
+) {
+  let tamanho = tamanhoMax;
+  while (tamanho >= tamanhoMin) {
     ctx.font = `500 ${tamanho}px "Tan Mon Cheri", serif`;
     const linhas = quebrar(ctx, frase, maxLargura);
     const altura = linhas.length * tamanho * 1.35;
     if (altura <= maxAltura) return { tamanho, linhas, altura };
     tamanho -= 2;
   }
-  ctx.font = `500 42px "Tan Mon Cheri", serif`;
+  ctx.font = `500 ${tamanhoMin}px "Tan Mon Cheri", serif`;
   const linhas = quebrar(ctx, frase, maxLargura);
-  return { tamanho: 42, linhas, altura: linhas.length * 42 * 1.35 };
+  return { tamanho: tamanhoMin, linhas, altura: linhas.length * tamanhoMin * 1.35 };
 }
 
 async function cartaoStories(frase: string, data?: string, fundo: string = FUNDO, abertura?: string): Promise<File | null> {
@@ -76,8 +83,8 @@ async function cartaoStories(frase: string, data?: string, fundo: string = FUNDO
   }
 
   const velatura = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  velatura.addColorStop(0, "rgba(18,12,8,0.42)");
-  velatura.addColorStop(0.46, "rgba(18,12,8,0.58)");
+  velatura.addColorStop(0, "rgba(18,12,8,0.28)");
+  velatura.addColorStop(0.42, "rgba(18,12,8,0.48)");
   velatura.addColorStop(1, "rgba(18,12,8,0.78)");
   ctx.fillStyle = velatura;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -91,54 +98,49 @@ async function cartaoStories(frase: string, data?: string, fundo: string = FUNDO
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  let cursor = 280;
-  try {
-    const logo = await carregarImagem(LOGO_CLARO);
-    const logoLargura = 820;
-    const logoAltura = (logo.height / logo.width) * logoLargura;
-    const logoY = 150;
-    ctx.drawImage(logo, (canvas.width - logoLargura) / 2, logoY, logoLargura, logoAltura);
-    cursor = logoY + logoAltura + 120;
-  } catch {
-    /* segue sem a marca se o arquivo não carregar */
-  }
+  let cursor = 320;
 
   if (data) {
     ctx.fillStyle = "#c8a56b";
-    ctx.font = "600 30px sans-serif";
-    textoEspacado(ctx, data, canvas.width / 2, cursor, 6);
-    cursor += 58;
+    ctx.font = "600 34px sans-serif";
+    textoEspacado(ctx, data, canvas.width / 2, cursor, 5);
+    cursor += 72;
+  }
+
+  if (abertura) {
+    const blocoAbertura = linhasQueCabem(ctx, abertura, 820, 420, 58, 40);
+    ctx.fillStyle = "#f7f2ec";
+    ctx.font = `500 ${blocoAbertura.tamanho}px "Tan Mon Cheri", serif`;
+    const passoAbertura = blocoAbertura.tamanho * 1.28;
+    blocoAbertura.linhas.forEach((linha, i) => ctx.fillText(linha, canvas.width / 2, cursor + i * passoAbertura));
+    cursor += blocoAbertura.linhas.length * passoAbertura + 36;
   }
 
   ctx.fillStyle = "rgba(200,165,107,0.9)";
-  ctx.fillRect(canvas.width / 2 - 70, cursor, 140, 3);
+  ctx.fillRect(canvas.width / 2 - 36, cursor, 72, 2);
   cursor += 52;
 
-  let zonaTopo = cursor;
-  let zonaAltura = Math.max(280, 1560 - zonaTopo);
-  if (abertura) {
-    ctx.fillStyle = "rgba(247,242,236,0.92)";
-    ctx.font = '500 40px "Tan Mon Cheri", serif';
-    const linhasAbertura = quebrar(ctx, abertura, 760).slice(0, 4);
-    const passoAbertura = 52;
-    linhasAbertura.forEach((linha, i) => ctx.fillText(linha, canvas.width / 2, cursor + i * passoAbertura));
-    const depois = cursor + linhasAbertura.length * passoAbertura + 18;
-    ctx.fillStyle = "rgba(200,165,107,0.9)";
-    ctx.fillRect(canvas.width / 2 - 36, depois, 72, 2);
-    zonaTopo = depois + 48;
-    zonaAltura = Math.max(280, 1560 - zonaTopo);
-  }
-
-  const bloco = linhasQueCabem(ctx, frase, 840, zonaAltura);
-  ctx.fillStyle = "#f7f2ec";
+  const zonaAltura = Math.max(220, 1580 - cursor);
+  const bloco = linhasQueCabem(ctx, frase, 840, zonaAltura, 42, 28);
+  ctx.fillStyle = "rgba(247,242,236,0.92)";
   ctx.font = `500 ${bloco.tamanho}px "Tan Mon Cheri", serif`;
   const passo = bloco.tamanho * 1.35;
-  const inicio = zonaTopo + (zonaAltura - bloco.altura) / 2 + passo / 2;
+  const inicio = cursor + passo / 2;
   bloco.linhas.forEach((linha, i) => ctx.fillText(linha, canvas.width / 2, inicio + i * passo));
 
-  ctx.fillStyle = "#c8a56b";
-  ctx.font = "600 30px sans-serif";
-  textoEspacado(ctx, "portaliluminando.com.br", canvas.width / 2, 1640, 4);
+  try {
+    const tom = await detectarTomLogo(fundo);
+    const logo = await carregarImagem(srcLogo(tom));
+    const logoLargura = 320;
+    const logoAltura = (logo.height / logo.width) * logoLargura;
+    const logoY = 1705;
+    ctx.fillStyle = "#c8a56b";
+    ctx.font = "600 28px sans-serif";
+    textoEspacado(ctx, "LETÍCIA GALLONI", canvas.width / 2, logoY - 36, 5);
+    ctx.drawImage(logo, (canvas.width - logoLargura) / 2, logoY, logoLargura, logoAltura);
+  } catch {
+    /* segue sem a marca se o arquivo não carregar */
+  }
 
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!blob) return null;

@@ -36,6 +36,13 @@
       "when": 1762370000000,
       "tag": "0005_convites_diarios_luzes",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1762700000000,
+      "tag": "0006_frases_guardadas",
+      "breakpoints": true
     }
   ]
 }

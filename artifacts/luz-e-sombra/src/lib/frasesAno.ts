@@ -397,3 +397,8 @@ export function dataPorExtenso(data: Date = new Date()): string {
 export function dataDiaMes(data: Date = new Date()): string {
   return `${data.getDate()} de ${MESES[data.getMonth()]}`;
 }
+
+/** Data curta para o cartão do dia, sem o nome da semana. */
+export function dataCurta(data: Date = new Date()): string {
+  return dataDiaMes(data);
+}

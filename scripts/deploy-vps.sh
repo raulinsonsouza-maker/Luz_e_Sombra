@@ -131,6 +131,18 @@ echo "==> build frontend (@workspace/luz-e-sombra)"
 "$PNPM" --filter @workspace/luz-e-sombra build
 
 echo ""
+echo "==> banco de imagens do dia (docs/imagens_atualizadas → dist/public/imagens-dia)"
+IMAGENS_SRC="docs/imagens_atualizadas"
+IMAGENS_DEST="artifacts/luz-e-sombra/dist/public/imagens-dia"
+if [[ -d "$IMAGENS_SRC" ]]; then
+  mkdir -p "$IMAGENS_DEST"
+  cp -a "$IMAGENS_SRC"/. "$IMAGENS_DEST"/
+  echo "   $(find "$IMAGENS_DEST" -type f | wc -l) arquivos em $IMAGENS_DEST"
+else
+  echo "   Aviso: $IMAGENS_SRC não encontrado."
+fi
+
+echo ""
 echo "==> build API (@workspace/api-server)"
 "$PNPM" --filter @workspace/api-server build
 

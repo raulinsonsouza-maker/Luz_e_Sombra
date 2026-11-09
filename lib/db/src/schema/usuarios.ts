@@ -307,6 +307,20 @@ export const analiseLinguagensAmorTable = pgTable("analise_linguagens_amor", {
   ),
 }));
 
+/** Frases do dia guardadas na conta (snapshot editorial no momento do save). */
+export const frasesGuardadasTable = pgTable("frases_guardadas", {
+  id: serial("id").primaryKey(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuariosTable.id, { onDelete: "cascade" }),
+  dia: integer("dia").notNull(),
+  frase: text("frase").notNull(),
+  reflexao: text("reflexao").notNull().default(""),
+  convite: text("convite").notNull().default(""),
+  guardadaEm: timestamp("guardada_em").notNull().defaultNow(),
+}, (table) => ({
+  uniqueUsuarioDia: unique("uq_frases_guardadas_usuario_dia").on(table.usuarioId, table.dia),
+  usuarioIdx: index("idx_frases_guardadas_usuario").on(table.usuarioId),
+}));
+
 // ── Schemas & types ────────────────────────────────────────────────────────────
 
 export const insertUsuarioSchema = createInsertSchema(usuariosTable).omit({ id: true, criadoEm: true, atualizadoEm: true });
@@ -334,3 +348,4 @@ export type ProgressoCurso = typeof progressoCursosTable.$inferSelect;
 export type Notificacao = typeof notificacoesTable.$inferSelect;
 export type ConfiguracaoModulo = typeof configuracoesModulosTable.$inferSelect;
 export type AnaliseLinguagensAmor = typeof analiseLinguagensAmorTable.$inferSelect;
+export type FraseGuardada = typeof frasesGuardadasTable.$inferSelect;
