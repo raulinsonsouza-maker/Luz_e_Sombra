@@ -39,10 +39,21 @@ function imagensDoDiaPlugin(): Plugin {
     closeBundle() {
       const dest = path.resolve(import.meta.dirname, "dist/public/imagens-dia");
       if (!fs.existsSync(imagensDiaSrc)) return;
-      fs.mkdirSync(dest, { recursive: true });
+      fs.mkdirSync(dest, { recursive: true, mode: 0o755 });
+      try {
+        fs.chmodSync(dest, 0o755);
+      } catch {
+        /* Windows pode ignorar mode */
+      }
       for (const nome of fs.readdirSync(imagensDiaSrc)) {
         if (!/\.(png|jpe?g|webp)$/i.test(nome)) continue;
-        fs.copyFileSync(path.join(imagensDiaSrc, nome), path.join(dest, nome));
+        const alvo = path.join(dest, nome);
+        fs.copyFileSync(path.join(imagensDiaSrc, nome), alvo);
+        try {
+          fs.chmodSync(alvo, 0o644);
+        } catch {
+          /* Windows pode ignorar mode */
+        }
       }
     },
   };

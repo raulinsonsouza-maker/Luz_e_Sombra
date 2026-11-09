@@ -13,6 +13,7 @@ import temperamentoRouter from "./temperamento";
 import linguagensAmorRouter from "./linguagensAmor";
 import modulosJornadaRouter from "./modulosJornada";
 import frasesGuardadasRouter from "./frases-guardadas";
+import conteudoDiaRouter from "./conteudoDia";
 import funnelRouter from "./funnel";
 import webhooksCaktoRouter from "./webhooks/cakto";
 import adminOpsRouter from "./adminOps";
@@ -36,5 +37,6 @@ router.use("/temperamento", temperamentoRouter);
 router.use("/linguagens-amor", linguagensAmorRouter);
 router.use("/modulos-jornada", modulosJornadaRouter);
 router.use("/frases-guardadas", frasesGuardadasRouter);
+router.use("/conteudo-dia", conteudoDiaRouter);
 
 export default router;

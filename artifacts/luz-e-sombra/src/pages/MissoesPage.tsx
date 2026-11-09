@@ -5,7 +5,7 @@ import { apiFetch } from "@/lib/auth";
 import { toastApiError } from "@/lib/apiError";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
-import { fraseDoDia } from "@/lib/frasesAno";
+import { buscarConteudoDia, type ConteudoDia } from "@/lib/conteudoDia";
 import { Flame, Trophy, Star, Zap, Sunrise, Crown, Target, Gem, Sparkles, Shield, Compass, Mountain, Award, Check, type LucideIcon } from "lucide-react";
 import { CATALOGO } from "@workspace/copy-voz";
 
@@ -77,13 +77,23 @@ export default function MissoesPage() {
   const [carregando, setCarregando] = useState(true);
   const [concluindoConvite, setConcluindoConvite] = useState(false);
   const [avisoLuz, setAvisoLuz] = useState(false);
-  const hoje = fraseDoDia();
+  const [hoje, setHoje] = useState<ConteudoDia | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") { navigate("/login"); return; }
     if (status === "loading") return;
     buscarProgresso();
   }, [status]);
+
+  useEffect(() => {
+    let ativo = true;
+    void buscarConteudoDia().then((c) => {
+      if (ativo) setHoje(c);
+    });
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!avisoLuz) return;
@@ -206,7 +216,7 @@ export default function MissoesPage() {
                 Seu convite de hoje
               </p>
               <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.78)" }}>
-                {hoje.convite}
+                {hoje?.convite ?? ""}
               </p>
               <button
                 type="button"

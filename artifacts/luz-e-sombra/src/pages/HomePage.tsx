@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
-import { dataDiaMes, dataPorExtenso, fraseDoDia } from "@/lib/frasesAno";
-import { imagemDoDia } from "@/lib/imagemDoDia";
+import { dataDiaMes, dataPorExtenso } from "@/lib/frasesAno";
+import { buscarConteudoDia, type ConteudoDia } from "@/lib/conteudoDia";
 import { momentoDoDia } from "@/lib/momentoDoDia";
 import { coresSobreFoto, detectarTomLogo, srcLogo, type TomLogo } from "@/lib/tomLogoPorFundo";
 import { toast } from "sonner";
@@ -62,9 +62,10 @@ export default function HomePage() {
   const [concluindoConvite, setConcluindoConvite] = useState(false);
   const [avisoLuz, setAvisoLuz] = useState(false);
   const [tomLogo, setTomLogo] = useState<TomLogo>("claro");
+  const [conteudo, setConteudo] = useState<ConteudoDia | null>(null);
   const { count: notiCount } = useNotificacoesCount();
-  const hoje = fraseDoDia();
-  const fundo = imagemDoDia();
+  const hoje = conteudo;
+  const fundo = conteudo?.imagemUrl ?? "";
   const cores = coresSobreFoto(tomLogo);
   const fotoClara = tomLogo === "ouro";
 
@@ -78,6 +79,17 @@ export default function HomePage() {
   }, [status, user]);
 
   useEffect(() => {
+    let ativo = true;
+    void buscarConteudoDia().then((c) => {
+      if (ativo) setConteudo(c);
+    });
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!fundo) return;
     let ativo = true;
     void detectarTomLogo(fundo).then((tom) => {
       if (ativo) setTomLogo(tom);
@@ -166,7 +178,11 @@ export default function HomePage() {
       )}
       <div className="max-w-lg mx-auto">
         <div className="relative overflow-hidden" style={{ minHeight: 460 }}>
-          <img src={fundo} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          {fundo ? (
+            <img src={fundo} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            <div className="absolute inset-0" style={{ background: "#1e1812" }} />
+          )}
           <div className="absolute inset-0" style={{ background: cores.velatura }} />
           <div className="relative flex min-h-[460px] flex-col px-6 pt-5 pb-8">
             <button
@@ -212,7 +228,7 @@ export default function HomePage() {
 
             <div className="mt-auto flex flex-col items-center text-center pt-8">
               <p className="font-tan-mon-cheri text-2xl leading-snug max-w-[18rem]" style={{ color: "#f7f2ec", textShadow: "0 2px 16px rgba(0,0,0,0.45)" }}>
-                {hoje.frase}
+                {hoje?.frase ?? ""}
               </p>
               <button
                 type="button"
@@ -310,7 +326,7 @@ export default function HomePage() {
             Seu convite de hoje
           </p>
           <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.78)" }}>
-            {hoje.convite}
+            {hoje?.convite ?? ""}
           </p>
           <button
             type="button"

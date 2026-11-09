@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import {
   Users, MessageSquare, GraduationCap, LayoutDashboard, Shield, Layers, Bell, Loader2, CheckCircle, AlertCircle,
-  CreditCard, Webhook, Mail, type LucideIcon,
+  CreditCard, Webhook, Mail, CalendarDays, type LucideIcon,
 } from "lucide-react";
 import { BG, C, type Tab } from "./admin/shared";
 import { DashboardTab } from "./admin/DashboardTab";
@@ -15,6 +15,7 @@ import { CursosTab } from "./admin/CursosTab";
 import { ComprasTab } from "./admin/ComprasTab";
 import { WebhooksTab } from "./admin/WebhooksTab";
 import { EmailsTab } from "./admin/EmailsTab";
+import { ConteudoDiaTab } from "./admin/ConteudoDiaTab";
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function AdminPage() {
@@ -51,6 +52,7 @@ export default function AdminPage() {
     { key: "engajamento", label: "Engajamento", icon: Bell },
     { key: "modulosJornada", label: "Módulos da Jornada", icon: Layers },
     { key: "cursos", label: "Cursos", icon: GraduationCap },
+    { key: "conteudoDia", label: "Conteúdo do dia", icon: CalendarDays },
   ];
 
   return (
@@ -114,6 +116,7 @@ export default function AdminPage() {
         {aba === "engajamento" && <EngajamentoTab showMsg={showMsg} />}
         {aba === "modulosJornada" && <ModulosJornadaTab showMsg={showMsg} />}
         {aba === "cursos"     && <CursosTab showMsg={showMsg} />}
+        {aba === "conteudoDia" && <ConteudoDiaTab showMsg={showMsg} />}
       </div>
     </div>
   );

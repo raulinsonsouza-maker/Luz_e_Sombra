@@ -136,7 +136,10 @@ IMAGENS_SRC="docs/imagens_atualizadas"
 IMAGENS_DEST="artifacts/luz-e-sombra/dist/public/imagens-dia"
 if [[ -d "$IMAGENS_SRC" ]]; then
   mkdir -p "$IMAGENS_DEST"
-  cp -a "$IMAGENS_SRC"/. "$IMAGENS_DEST"/
+  # sem -a: mode 700 da pasta de origem impede o nginx (www-data) de servir as fotos
+  cp -r "$IMAGENS_SRC"/. "$IMAGENS_DEST"/
+  find "$IMAGENS_DEST" -type d -exec chmod 755 {} +
+  find "$IMAGENS_DEST" -type f -exec chmod 644 {} +
   echo "   $(find "$IMAGENS_DEST" -type f | wc -l) arquivos em $IMAGENS_DEST"
 else
   echo "   Aviso: $IMAGENS_SRC não encontrado."

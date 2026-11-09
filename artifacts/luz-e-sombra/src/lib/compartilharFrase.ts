@@ -3,7 +3,7 @@ const FUNDO = "/images/peao.jpeg";
 import { detectarTomLogo, srcLogo } from "@/lib/tomLogoPorFundo";
 
 function quebrar(ctx: CanvasRenderingContext2D, texto: string, max: number): string[] {
-  const palavras = texto.split(" ");
+  const palavras = texto.split(/\s+/).filter(Boolean);
   const linhas: string[] = [];
   let atual = "";
   for (const palavra of palavras) {
@@ -30,7 +30,9 @@ function carregarImagem(src: string): Promise<HTMLImageElement> {
 
 function textoEspacado(ctx: CanvasRenderingContext2D, texto: string, x: number, y: number, espaco: number) {
   const chars = [...texto];
-  const largura = chars.reduce((soma, char) => soma + ctx.measureText(char).width, 0) + espaco * (chars.length - 1);
+  const largura =
+    chars.reduce((soma, char) => soma + ctx.measureText(char).width, 0) +
+    espaco * Math.max(chars.length - 1, 0);
   let cursor = x - largura / 2;
   const alinhamento = ctx.textAlign;
   ctx.textAlign = "left";
@@ -41,105 +43,181 @@ function textoEspacado(ctx: CanvasRenderingContext2D, texto: string, x: number, 
   ctx.textAlign = alinhamento;
 }
 
-function linhasQueCabem(
+function encaixarTexto(
   ctx: CanvasRenderingContext2D,
-  frase: string,
+  texto: string,
   maxLargura: number,
   maxAltura: number,
   tamanhoMax: number,
   tamanhoMin: number,
+  entrelinha = 1.28,
 ) {
   let tamanho = tamanhoMax;
   while (tamanho >= tamanhoMin) {
     ctx.font = `500 ${tamanho}px "Tan Mon Cheri", serif`;
-    const linhas = quebrar(ctx, frase, maxLargura);
-    const altura = linhas.length * tamanho * 1.35;
-    if (altura <= maxAltura) return { tamanho, linhas, altura };
+    const linhas = quebrar(ctx, texto, maxLargura);
+    const passo = tamanho * entrelinha;
+    const altura = linhas.length * passo;
+    if (altura <= maxAltura && linhas.length <= 10) {
+      return { tamanho, linhas, altura, passo };
+    }
     tamanho -= 2;
   }
   ctx.font = `500 ${tamanhoMin}px "Tan Mon Cheri", serif`;
-  const linhas = quebrar(ctx, frase, maxLargura);
-  return { tamanho: tamanhoMin, linhas, altura: linhas.length * tamanhoMin * 1.35 };
+  const linhas = quebrar(ctx, texto, maxLargura);
+  const passo = tamanhoMin * entrelinha;
+  return { tamanho: tamanhoMin, linhas, altura: linhas.length * passo, passo };
 }
 
-async function cartaoStories(frase: string, data?: string, fundo: string = FUNDO, abertura?: string): Promise<File | null> {
+function desenharLinhasCentralizadas(
+  ctx: CanvasRenderingContext2D,
+  linhas: string[],
+  centroX: number,
+  yTopo: number,
+  passo: number,
+) {
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  linhas.forEach((linha, i) => {
+    ctx.fillText(linha, centroX, yTopo + i * passo);
+  });
+}
+
+async function cartaoStories(
+  reflexao: string,
+  data?: string,
+  fundo: string = FUNDO,
+  abertura?: string,
+): Promise<File | null> {
+  const W = 1080;
+  const H = 1920;
   const canvas = document.createElement("canvas");
-  canvas.width = 1080;
-  canvas.height = 1920;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
   ctx.fillStyle = "#1e1812";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, W, H);
 
   try {
     const img = await carregarImagem(fundo);
-    const escala = Math.max(canvas.width / img.width, canvas.height / img.height);
+    const escala = Math.max(W / img.width, H / img.height);
     const w = img.width * escala;
     const h = img.height * escala;
-    ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+    ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
   } catch {
-    /* fundo sólido já pintado */
+    /* fundo sólido */
   }
 
-  const velatura = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  velatura.addColorStop(0, "rgba(18,12,8,0.28)");
-  velatura.addColorStop(0.42, "rgba(18,12,8,0.48)");
-  velatura.addColorStop(1, "rgba(18,12,8,0.78)");
+  const velatura = ctx.createLinearGradient(0, 0, 0, H);
+  velatura.addColorStop(0, "rgba(18,12,8,0.38)");
+  velatura.addColorStop(0.45, "rgba(18,12,8,0.52)");
+  velatura.addColorStop(1, "rgba(18,12,8,0.82)");
   ctx.fillStyle = velatura;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, W, H);
 
   try {
-    await document.fonts.load('500 78px "Tan Mon Cheri"');
+    await document.fonts.load('500 84px "Tan Mon Cheri"');
+    await document.fonts.load('600 32px sans-serif');
   } catch {
-    /* segue com a fonte disponível */
+    /* segue */
   }
 
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+  // Zona segura Stories/Reels: evita topo (status) e base (UI + marca)
+  const zonaTopo = 300;
+  const zonaBase = 1520;
+  const zonaAltura = zonaBase - zonaTopo;
+  const centroX = W / 2;
+  const maxLargura = 820;
 
-  let cursor = 320;
+  const temData = Boolean(data?.trim());
+  const temAbertura = Boolean(abertura?.trim());
+  const alturaData = temData ? 48 : 0;
+  const gapAposData = temData ? 56 : 0;
+  const alturaDivisor = 2;
+  const gapAntesDivisor = 40;
+  const gapAposDivisor = 40;
 
-  if (data) {
+  // Orçamento vertical para os textos (abertura + reflexão)
+  const reservaFixa = alturaData + gapAposData + gapAntesDivisor + alturaDivisor + gapAposDivisor;
+  const alturaTextos = Math.max(360, zonaAltura - reservaFixa);
+  const alturaAberturaMax = temAbertura ? Math.floor(alturaTextos * 0.42) : 0;
+  const alturaReflexaoMax = alturaTextos - (temAbertura ? alturaAberturaMax + 8 : 0);
+
+  const blocoAbertura = temAbertura
+    ? encaixarTexto(ctx, abertura!.trim(), maxLargura, alturaAberturaMax, 78, 50, 1.22)
+    : null;
+  const blocoReflexao = encaixarTexto(
+    ctx,
+    reflexao.trim(),
+    maxLargura,
+    alturaReflexaoMax,
+    temAbertura ? 46 : 56,
+    34,
+    1.32,
+  );
+
+  const alturaBloco =
+    alturaData +
+    gapAposData +
+    (blocoAbertura?.altura ?? 0) +
+    (blocoAbertura ? gapAntesDivisor + alturaDivisor + gapAposDivisor : 24) +
+    blocoReflexao.altura;
+
+  // Centro óptico levemente acima do meio da zona segura
+  let y = zonaTopo + Math.max(0, (zonaAltura - alturaBloco) / 2) - 24;
+
+  ctx.shadowColor = "rgba(0,0,0,0.35)";
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 2;
+
+  if (temData) {
     ctx.fillStyle = "#c8a56b";
-    ctx.font = "600 34px sans-serif";
-    textoEspacado(ctx, data, canvas.width / 2, cursor, 5);
-    cursor += 72;
+    ctx.font = "600 30px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    textoEspacado(ctx, data!.trim().toUpperCase(), centroX, y + 18, 6);
+    y += alturaData + gapAposData;
   }
 
-  if (abertura) {
-    const blocoAbertura = linhasQueCabem(ctx, abertura, 820, 420, 58, 40);
+  if (blocoAbertura) {
     ctx.fillStyle = "#f7f2ec";
     ctx.font = `500 ${blocoAbertura.tamanho}px "Tan Mon Cheri", serif`;
-    const passoAbertura = blocoAbertura.tamanho * 1.28;
-    blocoAbertura.linhas.forEach((linha, i) => ctx.fillText(linha, canvas.width / 2, cursor + i * passoAbertura));
-    cursor += blocoAbertura.linhas.length * passoAbertura + 36;
+    desenharLinhasCentralizadas(ctx, blocoAbertura.linhas, centroX, y, blocoAbertura.passo);
+    y += blocoAbertura.altura + gapAntesDivisor;
+
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.fillStyle = "rgba(200,165,107,0.9)";
+    ctx.fillRect(centroX - 40, y, 80, alturaDivisor);
+    y += alturaDivisor + gapAposDivisor;
+    ctx.shadowColor = "rgba(0,0,0,0.35)";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 2;
+  } else {
+    y += 24;
   }
 
-  ctx.fillStyle = "rgba(200,165,107,0.9)";
-  ctx.fillRect(canvas.width / 2 - 36, cursor, 72, 2);
-  cursor += 52;
+  ctx.fillStyle = "rgba(247,242,236,0.94)";
+  ctx.font = `500 ${blocoReflexao.tamanho}px "Tan Mon Cheri", serif`;
+  desenharLinhasCentralizadas(ctx, blocoReflexao.linhas, centroX, y, blocoReflexao.passo);
 
-  const zonaAltura = Math.max(220, 1580 - cursor);
-  const bloco = linhasQueCabem(ctx, frase, 840, zonaAltura, 42, 28);
-  ctx.fillStyle = "rgba(247,242,236,0.92)";
-  ctx.font = `500 ${bloco.tamanho}px "Tan Mon Cheri", serif`;
-  const passo = bloco.tamanho * 1.35;
-  const inicio = cursor + passo / 2;
-  bloco.linhas.forEach((linha, i) => ctx.fillText(linha, canvas.width / 2, inicio + i * passo));
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
 
   try {
     const tom = await detectarTomLogo(fundo);
     const logo = await carregarImagem(srcLogo(tom));
-    const logoLargura = 320;
+    const logoLargura = 280;
     const logoAltura = (logo.height / logo.width) * logoLargura;
-    const logoY = 1705;
-    ctx.fillStyle = "#c8a56b";
-    ctx.font = "600 28px sans-serif";
-    textoEspacado(ctx, "LETÍCIA GALLONI", canvas.width / 2, logoY - 36, 5);
-    ctx.drawImage(logo, (canvas.width - logoLargura) / 2, logoY, logoLargura, logoAltura);
+    const logoY = 1688;
+    ctx.fillStyle = "#e8d5b0";
+    ctx.font = "600 26px sans-serif";
+    textoEspacado(ctx, "LETÍCIA GALLONI", centroX, logoY - 28, 6);
+    ctx.drawImage(logo, (W - logoLargura) / 2, logoY, logoLargura, logoAltura);
   } catch {
-    /* segue sem a marca se o arquivo não carregar */
+    /* sem marca */
   }
 
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
@@ -153,7 +231,12 @@ export function textoCompartilhar(frase: string, abertura?: string): string {
 }
 
 /** Abre a folha do celular (Stories ou WhatsApp). No computador, copia e abre o WhatsApp. */
-export async function compartilharFrase(frase: string, data?: string, fundo?: string, abertura?: string): Promise<"nativo" | "whatsapp"> {
+export async function compartilharFrase(
+  frase: string,
+  data?: string,
+  fundo?: string,
+  abertura?: string,
+): Promise<"nativo" | "whatsapp"> {
   const texto = textoCompartilhar(frase, abertura);
   const arquivo = await cartaoStories(frase, data, fundo, abertura);
 
@@ -177,7 +260,7 @@ export async function compartilharFrase(frase: string, data?: string, fundo?: st
   try {
     await navigator.clipboard.writeText(texto);
   } catch {
-    /* segue para o WhatsApp mesmo sem copiar */
+    /* segue */
   }
   window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, "_blank", "noopener,noreferrer");
   return "whatsapp";

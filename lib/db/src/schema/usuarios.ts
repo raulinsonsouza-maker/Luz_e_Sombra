@@ -321,6 +321,21 @@ export const frasesGuardadasTable = pgTable("frases_guardadas", {
   usuarioIdx: index("idx_frases_guardadas_usuario").on(table.usuarioId),
 }));
 
+/** Override editorial da frase/imagem do dia (calendário civil). */
+export const conteudoDiaTable = pgTable("conteudo_dia", {
+  id: serial("id").primaryKey(),
+  data: text("data").notNull(),
+  frase: text("frase").notNull().default(""),
+  reflexao: text("reflexao").notNull().default(""),
+  convite: text("convite").notNull().default(""),
+  imagemUrl: text("imagem_url"),
+  atualizadoEm: timestamp("atualizado_em").notNull().defaultNow(),
+  atualizadoPor: integer("atualizado_por").references(() => usuariosTable.id, { onDelete: "set null" }),
+}, (table) => ({
+  uniqueData: unique("uq_conteudo_dia_data").on(table.data),
+  dataIdx: index("idx_conteudo_dia_data").on(table.data),
+}));
+
 // ── Schemas & types ────────────────────────────────────────────────────────────
 
 export const insertUsuarioSchema = createInsertSchema(usuariosTable).omit({ id: true, criadoEm: true, atualizadoEm: true });
@@ -349,3 +364,4 @@ export type Notificacao = typeof notificacoesTable.$inferSelect;
 export type ConfiguracaoModulo = typeof configuracoesModulosTable.$inferSelect;
 export type AnaliseLinguagensAmor = typeof analiseLinguagensAmorTable.$inferSelect;
 export type FraseGuardada = typeof frasesGuardadasTable.$inferSelect;
+export type ConteudoDia = typeof conteudoDiaTable.$inferSelect;

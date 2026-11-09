@@ -43,6 +43,13 @@
       "when": 1762700000000,
       "tag": "0006_frases_guardadas",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1762710000000,
+      "tag": "0007_conteudo_dia",
+      "breakpoints": true
     }
   ]
 }

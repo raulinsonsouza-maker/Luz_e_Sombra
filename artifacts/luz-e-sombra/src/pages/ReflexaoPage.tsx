@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
 import { Bookmark, BookmarkCheck, Share2 } from "lucide-react";
 import MobileTopBar from "@/components/MobileTopBar";
-import { dataCurta, fraseDoDia } from "@/lib/frasesAno";
+import { dataCurta } from "@/lib/frasesAno";
 import { compartilharFrase } from "@/lib/compartilharFrase";
-import { imagemDoDia } from "@/lib/imagemDoDia";
+import { buscarConteudoDia, type ConteudoDia } from "@/lib/conteudoDia";
 import { alternarFraseGuardada, statusFraseGuardada } from "@/lib/frasesGuardadas";
 import { coresSobreFoto, detectarTomLogo, srcLogo, type TomLogo } from "@/lib/tomLogoPorFundo";
 import { toast } from "sonner";
@@ -24,18 +23,28 @@ function tamanhoReflexao(texto: string) {
 }
 
 export default function ReflexaoPage() {
-  const [, navigate] = useLocation();
-  const hoje = fraseDoDia();
   const data = dataCurta();
-  const fundo = imagemDoDia();
+  const [conteudo, setConteudo] = useState<ConteudoDia | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [tomLogo, setTomLogo] = useState<TomLogo>("claro");
   const [guardada, setGuardada] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const fundo = conteudo?.imagemUrl ?? "";
   const cores = coresSobreFoto(tomLogo);
   const fotoClara = tomLogo === "ouro";
 
   useEffect(() => {
+    let ativo = true;
+    void buscarConteudoDia().then((c) => {
+      if (ativo) setConteudo(c);
+    });
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!fundo) return;
     let ativo = true;
     void detectarTomLogo(fundo).then((tom) => {
       if (ativo) setTomLogo(tom);
@@ -46,19 +55,21 @@ export default function ReflexaoPage() {
   }, [fundo]);
 
   useEffect(() => {
+    if (!conteudo) return;
     let ativo = true;
-    void statusFraseGuardada(hoje.dia).then((ok) => {
+    void statusFraseGuardada(conteudo.diaCalendario).then((ok) => {
       if (ativo) setGuardada(ok);
     });
     return () => {
       ativo = false;
     };
-  }, [hoje.dia]);
+  }, [conteudo?.diaCalendario]);
 
   async function compartilhar() {
+    if (!conteudo) return;
     setEnviando(true);
     try {
-      const modo = await compartilharFrase(hoje.reflexao, data, fundo, hoje.frase);
+      const modo = await compartilharFrase(conteudo.reflexao, data, fundo, conteudo.frase);
       if (modo === "whatsapp") {
         toast.success("Texto copiado. O WhatsApp abriu com o link do portal.");
       }
@@ -71,10 +82,18 @@ export default function ReflexaoPage() {
   }
 
   async function alternarGuardar() {
-    if (salvando) return;
+    if (!conteudo || salvando) return;
     setSalvando(true);
     try {
-      const proximo = await alternarFraseGuardada(hoje, guardada);
+      const proximo = await alternarFraseGuardada(
+        {
+          dia: conteudo.diaCalendario,
+          frase: conteudo.frase,
+          reflexao: conteudo.reflexao,
+          convite: conteudo.convite,
+        },
+        guardada,
+      );
       setGuardada(proximo);
       toast.success(proximo
         ? "Uma luz guardada para quando precisar."
@@ -91,7 +110,11 @@ export default function ReflexaoPage() {
       <MobileTopBar titulo="Reflexão" voltar="/dashboard" />
       <div className="max-w-lg mx-auto px-4 pt-4 flex flex-col" style={{ minHeight: "calc(100vh - 7rem)" }}>
         <div className="relative flex-1 overflow-hidden rounded-3xl min-h-[420px]">
-          <img src={fundo} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          {fundo ? (
+            <img src={fundo} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            <div className="absolute inset-0" style={{ background: "#1e1812" }} />
+          )}
           <div className="absolute inset-0" style={{ background: cores.velatura }} />
           <div className="relative flex h-full min-h-[420px] flex-col items-center text-center px-7 pt-8 pb-6">
             <div className="flex flex-1 w-full flex-col items-center justify-center">
@@ -108,11 +131,11 @@ export default function ReflexaoPage() {
                 className="font-tan-mon-cheri leading-snug max-w-[17.5rem] mt-5"
                 style={{
                   color: fotoClara ? cores.titulo : "#f7f2ec",
-                  fontSize: tamanhoFrase(hoje.frase),
+                  fontSize: tamanhoFrase(conteudo?.frase ?? ""),
                   textShadow: fotoClara ? "none" : "0 2px 14px rgba(0,0,0,0.4)",
                 }}
               >
-                {hoje.frase}
+                {conteudo?.frase ?? ""}
               </p>
               <div
                 className="my-5 h-px w-10"
@@ -122,10 +145,10 @@ export default function ReflexaoPage() {
                 className="font-tan-mon-cheri max-w-[18.5rem] leading-relaxed"
                 style={{
                   color: fotoClara ? cores.apoio : "rgba(247,242,236,0.92)",
-                  fontSize: tamanhoReflexao(hoje.reflexao),
+                  fontSize: tamanhoReflexao(conteudo?.reflexao ?? ""),
                 }}
               >
-                {hoje.reflexao}
+                {conteudo?.reflexao ?? ""}
               </p>
             </div>
 
@@ -149,7 +172,7 @@ export default function ReflexaoPage() {
           <button
             type="button"
             onClick={() => void alternarGuardar()}
-            disabled={salvando}
+            disabled={salvando || !conteudo}
             aria-pressed={guardada}
             className="w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
             style={{
@@ -165,7 +188,7 @@ export default function ReflexaoPage() {
           <button
             type="button"
             onClick={() => void compartilhar()}
-            disabled={enviando}
+            disabled={enviando || !conteudo}
             className="w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
             style={{
               background: "linear-gradient(135deg, #c8a56b, #9c7742)",

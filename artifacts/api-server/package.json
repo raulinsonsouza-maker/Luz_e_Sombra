@@ -15,6 +15,7 @@
     "@workspace/api-zod": "workspace:*",
     "@workspace/copy-voz": "workspace:*",
     "@workspace/cinco-linguagens-amor": "workspace:*",
+    "@workspace/conteudo-dia-padrao": "workspace:*",
     "@workspace/db": "workspace:*",
     "@workspace/temperamento-v1": "workspace:*",
     "@workspace/traco-diagnostico-emocional": "workspace:*",
