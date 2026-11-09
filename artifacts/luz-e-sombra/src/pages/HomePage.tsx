@@ -45,7 +45,6 @@ function saudacao() {
 }
 
 const QUICK_ACTIONS = [
-  { label: "Dossiê de Vida", sub: "Sua síntese integrada", icon: FileText, href: "/quem-sou-eu" },
   { label: "Frases guardadas", sub: "Palavras para levar com você", icon: Bookmark, href: "/frases-guardadas" },
   { label: "Meu perfil", sub: "Dados e preferências", icon: User, href: "/perfil" },
 ] as const;
@@ -311,6 +310,34 @@ export default function HomePage() {
             border: "1px solid rgba(200,165,107,0.16)",
           }}
         >
+          <p className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: "#5db97a" }}>
+            Convite do dia
+          </p>
+          <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.78)" }}>
+            {hoje?.convite ?? ""}
+          </p>
+          <button
+            type="button"
+            onClick={() => void concluirConvite()}
+            disabled={carregando || concluindoConvite || progresso?.conviteConcluido}
+            className="w-full py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
+            style={{
+              background: progresso?.conviteConcluido ? "rgba(93,185,122,0.16)" : "linear-gradient(135deg, #c8a56b, #9c7742)",
+              color: progresso?.conviteConcluido ? "#5db97a" : "#1a1208",
+            }}
+          >
+            <LuzIcon acesa={!!progresso?.conviteConcluido} className="w-5 h-5 shrink-0" />
+            {progresso?.conviteConcluido ? "Luz recebida" : "Concluir meu convite"}
+          </button>
+        </div>
+
+        <div
+          className="rounded-3xl p-5 mb-4"
+          style={{
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(200,165,107,0.16)",
+          }}
+        >
           <div className="flex items-center justify-between gap-3 mb-3">
             <p className="text-sm font-semibold" style={{ color: "#c8a56b" }}>
               Meu espaço
@@ -361,34 +388,6 @@ export default function HomePage() {
             border: "1px solid rgba(200,165,107,0.16)",
           }}
         >
-          <p className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: "#5db97a" }}>
-            Convite do dia
-          </p>
-          <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(247,242,236,0.78)" }}>
-            {hoje?.convite ?? ""}
-          </p>
-          <button
-            type="button"
-            onClick={() => void concluirConvite()}
-            disabled={carregando || concluindoConvite || progresso?.conviteConcluido}
-            className="w-full py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
-            style={{
-              background: progresso?.conviteConcluido ? "rgba(93,185,122,0.16)" : "linear-gradient(135deg, #c8a56b, #9c7742)",
-              color: progresso?.conviteConcluido ? "#5db97a" : "#1a1208",
-            }}
-          >
-            <LuzIcon acesa={!!progresso?.conviteConcluido} className="w-5 h-5 shrink-0" />
-            {progresso?.conviteConcluido ? "Luz recebida" : "Concluir meu convite"}
-          </button>
-        </div>
-
-        <div
-          className="rounded-3xl p-5 mb-4"
-          style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(200,165,107,0.16)",
-          }}
-        >
           <p className="text-sm font-semibold mb-3" style={{ color: "#c8a56b" }}>
             Seu momento: {momento?.dataLabel ?? dataDiaMes()}
           </p>
@@ -424,7 +423,7 @@ export default function HomePage() {
           <p className="text-xs font-semibold tracking-wider uppercase mb-3" style={{ color: "rgba(200,165,107,0.5)" }}>
             Continuar
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {QUICK_ACTIONS.map(({ label, sub, icon: Icon, href }) => (
               <button
                 key={href}
