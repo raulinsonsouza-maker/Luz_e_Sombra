@@ -138,10 +138,8 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
   const [formatoData, setFormatoData] = useState<FormatoData>("padrao");
   const [dataExibicao, setDataExibicao] = useState("");
   const [salvando, setSalvando] = useState(false);
-  const [galeriaPagina, setGaleriaPagina] = useState(0);
   const [galeriaAberta, setGaleriaAberta] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const POR_PAGINA = 20;
 
   async function carregarMes(a = ano, m = mes) {
     setLoading(true);
@@ -184,7 +182,6 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
     const fmt = detectarFormato(dia.data, dia.dataExibicao);
     setFormatoData(fmt);
     setDataExibicao(dia.dataExibicao?.trim() || "");
-    setGaleriaPagina(0);
     setGaleriaAberta(false);
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -304,8 +301,6 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
       ? rotuloPadrao(editandoDia.data)
       : dataExibicao.trim() || rotuloPadrao(editandoDia.data))
     : "";
-
-  const totalPaginasGaleria = Math.ceil(TOTAL_IMAGENS_DIA / POR_PAGINA);
 
   return (
     <div className="space-y-4">
@@ -607,7 +602,7 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                   <div>
                     <p className="font-tan-mon-cheri text-lg" style={{ color: C.text }}>Galeria</p>
                     <p className="text-[10px]" style={{ color: C.muted }}>
-                      Página {galeriaPagina + 1}/{totalPaginasGaleria}
+                      {TOTAL_IMAGENS_DIA} imagens · role para ver todas
                     </p>
                   </div>
                   <button type="button" onClick={() => setGaleriaAberta(false)} className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ color: C.muted }}>
@@ -616,9 +611,8 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                 </div>
                 <div className="p-4 overflow-y-auto flex-1 min-h-0" style={{ background: "#1a1510" }}>
                   <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-                    {Array.from({ length: POR_PAGINA }, (_, i) => {
-                      const n = galeriaPagina * POR_PAGINA + i + 1;
-                      if (n > TOTAL_IMAGENS_DIA) return null;
+                    {Array.from({ length: TOTAL_IMAGENS_DIA }, (_, i) => {
+                      const n = i + 1;
                       const src = `/imagens-dia/${n}.png`;
                       return (
                         <button
@@ -637,26 +631,6 @@ export function ConteudoDiaTab({ showMsg }: { showMsg: ShowMsg }) {
                       );
                     })}
                   </div>
-                </div>
-                <div className="flex justify-between px-4 py-3 border-t shrink-0" style={{ borderColor: "rgba(200,165,107,0.15)", background: "#1f1913" }}>
-                  <button
-                    type="button"
-                    disabled={galeriaPagina === 0}
-                    onClick={() => setGaleriaPagina((p) => Math.max(0, p - 1))}
-                    className="text-xs font-semibold"
-                    style={{ color: galeriaPagina === 0 ? C.dim : C.gold }}
-                  >
-                    Anterior
-                  </button>
-                  <button
-                    type="button"
-                    disabled={galeriaPagina >= totalPaginasGaleria - 1}
-                    onClick={() => setGaleriaPagina((p) => Math.min(totalPaginasGaleria - 1, p + 1))}
-                    className="text-xs font-semibold"
-                    style={{ color: galeriaPagina >= totalPaginasGaleria - 1 ? C.dim : C.gold }}
-                  >
-                    Próxima
-                  </button>
                 </div>
               </div>
             </div>
