@@ -1,7 +1,6 @@
 import { useLocation } from "wouter";
 import { Bell, ChevronLeft } from "lucide-react";
 import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
-import LogoPortal from "@/components/LogoPortal";
 
 type Props = {
   titulo?: string;
@@ -43,57 +42,30 @@ export default function MobileTopBar({
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
+        ) : null}
+
+        {(titulo || subtitulo) ? (
+          <div className="min-w-0 flex-1">
+            {titulo && (
+              <h2
+                className="text-sm font-bold tracking-widest uppercase truncate"
+                style={{ color: "#f7f2ec" }}
+              >
+                {titulo}
+              </h2>
+            )}
+            {subtitulo && (
+              <p
+                className="text-[10px] leading-tight truncate mt-0.5"
+                style={{ color: "rgba(200,165,107,0.65)" }}
+              >
+                {subtitulo}
+              </p>
+            )}
+          </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => navigate("/dashboard")}
-            aria-label="Início"
-            className="shrink-0 flex items-center"
-          >
-            <LogoPortal className="h-8 w-auto" />
-          </button>
+          <span className="flex-1" />
         )}
-
-        {voltar && (
-          <button
-            type="button"
-            onClick={() => navigate("/dashboard")}
-            aria-label="Início"
-            className="shrink-0 flex items-center"
-          >
-            <LogoPortal className="h-7 w-auto" />
-          </button>
-        )}
-
-        {(titulo || subtitulo) && (
-          <>
-            <span
-              className="w-px h-7 shrink-0 self-center"
-              style={{ background: "rgba(200,165,107,0.28)" }}
-              aria-hidden
-            />
-            <div className="min-w-0 flex-1">
-              {titulo && (
-                <h2
-                  className="font-tan-mon-cheri text-[1.15rem] leading-tight truncate"
-                  style={{ color: "#f7f2ec" }}
-                >
-                  {titulo}
-                </h2>
-              )}
-              {subtitulo && (
-                <p
-                  className="text-[10px] leading-tight truncate mt-0.5"
-                  style={{ color: "rgba(200,165,107,0.65)" }}
-                >
-                  {subtitulo}
-                </p>
-              )}
-            </div>
-          </>
-        )}
-
-        {!titulo && !subtitulo && <span className="flex-1" />}
 
         {mostrarSino && (
           <button

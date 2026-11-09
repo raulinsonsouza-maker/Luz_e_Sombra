@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
+import { LuzIcon } from "@/components/LuzIcon";
 import {
   CheckCircle2,
   Lock,
@@ -299,8 +300,12 @@ export default function JornadaPage() {
                             </p>
                           )}
                           {s !== "locked" && (
-                            <p className="text-[11px] font-medium" style={{ color: "rgba(200,165,107,0.55)" }}>
-                              +{luzes} Luzes (análise)
+                            <p
+                              className="text-[11px] font-medium inline-flex items-center gap-1.5"
+                              style={{ color: "rgba(200,165,107,0.55)" }}
+                            >
+                              <LuzIcon acesa className="w-3.5 h-3.5" />
+                              +{luzes} Luzes
                             </p>
                           )}
                         </div>
