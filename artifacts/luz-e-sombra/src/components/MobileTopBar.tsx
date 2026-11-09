@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { Bell, ChevronLeft } from "lucide-react";
 import { useNotificacoesCount } from "@/hooks/useNotificacoesCount";
+import { MARCA_ARCO } from "@/lib/marca";
 
 type Props = {
   titulo?: string;
@@ -43,6 +44,13 @@ export default function MobileTopBar({
             <ChevronLeft className="w-5 h-5" />
           </button>
         ) : null}
+
+        <img
+          src={MARCA_ARCO}
+          alt=""
+          className="h-7 w-7 shrink-0 rounded-lg object-cover"
+          aria-hidden
+        />
 
         {(titulo || subtitulo) ? (
           <div className="min-w-0 flex-1">

@@ -323,6 +323,21 @@ export default function JornadaHubPage() {
   const modulo = useMemo(() => lista.find((m) => m.slug === slug), [lista, slug]);
   const copy = slug ? JORNADA_HUB_COPY[slug] : undefined;
 
+  const introParagrafos = useMemo(() => {
+    const base =
+      copy?.introTexto ??
+      [copy?.introFallback ?? modulo?.descricaoIntro ?? ""].filter(Boolean);
+    if (slug !== "numerologia") return base;
+    const dataFmt = user?.dataNascimento
+      ? formatarDataBrasileira(user.dataNascimento)
+      : null;
+    return base.map((p) => {
+      if (!p.includes("O relatório usa a data de nascimento do seu perfil")) return p;
+      if (!dataFmt) return p;
+      return `O relatório usa a data de nascimento do seu perfil (${dataFmt}). O Ano Pessoal vira no seu aniversário — não no dia 1º de janeiro.`;
+    });
+  }, [copy, modulo?.descricaoIntro, slug, user?.dataNascimento]);
+
   const isCapstone = slug === "dossie";
 
   useEffect(() => {
@@ -480,11 +495,7 @@ export default function JornadaHubPage() {
             </div>
           ) : (
             <ModuloIntroTexto
-              paragrafos={
-                copy?.introTexto ?? [
-                  copy?.introFallback ?? modulo.descricaoIntro,
-                ]
-              }
+              paragrafos={introParagrafos}
               bullets={copy?.introBullets}
             />
           )}
