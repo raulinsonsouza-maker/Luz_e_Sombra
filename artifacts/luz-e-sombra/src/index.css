@@ -266,6 +266,30 @@ select {
   cursor: pointer;
 }
 
+.audio-speed-slider {
+  accent-color: #f7f2ec;
+}
+.audio-speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #f7f2ec;
+  border: none;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+.audio-speed-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #f7f2ec;
+  border: none;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
 @media print {
   @page { size: A4; margin: 1.5cm 2cm; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }

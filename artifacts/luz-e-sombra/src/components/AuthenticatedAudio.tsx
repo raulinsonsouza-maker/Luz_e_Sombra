@@ -1,26 +1,31 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetchGet } from "@/lib/auth";
-import { Check, Loader2, MicOff, Pause, Play, Settings } from "lucide-react";
+import { ChevronLeft, Loader2, MicOff, Minus, Pause, Play, Plus, Settings } from "lucide-react";
 
 type Props = {
   apiPath: string;
   className?: string;
 };
 
-const VELOCIDADES = [
-  { valor: 1, rotulo: "Normal" },
-  { valor: 1.25, rotulo: "1.25x" },
-  { valor: 1.5, rotulo: "1.5x" },
-  { valor: 2, rotulo: "2x" },
-] as const;
-
-type Velocidade = (typeof VELOCIDADES)[number]["valor"];
+/** Passos da barra: 1.00 → 2.00 */
+const PASSO = 0.25;
+const MIN_VEL = 1;
+const MAX_VEL = 2;
 
 function formatTime(sec: number) {
   if (!Number.isFinite(sec) || sec < 0) return "0:00";
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
   return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function formatVelocidade(v: number) {
+  return `${v.toFixed(2)}x`;
+}
+
+function encaixarVelocidade(v: number) {
+  const n = Math.round(v / PASSO) * PASSO;
+  return Math.min(MAX_VEL, Math.max(MIN_VEL, Number(n.toFixed(2))));
 }
 
 export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
@@ -32,7 +37,7 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [velocidade, setVelocidade] = useState<Velocidade>(1);
+  const [velocidade, setVelocidade] = useState(1);
   const [menuAberto, setMenuAberto] = useState(false);
 
   useEffect(() => {
@@ -126,8 +131,12 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
     el.currentTime = Math.max(0, Math.min(duration, (pct / 100) * duration));
   }
 
+  function mudarVelocidade(prox: number) {
+    setVelocidade(encaixarVelocidade(prox));
+  }
+
   const progress = duration > 0 ? (current / duration) * 100 : 0;
-  const rotuloAtual = VELOCIDADES.find((v) => v.valor === velocidade)?.rotulo ?? "Normal";
+  const progressoVel = ((velocidade - MIN_VEL) / (MAX_VEL - MIN_VEL)) * 100;
 
   if (loading) {
     return (
@@ -206,7 +215,7 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
             border: menuAberto ? "1px solid rgba(200,165,107,0.45)" : "1px solid rgba(247,242,236,0.12)",
             color: menuAberto ? "#e8d5b0" : "rgba(247,242,236,0.78)",
           }}
-          aria-label={`Velocidade: ${rotuloAtual}`}
+          aria-label={`Velocidade: ${formatVelocidade(velocidade)}`}
           aria-expanded={menuAberto}
         >
           <Settings className="w-4 h-4" />
@@ -215,43 +224,83 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
 
       {menuAberto && (
         <div
-          className="absolute right-2 z-20 mt-1.5 w-40 rounded-xl py-1.5 shadow-xl overflow-hidden"
+          className="absolute left-2 right-2 z-20 mt-2 rounded-2xl px-3.5 pt-3 pb-4 shadow-2xl"
           style={{
             top: "100%",
-            background: "rgba(18,12,8,0.97)",
-            border: "1px solid rgba(200,165,107,0.28)",
+            background: "rgba(18,12,8,0.96)",
+            border: "1px solid rgba(247,242,236,0.14)",
+            backdropFilter: "blur(14px)",
           }}
-          role="menu"
-          aria-label="Velocidade"
+          role="dialog"
+          aria-label="Velocidade da reprodução"
         >
-          <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold tracking-[0.12em] uppercase" style={{ color: "rgba(200,165,107,0.7)" }}>
-            Velocidade
+          <div className="relative flex items-center justify-center mb-3 pb-2.5" style={{ borderBottom: "1px solid rgba(247,242,236,0.12)" }}>
+            <button
+              type="button"
+              onClick={() => setMenuAberto(false)}
+              className="absolute left-0 p-1 rounded-lg"
+              style={{ color: "rgba(247,242,236,0.85)" }}
+              aria-label="Voltar"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <p className="text-sm font-medium" style={{ color: "#f7f2ec" }}>
+              Velocidade da reprodução
+            </p>
+          </div>
+
+          <p className="text-center text-[1.65rem] font-semibold tabular-nums leading-none mb-4" style={{ color: "#f7f2ec" }}>
+            {formatVelocidade(velocidade)}
           </p>
-          {VELOCIDADES.map((item) => {
-            const ativo = velocidade === item.valor;
-            return (
-              <button
-                key={item.valor}
-                type="button"
-                role="menuitemradio"
-                aria-checked={ativo}
-                onClick={() => {
-                  setVelocidade(item.valor);
-                  setMenuAberto(false);
-                }}
-                className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left text-sm"
-                style={{
-                  color: ativo ? "#f7f2ec" : "rgba(247,242,236,0.72)",
-                  background: ativo ? "rgba(200,165,107,0.14)" : "transparent",
-                }}
-              >
-                <span>{item.rotulo}</span>
-                {ativo ? <Check className="w-3.5 h-3.5 shrink-0" style={{ color: "#c8a56b" }} /> : <span className="w-3.5" />}
-              </button>
-            );
-          })}
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => mudarVelocidade(velocidade - PASSO)}
+              disabled={velocidade <= MIN_VEL}
+              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+              style={{
+                background: "rgba(247,242,236,0.1)",
+                color: "#f7f2ec",
+                opacity: velocidade <= MIN_VEL ? 0.35 : 1,
+              }}
+              aria-label="Diminuir velocidade"
+            >
+              <Minus className="w-4 h-4" />
+            </button>
+
+            <input
+              type="range"
+              min={MIN_VEL}
+              max={MAX_VEL}
+              step={PASSO}
+              value={velocidade}
+              onChange={(e) => mudarVelocidade(Number(e.target.value))}
+              className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer audio-speed-slider"
+              style={{
+                background: `linear-gradient(to right, #f7f2ec ${progressoVel}%, rgba(247,242,236,0.22) ${progressoVel}%)`,
+              }}
+              aria-label="Ajustar velocidade"
+            />
+
+            <button
+              type="button"
+              onClick={() => mudarVelocidade(velocidade + PASSO)}
+              disabled={velocidade >= MAX_VEL}
+              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+              style={{
+                background: "rgba(247,242,236,0.1)",
+                color: "#f7f2ec",
+                opacity: velocidade >= MAX_VEL ? 0.35 : 1,
+              }}
+              aria-label="Aumentar velocidade"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
+
     </div>
   );
 }
