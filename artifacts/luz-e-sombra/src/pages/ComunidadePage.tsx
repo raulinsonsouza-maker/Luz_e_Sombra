@@ -31,6 +31,7 @@ interface Post {
   autorAdmin?: boolean;
   autorFotoUrl?: string | null;
   tipo: "texto" | "imagem" | "video" | "audio";
+  titulo?: string | null;
   conteudo: string;
   mediaUrl: string | null;
   criadoEm: string;
@@ -82,6 +83,7 @@ export default function ComunidadePage() {
   const [deletando, setDeletando] = useState<number | null>(null);
 
   const [novoTipo, setNovoTipo] = useState<"texto" | "imagem" | "video">("texto");
+  const [novoTitulo, setNovoTitulo] = useState("");
   const [novoConteudo, setNovoConteudo] = useState("");
   const [novoMediaUrl, setNovoMediaUrl] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -184,10 +186,16 @@ export default function ComunidadePage() {
 
       const res = await apiFetch("/comunidade", {
         method: "POST",
-        body: JSON.stringify({ tipo: novoTipo, conteudo: textoPublicacao, mediaUrl }),
+        body: JSON.stringify({
+          tipo: novoTipo,
+          titulo: novoTitulo.trim() || undefined,
+          conteudo: textoPublicacao,
+          mediaUrl,
+        }),
       });
 
       if (res.ok) {
+        setNovoTitulo("");
         setNovoConteudo("");
         setNovoMediaUrl("");
         setUploadFile(null);
@@ -345,6 +353,16 @@ export default function ComunidadePage() {
                 </button>
               ))}
             </div>
+
+            <input
+              type="text"
+              value={novoTitulo}
+              onChange={e => setNovoTitulo(e.target.value)}
+              maxLength={160}
+              className="w-full px-4 py-3 rounded-xl text-sm outline-none"
+              style={inputStyle}
+              placeholder="Título da publicação"
+            />
 
             <textarea
               value={novoConteudo}
@@ -555,11 +573,11 @@ function PostCard({
       className="rounded-2xl overflow-hidden shadow-lg shadow-black/20"
       style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}
     >
-      {/* Author bar */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-3">
-        <div className="flex items-center gap-3">
+      {/* Título + autor */}
+      <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-3">
+        <div className="flex items-start gap-3 min-w-0 flex-1">
           <div
-            className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold shrink-0"
+            className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
             style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.2), rgba(156,119,66,0.1))", color: "#c8a56b", border: "1px solid rgba(200,165,107,0.25)" }}
           >
             {post.autorFotoUrl ? (
@@ -573,18 +591,32 @@ function PostCard({
               (post.autorNome || "A")[0].toUpperCase()
             )}
           </div>
-          <div>
-            <p className="text-sm font-medium" style={{ color: "#f7f2ec" }}>{post.autorNome}</p>
-            <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
-              {timeAgo(post.criadoEm)}
-            </p>
+          <div className="min-w-0">
+            {post.titulo?.trim() ? (
+              <>
+                <h2 className="text-base font-semibold leading-snug" style={{ color: "#f7f2ec" }}>
+                  {post.titulo.trim()}
+                </h2>
+                <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.42)" }}>
+                  {post.autorNome}
+                  <span style={{ color: "rgba(247,242,236,0.28)" }}> · {timeAgo(post.criadoEm)}</span>
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium" style={{ color: "#f7f2ec" }}>{post.autorNome}</p>
+                <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
+                  {timeAgo(post.criadoEm)}
+                </p>
+              </>
+            )}
           </div>
         </div>
         {isAdmin && (
           <button
             onClick={() => onDeletar(post.id)}
             disabled={deletando}
-            className="p-1.5 rounded-lg transition-all"
+            className="p-1.5 rounded-lg transition-all shrink-0"
             style={{ color: "rgba(220,38,38,0.4)" }}
             onMouseEnter={e => (e.currentTarget.style.color = "#dc2626")}
             onMouseLeave={e => (e.currentTarget.style.color = "rgba(220,38,38,0.4)")}

@@ -16,6 +16,7 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
   const [loading, setLoading] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
   const [novoTipo, setNovoTipo] = useState<TipoPost>("texto");
+  const [novoTitulo, setNovoTitulo] = useState("");
   const [novoConteudo, setNovoConteudo] = useState("");
   const [novoMediaUrl, setNovoMediaUrl] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -49,6 +50,7 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
 
   function resetForm() {
     setNovoTipo("texto");
+    setNovoTitulo("");
     setNovoConteudo("");
     setNovoMediaUrl("");
     setUploadFile(null);
@@ -103,7 +105,13 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
       const texto = novoConteudo.trim() || " ";
       const res = await apiFetch("/comunidade", {
         method: "POST",
-        body: JSON.stringify({ tipo: novoTipo, conteudo: texto, mediaUrl, notificar }),
+        body: JSON.stringify({
+          tipo: novoTipo,
+          titulo: novoTitulo.trim() || undefined,
+          conteudo: texto,
+          mediaUrl,
+          notificar,
+        }),
       });
       if (res.ok) {
         showMsg("sucesso", "Publicação criada!");
@@ -223,6 +231,11 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
                         </span>
                       )}
                     </div>
+                    {p.titulo?.trim() && (
+                      <p className="text-sm font-semibold leading-snug mb-1" style={{ color: "#f7f2ec" }}>
+                        {p.titulo}
+                      </p>
+                    )}
                     {p.conteudo?.trim() && (
                       <p className="text-sm leading-relaxed line-clamp-2 mb-2" style={{ color: "rgba(247,242,236,0.8)" }}>
                         {p.conteudo}
@@ -313,6 +326,16 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
                 </button>
               ))}
             </div>
+
+            <input
+              type="text"
+              value={novoTitulo}
+              onChange={(e) => setNovoTitulo(e.target.value)}
+              maxLength={160}
+              className={ic}
+              style={INPUT_ST}
+              placeholder="Título da publicação"
+            />
 
             <textarea
               value={novoConteudo}

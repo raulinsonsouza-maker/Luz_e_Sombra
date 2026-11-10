@@ -65,7 +65,7 @@ export function validarFormularioUsuario(values: FormValues, editando: boolean):
 }
 
 export interface Post {
-  id: number; tipo: string; conteudo: string; mediaUrl: string | null; criadoEm: string;
+  id: number; tipo: string; titulo?: string | null; conteudo: string; mediaUrl: string | null; criadoEm: string;
   autorNome: string; reacoes: Record<string, number>;
 }
 export interface ComentarioEngajamento {

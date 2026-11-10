@@ -25,6 +25,7 @@ router.get("/", requireAuth, async (req: AuthRequest, res: Response) => {
         id: comunidadeTable.id,
         autorId: comunidadeTable.autorId,
         tipo: comunidadeTable.tipo,
+        titulo: comunidadeTable.titulo,
         conteudo: comunidadeTable.conteudo,
         mediaUrl: comunidadeTable.mediaUrl,
         criadoEm: comunidadeTable.criadoEm,
@@ -198,12 +199,13 @@ router.get("/admin/comentarios", requireAdmin, async (req: AuthRequest, res: Res
 // POST /api/comunidade — admin create post
 router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const { tipo, conteudo, mediaUrl, notificar } = req.body as {
-      tipo?: string; conteudo?: string; mediaUrl?: string; notificar?: boolean;
+    const { tipo, titulo, conteudo, mediaUrl, notificar } = req.body as {
+      tipo?: string; titulo?: string; conteudo?: string; mediaUrl?: string; notificar?: boolean;
     };
 
     const texto = (conteudo ?? "").trim();
     const midia = (mediaUrl ?? "").trim();
+    const tituloLimpo = (titulo ?? "").trim().slice(0, 160) || null;
     if (!texto && !midia) {
       return res.status(400).json({ error: "Inclua um texto ou uma mídia (imagem / áudio / link de vídeo)" });
     }
@@ -225,6 +227,7 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
       .values({
         autorId: req.user!.id,
         tipo: tipo || "texto",
+        titulo: tituloLimpo,
         conteudo: texto || " ",
         mediaUrl: midia || null,
       })
@@ -237,7 +240,7 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
         .where(and(eq(usuariosTable.isAdmin, false), eq(usuariosTable.ativo, true)));
 
       if (usuarios.length > 0) {
-        const previewBase = texto || (midia ? "Nova publicação com mídia" : "Comunidade");
+        const previewBase = tituloLimpo || texto || (midia ? "Nova publicação com mídia" : "Comunidade");
         const preview = previewBase.slice(0, 100) + (previewBase.length > 100 ? "..." : "");
         await db.insert(notificacoesTable).values(
           usuarios.map(u => ({

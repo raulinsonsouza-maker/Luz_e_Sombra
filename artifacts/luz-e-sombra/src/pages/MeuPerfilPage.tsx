@@ -8,9 +8,10 @@ import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import {
   User, Calendar, Lock, CheckCircle, AlertCircle, Flame, Target,
-  Star, Camera, Loader2, Sparkles, ArrowRight, Edit2, X, Save, KeyRound, LogOut, Bookmark,
+  Star, Camera, Loader2, Sparkles, ArrowRight, Edit2, X, Save, KeyRound, LogOut, Bookmark, Leaf,
 } from "lucide-react";
 import { listarFrasesGuardadas } from "@/lib/frasesGuardadas";
+import { listarPercepcoes } from "@/lib/percepcoes";
 import { LuzIcon } from "@/components/LuzIcon";
 
 interface Progresso {
@@ -56,6 +57,7 @@ export default function MeuPerfilPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [progresso, setProgresso] = useState<Progresso | null>(null);
   const [frasesGuardadasCount, setFrasesGuardadasCount] = useState(0);
+  const [percepcoesCount, setPercepcoesCount] = useState(0);
 
   // ── Photo ──────────────────────────────────────────────────────────────────
   const [fotoUrl, setFotoUrl] = useState<string | null>(null);
@@ -76,6 +78,7 @@ export default function MeuPerfilPage() {
     listarFrasesGuardadas()
       .then((itens) => setFrasesGuardadasCount(itens.length))
       .catch(() => setFrasesGuardadasCount(0));
+    setPercepcoesCount(listarPercepcoes().length);
   }, []);
 
   // keep form in sync if user object updates from outside
@@ -321,34 +324,65 @@ export default function MeuPerfilPage() {
           <div style={{ height: 2, background: "linear-gradient(90deg, transparent, rgba(200,165,107,0.4), transparent)" }} />
         </button>
 
-        <button
-          type="button"
-          onClick={() => navigate("/frases-guardadas")}
-          className="w-full mb-6 rounded-2xl p-4 text-left transition-all active:scale-[0.98]"
-          style={{
-            background: "rgba(200,165,107,0.07)",
-            border: "1px solid rgba(200,165,107,0.18)",
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: "rgba(200,165,107,0.14)", border: "1px solid rgba(200,165,107,0.28)" }}
-            >
-              <Bookmark className="w-5 h-5" style={{ color: "#c8a56b" }} />
+        <div className="grid grid-cols-1 gap-3 mb-6">
+          <button
+            type="button"
+            onClick={() => navigate("/acompanhamento")}
+            className="w-full rounded-2xl p-4 text-left transition-all active:scale-[0.98]"
+            style={{
+              background: "rgba(200,165,107,0.07)",
+              border: "1px solid rgba(200,165,107,0.18)",
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: "rgba(200,165,107,0.14)", border: "1px solid rgba(200,165,107,0.28)" }}
+              >
+                <Leaf className="w-5 h-5" style={{ color: "#c8a56b" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm" style={{ color: "#f7f2ec" }}>Minhas percepções</p>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(247,242,236,0.5)" }}>
+                  Seus registros ficam guardados aqui para você revisitar.
+                  {percepcoesCount > 0
+                    ? ` ${percepcoesCount} ${percepcoesCount === 1 ? "momento" : "momentos"}.`
+                    : ""}
+                </p>
+              </div>
+              <ArrowRight className="w-4 h-4 shrink-0" style={{ color: "#c8a56b" }} />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm" style={{ color: "#f7f2ec" }}>Frases guardadas</p>
-              <p className="text-xs mt-0.5" style={{ color: "rgba(247,242,236,0.5)" }}>
-                Palavras para levar com você.
-                {frasesGuardadasCount > 0
-                  ? ` ${frasesGuardadasCount} ${frasesGuardadasCount === 1 ? "mensagem" : "mensagens"}.`
-                  : ""}
-              </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/frases-guardadas")}
+            className="w-full rounded-2xl p-4 text-left transition-all active:scale-[0.98]"
+            style={{
+              background: "rgba(200,165,107,0.07)",
+              border: "1px solid rgba(200,165,107,0.18)",
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: "rgba(200,165,107,0.14)", border: "1px solid rgba(200,165,107,0.28)" }}
+              >
+                <Bookmark className="w-5 h-5" style={{ color: "#c8a56b" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm" style={{ color: "#f7f2ec" }}>Frases guardadas</p>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(247,242,236,0.5)" }}>
+                  Palavras para levar com você.
+                  {frasesGuardadasCount > 0
+                    ? ` ${frasesGuardadasCount} ${frasesGuardadasCount === 1 ? "mensagem" : "mensagens"}.`
+                    : ""}
+                </p>
+              </div>
+              <ArrowRight className="w-4 h-4 shrink-0" style={{ color: "#c8a56b" }} />
             </div>
-            <ArrowRight className="w-4 h-4 shrink-0" style={{ color: "#c8a56b" }} />
-          </div>
-        </button>
+          </button>
+        </div>
 
         {/* ── Stats grid ───────────────────────────────────────────────────── */}
         {progresso && (

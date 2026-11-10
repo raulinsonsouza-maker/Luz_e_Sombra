@@ -166,6 +166,7 @@ export const comunidadeTable = pgTable("comunidade", {
   id: serial("id").primaryKey(),
   autorId: integer("autor_id").notNull().references(() => usuariosTable.id),
   tipo: text("tipo").notNull().default("texto"),
+  titulo: text("titulo"),
   conteudo: text("conteudo").notNull(),
   mediaUrl: text("media_url"),
   criadoEm: timestamp("criado_em").notNull().defaultNow(),

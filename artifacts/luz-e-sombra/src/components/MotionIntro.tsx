@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 const MOTION_SRC = "/motion/Motion.mp4";
-const STORAGE_KEY = "luz_motion_intro_v1";
+const STORAGE_KEY = "luz_motion_intro_v3";
 const FADE_MS = 520;
-const MAX_MS = 12000;
+const MAX_MS = 16000;
 
 function jaExibidoNestaSessao(): boolean {
   try {

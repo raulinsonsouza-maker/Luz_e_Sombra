@@ -7,11 +7,17 @@ type Props = {
   className?: string;
 };
 
+const VELOCIDADES = [1, 1.25, 1.5, 2] as const;
+
 function formatTime(sec: number) {
   if (!Number.isFinite(sec) || sec < 0) return "0:00";
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
   return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function rotuloVelocidade(v: number) {
+  return v === 1 ? "1x" : `${v}x`;
 }
 
 export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
@@ -22,6 +28,7 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [velocidade, setVelocidade] = useState<(typeof VELOCIDADES)[number]>(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -70,6 +77,11 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
     };
   }, [blobUrl]);
 
+  useEffect(() => {
+    const el = audioRef.current;
+    if (el) el.playbackRate = velocidade;
+  }, [velocidade, blobUrl]);
+
   async function togglePlay() {
     const el = audioRef.current;
     if (!el) return;
@@ -79,6 +91,7 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
       return;
     }
     try {
+      el.playbackRate = velocidade;
       await el.play();
       setPlaying(true);
     } catch {
@@ -151,12 +164,36 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
             }}
             aria-label="Progresso do áudio"
           />
-          <div className="flex justify-between mt-1.5 text-[10px] tabular-nums" style={{ color: "rgba(247,242,236,0.45)" }}>
-            <span>{formatTime(current)}</span>
-            <span>{formatTime(duration)}</span>
+          <div className="flex items-center justify-between mt-1.5 gap-2">
+            <span className="text-[10px] tabular-nums" style={{ color: "rgba(247,242,236,0.45)" }}>
+              {formatTime(current)}
+            </span>
+            <div className="flex items-center gap-1">
+              {VELOCIDADES.map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setVelocidade(v)}
+                  className="min-w-[2rem] px-1.5 py-0.5 rounded-md text-[10px] font-semibold tabular-nums"
+                  style={
+                    velocidade === v
+                      ? { background: "rgba(200,165,107,0.28)", color: "#f0e0c0", border: "1px solid rgba(200,165,107,0.45)" }
+                      : { background: "transparent", color: "rgba(247,242,236,0.4)", border: "1px solid transparent" }
+                  }
+                  aria-label={`Velocidade ${rotuloVelocidade(v)}`}
+                  aria-pressed={velocidade === v}
+                >
+                  {rotuloVelocidade(v)}
+                </button>
+              ))}
+            </div>
+            <span className="text-[10px] tabular-nums" style={{ color: "rgba(247,242,236,0.45)" }}>
+              {formatTime(duration)}
+            </span>
           </div>
         </div>
       </div>
+
     </div>
   );
 }
