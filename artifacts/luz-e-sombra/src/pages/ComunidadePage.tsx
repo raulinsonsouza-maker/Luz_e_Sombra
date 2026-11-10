@@ -18,7 +18,6 @@ import {
   Heart,
   ExternalLink,
   MessageCircle,
-  Share2,
   Bookmark,
   Send,
   CheckCircle2,
@@ -255,36 +254,6 @@ export default function ComunidadePage() {
     }
   }
 
-  async function handleCompartilhar(postId: number) {
-    const shareUrl = `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, "")}/comunidade`;
-    const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
-    try {
-      if (canNativeShare) {
-        await navigator.share({
-          title: "Publicação da comunidade",
-          text: "Veja esta publicação da comunidade",
-          url: shareUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-      }
-    } catch {
-      // user canceled share
-    }
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id !== postId
-          ? p
-          : { ...p, totalCompartilhamentos: (p.totalCompartilhamentos ?? 0) + 1 }
-      )
-    );
-    try {
-      await apiFetch(`/comunidade/${postId}/compartilhar`, { method: "POST" });
-    } catch {
-      /* noop */
-    }
-  }
-
   const inputStyle = {
     background: "rgba(255,255,255,0.04)",
     border: "1px solid rgba(200,165,107,0.2)",
@@ -483,7 +452,6 @@ export default function ComunidadePage() {
                 onDeletar={handleDeletar}
                 onComentar={handleComentar}
                 onSalvar={handleSalvar}
-                onCompartilhar={handleCompartilhar}
                 deletando={deletando === post.id}
               />
             ))}
@@ -495,7 +463,7 @@ export default function ComunidadePage() {
 }
 
 function PostCard({
-  post, isAdmin, onReagir, onDeletar, onComentar, onSalvar, onCompartilhar, deletando,
+  post, isAdmin, onReagir, onDeletar, onComentar, onSalvar, deletando,
 }: {
   post: Post;
   isAdmin: boolean;
@@ -503,7 +471,6 @@ function PostCard({
   onDeletar: (id: number) => void;
   onComentar: (id: number, conteudo: string, parentComentarioId?: number | null) => Promise<void>;
   onSalvar: (id: number) => Promise<void>;
-  onCompartilhar: (id: number) => Promise<void>;
   deletando: boolean;
 }) {
   const [comentarioInput, setComentarioInput] = useState("");
@@ -516,7 +483,6 @@ function PostCard({
   const showImagem = post.tipo === "imagem" && Boolean(post.mediaUrl);
   const totalCurtidas = post.reacoes["❤️"] ?? 0;
   const totalComentarios = post.totalComentarios ?? post.comentarios?.length ?? 0;
-  const totalCompartilhamentos = post.totalCompartilhamentos ?? 0;
   const totalSalvos = post.totalSalvos ?? 0;
   const textoPost = post.conteudo?.trim();
   const comentariosLista = post.comentarios ?? [];
@@ -705,10 +671,6 @@ function PostCard({
         >
           <MessageCircle className="w-4 h-4" style={{ color: "rgba(247,242,236,0.65)" }} />
           {totalComentarios}
-        </button>
-        <button className="inline-flex items-center gap-1.5 text-xs" style={{ color: "rgba(247,242,236,0.8)" }} onClick={() => onCompartilhar(post.id)}>
-          <Share2 className="w-4 h-4" style={{ color: "rgba(247,242,236,0.65)" }} />
-          {totalCompartilhamentos}
         </button>
         <button className="inline-flex items-center gap-1.5 text-xs ml-auto" style={{ color: "rgba(247,242,236,0.8)" }} onClick={() => onSalvar(post.id)}>
           <Bookmark className="w-4 h-4" style={{ color: post.salvoPorMim ? "#c8a56b" : "rgba(247,242,236,0.65)" }} />

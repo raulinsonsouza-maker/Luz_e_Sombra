@@ -17,6 +17,9 @@ const RELACOES_SUGERIDAS = [
   "outro",
 ];
 
+/** Neste lançamento, a análise fica só no perfil do usuário. */
+const PERMITIR_OUTRAS_PESSOAS = false;
+
 export default function SeletorPessoaAnalise({
   pessoas,
   selectedPessoaId,
@@ -44,6 +47,8 @@ export default function SeletorPessoaAnalise({
   addErro: string | null;
   className?: string;
 }) {
+  if (!PERMITIR_OUTRAS_PESSOAS) return null;
+
   const pessoaAtiva = selectedPessoaId !== null ? pessoas.find((p) => p.id === selectedPessoaId) : null;
 
   return (

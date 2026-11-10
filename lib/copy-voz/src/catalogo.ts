@@ -19,16 +19,18 @@ export const CATALOGO = {
     tracoMenu: "O que o seu corpo mostra sobre você",
     traco: {
       introFallback:
-        "O corpo mostra um dos cinco traços: Esquizoide, Oral, Psicopata, Masoquista ou Rígido. As fotos e o que você conta se cruzam nessa leitura.",
+        "Os traços de caráter são padrões emocionais e comportamentais formados na infância. Nesta análise, fotos e questionário se cruzam para mostrar como esses padrões aparecem em você.",
       introTexto: [
-        "O Traço de Caráter lê o corpo junto com o que você sente. Ele observa como você ocupa o espaço, sustenta tensões e expressa emoção. São padrões que muitas vezes acontecem no automático.",
-        "Você envia fotos com orientações simples e responde a um questionário. As duas leituras se cruzam e mostram o traço que mais aparece, o que se repete e um passo para usar isso com consciência.",
-        "Reserve cerca de 20 a 30 minutos em um lugar calmo. No final, a leitura fica guardada aqui e pode ser refeita quando você quiser ir mais fundo.",
+        "Os traços de caráter são padrões emocionais e comportamentais que se desenvolvem ao longo da infância, a partir das experiências vividas e da maneira como aprendemos a lidar com o mundo.",
+        "Esses padrões podem influenciar nossa forma de pensar, sentir, reagir, nos relacionar e até de nos expressar por meio do corpo.",
+        "Nesta análise, você vai conhecer os cinco traços de caráter e explorar como eles podem aparecer em você. Para isso, serão consideradas duas fontes de informação: fotos do seu corpo, feitas seguindo orientações simples, e suas respostas a um questionário.",
+        "Ao cruzar essas informações, a análise apresenta quais traços aparecem com maior intensidade, suas possíveis características e como elas podem se manifestar no seu dia a dia.",
+        "Reserve cerca de 20 a 30 minutos para realizar a experiência em um ambiente tranquilo. Ao finalizar, seu relatório ficará disponível nesta página para consulta.",
       ],
       introBullets: [
-        "Cinco traços, lidos no corpo e no que você conta",
-        "Fotos e questionário se cruzam numa leitura só",
-        "Um relatório seu, com um passo para o dia a dia",
+        "Os cinco traços de caráter: conheça os padrões e as características associados a cada um deles.",
+        "Uma leitura integrada: entenda como suas fotos e respostas ao questionário se complementam na análise.",
+        "Seu perfil de traços: descubra quais aparecem com maior intensidade e como podem influenciar seus comportamentos e relacionamentos.",
       ],
       analiseDescricaoSem: "Envie suas fotos e conte como você tem se sentido. Leva cerca de 20 a 30 minutos.",
     },
