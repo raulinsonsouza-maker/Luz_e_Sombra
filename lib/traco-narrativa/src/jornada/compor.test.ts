@@ -54,6 +54,31 @@ describe("comporJornadaTraco", () => {
     assert.match(texto ?? "", /Rígido/);
     assert.match(texto ?? "", /Masoquista/);
     assert.match(texto ?? "", /terceiro|Em terceiro/i);
+    assert.match(texto ?? "", /Quando os três|Lendo os três juntos/i);
+  });
+
+  it("usa exercícios vivos e não carrega recomendações antigas do resultado", () => {
+    const jornada = comporJornadaTraco({
+      ...BASE,
+      recomendacoesPraticas: [
+        "Trabalho de enraizamento em pernas e pés: squats, corrida, yoga.",
+        "Desenvolva estrutura própria: rotinas, limites claros.",
+      ],
+    });
+    const integracao = jornada.etapas.find((e) => e.id === "integracao");
+    const passos = integracao?.blocos.find((b) => b.tipo === "passos");
+    assert.ok(passos && passos.tipo === "passos");
+    const blob = passos.itens.join(" ");
+    assert.equal(/squats|yoga|enraizamento/i.test(blob), false);
+    assert.match(blob, /receber|pedir|rotina/i);
+  });
+
+  it("não repete lista de talentos nem pontos de atenção nas etapas", () => {
+    const jornada = comporJornadaTraco(BASE);
+    const recurso = jornada.etapas.find((e) => e.id === "recurso");
+    const sombra = jornada.etapas.find((e) => e.id === "sombra");
+    assert.equal(recurso?.blocos.some((b) => b.tipo === "lista"), false);
+    assert.equal(sombra?.blocos.some((b) => b.tipo === "lista"), false);
   });
 
   it("não coloca métricas técnicas nem jargão residual na saída", () => {

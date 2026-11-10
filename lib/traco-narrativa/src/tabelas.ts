@@ -20,15 +20,15 @@ const APELIDOSS: Record<keyof EstruturasPct, string> = {
 
 const FRASES_IDENTIDADE: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "Você pensa fundo e imagina caminhos que muita gente ainda não enxerga. Em algum momento cedo, a rejeição ou a frieza podem ter ensinado que se afastar era mais seguro. O que segue não é um rótulo: é um mapa de como esse jeito pode aparecer na sua vida hoje.",
+    "Você pensa fundo, cria mundos internos e enxerga o que muita gente passa batido. O que segue não é um rótulo: é um mapa de como essa profundidade se formou, o que ela protege e como ela pode viver com mais presença hoje.",
   oral:
-    "Você sente o outro e comunica afeto com facilidade. Em algum momento cedo, a falta de colo ou de sustentação constante pode ter ensinado a buscar no outro o que faltava por dentro. A leitura abaixo mostra como esse jeito pode aparecer no seu cotidiano.",
+    "Você sente o outro, aquece vínculos e comunica afeto com naturalidade. O que segue aprofunda esse jeito: de onde ele pode ter vindo, o que ele protege, o talento que nasceu dele e o custo de usá-lo o tempo todo.",
   psicopata:
-    "Você organiza, lidera e negocia com naturalidade. Em algum momento cedo, confiar pode ter doído — e controlar o ambiente passou a parecer a forma mais segura de existir. A leitura aprofunda como essa força vive em você hoje.",
+    "Você organiza, lidera e faz as coisas andarem. O que segue aprofunda essa força: como ela pode ter nascido, o que ela evita sentir, o talento que carrega e o preço de nunca baixar a guarda.",
   masoquista:
-    "Você aguenta, planeja e sustenta. Em algum momento cedo, a crítica ou a humilhação podem ter ensinado que silenciar e resistir era mais seguro do que se expandir. A leitura a seguir mostra essa força e o custo de usá-la o tempo todo.",
+    "Você aguenta, permanece e sustenta o que outros abandonam. O que segue aprofunda essa lealdade: a história possível por trás dela, a dor que protege, o recurso que criou e o convite a ocupar mais espaço.",
   rigido:
-    "Você executa, capricha e mantém o ritmo. Em algum momento cedo, demonstrar sentimento ou se entregar pode ter trazido frustração — e a excelência virou proteção. O texto a seguir aprofunda esse jeito de funcionar, sem trocar o nome do traço.",
+    "Você executa, capricha e mantém o que promete. O que segue aprofunda essa excelência: como ela pode ter virado proteção, o que fica preso por baixo dela e o caminho para sentir sem perder qualidade.",
 };
 
 const PONTOS_FORTES: Record<keyof EstruturasPct, string[]> = {
@@ -49,28 +49,28 @@ const PONTOS_ATENCAO: Record<keyof EstruturasPct, string[]> = {
 
 const FERIDAS: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "Imagine um começo em que existir plenamente parecia arriscado: rejeição, frieza ou invasão. A criança aprende a se proteger pela distância. Isso não é frieza adulta — é um jeito antigo de cuidar de si, antes mesmo de haver palavras. Observe se essa história encontra eco na sua vida.",
+    "A dor que esse padrão procura evitar raramente é falada em voz alta: a sensação de não caber, de ser demais ou de menos, de que o mundo invade ou rejeita. Por dentro pode haver um frio antigo — não falta de sentimento, mas medo de que o sentimento não tenha lugar seguro. A distância vira anestesia. Observe se essa experiência encontra eco em você, sem precisar forçar uma biografia.",
   oral:
-    "Imagine um começo em que o colo e a sustentação faltaram ou chegaram de forma irregular. A criança aprende a buscar fora o que falta por dentro. Isso não define quem você é: ajuda a entender por que receber ainda pode parecer difícil ou perigoso. Observe se essa experiência faz sentido para você.",
+    "A dor que esse padrão procura evitar é a de ficar sem sustentação: o vazio quando o outro se afasta, a angústia de precisar e não saber pedir, a vergonha de receber sem retribuir na hora. Pode parecer que pedir é fraqueza e que só o cuidado dado garante o lugar. Isso não define quem você é — ajuda a entender por que a solidão ainda aperta tanto. Observe se essa experiência faz sentido para você.",
   psicopata:
-    "Imagine um começo em que confiar custou caro. Controlar o ambiente passou a parecer a única forma de se sentir seguro. A força que nasceu disso é real. O custo aparece quando ninguém consegue te ver sem a estratégia. Observe se isso faz sentido para você.",
+    "A dor que esse padrão procura evitar é a de ser vulnerável e pagar caro por isso: traição, humilhação, perda de dignidade. Controlar o ambiente vira anestesia contra o risco de depender. A força que nasce disso é real. O custo aparece quando quase ninguém te alcança por baixo da estratégia. Observe se isso encontra eco em você.",
   masoquista:
-    "Imagine um começo em que querer algo seu trouxe crítica, humilhação ou pressão para se adaptar. A criança aprende a ficar forte, fiel e capaz de aguentar. Aguentar tudo não precisa ser a única prova de valor: a vida também cabe leve. Observe se essa leitura encontra eco em você.",
+    "A dor que esse padrão procura evitar é a de ser criticado, diminuído ou expulso por ocupar espaço. Querer algo seu pode ter soado perigoso. Então o corpo aprende a comprimir desejo, voz e prazer. Aguentar vira prova de valor. Observe se essa leitura encontra eco — e se ainda hoje expandir parece, por um segundo, perigoso demais.",
   rigido:
-    "Imagine um começo em que demonstrar sentimento ou se entregar trouxe frustração, rejeição ou a sensação de não ser escolhido. A criança aprende a controlar a emoção e a merecer carinho sendo correta, competente e admirável. Por dentro, o sentimento continua: só espera permissão para aparecer sem perder o padrão. Observe se essa história faz sentido para você.",
+    "A dor que esse padrão procura evitar é a de se entregar e não ser escolhido: a frustração de mostrar sentimento e sentir que isso não bastou, ou que foi usado contra você. Controlar a emoção e merecer pelo desempenho vira escudo. Por dentro o sentimento continua — só espera permissão para aparecer sem perder o padrão. Observe se essa história faz sentido para você.",
 };
 
 const RECURSOS: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "O mesmo movimento que pode ter te afastado do mundo também desenvolveu uma mente capaz de criar o que ainda não existe. Você enxerga padrões, conecta ideias e imagina caminhos que outros não veem. Quando essa visão deixa de ser só proteção e passa a ser presença, ela vira um talento que o mundo realmente precisa.",
+    "O mesmo movimento que pode ter te afastado do mundo também desenvolveu uma mente capaz de criar o que ainda não existe. Você enxerga padrões, conecta ideias e imagina caminhos que outros não veem. Em uma reunião rasa, você já está três camadas à frente; em um problema complexo, encontra o fio que faltava. Quando essa visão deixa de ser só esconderijo e vira presença — quando o corpo acompanha a ideia — ela se torna um talento que o mundo realmente precisa.",
   oral:
-    "O mesmo anseio que pode ter te feito buscar o outro demais também desenvolveu uma empatia rara. Você lê o ambiente antes da fala, aquece vínculos e sustenta pessoas. Quando essa generosidade deixa de esvaziar você e passa a nascer de um centro próprio, ela vira um recurso de conexão verdadeira.",
+    "O mesmo anseio que pode ter te feito buscar o outro demais também desenvolveu uma empatia rara. Você lê o ambiente antes da fala, percebe o que não foi dito e aquece vínculos sem esforço. Em uma sala tensa, você desarma; em uma crise pessoal de alguém próximo, você fica. Quando essa generosidade deixa de esvaziar você e passa a nascer de um centro próprio — quando você também se coloca na conta do cuidado — ela vira conexão verdadeira, não sacrifício disfarçado.",
   psicopata:
-    "O mesmo impulso que pode ter te feito controlar o ambiente também desenvolveu uma presença que organiza e mobiliza. Você vê o caminho, articula e faz as coisas andarem. Quando essa força deixa de ser só defesa e passa a incluir vulnerabilidade, ela vira liderança que inspira confiança de verdade.",
+    "O mesmo impulso que pode ter te feito controlar o ambiente também desenvolveu uma presença que organiza e mobiliza. Você vê o caminho, articula e faz as coisas andarem quando outros ainda hesitam. Em caos, você decide; em dúvida coletiva, você corta o nó. Quando essa força deixa de ser só defesa e inclui vulnerabilidade escolhida, ela vira liderança que inspira confiança de verdade — não só obediência.",
   masoquista:
-    "O mesmo padrão que pode ter te feito aguentar demais também desenvolveu uma resistência que permanece quando muita coisa cede. Você é leal, profundo e capaz de sustentar. Quando essa força deixa de ser só compressão e passa a se expandir, ela vira persistência com espaço para prazer e leveza.",
+    "O mesmo padrão que pode ter te feito aguentar demais também desenvolveu uma resistência que permanece quando muita coisa cede. Você é leal, profundo e capaz de sustentar projetos, pessoas e crises longas. Quem está perto sabe: você não some na primeira dificuldade. Quando essa força deixa de ser só compressão e se expande — quando prazer e limite também cabem — ela vira persistência com dignidade, não sacrifício silencioso.",
   rigido:
-    "O mesmo cuidado que pode ter te feito controlar a emoção também desenvolveu uma capacidade real de transformar visão em resultado. Você é confiável, organizado e entrega o que promete. Quando essa excelência deixa de ser só proteção e passa a conviver com fragilidade, ela vira competência com profundidade humana.",
+    "O mesmo cuidado que pode ter te feito controlar a emoção também desenvolveu uma capacidade real de transformar visão em resultado. Você é confiável, organizado e entrega o que promete. Em meio a improvisos, você traz forma; em meio a promessas vagas, você fecha. Quando essa excelência deixa de ser só proteção e convive com fragilidade, ela vira competência com profundidade humana — qualidade sem couraça.",
 };
 
 const RECOMENDACOES: Record<keyof EstruturasPct, string[]> = {
@@ -82,11 +82,11 @@ const RECOMENDACOES: Record<keyof EstruturasPct, string[]> = {
     "Caminhe com atenção no corpo: passo, respiração, presença. Sem meta de desempenho.",
   ],
   oral: [
-    "Pratique receber um cuidado pequeno sem imediatamente retribuir ou se sentir em dívida.",
-    "Monte uma rotina simples só sua: sono, alimentação, um tempo sem atender ninguém.",
-    "Observe onde você dá mais do que recebe e escolha uma situação para pedir algo concreto.",
-    "Diga em uma frase clara o que você precisa a alguém próximo.",
-    "Quando a solidão apertar, pergunte-se o que você mesmo pode oferecer a si agora, antes de buscar o outro.",
+    "Pratique receber um cuidado pequeno sem imediatamente retribuir ou se sentir em dívida — e observe o que acontece no peito.",
+    "Monte uma rotina simples só sua: sono, alimentação e um tempo do dia em que você não atende ninguém.",
+    "Escolha uma situação concreta desta semana e peça algo específico a alguém de confiança, em uma frase clara.",
+    "Quando a solidão apertar, pergunte-se o que você pode oferecer a si agora, antes de buscar o outro.",
+    "Observe um momento em que você deu por medo de perder o vínculo — e experimente pausar antes do próximo 'sim' automático.",
   ],
   psicopata: [
     "Escolha uma relação segura e mostre um limite ou uma necessidade real, sem estratégia.",
@@ -204,15 +204,15 @@ const SINTESE_TOQUE_SECUNDARIO: Record<keyof EstruturasPct, string> = {
 /** Quando o traço aparece em 3º no mapa: o que ele acrescenta sem roubar o centro. */
 const TOQUE_TERCIARIO: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "Em terceiro lugar no seu mapa, o Esquizóide acrescenta um espaço interior: você pensa antes de se entregar por completo e precisa de momentos só seus para não se perder no contato. Essa distância discreta pode ser sabedoria, desde que não vire fuga quando a vida pede presença.",
+    "Em terceiro lugar no seu mapa, o Esquizóide acrescenta um espaço interior: você pensa antes de se entregar por completo e precisa de momentos só seus para não se perder no contato. Em uma semana cheia, esse recolhimento discreto pode ser sabedoria — desde que não vire fuga no exato momento em que a vida pede presença e conversa difícil.",
   oral:
-    "Em terceiro lugar no seu mapa, o Oral acrescenta calor e sede de vínculo: mesmo quando outro traço conduz, você ainda busca ser visto e cuidar. Isso humaniza o perfil e pede atenção para não se esvaziar dando o que ninguém pediu.",
+    "Em terceiro lugar no seu mapa, o Oral acrescenta calor e sede de vínculo: mesmo quando outro traço conduz, você ainda busca ser visto e cuidar. Isso humaniza o perfil — há ternura sob a estratégia ou sob a forma. O cuidado é não se esvaziar dando o que ninguém pediu, nem usar o afeto como moeda para garantir lugar.",
   psicopata:
-    "Em terceiro lugar no seu mapa, o Psicopata acrescenta impulso de avanço e de organizar o entorno. Você consegue empurrar decisões e tomar frente quando precisa. O cuidado é não usar essa força só para não sentir.",
+    "Em terceiro lugar no seu mapa, o Psicopata acrescenta impulso de avanço e de organizar o entorno. Quando a situação pede corte limpo ou decisão rápida, essa força aparece. O cuidado é não usá-la só para não sentir: liderar a agenda externa enquanto a vida emocional fica sem dono.",
   masoquista:
-    "Em terceiro lugar no seu mapa, o Masoquista acrescenta capacidade de aguentar e permanecer. Você sustenta o que importa por tempo longo e pode acabar carregando além do justo se não nomear o limite a tempo.",
+    "Em terceiro lugar no seu mapa, o Masoquista acrescenta capacidade de aguentar e permanecer. Você sustenta o que importa por tempo longo — projetos, vínculos, crises — com uma fidelidade quieta. O risco é carregar além do justo e só perceber o excesso quando o corpo ou o ressentimento já cobraram. Nomear o limite a tempo não apaga essa virtude: a torna sustentável.",
   rigido:
-    "Em terceiro lugar no seu mapa, o Rígido acrescenta ordem, capricho e compromisso com a qualidade. Você fecha o que começa e mantém o padrão. O convite é deixar a excelência servir à vida, não substituir o afeto.",
+    "Em terceiro lugar no seu mapa, o Rígido acrescenta ordem, capricho e compromisso com a qualidade. Você fecha o que começa e mantém o padrão mesmo quando o centro emocional puxa para outro lado. O convite é deixar a excelência servir à vida e ao vínculo — não substituir o afeto por desempenho.",
 };
 
 const PADROES_POSTURAIS: Record<keyof EstruturasPct, string> = {
@@ -251,52 +251,52 @@ const PADROES_ENERGETICOS: Record<keyof EstruturasPct, string> = {
 
 const MENSAGENS: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "Sua visão interior é um recurso real, não um defeito. Cada vez que você ancora presença no corpo e permite ser visto em doses pequenas, descobre que existir aqui pode ser mais seguro do que a proteção antiga sugeria. Isso não é performance: é integração gradual.",
+    "Sua visão interior é um recurso real, não um defeito. Cada vez que você ancora presença no corpo e permite ser visto em doses pequenas, descobre que existir aqui pode ser mais seguro do que a proteção antiga sugeria. Isso não é performance: é integração gradual — e você não precisa abandonar a profundidade para pertencer.",
   oral:
-    "Receber apoio não enfraquece o seu jeito de cuidar. Quanto mais estrutura interna você constrói, mais consegue sustentar vínculos sem se esvaziar. Pedir o que precisa faz parte de como você funciona melhor, não de uma falha.",
+    "Receber apoio não enfraquece o seu jeito de cuidar. Quanto mais centro próprio você constrói — rotina, limite, a coragem de pedir — mais consegue sustentar vínculos sem se esvaziar. Pedir o que precisa faz parte de como você funciona melhor, não de uma falha. O outro deixa de ser muleta e volta a ser companhia.",
   psicopata:
-    "Sua força já está provada. O próximo passo é permitir que vulnerabilidade e liderança caminhem juntas: mostrar limite e necessidade não reduz influência — aumenta confiança.",
+    "Sua força já está provada. O próximo passo é permitir que vulnerabilidade e liderança caminhem juntas: mostrar limite e necessidade não reduz influência — aumenta confiança. Quem te segue de verdade precisa poder te alcançar.",
   masoquista:
-    "Suportar não precisa ser a sua única identidade. Expansão, prazer e leveza também cabem em você. Dizer não em doses pequenas reescreve o padrão antigo sem apagar a sua lealdade.",
+    "Suportar não precisa ser a sua única identidade. Expansão, prazer e leveza também cabem em você. Dizer não em doses pequenas reescreve o padrão antigo sem apagar a sua lealdade. Você pode permanecer — e também pode caber.",
   rigido:
-    "Sua competência é real e valiosa. Por baixo do controle existe sensibilidade que também precisa de espaço. Relaxar não é perder padrão: é ampliar o que você consegue sentir e viver sem deixar de ser quem você é.",
+    "Sua competência é real e valiosa. Por baixo do controle existe sensibilidade que também precisa de espaço. Relaxar não é perder padrão: é ampliar o que você consegue sentir e viver sem deixar de ser quem você é. A excelência ganha alma quando o afeto também tem lugar.",
 };
 
 const INTERPRETACOES: Record<keyof EstruturasPct, string[]> = {
   esquizoide: [
-    "No começo, estar inteiro no mundo pode ter parecido arriscado. A proteção foi se afastar, observar e criar um universo interior rico. Você pode ter aprendido que pensar era mais seguro do que sentir e ser visto. Observe se essa origem encontra eco na sua história.",
-    "Com o tempo, essa proteção desenvolveu um talento real: profundidade, criatividade e capacidade de ver o que outros não veem. Ao mesmo tempo, o corpo pode ter ficado um pouco de fora da conversa. A solidão vira fortaleza e, às vezes, prisão. O trabalho não é se tornar outra pessoa: é reunir o que já é seu.",
-    "Hoje isso pode aparecer como necessidade de espaço, cansaço em ambientes muito estimulantes e uma vida interior que poucos conhecem de verdade. Você pode ser leal e intenso nos poucos vínculos que escolhe. O desafio é confiar, em doses, que é seguro existir aqui.",
-    "O caminho passa pelo corpo e pela presença. Enquanto a mente já habita mundos sofisticados, o corpo espera a mesma atenção. Cada vez que você ancora a riqueza interior no aqui e agora, a experiência de ser você fica mais inteira.",
-    "Integrar o Esquizóide não é se tornar 'comum'. É trazer o universo interior para o contato com o mundo. Quando a presença acompanha a visão, surge alguém criativo, conectado e profundamente autêntico.",
+    "No começo, estar inteiro no mundo pode ter parecido arriscado: rejeição, frieza ou invasão. A proteção foi se afastar, observar e criar um universo interior rico o bastante para não depender do acolhimento externo. Você pode ter aprendido que pensar era mais seguro do que sentir e ser visto. Observe se essa origem encontra eco na sua história — sem precisar forçar uma narrativa única.",
+    "Com o tempo, essa proteção desenvolveu um talento real: profundidade, criatividade e capacidade de ver o que outros não veem. Você conecta ideias, antecipa padrões e habita nuances. Ao mesmo tempo, o corpo pode ter ficado um pouco de fora da conversa: presente no mundo das ideias, menos habitado no chão. A solidão vira fortaleza e, às vezes, prisão. O trabalho não é se tornar outra pessoa: é reunir mente, corpo e vínculo no mesmo endereço.",
+    "Hoje isso pode aparecer como necessidade clara de espaço, cansaço rápido em ambientes barulhentos ou superficiais, e uma vida interior que poucos conhecem de verdade. Você pode ser leal e intenso nos poucos vínculos que escolhe — e sumir quando a proximidade aperta demais. Em uma festa, observa; em um projeto profundo, brilha. O desafio é confiar, em doses, que é seguro existir aqui sem abandonar a riqueza que já é sua.",
+    "O caminho passa pelo corpo e pela presença. Enquanto a mente já habita mundos sofisticados, o corpo espera a mesma atenção: pés no chão, respiração, um contato pequeno e real. Cada vez que você ancora a riqueza interior no aqui e agora — sem exigir de si uma sociabilidade que não é a sua — a experiência de ser você fica mais inteira.",
+    "Integrar o Esquizóide não é se tornar 'comum' nem forçar extroversão. É trazer o universo interior para o contato com o mundo no seu ritmo. Quando a presença acompanha a visão, surge alguém criativo, seletivo e profundamente autêntico — capaz de pertencer sem se dissolver.",
   ],
   oral: [
-    "No começo, o suporte pode ter faltado ou chegado de forma irregular. A proteção foi buscar o outro: cuidar, sentir e se ligar. Você pode ter aprendido que o afeto vem de fora. Observe se essa história faz sentido para você.",
-    "Com o tempo, essa proteção desenvolveu uma empatia rara: você lê o outro, aquece ambientes e sustenta vínculos. Ao mesmo tempo, o corpo pode ter aprendido a funcionar com menos sustentação própria. Quando a conexão falta, a energia cai e aparece a pergunta: e eu, quem me sustenta?",
-    "Hoje isso pode aparecer como generosidade grande, medo de abandonar e de ser abandonado, e dificuldade de receber sem se sentir em dívida. Você pode dar demais para não ficar sozinho. O desafio é construir um centro próprio sem fechar a abertura que já é seu talento.",
-    "O caminho passa por pedir, receber e se apoiar em si mesmo com a mesma entrega com que você cuida. Você merece isso como direito, não como recompensa. Limites e autocuidado não apagam o vínculo: tornam o vínculo sustentável.",
-    "Integrar o Oral é descobrir plenitude por dentro. Não é fechar a receptividade. É ter um centro tão forte quanto a capacidade de cuidar e se ligar que você já carrega.",
+    "No começo, o suporte pode ter faltado ou chegado de forma irregular: colo presente e depois ausente, afeto que aquecia e sumia, uma casa em que cuidar do outro era o caminho mais seguro de não ficar só. A proteção foi buscar o outro — sentir, cuidar, se ligar. Você pode ter aprendido que o afeto vem de fora e que garantir o vínculo era a forma de garantir a si. Observe se essa história faz sentido para você.",
+    "Com o tempo, essa proteção desenvolveu uma empatia rara: você lê o outro antes da fala, aquece ambientes e sustenta pessoas em crise com uma presença que poucos conseguem oferecer. Ao mesmo tempo, o corpo pode ter aprendido a funcionar com menos sustentação própria — como se a energia viesse do contato e baixasse quando o contato falha. Quando a conexão some, aparece a pergunta antiga: e eu, quem me sustenta?",
+    "Hoje isso pode aparecer em cenas concretas: você é a pessoa para quem ligam; você antecipa a necessidade do outro e demora a nomear a sua; você sente culpa ao receber sem retribuir na hora; um domingo sozinho pode pesar mais do que deveria. A generosidade é real. O risco é dar demais para não ficar sozinho — e confundir vínculo com combustível. O desafio é construir um centro próprio sem fechar a abertura que já é seu talento.",
+    "O caminho passa por pedir, receber e se apoiar em si mesmo com a mesma entrega com que você cuida. Não como prêmio por ter sido 'boa o suficiente', e sim como direito. Limites claros, rotina que te nutre e a coragem de dizer 'preciso' não apagam o vínculo: tornam o vínculo sustentável. Quanto mais você se sustenta, mais o cuidado que oferece deixa de ser fuga e vira escolha.",
+    "Integrar o Oral é descobrir plenitude por dentro sem fechar a receptividade. Não é ficar fria nem deixar de amar. É ter um centro tão forte quanto a capacidade de cuidar e se ligar que você já carrega — para que o outro seja companhia, não muleta.",
   ],
   psicopata: [
-    "No começo, a vontade pode ter sido interrompida e confiar pode ter custado caro. A proteção foi expandir, controlar e liderar. Você pode ter aprendido que força evita dor. Observe se isso encontra eco na sua vida.",
-    "Com o tempo, essa proteção desenvolveu magnetismo, visão e capacidade de fazer as coisas andarem. O corpo comunica presença antes da fala. O preço pode ter sido a distância da própria fragilidade: quanto mais forte por cima, menos espaço para ser cuidado.",
-    "Hoje isso pode aparecer como alta performance, impaciência com lentidão e dificuldade de mostrar necessidade. Você investe onde há respeito e estímulo. O desafio é descobrir que vulnerabilidade, nos momentos certos, não diminui liderança: humaniza e aprofunda a confiança.",
-    "O caminho passa por descer. Trazer a força até o chão, até as pernas, até o descanso. Quando o poder vem do corpo inteiro e da verdade, ele se torna sustentável.",
-    "Integrar o Psicopata é permitir que a força e a fragilidade convivam. Quem conhece o próprio limite inspira uma lealdade que a performance sozinha nunca alcança.",
+    "No começo, a vontade pode ter sido interrompida e confiar pode ter custado caro: promessas quebradas, humilhação, um ambiente em que baixar a guarda doía. A proteção foi expandir, controlar e liderar. Você pode ter aprendido que força evita dor e que organizar o entorno é a forma mais segura de existir. Observe se isso encontra eco na sua vida.",
+    "Com o tempo, essa proteção desenvolveu magnetismo, visão e capacidade de fazer as coisas andarem. O corpo comunica presença antes da fala; em uma sala, as pessoas sentem que alguém está conduzindo. O preço pode ter sido a distância da própria fragilidade: quanto mais forte por cima, menos espaço para ser cuidado. A performance protege — e também isola.",
+    "Hoje isso pode aparecer como alta performance, impaciência com lentidão e dificuldade de mostrar necessidade mesmo quando o corpo pede pausa. Você investe onde há respeito e estímulo; some de dinâmicas sem tensão criativa. Em crise objetiva, brilha. Em crise emocional, pode tentar 'resolver' o que precisava ser sentido. O desafio é descobrir que vulnerabilidade, nos momentos certos, não diminui liderança: humaniza e aprofunda a confiança.",
+    "O caminho passa por descer. Trazer a força até o chão, até as pernas, até o descanso sem agenda de conquista. Pedir ajuda em algo que você conseguiria fazer sozinho. Mostrar um limite real sem estratégia. Quando o poder vem do corpo inteiro e da verdade — não só da fachada — ele se torna sustentável.",
+    "Integrar o Psicopata é permitir que a força e a fragilidade convivam. Quem conhece o próprio limite inspira uma lealdade que a performance sozinha nunca alcança. Você continua capaz de avançar — e passa a ser alcançável.",
   ],
   masoquista: [
-    "No começo, expressar vontade pode ter custado crítica ou humilhação. A proteção foi engolir, aguentar e continuar. Você pode ter aprendido que ceder era mais seguro do que expandir. Observe se essa leitura encontra eco em você.",
-    "Com o tempo, essa proteção desenvolveu lealdade, persistência e capacidade de sustentar o que outros abandonam. O corpo pode ter comprimido o que não podia ser dito. A força silenciosa é real. O custo é o prazer adiado e o espaço que você ainda hesita em ocupar.",
-    "Hoje isso pode aparecer como fazer demais, reclamar de menos e permanecer em situações que já pedem mudança. Você conhece a dor de dentro e por isso acolhe o outro com profundidade. O desafio é descobrir que o mundo não desaba quando você diz não.",
-    "O caminho é a expansão gradual, não a explosão. Um tom a mais na voz, um limite pequeno, um prazer permitido. Cada vez que você expressa em vez de engolir, reescreve a história do corpo.",
-    "Integrar o Masoquista é lembrar que alegria e leveza não são prêmio por sofrimento. São direito. A vida espera que você floresça além do que foi suportado.",
+    "No começo, expressar vontade pode ter custado crítica, humilhação ou pressão para se adaptar. A proteção foi engolir, aguentar e continuar. Você pode ter aprendido que ceder era mais seguro do que expandir, e que a lealdade garantia o lugar. Observe se essa leitura encontra eco em você.",
+    "Com o tempo, essa proteção desenvolveu persistência, profundidade e capacidade de sustentar o que outros abandonam. Você permanece quando a novidade passa. O corpo pode ter comprimido o que não podia ser dito: desejo, raiva, prazer. A força silenciosa é real. O custo é o prazer adiado e o espaço que você ainda hesita em ocupar — como se expandir fosse trair alguém.",
+    "Hoje isso pode aparecer como fazer demais, reclamar de menos e permanecer em situações que já pedem mudança. Você conhece a dor de perto e por isso acolhe o outro com uma profundidade rara. Em um projeto longo, você é âncora. Em uma relação desequilibrada, pode demorar a sair. O desafio é descobrir que o mundo não desaba quando você diz não — e que dizer não também é forma de amor.",
+    "O caminho é a expansão gradual, não a explosão. Um tom a mais na voz, um limite pequeno nomeado cedo, um prazer permitido sem precisar 'merecer'. Cada vez que você expressa em vez de engolir, o corpo aprende que há saída além de aguentar. Persistência continua sendo sua — agora com dignidade e escolha.",
+    "Integrar o Masoquista é lembrar que alegria e leveza não são prêmio por sofrimento. São direito. A vida espera que você floresça além do que foi suportado — sem abandonar a lealdade que já é sua marca.",
   ],
   rigido: [
-    "No começo, demonstrar sentimento ou se entregar pode ter trazido frustração, rejeição ou a sensação de não ser escolhido. Como proteção, você pode ter aprendido a controlar a emoção e a merecer carinho sendo correto, competente e admirável. Observe se essa história faz sentido para a sua vida.",
-    "Com o tempo, essa proteção desenvolveu excelência, organização e confiabilidade reais. O corpo se mantém unido e a postura comunica competência. O preço pode ser a dificuldade de se desorganizar o suficiente para sentir. O que fica represado não desaparece: espera uma saída segura.",
-    "Na vida adulta, essa estratégia pode continuar: você se esforça para ser admirado, sente necessidade de corresponder às expectativas e encontra dificuldade em demonstrar fragilidade, mesmo quando gostaria de receber acolhimento. Por fora você opera com clareza. Por dentro, a emoção pede permissão.",
-    "O caminho passa por flexibilizar o controle com intenção, não por perder padrão. Quando você relaxa o suficiente para sentir sem corrigir na hora, a competência ganha profundidade humana.",
-    "Integrar o Rígido é descobrir quem você é quando não precisa provar. A pergunta viva é: o que aparece quando ninguém está olhando, quando não há meta nem papel? A resposta mostra o que ainda pede cuidado e o que já está pronto para crescer.",
+    "No começo, demonstrar sentimento ou se entregar pode ter trazido frustração, rejeição ou a sensação de não ser escolhido. Como proteção, você pode ter aprendido a controlar a emoção e a merecer carinho sendo correto, competente e admirável. A excelência virou ponte para o afeto. Observe se essa história faz sentido para a sua vida.",
+    "Com o tempo, essa proteção desenvolveu organização, confiabilidade e capacidade real de transformar visão em resultado. O corpo se mantém unido; a postura comunica competência. As pessoas confiam em você porque você entrega. O preço pode ser a dificuldade de se desorganizar o suficiente para sentir: o que fica represado não desaparece — espera uma saída segura, e às vezes vira tensão, cobrança ou distância sem intenção.",
+    "Na vida adulta, essa estratégia pode continuar em cenas cotidianas: você capricha além do pedido; sente culpa ao descansar; tem dificuldade de mostrar fragilidade mesmo quando gostaria de acolhimento; prefere 'resolver' a emoção a habitá-la. Por fora você opera com clareza. Por dentro, o sentimento pede permissão. O desafio não é perder padrão — é deixar o padrão servir à vida, não substituí-la.",
+    "O caminho passa por flexibilizar o controle com intenção. Fazer o suficientemente bom em uma tarefa. Nomear o que sente antes de organizar a solução. Aceitar cuidado sem transformar em dívida. Quando você relaxa o suficiente para sentir sem corrigir na hora, a competência ganha profundidade humana.",
+    "Integrar o Rígido é descobrir quem você é quando não precisa provar. A pergunta viva é: o que aparece quando ninguém está olhando, quando não há meta nem papel? A resposta mostra o que ainda pede cuidado — e o que já está pronto para crescer com você, não apesar de você.",
   ],
 };
 
@@ -316,7 +316,7 @@ const COMBOS: Record<string, string> = {
   "oral-masoquista":
     "pode haver um padrão profundo de dar e aguentar. Abandono e crítica, quando se encontram, reforçam o autossacrifício. A compaixão que nasce disso é rara. A transformação começa quando você também se coloca na conta do cuidado.",
   "oral-rigido":
-    "pode haver desejo de vínculo organizado pela necessidade de manter a forma. Você cuida com consistência, mas regula o quanto se entrega e o quanto recebe. A integração é aprender a receber sem perder estrutura.",
+    "pode haver desejo de vínculo organizado pela necessidade de manter a forma. Você cuida com consistência e ainda assim regula o quanto se entrega e o quanto recebe — como se o afeto precisasse estar bem feito para ser seguro. A integração é aprender a receber sem perder estrutura, e a se entregar sem transformar o cuidado em tarefa.",
   "psicopata-esquizoide":
     "pode haver poder de influência exercido mais por ideias do que por exposição. Você pensa antes de avançar e avança com intenção. A liderança ganha profundidade quando a presença também se permite aparecer.",
   "psicopata-oral":
@@ -403,15 +403,15 @@ const ESTILOS_COMUNICACAO: Record<keyof EstruturasPct, EstiloComunicacao> = {
   oral: {
     tipo: "Expressivo e relacional",
     descricao:
-      "Você se comunica com abertura. A emoção aparece na voz e também no tom e no gesto. Falar ajuda a organizar o que sente. A conversa é conexão, não só troca de informação.",
+      "Você se comunica com abertura. A emoção aparece na voz, no tom e no gesto. Falar ajuda a organizar o que sente: a conversa é conexão, não só troca de informação. Em grupos, busca calor genuíno e frequentemente aquece o ambiente — percebe o que o outro precisa ouvir e tem generosidade para dizer.",
     emGrupos:
       "Em grupos, busca calor genuíno e frequentemente aquece o ambiente. Percebe o que o outro precisa ouvir e tem generosidade para dizer. Pode ser o centro emocional sem ser o mais falante.",
     emRelacoes:
-      "Nas relações íntimas, a comunicação flui com naturalidade. Você compartilha e confessa. O desafio é perceber quando fala para aliviar a própria ansiedade e quando fala para conectar de verdade.",
+      "Nas relações íntimas, a comunicação flui com naturalidade. Você compartilha e confessa com facilidade. O desafio é perceber quando fala para aliviar a própria ansiedade e quando fala para conectar de verdade — e praticar também o silêncio em que você se sustenta sem precisar do espelho do outro.",
     emConflito:
-      "No conflito, tende a harmonizar. A discórdia incomoda. Às vezes cede antes de dizer o que realmente pensa. Com o tempo, o não-dito vira peso.",
+      "No conflito, tende a harmonizar. A discórdia aperta o peito. Às vezes cede antes de dizer o que realmente pensa, só para recuperar o calor. Com o tempo, o não-dito vira peso e pode sair em cobrança indireta. Aprender a discordar sem abandonar o vínculo é um dos seus maiores treinamentos.",
     emTensao:
-      "Sob tensão, pode falar mais para manejar a ansiedade. Perceber isso ajuda a escolher as palavras que importam, em vez de só produzir volume.",
+      "Sob tensão, pode falar mais para manejar a ansiedade. Perceber isso ajuda a escolher as palavras que importam, em vez de só produzir volume. Uma frase clara vale mais do que dez mensagens de apaziguamento.",
   },
   psicopata: {
     tipo: "Direto e estratégico",
@@ -465,13 +465,13 @@ const PERFIS_PAR: Record<string, string> = {
   "esquizoide-rigido":
     "Precisão mental aliada à organização prática. A riqueza interior do Esquizóide ganha forma com o Rígido: você gera ideias profundas e as executa com consistência. O desafio compartilhado é que os dois tendem a manter o mundo emocional à distância. A integração convida o sentir a ocupar o mesmo espaço do pensar e do realizar — sem perder a qualidade do que você entrega.",
   "oral-esquizoide":
-    "Um anseio de vínculo aliado a uma mente que precisa de distância. Você deseja profundamente e também teme o custo da proximidade. Essa tensão não precisa ser apagada: precisa ser habitada com consciência. Quando integradas, essas forças produzem empatia profunda e visão interior rara — alguém que cuida sem se perder, e que pensa sem abandonar o outro.",
+    "Um anseio de vínculo aliado a uma mente que precisa de distância. Você deseja profundamente e também teme o custo da proximidade: quer perto e, no mesmo movimento, precisa de espaço para não se dissolver. Em uma semana, pode buscar conversa intensa e no dia seguinte sumir para processar. Essa tensão não precisa ser apagada — precisa ser habitada com consciência e combinada em voz alta com quem está perto. Quando integradas, essas forças produzem empatia profunda e visão interior rara: alguém que cuida sem se perder, e que pensa sem abandonar o outro.",
   "oral-psicopata":
-    "O desejo de ser visto combinado com a força de quem lidera. Pode haver necessidade de reconhecimento disfarçada de generosidade ou de liderança. A pergunta viva é: quando você serve porque quer, e quando busca aprovação que ainda não aprendeu a dar a si? Integradas, essas forças criam alguém que conduz com humanidade — forte o bastante para pedir e próximo o bastante para ser seguido de verdade.",
+    "O desejo de ser visto combinado com a força de quem lidera. Pode haver necessidade de reconhecimento disfarçada de generosidade ou de condução. Em uma equipe, você aquece e também empurra; em um vínculo, pode cuidar e ao mesmo tempo testar se ainda é admirado. A pergunta viva é: quando você serve porque quer, e quando busca aprovação que ainda não aprendeu a dar a si? Integradas, essas forças criam alguém que conduz com humanidade — forte o bastante para pedir e próximo o bastante para ser seguido de verdade.",
   "oral-masoquista":
-    "Duas histórias de necessidade não atendida podem se reforçar: abandono e humilhação criando autossacrifício. Você carrega muito, oferece muito e frequentemente recebe pouco. A compaixão que nasce disso é rara. A transformação começa com a decisão de que você merece receber tanto quanto oferece — e que pedir não é fraqueza, é o que torna o cuidado sustentável.",
+    "Duas histórias de necessidade não atendida podem se reforçar: abandono e crítica criando autossacrifício. Você carrega muito, oferece muito e frequentemente recebe pouco — e ainda assim permanece. A compaixão que nasce disso é rara. Em casa ou no trabalho, pode ser a pessoa que segura a emoção coletiva e engole a própria. A transformação começa com a decisão de que você merece receber tanto quanto oferece — e que pedir não é fraqueza: é o que torna o cuidado sustentável.",
   "oral-rigido":
-    "A necessidade de vínculo encontra uma organização que aprendeu a gerenciar entrega e recebimento. O Oral quer se entregar; o Rígido organiza essa entrega. Você pode cuidar com consistência e raramente se permitir ser completamente vulnerável no cuidado. A integração abre o vínculo sem perder a forma: receber sem se desorganizar, e se entregar sem se abandonar.",
+    "A necessidade de vínculo encontra uma organização que aprendeu a dosar entrega e recebimento. O Oral quer se entregar por inteiro; o Rígido organiza essa entrega para não perder a forma. Na prática, você pode cuidar com uma consistência rara — lembrar datas, manter a palavra, sustentar a rotina do outro — e ainda assim regular o quanto se deixa ver frágil. Pode parecer que o amor precisa estar 'bem feito' para ser seguro. A integração abre o vínculo sem perder a forma: receber sem se desorganizar, se entregar sem se abandonar, e deixar o afeto existir também fora da planilha emocional.",
   "psicopata-esquizoide":
     "Você tem influência e visão, e prefere a profundidade do pensamento à exposição direta. Tende a exercer liderança por ideias e direção, com uma distância de segurança. Quando integradas, essas forças produzem profundidade e capacidade de agir com intenção precisa — alguém que avança sem precisar estar sempre no centro do palco.",
   "psicopata-oral":
@@ -491,7 +491,7 @@ const PERFIS_PAR: Record<string, string> = {
   "rigido-esquizoide":
     "Organização no mundo e profundidade por dentro. Você funciona bem lá fora e habita universos ricos cá dentro. O Rígido mostra competência; o Esquizóide guarda o que raramente é compartilhado. A integração convida essa riqueza a ser vista e recebida, sem perder a clareza com que você opera no cotidiano.",
   "rigido-oral":
-    "A necessidade de vínculo é gerida pela organização. Você cuida com consistência e regula a entrega. A integração pede aprender a receber apoio com a mesma competência com que oferece — sem administrar cada troca afetiva, e sem transformar o afeto em tarefa a cumprir.",
+    "A necessidade de vínculo é gerida pela organização. Você cuida com consistência e regula a entrega: há calor, mas ele passa por um filtro de adequação. A integração pede aprender a receber apoio com a mesma competência com que oferece — sem administrar cada troca afetiva, sem transformar o carinho em tarefa a cumprir, e sem cobrar de si uma performance de amor.",
   "rigido-psicopata":
     "Excelência e influência em alto rendimento. O exterior é brilhante e a competência é real. O desafio é encontrar quem você é quando não está realizando ou liderando. Essa descoberta não diminui o poder: aprofunda. Você continua entregando — e passa a existir também além do que entrega.",
   "rigido-masoquista":
@@ -504,88 +504,88 @@ const PERFIS_UNICOS = PERFIS_PAR;
 const DINAMICAS_FUNCIONAIS: Record<keyof EstruturasPct, DinamicaFuncional> = {
   esquizoide: {
     trabalho:
-      "No trabalho, você rende mais na profundidade do que na dispersão. Prefere mergulhar em um problema a saltar entre muitos. Ambientes de muita interação drenam. O melhor rendimento vem com autonomia, tempo para pensar e projetos que pedem originalidade real.",
+      "No trabalho, você rende na profundidade, não na dispersão. Prefere mergulhar em um problema a saltar entre dez reuniões rasas. Ambientes de interação constante drenam; autonomia, tempo para pensar e projetos que pedem originalidade real te fazem brilhar. Quando cobram presença social o tempo todo, a qualidade da entrega cai — não por falta de competência, e sim por falta de oxigênio interior.",
     relacoes:
-      "Relacionamentos consomem uma energia que você raramente explica. Não é que você não queira as pessoas: a presença contínua exige um cuidado interno que outros não veem. Seus vínculos mais profundos são poucos e intensos. Você é leal de um jeito que quem está fora quase não percebe.",
+      "Relacionamentos pedem uma energia que você raramente explica. Não é que você não queira as pessoas: a presença contínua exige um cuidado interno que outros não veem. Seus vínculos mais profundos são poucos e intensos. Você é leal de um jeito quieto. O desafio é avisar quando precisa de espaço — para que o outro não leia recolhimento como abandono.",
     estresse:
-      "Sob estresse, você se retira para a mente, para a solidão ou para o trabalho de pensar. Processa em silêncio e só então emerge com clareza. Outros podem ler isso como frieza. É você funcionando: primeiro entende, depois responde.",
+      "Sob pressão, você se retira para a mente, para a solidão ou para o trabalho de pensar. Processa em silêncio e só então emerge com clareza. Outros podem ler isso como frieza. É o seu sistema funcionando: primeiro entende, depois responde. O risco é demorar tanto no processamento que a vida real fica esperando na porta.",
     decisoes:
-      "Suas decisões nascem por dentro, com um processo que pode parecer lento. Você analisa fundo e chega a conclusões que outros não viram. A dificuldade aparece quando a vida pede velocidade ou quando o sentimento pesa mais do que a lógica.",
+      "Suas decisões nascem por dentro, com um processo que pode parecer lento do lado de fora. Você analisa fundo e chega a conclusões que outros não viram. A dificuldade aparece quando a vida pede velocidade imediata ou quando o sentimento pesa mais do que a lógica — aí a mente tenta resolver o que o corpo ainda não nomeou.",
     energia:
-      "Você se regenera na solidão e se consome na interação. Grupos grandes e ambientes muito estimulantes pedem recuperação. Quando você pede recolhimento, atender a isso não é isolamento: é manutenção.",
+      "Você se regenera na solidão e se consome na interação demais. Grupos grandes e ambientes muito estimulantes pedem recuperação deliberada. Quando você pede recolhimento, atender a isso não é isolamento: é manutenção. Sem essa pausa, a criatividade seca e o mundo começa a parecer invasivo.",
     sombra:
-      "O que pode doer reconhecer: o isolamento que vira prisão, o pensamento que evita sentir, a dificuldade de se deixar tocar. A sombra é o mundo rico demais para ser compartilhado e protegido demais para ser alcançado. A cura começa em trazer esse universo para o contato real, um passo de cada vez.",
+      "O que pode doer reconhecer: o isolamento que virou prisão confortável, o pensamento que evita sentir, a dificuldade de se deixar tocar mesmo por quem ama. A sombra é um mundo interior rico demais para ser compartilhado e protegido demais para ser alcançado. A cura começa em trazer um pedaço desse universo para o contato real — um passo, uma pessoa, uma conversa de cada vez.",
   },
   oral: {
     trabalho:
-      "No trabalho, você rende melhor onde há colaboração e sentido humano. Isolamento longo drena. Você produz mais quando sente que o que faz importa para alguém. O reconhecimento genuíno não é vaidade: é combustível.",
+      "No trabalho, você rende onde há colaboração, sentido humano e a sensação de que o que faz importa para alguém. Isolamento longo drena; o reconhecimento genuíno não é vaidade — é combustível. Você costuma ser a pessoa que acolhe o clima da equipe, mediando tensões e lembrando do lado humano. O risco é virar suporte emocional não nomeado: dar tanto ao ambiente que sua própria entrega criativa fica em segundo plano.",
     relacoes:
-      "Relacionamentos são o centro de gravidade. Você investe fundo, sente a dor e a alegria do outro e cuida com uma generosidade rara. O desafio é perceber quando está dando em excesso para preencher uma necessidade que pediria olhar para dentro.",
+      "Relacionamentos são o centro de gravidade. Você investe fundo, sente a dor e a alegria do outro e cuida com uma generosidade rara. Em uma briga, pode ceder cedo demais para recuperar o calor; em um silêncio do outro, pode inventar significados e se adiantar pedindo desculpas. O desafio é perceber quando está dando em excesso para preencher uma necessidade que pediria olhar para dentro — e praticar receber sem transformar o cuidado em dívida.",
     estresse:
-      "Sob estresse, você busca o outro — falar, compartilhar, pedir ou oferecer cuidado. A conexão é âncora. Sozinho por muito tempo sob pressão, a energia cai. Manter vínculos saudáveis, para você, é necessidade legítima.",
+      "Sob pressão, a âncora vira a conexão. Você quer falar com alguém de confiança, compartilhar o que pesa e pedir ou oferecer cuidado. Sozinho por muito tempo sob estresse, a energia cai e a mente pode amplificar o medo da solidão. Manter vínculos saudáveis, para você, é necessidade legítima — não luxo. O cuidado é não usar a conversa só para anestesiar a ansiedade, e sim para se organizar de verdade.",
     decisoes:
-      "Você decide com o impacto relacional bem presente. Às vezes isso é sabedoria. Outras vezes, a decisão saudável é a que vai desagradar alguém, e aí você trava. Aprender a decidir por si é prática de longo prazo.",
+      "Você decide com o impacto relacional bem presente: quem vai sentir, quem pode se magoar, o que isso faz com o vínculo. Às vezes isso é sabedoria. Outras vezes, a decisão saudável é exatamente a que vai desagradar alguém — e aí você trava, adia ou pede confirmação demais. Aprender a decidir por si, mesmo com o peito apertado, é prática de longo prazo e um dos maiores gestos de autoamor do seu mapa.",
     energia:
-      "Sua energia pede recarga regular em conexões genuínas, propósito e autocuidado. Bem nutrido, você tem calor e vitalidade. Vazio, pode buscar o outro para se reabastecer, e aí a conexão se confunde com dependência.",
+      "Sua energia pede recarga em conexões genuínas, propósito e autocuidado concreto: sono, comida, tempo sem atender ninguém. Bem nutrida, você tem calor e vitalidade. Vazia, pode buscar o outro para se reabastecer — e aí a conexão se confunde com dependência. A pergunta útil não é 'quem está disponível?', e sim 'o que eu posso oferecer a mim agora?'.",
     sombra:
-      "O que pode doer reconhecer: a dependência disfarçada de generosidade, o autoabandono que parece cuidado, a dificuldade de se sustentar por dentro. Nomear a necessidade diretamente é o começo da integração.",
+      "O que pode doer reconhecer: a dependência disfarçada de generosidade, o autoabandono que parece cuidado, a dificuldade de se sustentar por dentro sem um testemunho externo. Pode haver um medo antigo de que, se você parar de dar, o lugar some. Nomear a necessidade diretamente — 'preciso de colo', 'preciso de pausa', 'preciso que fique' — é o começo da integração, não o fim do amor.",
   },
   psicopata: {
     trabalho:
-      "No trabalho, você opera em alta performance e orientação a resultado. Ambientes sem desafio ou com burocracia demais frustram. Você lidera, articula e mobiliza. O risco é confundir eficiência com relação: times inspirados entregam mais do que times pressionados.",
+      "No trabalho, você opera em alta performance e orientação a resultado. Ambientes sem desafio ou com burocracia demais frustram. Você lidera, articula e mobiliza. O risco é confundir eficiência com relação: times inspirados entregam mais do que times pressionados. Quando a presença vira só cobrança, a lealdade do entorno esfria mesmo que os números subam.",
     relacoes:
-      "Relacionamentos tendem a ser estruturados. Você investe onde há respeito e estímulo. Mostrar vulnerabilidade parece, por dentro, dar poder ao outro. A transformação começa quando você descobre que mostrar necessidade é confiança, não fraqueza.",
+      "Relacionamentos tendem a ser estruturados e seletivos. Você investe onde há respeito e estímulo. Mostrar vulnerabilidade parece, por dentro, entregar poder. Parceiros e amigos próximos podem admirar sua força e ao mesmo tempo sentir dificuldade de te alcançar. A transformação começa quando você descobre que mostrar necessidade é confiança — não fraqueza — e que intimidade pede menos estratégia do que liderança.",
     estresse:
-      "Sob estresse, você avança: mais ação, mais controle, mais intensidade. Funciona em crises objetivas. Em crises emocionais, o mesmo padrão pode forçar solução onde o que falta é presença e sentimento.",
+      "Sob pressão, você avança: mais ação, mais controle, mais intensidade. Funciona em crises objetivas. Em crises emocionais, o mesmo padrão pode forçar solução onde o que falta é presença e sentimento. Perceber a diferença entre 'preciso agir' e 'preciso sentir' é liderança madura sobre si mesmo.",
     decisoes:
-      "Você decide com velocidade e convicção. A execução começa cedo. O ponto cego é a consulta genuína: deixar o pensamento do outro mudar o seu. As melhores decisões chegam quando o ego sai da sala.",
+      "Você decide com velocidade e convicção. A execução começa cedo. O ponto cego é a consulta genuína: deixar o pensamento do outro mudar o seu sem sentir que perdeu autoridade. As melhores decisões chegam quando o ego sai da sala e a escuta entra — sem abandonar a clareza que já é sua.",
     energia:
-      "Você tem alta carga e precisa de descarga saudável: movimento, projetos com sentido e momentos de verdade. Sem saída, a tensão sobe para ombros, nuca e maxilar. O corpo guarda o que não foi expresso.",
+      "Você tem alta carga e precisa de descarga saudável: movimento, projetos com sentido e momentos de verdade sem performance. Sem saída, a tensão sobe para ombros, nuca e maxilar. O corpo guarda o que não foi expresso. Descansar sem agenda de conquista não é perda de tempo: é o que torna o poder sustentável.",
     sombra:
-      "O que pode doer reconhecer: a necessidade de aprovação atrás da performance, a fragilidade antiga que a força veio proteger, a parte que quer ser vista de forma simples. A sombra é essa fragilidade ainda à espera de ser encontrada.",
+      "O que pode doer reconhecer: a necessidade de aprovação atrás da performance, a fragilidade antiga que a força veio proteger, a parte que quer ser vista de forma simples — sem impressionar. A sombra é essa fragilidade ainda à espera de ser encontrada. Integrá-la não diminui sua influência: aprofunda a confiança de quem está perto.",
   },
   masoquista: {
     trabalho:
-      "No trabalho, você entrega de verdade: presente, comprometido, confiável. A tendência é assumir demais e reclamar de menos. O risco é a invisibilidade: fazer tanto sem pedir nada pode parecer que está tudo bem quando não está. Comunicar limite é competência.",
+      "No trabalho, você entrega de verdade: presente, comprometido, confiável em maratonas que outros abandonariam. A tendência é assumir demais e reclamar de menos. O risco é a invisibilidade — fazer tanto sem pedir nada pode parecer que está tudo bem quando não está. Comunicar limite cedo é competência, não drama. Quem valoriza sua constância precisa também ouvir quando o peso passou do justo.",
     relacoes:
-      "Você é leal até o fim, mesmo quando o custo é alto. O desafio é perceber quando a lealdade virou submissão: permanecer não porque quer, mas porque sair parece impossível. Saúde relacional começa quando você pode escolher ficar e também escolher ir.",
+      "Você é leal até o fim, mesmo quando o custo é alto. Acolhe a dor do outro com profundidade porque a conhece de perto. O desafio é perceber quando a lealdade virou submissão: permanecer não porque quer, mas porque sair parece impossível ou egoísta. Saúde relacional começa quando você pode escolher ficar e também escolher ir — sem transformar a saída em traição de si.",
     estresse:
-      "Sob estresse, você aguenta. Continua funcionando quando outros já teriam parado. Isso é força, e também onde a cobrança interna aperta. Estresse não atendido encontra saída no corpo. Cuidar antes de acumular não é fraqueza.",
+      "Sob pressão, você aguenta. Continua funcionando quando outros já teriam parado. Isso é força — e também onde a cobrança interna aperta. Estresse não atendido encontra saída no corpo: peso, compressão, explosão tardia. Cuidar antes de acumular não é fraqueza. É o que impede a lealdade de virar autoapagamento.",
     decisoes:
-      "Você decide com muito peso. Avalia o que pode custar e quem pode se magoar. Adia a decisão que incomoda, mesmo quando ela é justa. Decisões adiadas não somem: crescem.",
+      "Você decide com muito peso. Avalia o que pode custar e quem pode se magoar. Adia a decisão que incomoda, mesmo quando ela é justa. Decisões adiadas não somem: crescem e cobram juros no corpo e no vínculo. Praticar um 'não' pequeno e cedo treina o músculo das escolhas maiores.",
     energia:
-      "Sua energia é densa e duradoura. Sustenta esforço longo. O problema é gastar mais do que recebe. A descarga que você precisa é expressão e expansão. Sem isso, a tensão se acumula em quadris, lombar e ombros.",
+      "Sua energia é densa e duradoura. Sustenta esforço longo. O problema é gastar mais do que recebe. A descarga que você precisa é expressão e expansão — voz, prazer, movimento, limite nomeado. Sem isso, a tensão se acumula e a vida vira só dever. Persistência com prazer é o alvo; persistência sem oxigênio é o risco.",
     sombra:
-      "O que pode doer reconhecer: o aguentar que virou identidade, o ressentimento silencioso, a expansão que parece perigosa. A sombra é a crença de que pedir mais vai custar o que você não pode perder. A cura começa quando você descobre que pode caber mais espaço.",
+      "O que pode doer reconhecer: o aguentar que virou identidade, o ressentimento silencioso, a expansão que ainda parece perigosa. A sombra é a crença de que pedir mais vai custar o pertencimento. A cura começa quando você descobre que pode caber mais espaço — e que quem te quer de verdade também aguenta o seu limite.",
   },
   rigido: {
     trabalho:
-      "No trabalho, você é referência: preciso, entregador, fiel ao que promete. Alta performance é habitat natural. O risco não está na entrega: está no custo. A perfeição como padrão esgota o entusiasmo. Aprender o 'suficientemente bom' pode ser a expansão mais difícil.",
+      "No trabalho, você é referência: preciso, entregador, fiel ao que promete. Alta performance é habitat natural. O risco não está na entrega — está no custo. A perfeição como padrão esgota o entusiasmo e pode atrasar o 'pronto' em nome do 'impecável'. Aprender o suficientemente bom, em doses, pode ser a expansão mais difícil e a mais libertadora da sua carreira.",
     relacoes:
-      "Você é confiável e consistente. Por baixo, sente profundamente e mantém a emoção sob cuidado. O outro pode te experimentar como formal exatamente quando esperava entrega. Não é distância: é a proteção que ainda não foi toda removida.",
+      "Você é confiável e consistente. Por baixo, sente profundamente e mantém a emoção sob cuidado. O outro pode te experimentar como formal exatamente quando esperava entrega espontânea. Não é distância fria: é a proteção que ainda não foi toda removida. Intimidade pede permissão para aparecer imperfeito — e isso, para você, pode ser mais assustador do que qualquer meta.",
     estresse:
-      "Sob estresse, você aumenta o controle da situação e de si. Funciona em crises objetivas. Em crises emocionais, o mesmo mecanismo cria distância quando a conexão seria a solução. Você precisa de permissão para sentir sem gerenciar na hora.",
+      "Sob pressão, você aumenta o controle da situação e de si. Funciona em crises objetivas. Em crises emocionais, o mesmo mecanismo cria distância quando a conexão seria a solução. Você precisa de permissão para sentir sem gerenciar na hora — nomear o aperto antes de montar o plano.",
     decisoes:
-      "Você decide com método. Raramente age por impulso. O ponto cego é o sentimento deixado de fora da deliberação. A intuição emocional não é menos válida que a lógica: muitas vezes completa o quadro.",
+      "Você decide com método. Raramente age por impulso. O ponto cego é o sentimento deixado de fora da deliberação. A intuição emocional não é menos válida que a lógica: muitas vezes completa o quadro. Incluir 'o que eu sinto sobre isso?' na lista de critérios não diminui a qualidade da escolha — aprofunda.",
     energia:
-      "Sua energia é organizada e disponível para realizar. Encontra barreira no campo emocional e relacional, onde não há estrutura prévia. É justamente aí que a maior expansão é possível.",
+      "Sua energia é organizada e disponível para realizar. Encontra barreira no campo emocional e relacional, onde não há estrutura prévia. É justamente aí que a maior expansão é possível: um tempo sem agenda, um afeto sem roteiro, um erro pequeno permitido. Sem isso, a competência continua alta e a vida interior fica com sede.",
     sombra:
-      "O que pode doer reconhecer: a rigidez disfarçada de princípio, a sensibilidade que quer contato e desvia na hora, o perfeccionismo que é autocobrança. A sombra é o ser sensível por baixo do controle, que sente mais do que permite mostrar.",
+      "O que pode doer reconhecer: a rigidez disfarçada de princípio, a sensibilidade que quer contato e desvia na hora, o perfeccionismo que é autocobrança com roupa boa. A sombra é o ser sensível por baixo do controle — que sente mais do que permite mostrar. Olhar para isso com honestidade não destrói sua excelência: humaniza.",
   },
 };
 
 /** Dor associada ao traço, em linguagem acessível e hipotética. */
 const DORES_LIVRO: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "No dia a dia, esse jeito pode aparecer como recuar antes de se sentir invadido ou rejeitado. A distância não é frieza: é cuidado antigo. O corpo aprendeu cedo que existir plenamente podia ser arriscado.",
+    "No cotidiano, isso pode aparecer como sair cedo de uma conversa que aperta, preferir mensagem a encontro, ou viver dias inteiros na cabeça enquanto o corpo espera. A distância não é frieza: é cuidado antigo tentando evitar a dor de não caber. O eco moderno é solidão escolhida que, em excesso, deixa de proteger e passa a empobrecer.",
   oral:
-    "No dia a dia, isso pode aparecer como dar demais, pedir pouco e sentir que nunca é sustentado o suficiente. O corpo busca apoio externo. A origem costuma ser um começo em que o suporte chegou de forma irregular.",
+    "No cotidiano, isso pode aparecer como responder mensagem no mesmo segundo, antecipar o jantar do outro e esquecer o próprio, ou sentir o peito cair quando alguém demora a responder. Você dá com facilidade e pede com vergonha. O corpo busca apoio externo. O eco moderno é uma generosidade real que, sem centro próprio, vira cansaço e a sensação de nunca ser sustentado o bastante.",
   psicopata:
-    "No dia a dia, isso pode aparecer como força e distância ao mesmo tempo. O corpo aprendeu a se expandir e a controlar quando a vulnerabilidade custou caro. O desafio é permitir afeto sem perder presença.",
+    "No cotidiano, isso pode aparecer como resolver a crise de todo mundo e não conseguir dizer 'estou mal', ou transformar intimidade em projeto a conduzir. Força e distância andam juntas. O eco moderno é admiração por fora e escassez de colo por dentro — até você mesmo acreditar que não precisa.",
   masoquista:
-    "No dia a dia, isso pode aparecer como lealdade excessiva, dificuldade de dizer não e ressentimento silencioso. O corpo comprime e aguenta. A origem costuma ser um começo em que expressar vontade trouxe crítica.",
+    "No cotidiano, isso pode aparecer como dizer sim com o peito fechado, carregar a agenda de todos e explodir só depois de meses de silêncio. Lealdade demais, limite de menos, ressentimento guardado. O eco moderno é ser a pessoa 'forte' da história — e descobrir tarde demais o preço de nunca ter pedido.",
   rigido:
-    "No dia a dia, você parece confiável e competente, e ainda assim regula de perto o que sente. Isso dificulta se entregar sem planejar cada reação. O corpo se organizou para funcionar bem e se proteger quando a entrega emocional foi frustrada.",
+    "No cotidiano, isso pode aparecer como revisar o e-mail três vezes, ter dificuldade de chorar na frente de quem ama, ou transformar descanso em culpa. Você parece confiável e competente — e regula de perto o que sente. O eco moderno é uma vida bem organizada em que a emoção só entra com hora marcada.",
 };
 
 const PERGUNTAS_TRANSFORMACAO: Record<keyof EstruturasPct, string> = {
@@ -610,11 +610,16 @@ const PONTE_POSTURAL_SECUNDARIA: Partial<Record<keyof EstruturasPct, string>> = 
 };
 
 const CUIDADOS_FERIDA: Record<keyof EstruturasPct, string> = {
-  esquizoide: "Pratique estar no corpo antes de recuar para a mente em momentos de pressão.",
-  oral: "Observe onde você dá mais do que recebe, e pratique pedir algo concreto esta semana.",
-  psicopata: "Permita um momento de vulnerabilidade com alguém de confiança, sem estratégia.",
-  masoquista: "Diga não a uma pequena cobrança que você costumaria aceitar em silêncio.",
-  rigido: "Deixe uma emoção aparecer sem corrigi-la ou organizá-la imediatamente.",
+  esquizoide:
+    "Quando a vontade de sumir chegar, nomeie em voz alta (mesmo só para si) o que está sentindo — e só então escolha o recolhimento. Assim a distância vira escolha, não fuga automática.",
+  oral:
+    "Escolha uma pessoa segura e diga, esta semana, uma necessidade concreta em uma frase — sem justificar demais e sem oferecer algo em troca na mesma frase.",
+  psicopata:
+    "Com alguém de confiança, mostre um limite ou uma necessidade real sem transformar isso em estratégia ou em piada. Observe o que acontece no corpo quando você é alcançado.",
+  masoquista:
+    "Diga não a uma cobrança pequena que você costumaria engolir — e permita-se o desconforto sem consertar o clima na hora. O mundo raramente desaba no primeiro não.",
+  rigido:
+    "Quando uma emoção aparecer, nomeie-a antes de montar a solução. Dê a si dois minutos só de sentir — sem corrigir, otimizar ou explicar.",
 };
 
 export {

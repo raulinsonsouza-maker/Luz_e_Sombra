@@ -1,1 +1,1 @@
-export const VERSAO_NARRATIVA = "traco_narrativa_v4" as const;
+export const VERSAO_NARRATIVA = "traco_narrativa_v5" as const;

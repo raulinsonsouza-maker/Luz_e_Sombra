@@ -7,6 +7,22 @@ import type { BlocoJornada, EtapaJornada, JornadaTraco } from "./tipos.js";
 const AVISO =
   "Esta leitura é um caminho de autoconhecimento. Ela se apoia principalmente nas suas respostas. O corpo entra como apoio, com cuidado, e não como diagnóstico.";
 
+const FOCO_CURTO: Record<EstruturaTraco, string> = {
+  esquizoide: "espaço interior e profundidade",
+  oral: "vínculo e cuidado",
+  psicopata: "direção e presença",
+  masoquista: "permanência e sustentação",
+  rigido: "forma, padrão e compromisso",
+};
+
+const RISCO_CURTO: Record<EstruturaTraco, string> = {
+  esquizoide: "sumir quando a vida pede presença",
+  oral: "se esvaziar cuidando do outro",
+  psicopata: "controlar para não sentir",
+  masoquista: "carregar além do justo",
+  rigido: "endurecer o afeto sob o nome de qualidade",
+};
+
 function texto(...partes: Array<string | null | undefined>): string[] {
   return partes.map((p) => (p ?? "").trim()).filter(Boolean);
 }
@@ -58,18 +74,41 @@ function significadoMapa(
 
 function necessidadePorTras(principal: EstruturaTraco): string {
   if (principal === "esquizoide") {
-    return "Por trás da distância pode haver o desejo de existir com segurança e ser acolhido sem invasão.";
+    return "Por trás da distância costuma haver um desejo simples e profundo: existir por inteiro sem ser invadido, rejeitado ou obrigado a performar presença. Você não busca frieza — busca um espaço em que a alma caiba sem ter de se explicar o tempo todo.";
   }
   if (principal === "oral") {
-    return "Por trás da busca pelo outro pode haver o desejo de ser sustentado de forma constante.";
+    return "Por trás da busca pelo outro costuma haver o desejo de ser sustentado de forma constante: sentir que alguém fica, que o colo não some, que você não precisa merecer cuidado produzindo cuidado. Nomear isso não diminui a generosidade — coloca a necessidade no lugar certo.";
   }
   if (principal === "psicopata") {
-    return "Por trás do controle pode haver o desejo de não ser ferido outra vez e de manter dignidade.";
+    return "Por trás do controle costuma haver o desejo de não ser ferido outra vez e de manter dignidade. A força protege uma parte que ainda pergunta: se eu baixar a guarda, quem segura? Integrar não é abandonar o poder — é descobrir que vulnerabilidade escolhida também é poder.";
   }
   if (principal === "masoquista") {
-    return "Por trás do aguentar pode haver o desejo de pertencimento sem crítica.";
+    return "Por trás do aguentar costuma haver o desejo de pertencimento sem crítica: ficar e ser querido sem ter de encolher o próprio desejo. A lealdade é real. O convite é descobrir que você também cabe na conta do cuidado que oferece.";
   }
-  return "Por trás da excelência pode haver o desejo de ser escolhido e amado sem precisar provar.";
+  return "Por trás da excelência costuma haver o desejo de ser escolhido e amado sem precisar provar. A competência abre portas. O que ainda pede espaço é o direito de ser visto também quando não está entregando a versão impecável.";
+}
+
+function quandoOsTresSeEncontram(
+  principal: EstruturaTraco,
+  secundaria: EstruturaTraco,
+  terciaria: EstruturaTraco,
+): string {
+  const nomeP = T.NOMES[principal];
+  const nomeS = T.NOMES[secundaria];
+  const nomeT = T.NOMES[terciaria];
+  return (
+    `Lendo os três juntos, o centro da sua vida costuma girar em torno de ${FOCO_CURTO[principal]}, ` +
+    `com a cor de ${FOCO_CURTO[secundaria]} e um fio de ${FOCO_CURTO[terciaria]}. ` +
+    `Na prática, o ${nomeP} conduz; o ${nomeS} organiza o jeito de conduzir; o ${nomeT} acrescenta textura. ` +
+    `O risco do conjunto é ${RISCO_CURTO[principal]}, reforçado pela tendência a ${RISCO_CURTO[secundaria]} ` +
+    `e atravessado pelo impulso de ${RISCO_CURTO[terciaria]}. ` +
+    `Integração aqui não é apagar nenhum dos três: é deixar o ${nomeP} brilhar sem que os outros trabalhem só como defesa.`
+  );
+}
+
+function vidaComunicacao(estilo: ResultadoAnalise["estiloComunicacao"]): string {
+  if (!estilo) return "";
+  return [estilo.descricao, estilo.emRelacoes, estilo.emConflito].filter(Boolean).join(" ");
 }
 
 export function comporJornadaTraco(resultado: {
@@ -107,14 +146,14 @@ export function comporJornadaTraco(resultado: {
     T.PERFIS_PAR[comboKey] ??
     T.PERFIS_UNICOS[comboKey] ??
     `A combinação de ${nomeP} com ${nomeS} cria um perfil próprio. As duas forças se encontram no seu jeito de viver.`;
-  const recomendacoes = resultado.recomendacoesPraticas?.length
-    ? resultado.recomendacoesPraticas
-    : T.RECOMENDACOES[principal];
+  // Sempre a tabela viva: resultados salvos podem carregar exercícios antigos/rasos.
+  const recomendacoes = T.RECOMENDACOES[principal];
   const mensagem = T.MENSAGENS[principal];
   const pergunta = T.PERGUNTAS_TRANSFORMACAO[principal];
   const pontosFortes = resultado.pontosFortes?.length ? resultado.pontosFortes : T.PONTOS_FORTES[principal];
   const pontosAtencao = resultado.pontosAtencao?.length ? resultado.pontosAtencao : T.PONTOS_ATENCAO[principal];
   const significado = significadoMapa(principal, secundaria, terciaria);
+  const temTerciarioDistinto = terciaria !== secundaria && terciaria !== principal;
 
   const etapas: EtapaJornada[] = [
     {
@@ -125,7 +164,7 @@ export function comporJornadaTraco(resultado: {
       blocos: limparBlocos([
         blocoTexto(
           "O que os números mostram",
-          "Cada percentual diz quanto aquele jeito aparece no seu perfil. Os cinco somam 100%. O maior conduz; o segundo colore o primeiro; o terceiro acrescenta um tom.",
+          "Cada percentual diz quanto aquele jeito aparece no seu perfil. Os cinco somam 100%. O maior conduz; o segundo colore o primeiro; o terceiro acrescenta um tom. Os menores não somem: ficam em segundo plano até a vida pedi-los.",
         ),
         blocoTexto("O que isso significa?", significado),
       ]),
@@ -166,14 +205,9 @@ export function comporJornadaTraco(resultado: {
           cabecalhos: ["Recurso", "Em equilíbrio", "Em excesso"],
           linhas: RECURSOS_TABELA[principal].map(([nome, bom, excesso]) => [nome, bom, excesso]),
         },
-        {
-          tipo: "lista",
-          rotulo: "Talentos que aparecem com frequência",
-          itens: pontosFortes,
-        },
         blocoTexto(
           "A mensagem central",
-          "Você não precisa abandonar sua força para cuidar da dor. O caminho é usar essa força sem precisar se proteger o tempo todo.",
+          "Você não precisa abandonar sua força para cuidar da dor. O mesmo movimento que um dia protegeu também gerou talento. O caminho é usar essa força sem precisar se proteger o tempo todo — e sem confundir excesso com virtude.",
         ),
       ]),
     },
@@ -186,10 +220,8 @@ export function comporJornadaTraco(resultado: {
         blocoTexto("No trabalho", dia.trabalho),
         blocoTexto("Nas relações", dia.relacoes),
         blocoTexto("Nas decisões", dia.decisoes),
-        blocoTexto("Sua energia", dia.energia),
-        blocoTexto("Como você se comunica", estilo.descricao),
-        blocoTexto("Com as pessoas próximas", estilo.emRelacoes),
-        blocoTexto("Quando a pressão sobe", dia.estresse),
+        blocoTexto("Sua energia e a pressão", `${dia.energia} ${dia.estresse}`),
+        blocoTexto("Como você se comunica", vidaComunicacao(estilo)),
       ]),
     },
     {
@@ -205,14 +237,9 @@ export function comporJornadaTraco(resultado: {
           cabecalhos: ["Você tenta", "Pode acabar"],
           linhas: SOMBRA_TABELA[principal],
         },
-        {
-          tipo: "lista",
-          rotulo: "Pontos que pedem cuidado",
-          itens: pontosAtencao,
-        },
         blocoTexto(
           "Lembrete",
-          "O que um dia foi proteção pode, sem que você perceba, virar prisão. A sombra não é defeito: é o excesso de uma estratégia que já teve função.",
+          "O que um dia foi proteção pode, sem que você perceba, virar prisão. A sombra não é defeito: é o excesso de uma estratégia que já teve função. Olhar para ela com honestidade é o começo de recuperar escolha.",
         ),
       ]),
     },
@@ -229,8 +256,14 @@ export function comporJornadaTraco(resultado: {
             : `Principal: ${nomeP}. Também presente: ${nomeS}. Terceiro tom: ${nomeT}.`,
         ),
         blocoTexto("Como as duas forças principais se encontram", perfilPar),
-        principal !== terciaria && secundaria !== terciaria
+        temTerciarioDistinto
           ? blocoTexto("O que o terceiro traço acrescenta", T.TOQUE_TERCIARIO[terciaria])
+          : null,
+        temTerciarioDistinto
+          ? blocoTexto(
+              "Quando os três se encontram na vida",
+              quandoOsTresSeEncontram(principal, secundaria, terciaria),
+            )
           : null,
       ]),
     },
