@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import {
   Users, MessageSquare, GraduationCap, LayoutDashboard, Shield, Layers, Bell, Loader2, CheckCircle, AlertCircle,
-  CreditCard, Webhook, Mail, CalendarDays, Menu, X, Settings, PanelLeftClose, PanelLeft, Images, UserCircle, type LucideIcon,
+  CreditCard, Webhook, Mail, CalendarDays, Menu, X, Settings, PanelLeftClose, PanelLeft, Images, UserCircle, LogOut, type LucideIcon,
 } from "lucide-react";
 import { LOGO_CLARO } from "@/lib/marca";
 import { BG, C, type Tab } from "./admin/shared";
@@ -256,6 +256,21 @@ export default function AdminPage() {
 
           <button
             type="button"
+            title="Sair do admin"
+            onClick={() => navigate("/dashboard")}
+            className={`flex items-center rounded-xl text-sm w-full ${recolhido ? "justify-center w-10 h-10 mx-auto" : "gap-3 px-3 py-2.5"}`}
+            style={{
+              color: "rgba(247,242,236,0.7)",
+              background: "rgba(200,165,107,0.08)",
+              border: "1px solid rgba(200,165,107,0.2)",
+            }}
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            {!recolhido && <span>Sair do admin</span>}
+          </button>
+
+          <button
+            type="button"
             title={recolhido ? "Expandir menu" : "Recolher menu"}
             onClick={() => setRecolhido((v) => !v)}
             className={`flex items-center rounded-xl text-sm w-full ${recolhido ? "justify-center w-10 h-10 mx-auto" : "gap-3 px-3 py-2"}`}
@@ -291,6 +306,20 @@ export default function AdminPage() {
               {tituloAba}
             </h2>
           </div>
+
+          <button
+            type="button"
+            onClick={() => navigate("/dashboard")}
+            className="lg:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold shrink-0"
+            style={{
+              color: "#e8d5b0",
+              background: "rgba(200,165,107,0.1)",
+              border: "1px solid rgba(200,165,107,0.25)",
+            }}
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Sair
+          </button>
 
           {mensagem && (
             <div
@@ -351,6 +380,24 @@ export default function AdminPage() {
                 </p>
                 <NavConfig />
               </div>
+            </div>
+            <div className="px-3 pb-5 border-t pt-3" style={{ borderColor: "rgba(200,165,107,0.1)" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuAberto(false);
+                  navigate("/dashboard");
+                }}
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm"
+                style={{
+                  color: "rgba(247,242,236,0.7)",
+                  background: "rgba(200,165,107,0.08)",
+                  border: "1px solid rgba(200,165,107,0.2)",
+                }}
+              >
+                <LogOut className="w-4 h-4 shrink-0" />
+                Sair do admin
+              </button>
             </div>
           </aside>
         </div>
