@@ -9,10 +9,13 @@ const FORTE = "rgba(247,242,236,0.94)";
 export default function JornadaTracoResultado({
   jornada,
   etapasAposMapa = true,
+  mostrarAviso = true,
 }: {
   jornada: JornadaTraco;
   /** Quando false, renderiza só o aviso (mapa fica no painel). */
   etapasAposMapa?: boolean;
+  /** Quando o mapa já trouxe o aviso, evita repetir. */
+  mostrarAviso?: boolean;
 }) {
   const etapas = etapasAposMapa
     ? jornada.etapas.filter((e) => e.id !== "mapa")
@@ -20,9 +23,11 @@ export default function JornadaTracoResultado({
 
   return (
     <div className="space-y-10">
-      <p className="text-sm leading-relaxed" style={{ color: FORTE, lineHeight: 1.75 }}>
-        {jornada.aviso}
-      </p>
+      {mostrarAviso && (
+        <p className="text-sm leading-relaxed" style={{ color: FORTE, lineHeight: 1.75 }}>
+          {jornada.aviso}
+        </p>
+      )}
 
       {etapas.map((etapa) => (
         <EtapaSection key={etapa.id} etapa={etapa} />

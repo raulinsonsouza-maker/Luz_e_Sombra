@@ -191,17 +191,14 @@ export function TracoPainelResultado({
     [estruturaPrincipal, resultado],
   );
 
-  const demaisTracos = useMemo(() => {
-    const principal = resultado.estruturaPrincipal;
-    const secundaria = resultado.estruturaSecundaria;
+  const rankingTracos = useMemo(() => {
     return (Object.entries(resultado.estruturas) as [keyof EstruturasPct, number][])
-      .filter(([key]) => key !== principal && key !== secundaria)
       .sort(([, a], [, b]) => b - a);
-  }, [resultado.estruturas, resultado.estruturaPrincipal, resultado.estruturaSecundaria]);
+  }, [resultado.estruturas]);
 
   return (
-    <div id="resultado-traco" className="space-y-5">
-      <div className="flex items-center gap-4 mb-2">
+    <div id="resultado-traco" className="space-y-10">
+      <div className="flex items-center gap-4">
         <div className="flex-1 h-px" style={{ background: "rgba(200,165,107,0.15)" }} />
         <span className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.4)" }}>
           Resultado da Análise
@@ -210,206 +207,191 @@ export function TracoPainelResultado({
       </div>
 
       {legado && (
-        <p
-          className="text-xs px-4 py-3 rounded-xl"
-          style={{
-            color: "rgba(224,123,57,0.9)",
-            background: "rgba(224,123,57,0.08)",
-            border: "1px solid rgba(224,123,57,0.2)",
-          }}
-        >
+        <p className="text-sm leading-relaxed" style={{ color: "rgba(224,123,57,0.9)", lineHeight: 1.7 }}>
           Este resultado foi gerado com uma versão anterior. Use <strong>Reanalisar</strong> para
           atualizar a leitura completa.
         </p>
       )}
 
       {configPrincipal && estruturaPrincipal && jornada && (
-        <Capitulo
-          titulo="Seu mapa de personalidade"
-          subtitulo={`Resultado de ${alvoAnalise} · ${dataAnalise}`}
-          recolhivel={false}
-        >
-          <div
-            className="rounded-xl p-5"
-            style={{
-              background: `linear-gradient(135deg, ${configPrincipal.corBg} 0%, rgba(30,24,18,0.4) 100%)`,
-              border: `1px solid ${configPrincipal.corBorder}`,
-            }}
-          >
-            <div className="flex flex-wrap items-center gap-2 mb-4">
+        <section className="space-y-6">
+          <header className="space-y-1.5">
+            <p className="text-[10px] tracking-[0.22em] uppercase" style={{ color: "rgba(200,165,107,0.55)" }}>
+              Etapa 01
+            </p>
+            <h2 className="font-tan-mon-cheri text-xl sm:text-2xl" style={{ color: "#e8d5b0" }}>
+              Seu mapa de personalidade
+            </h2>
+            <p className="text-sm" style={{ color: "rgba(247,242,236,0.45)", lineHeight: 1.5 }}>
+              Resultado de {alvoAnalise} · {dataAnalise}
+            </p>
+            <div
+              className="h-px w-16 mt-3"
+              style={{ background: "linear-gradient(to right, rgba(200,165,107,0.45), transparent)" }}
+            />
+          </header>
+
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "#c8a56b" }}>
+              O que mais aparece em você
+            </p>
+            <div className="flex items-baseline justify-between gap-4">
+              <h3 className="font-tan-mon-cheri text-3xl md:text-4xl" style={{ color: configPrincipal.cor }}>
+                {configPrincipal.nome}
+              </h3>
               <span
-                className="text-xs font-medium tracking-widest uppercase px-3 py-1.5 rounded-full"
-                style={{
-                  background: configPrincipal.corBg,
-                  color: configPrincipal.cor,
-                  border: `1px solid ${configPrincipal.corBorder}`,
-                }}
+                className="font-tan-mon-cheri text-3xl md:text-4xl tabular-nums shrink-0"
+                style={{ color: configPrincipal.cor }}
               >
-                Traço {configPrincipal.nome}
+                {resultado.estruturas[estruturaPrincipal]}%
               </span>
             </div>
-
-            <div className="flex items-start justify-between gap-4 mb-3">
-              <div>
-                <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>
-                  O que mais aparece em você
-                </p>
-                <h2 className="font-tan-mon-cheri text-2xl md:text-3xl" style={{ color: configPrincipal.cor }}>
-                  {configPrincipal.nome}
-                </h2>
-              </div>
-              <div className="text-3xl font-bold font-tan-mon-cheri flex-shrink-0" style={{ color: configPrincipal.cor, opacity: 0.9 }}>
-                {resultado.estruturas[estruturaPrincipal]}%
-              </div>
-            </div>
-
-            {resultado.estruturaSecundaria && (
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
-                  Também presente:
-                </span>
-                <span
-                  className="text-xs px-3 py-1 rounded-full"
-                  style={{
-                    color: ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].cor,
-                    background: ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].corBg,
-                    border: `1px solid ${ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].corBorder}`,
-                  }}
-                >
-                  {ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].nome}{" "}
-                  ({resultado.estruturas[resultado.estruturaSecundaria]}%)
-                </span>
-              </div>
-            )}
-
-            {demaisTracos.length > 0 && (
-              <div className="mb-3 pt-3" style={{ borderTop: "1px solid rgba(200,165,107,0.12)" }}>
-                <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.4)" }}>
-                  Demais traços
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {demaisTracos.map(([key, pct]) => {
-                    const cfg = ESTRUTURAS_CONFIG[key];
-                    return (
-                      <span
-                        key={key}
-                        className="text-xs px-2.5 py-1 rounded-full"
-                        style={{
-                          color: cfg.cor,
-                          background: cfg.corBg,
-                          border: `1px solid ${cfg.corBorder}`,
-                          opacity: 0.92,
-                        }}
-                      >
-                        {cfg.nome} <span style={{ opacity: 0.85 }}>({pct}%)</span>
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className="mb-3">
-              <TextoFormatado texto={jornada.mapa.significado} fluido />
-            </div>
-
-            <details className="group mb-1">
-              <summary
-                className="text-xs flex items-center gap-1.5 cursor-pointer list-none"
-                style={{ color: "rgba(200,165,107,0.55)" }}
-              >
-                <Info className="w-3.5 h-3.5" />
-                Saber mais sobre {configPrincipal.nome}
-              </summary>
-              <div className="mt-2 pl-5">
-                <TextoFormatado texto={configPrincipal.descricaoLonga} fluido={false} />
-              </div>
-            </details>
           </div>
 
-          {((resultado.pontosFortes?.length ?? 0) > 0 || (resultado.pontosAtencao?.length ?? 0) > 0) && (
-            <div className="grid md:grid-cols-2 gap-3">
-              {resultado.pontosFortes && resultado.pontosFortes.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-xs w-full tracking-widest uppercase" style={{ color: "rgba(109,185,109,0.6)" }}>
-                    Pontos fortes
-                  </span>
-                  {resultado.pontosFortes.map((p, i) => (
-                    <span
-                      key={i}
-                      className="text-xs px-3 py-1.5 rounded-full"
-                      style={{
-                        background: "rgba(109,185,109,0.08)",
-                        border: "1px solid rgba(109,185,109,0.22)",
-                        color: "rgba(109,185,109,0.85)",
-                      }}
-                    >
-                      {p}
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "#c8a56b" }}>
+              Seu trio
+            </p>
+            <ol className="space-y-2.5">
+              <li className="flex items-baseline justify-between gap-3 text-sm" style={{ color: "rgba(247,242,236,0.88)", lineHeight: 1.55 }}>
+                <span>
+                  <span style={{ color: configPrincipal.cor }}>{jornada.mapa.nomePrincipal}</span>
+                  <span style={{ color: "rgba(247,242,236,0.4)" }}> · principal</span>
+                </span>
+                <span className="tabular-nums" style={{ color: configPrincipal.cor }}>
+                  {resultado.estruturas[estruturaPrincipal]}%
+                </span>
+              </li>
+              {resultado.estruturaSecundaria && (
+                <li className="flex items-baseline justify-between gap-3 text-sm" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.55 }}>
+                  <span>
+                    <span style={{ color: ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].cor }}>
+                      {jornada.mapa.nomeSecundaria}
                     </span>
-                  ))}
+                    <span style={{ color: "rgba(247,242,236,0.4)" }}> · também presente</span>
+                  </span>
+                  <span className="tabular-nums" style={{ color: ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].cor }}>
+                    {resultado.estruturas[resultado.estruturaSecundaria]}%
+                  </span>
+                </li>
+              )}
+              {jornada.mapa.terciaria !== estruturaPrincipal &&
+                jornada.mapa.terciaria !== resultado.estruturaSecundaria && (
+                  <li className="flex items-baseline justify-between gap-3 text-sm" style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.55 }}>
+                    <span>
+                      <span style={{ color: ESTRUTURAS_CONFIG[jornada.mapa.terciaria].cor }}>
+                        {jornada.mapa.nomeTerciaria}
+                      </span>
+                      <span style={{ color: "rgba(247,242,236,0.4)" }}> · terceiro tom</span>
+                    </span>
+                    <span className="tabular-nums" style={{ color: ESTRUTURAS_CONFIG[jornada.mapa.terciaria].cor }}>
+                      {resultado.estruturas[jornada.mapa.terciaria]}%
+                    </span>
+                  </li>
+                )}
+            </ol>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "#c8a56b" }}>
+              O que isso significa
+            </p>
+            <TextoFormatado texto={jornada.mapa.significado} fluido />
+          </div>
+
+          <details className="group">
+            <summary
+              className="text-sm flex items-center gap-1.5 cursor-pointer list-none"
+              style={{ color: "rgba(200,165,107,0.7)" }}
+            >
+              <Info className="w-3.5 h-3.5" />
+              Saber mais sobre {configPrincipal.nome}
+            </summary>
+            <div className="mt-3">
+              <TextoFormatado texto={configPrincipal.descricaoLonga} fluido />
+            </div>
+          </details>
+
+          {((jornada.mapa.pontosFortes?.length ?? 0) > 0 || (jornada.mapa.pontosAtencao?.length ?? 0) > 0) && (
+            <div className="grid md:grid-cols-2 gap-6">
+              {jornada.mapa.pontosFortes.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "rgba(109,185,109,0.75)" }}>
+                    Pontos fortes
+                  </p>
+                  <ul className="space-y-1.5">
+                    {jornada.mapa.pontosFortes.map((p, i) => (
+                      <li key={i} className="flex gap-2 text-sm" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.55 }}>
+                        <span style={{ color: "rgba(109,185,109,0.7)" }}>·</span>
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
-              {resultado.pontosAtencao && resultado.pontosAtencao.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-xs w-full tracking-widest uppercase" style={{ color: "rgba(224,123,57,0.6)" }}>
+              {jornada.mapa.pontosAtencao.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "rgba(224,123,57,0.75)" }}>
                     Pontos de atenção
-                  </span>
-                  {resultado.pontosAtencao.map((p, i) => (
-                    <span
-                      key={i}
-                      className="text-xs px-3 py-1.5 rounded-full"
-                      style={{
-                        background: "rgba(224,123,57,0.08)",
-                        border: "1px solid rgba(224,123,57,0.22)",
-                        color: "rgba(224,123,57,0.85)",
-                      }}
-                    >
-                      {p}
-                    </span>
-                  ))}
+                  </p>
+                  <ul className="space-y-1.5">
+                    {jornada.mapa.pontosAtencao.map((p, i) => (
+                      <li key={i} className="flex gap-2 text-sm" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.55 }}>
+                        <span style={{ color: "rgba(224,123,57,0.7)" }}>·</span>
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
           )}
 
-          <div className="space-y-3 pt-1">
-            <p className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
+          <div className="space-y-3">
+            <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "#c8a56b" }}>
               Quanto cada traço aparece no seu perfil
             </p>
-            {(Object.entries(resultado.estruturas) as [keyof EstruturasPct, number][])
-              .sort(([, a], [, b]) => b - a)
-              .map(([key, pct]) => {
-                const cfg = ESTRUTURAS_CONFIG[key];
-                const isPrincipal = key === resultado.estruturaPrincipal;
-                const isSecundaria = key === resultado.estruturaSecundaria;
-                const isDestaque = isPrincipal || isSecundaria;
-                return (
-                  <div key={key}>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.45)" }}>
-                        {cfg.nome}
-                        {isPrincipal && <span className="ml-1.5 opacity-70">· principal</span>}
-                        {isSecundaria && <span className="ml-1.5 opacity-70">· também presente</span>}
-                      </span>
-                      <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.4)" }}>{pct}%</span>
-                    </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${pct}%`,
-                          background: isDestaque ? cfg.cor : `${cfg.cor}66`,
-                        }}
-                      />
-                    </div>
+            {rankingTracos.map(([key, pct]) => {
+              const cfg = ESTRUTURAS_CONFIG[key];
+              const isPrincipal = key === resultado.estruturaPrincipal;
+              const isSecundaria = key === resultado.estruturaSecundaria;
+              const isTerciaria = key === jornada.mapa.terciaria;
+              const isDestaque = isPrincipal || isSecundaria || isTerciaria;
+              return (
+                <div key={key}>
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.4)" }}>
+                      {cfg.nome}
+                      {isPrincipal && <span className="ml-1.5 opacity-60">· principal</span>}
+                      {isSecundaria && <span className="ml-1.5 opacity-60">· também presente</span>}
+                      {isTerciaria && !isPrincipal && !isSecundaria && (
+                        <span className="ml-1.5 opacity-60">· terceiro tom</span>
+                      )}
+                    </span>
+                    <span className="tabular-nums" style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.35)" }}>
+                      {pct}%
+                    </span>
                   </div>
-                );
-              })}
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${pct}%`,
+                        background: isDestaque ? cfg.cor : `${cfg.cor}55`,
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+            <p className="text-sm leading-relaxed pt-1" style={{ color: "rgba(247,242,236,0.5)", lineHeight: 1.7 }}>
+              Esta leitura é um caminho de autoconhecimento. Ela se apoia principalmente nas suas respostas. O corpo entra como apoio, com cuidado, e não como diagnóstico.
+            </p>
           </div>
-        </Capitulo>
+        </section>
       )}
 
-      {jornada && <JornadaTracoResultado jornada={jornada} />}
+      {jornada && <JornadaTracoResultado jornada={jornada} mostrarAviso={false} />}
 
       {(resultado.caracteristicasFisicasObservadas?.length ||
         resultado.perfilFisicoNarrado ||
