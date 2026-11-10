@@ -261,6 +261,65 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
   }
 });
 
+// PATCH /api/comunidade/:id — admin edit post
+router.patch("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const id = parseInt(String(req.params.id), 10);
+    if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
+
+    const [atual] = await db
+      .select()
+      .from(comunidadeTable)
+      .where(eq(comunidadeTable.id, id))
+      .limit(1);
+    if (!atual) return res.status(404).json({ error: "Publicação não encontrada" });
+
+    const { titulo, conteudo, mediaUrl } = req.body as {
+      titulo?: string | null;
+      conteudo?: string;
+      mediaUrl?: string | null;
+    };
+
+    const tituloLimpo =
+      titulo === undefined
+        ? atual.titulo
+        : ((titulo ?? "").trim().slice(0, 160) || null);
+    const texto =
+      conteudo === undefined ? atual.conteudo : ((conteudo ?? "").trim() || " ");
+    const midia =
+      mediaUrl === undefined
+        ? atual.mediaUrl
+        : ((mediaUrl ?? "").trim() || null);
+
+    if (!texto.trim() && !midia) {
+      return res.status(400).json({ error: "Inclua um texto ou uma mídia" });
+    }
+    if ((atual.tipo === "imagem" || atual.tipo === "audio") && !midia) {
+      return res.status(400).json({
+        error: atual.tipo === "audio" ? "Áudio obrigatório" : "Imagem obrigatória",
+      });
+    }
+    if (atual.tipo === "video" && !midia) {
+      return res.status(400).json({ error: "Link de vídeo obrigatório" });
+    }
+
+    const [post] = await db
+      .update(comunidadeTable)
+      .set({
+        titulo: tituloLimpo,
+        conteudo: texto,
+        mediaUrl: midia,
+      })
+      .where(eq(comunidadeTable.id, id))
+      .returning();
+
+    return res.json(post);
+  } catch (err) {
+    req.log.error({ err }, "Erro ao editar post");
+    return res.status(500).json({ error: "Erro ao editar publicação" });
+  }
+});
+
 // DELETE /api/comunidade/:id — admin delete
 router.delete("/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
   try {

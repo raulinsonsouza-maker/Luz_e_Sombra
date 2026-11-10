@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  Plus, Trash2, Check, Loader2, MessageSquare, FileText, Youtube, ImageIcon, Mic, X,
+  Plus, Trash2, Check, Loader2, MessageSquare, FileText, Youtube, ImageIcon, Mic, X, Pencil,
 } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 import { AuthenticatedImage } from "@/components/AuthenticatedImage";
@@ -15,6 +15,7 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
+  const [editandoId, setEditandoId] = useState<number | null>(null);
   const [novoTipo, setNovoTipo] = useState<TipoPost>("texto");
   const [novoTitulo, setNovoTitulo] = useState("");
   const [novoConteudo, setNovoConteudo] = useState("");
@@ -23,6 +24,8 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
   const [enviando, setEnviando] = useState(false);
   const [notificar, setNotificar] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const editando = editandoId != null;
 
   useEffect(() => {
     void buscarPosts();
@@ -49,6 +52,7 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
   }
 
   function resetForm() {
+    setEditandoId(null);
     setNovoTipo("texto");
     setNovoTitulo("");
     setNovoConteudo("");
@@ -64,17 +68,34 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
     resetForm();
   }
 
-  async function handleCriar(e: React.FormEvent) {
+  function abrirCriar() {
+    resetForm();
+    setModalAberto(true);
+  }
+
+  function abrirEditar(p: Post) {
+    setEditandoId(p.id);
+    setNovoTipo((p.tipo as TipoPost) || "texto");
+    setNovoTitulo(p.titulo?.trim() || "");
+    setNovoConteudo(p.conteudo?.trim() || "");
+    setNovoMediaUrl(p.tipo === "video" ? (p.mediaUrl || "") : "");
+    setUploadFile(null);
+    setNotificar(false);
+    if (fileRef.current) fileRef.current.value = "";
+    setModalAberto(true);
+  }
+
+  async function handleSalvar(e: React.FormEvent) {
     e.preventDefault();
     if (novoTipo === "texto" && !novoConteudo.trim()) {
       showMsg("erro", "Escreva o conteúdo.");
       return;
     }
-    if (novoTipo === "imagem" && !uploadFile) {
+    if (!editando && novoTipo === "imagem" && !uploadFile) {
       showMsg("erro", "Selecione uma imagem.");
       return;
     }
-    if (novoTipo === "audio" && !uploadFile) {
+    if (!editando && novoTipo === "audio" && !uploadFile) {
       showMsg("erro", "Selecione um áudio.");
       return;
     }
@@ -84,7 +105,7 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
     }
     setEnviando(true);
     try {
-      let mediaUrl: string | undefined;
+      let mediaUrl: string | undefined | null;
       if ((novoTipo === "imagem" || novoTipo === "audio") && uploadFile) {
         const urlRes = await apiFetch("/comunidade/upload-url", { method: "POST" });
         if (!urlRes.ok) throw new Error("Erro ao gerar URL");
@@ -102,28 +123,38 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
       } else if (novoTipo === "video") {
         mediaUrl = novoMediaUrl.trim() || undefined;
       }
+
       const texto = novoConteudo.trim() || " ";
-      const res = await apiFetch("/comunidade", {
-        method: "POST",
-        body: JSON.stringify({
-          tipo: novoTipo,
-          titulo: novoTitulo.trim() || undefined,
-          conteudo: texto,
-          mediaUrl,
-          notificar,
-        }),
+      const body = editando
+        ? {
+            titulo: novoTitulo.trim() || null,
+            conteudo: texto,
+            ...(mediaUrl !== undefined ? { mediaUrl } : {}),
+          }
+        : {
+            tipo: novoTipo,
+            titulo: novoTitulo.trim() || undefined,
+            conteudo: texto,
+            mediaUrl,
+            notificar,
+          };
+
+      const res = await apiFetch(editando ? `/comunidade/${editandoId}` : "/comunidade", {
+        method: editando ? "PATCH" : "POST",
+        body: JSON.stringify(body),
       });
+
       if (res.ok) {
-        showMsg("sucesso", "Publicação criada!");
+        showMsg("sucesso", editando ? "Publicação atualizada!" : "Publicação criada!");
         setModalAberto(false);
         resetForm();
         await buscarPosts();
       } else {
         const d = await res.json();
-        showMsg("erro", d.error || "Erro ao publicar");
+        showMsg("erro", d.error || (editando ? "Erro ao atualizar" : "Erro ao publicar"));
       }
     } catch {
-      showMsg("erro", "Erro ao criar publicação");
+      showMsg("erro", editando ? "Erro ao atualizar publicação" : "Erro ao criar publicação");
     }
     setEnviando(false);
   }
@@ -158,7 +189,7 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
         </p>
         <button
           type="button"
-          onClick={() => setModalAberto(true)}
+          onClick={abrirCriar}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
           style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
         >
@@ -257,22 +288,42 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
                       </div>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => void handleDeletar(p.id)}
-                    className="p-2 rounded-lg shrink-0 transition-all"
-                    style={{ color: "rgba(248,113,113,0.4)" }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "rgba(248,113,113,0.08)";
-                      (e.currentTarget as HTMLElement).style.color = "#f87171";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "transparent";
-                      (e.currentTarget as HTMLElement).style.color = "rgba(248,113,113,0.4)";
-                    }}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => abrirEditar(p)}
+                      className="p-2 rounded-lg transition-all"
+                      style={{ color: "rgba(200,165,107,0.55)" }}
+                      title="Editar"
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = "rgba(200,165,107,0.1)";
+                        (e.currentTarget as HTMLElement).style.color = "#c8a56b";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = "transparent";
+                        (e.currentTarget as HTMLElement).style.color = "rgba(200,165,107,0.55)";
+                      }}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleDeletar(p.id)}
+                      className="p-2 rounded-lg transition-all"
+                      style={{ color: "rgba(248,113,113,0.4)" }}
+                      title="Deletar"
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = "rgba(248,113,113,0.08)";
+                        (e.currentTarget as HTMLElement).style.color = "#f87171";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = "transparent";
+                        (e.currentTarget as HTMLElement).style.color = "rgba(248,113,113,0.4)";
+                      }}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -290,13 +341,13 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
             onClick={fecharModal}
           />
           <form
-            onSubmit={(e) => void handleCriar(e)}
+            onSubmit={(e) => void handleSalvar(e)}
             className="relative w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-5 space-y-4 shadow-2xl"
             style={{ background: "#1a1510", border: "1px solid rgba(200,165,107,0.25)" }}
           >
             <div className="flex items-center justify-between gap-3">
               <p className="font-tan-mon-cheri text-xl" style={{ color: C.text }}>
-                Nova publicação
+                {editando ? "Editar publicação" : "Nova publicação"}
               </p>
               <button type="button" onClick={fecharModal} className="p-2 rounded-lg" style={{ color: C.muted }}>
                 <X className="w-5 h-5" />
@@ -308,13 +359,15 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
                 <button
                   key={key}
                   type="button"
+                  disabled={editando}
                   onClick={() => {
+                    if (editando) return;
                     setNovoTipo(key);
                     setUploadFile(null);
                     setNovoMediaUrl("");
                     if (fileRef.current) fileRef.current.value = "";
                   }}
-                  className="flex flex-col items-center gap-1.5 py-2.5 rounded-xl text-xs font-medium"
+                  className="flex flex-col items-center gap-1.5 py-2.5 rounded-xl text-xs font-medium disabled:opacity-60"
                   style={
                     novoTipo === key
                       ? { background: "rgba(200,165,107,0.2)", color: C.gold, border: "1px solid rgba(200,165,107,0.4)" }
@@ -374,9 +427,13 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
                   <span>
                     {uploadFile
                       ? uploadFile.name
-                      : novoTipo === "audio"
-                        ? "Selecionar áudio"
-                        : "Selecionar imagem"}
+                      : editando
+                        ? novoTipo === "audio"
+                          ? "Trocar áudio (opcional)"
+                          : "Trocar imagem (opcional)"
+                        : novoTipo === "audio"
+                          ? "Selecionar áudio"
+                          : "Selecionar imagem"}
                   </span>
                   {novoTipo === "audio" && (
                     <span className="text-[10px] opacity-60">MP3, M4A, WAV, OGG</span>
@@ -396,20 +453,22 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
               />
             )}
 
-            <label className="flex items-center gap-2.5 cursor-pointer select-none" onClick={() => setNotificar((v) => !v)}>
-              <div
-                className="w-5 h-5 rounded flex items-center justify-center shrink-0"
-                style={{
-                  border: notificar ? "none" : "1.5px solid rgba(200,165,107,0.35)",
-                  background: notificar ? "linear-gradient(135deg, #c8a56b, #9c7742)" : "transparent",
-                }}
-              >
-                {notificar && <Check className="w-3 h-3" style={{ color: "#1a1208" }} />}
-              </div>
-              <span className="text-xs font-medium" style={{ color: C.muted }}>
-                Notificar membros
-              </span>
-            </label>
+            {!editando && (
+              <label className="flex items-center gap-2.5 cursor-pointer select-none" onClick={() => setNotificar((v) => !v)}>
+                <div
+                  className="w-5 h-5 rounded flex items-center justify-center shrink-0"
+                  style={{
+                    border: notificar ? "none" : "1.5px solid rgba(200,165,107,0.35)",
+                    background: notificar ? "linear-gradient(135deg, #c8a56b, #9c7742)" : "transparent",
+                  }}
+                >
+                  {notificar && <Check className="w-3 h-3" style={{ color: "#1a1208" }} />}
+                </div>
+                <span className="text-xs font-medium" style={{ color: C.muted }}>
+                  Notificar membros
+                </span>
+              </label>
+            )}
 
             <div className="flex gap-3 pt-1">
               <button
@@ -426,7 +485,13 @@ export function ComunidadeTab({ showMsg }: { showMsg: (t: "sucesso" | "erro", ms
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
               >
-                {enviando ? "Publicando…" : "Publicar"}
+                {enviando
+                  ? editando
+                    ? "Salvando…"
+                    : "Publicando…"
+                  : editando
+                    ? "Salvar"
+                    : "Publicar"}
               </button>
             </div>
           </form>
