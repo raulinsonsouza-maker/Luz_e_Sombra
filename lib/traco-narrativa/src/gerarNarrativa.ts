@@ -272,7 +272,7 @@ function estiloComunicacaoModulado(
 }
 
 const PADRAO_CONTENCAO_RIGIDA =
-  "O corpo apresenta organização e simetria notáveis, com contenção emocional perceptível. Não é um ceder que busca sustentação, mas uma proteção que mantém tudo no lugar. Há tensão discreta na cintura e nas costas — mais compressão do que abertura.";
+  "O corpo apresenta organização e simetria notáveis, com contenção emocional perceptível. Não é um ceder que busca sustentação, mas uma proteção que mantém tudo no lugar. Há tensão discreta na cintura e nas costas, mais compressão do que abertura.";
 
 function resolverPadraoPostural(
   principal: EstruturaTraco,

@@ -355,7 +355,7 @@ test("narrativa v4 — interpretação enxuta sem COMBOS nem perfilUnico", () =>
 
   const paragrafos = r.interpretacao.split(/\n\n+/).filter(Boolean);
   assert.ok(paragrafos.length <= 3, `esperado ≤3 parágrafos, obteve ${paragrafos.length}`);
-  assert.equal(r.versaoNarrativa, "traco_narrativa_v6");
+  assert.equal(r.versaoNarrativa, "traco_narrativa_v7");
   assert.ok(r.perguntaTransformacao && r.perguntaTransformacao.length > 10);
   assert.ok(!r.interpretacao.includes(r.perguntaTransformacao));
   if (r.perfilUnico) {

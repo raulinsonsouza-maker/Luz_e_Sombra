@@ -30,7 +30,7 @@ const COR_SECUNDARIA: Record<EstruturaTraco, { trabalho: string; relacoes: strin
     trabalho:
       "Com o Esquizóide também presente, você precisa de intervalos de silêncio para não perder a qualidade do que entrega.",
     relacoes:
-      "O Esquizóide colore o vínculo: mesmo querendo perto, você precisa de espaço — e avisar isso evita que o outro leia distância como rejeição.",
+      "O Esquizóide colore o vínculo: mesmo querendo perto, você precisa de espaço, e avisar isso evita que o outro leia distância como rejeição.",
   },
   oral: {
     trabalho:
@@ -40,19 +40,19 @@ const COR_SECUNDARIA: Record<EstruturaTraco, { trabalho: string; relacoes: strin
   },
   psicopata: {
     trabalho:
-      "Com o Psicopata também presente, você empurra decisões e corta nós quando o grupo trava — o cuidado é não transformar urgência em pressão sobre quem está ao lado.",
+      "Com o Psicopata também presente, você empurra decisões e corta nós quando o grupo trava. O cuidado é não transformar urgência em pressão sobre quem está ao lado.",
     relacoes:
       "O Psicopata colore o vínculo: há força e direção, e também a tentação de conduzir a intimidade em vez de habitá-la.",
   },
   masoquista: {
     trabalho:
-      "Com o Masoquista também presente, você segura sobrecarga por tempo longo antes de pedir alívio — e isso pode parecer competência até o corpo cobrar.",
+      "Com o Masoquista também presente, você segura sobrecarga por tempo longo antes de pedir alívio, e isso pode parecer competência até o corpo cobrar.",
     relacoes:
       "O Masoquista colore o vínculo: você permanece e aguenta, às vezes além do ponto em que um limite claro seria o verdadeiro cuidado.",
   },
   rigido: {
     trabalho:
-      "Com o Rígido também presente, você cuida com constância e cobra de si um padrão alto — às vezes mais do que o cargo ou a equipe pediram.",
+      "Com o Rígido também presente, você cuida com constância e cobra de si um padrão alto, às vezes mais do que o cargo ou a equipe pediram.",
     relacoes:
       "O Rígido colore o vínculo: você ama com lealdade organizada e pode demorar a mostrar a parte frágil, mesmo quando o peito já pediu colo.",
   },
@@ -60,7 +60,7 @@ const COR_SECUNDARIA: Record<EstruturaTraco, { trabalho: string; relacoes: strin
 
 const COR_TERCIARIA: Record<EstruturaTraco, string> = {
   esquizoide:
-    "Em terceiro, o Esquizóide acrescenta a necessidade de um canto só seu — sem isso, o excesso de contato esgota a presença.",
+    "Em terceiro, o Esquizóide acrescenta a necessidade de um canto só seu. Sem isso, o excesso de contato esgota a presença.",
   oral:
     "Em terceiro, o Oral acrescenta calor e a vontade de ser visto: mesmo quando outro traço conduz, o vínculo continua pedindo lugar.",
   psicopata:
@@ -68,7 +68,7 @@ const COR_TERCIARIA: Record<EstruturaTraco, string> = {
   masoquista:
     "Em terceiro, o Masoquista acrescenta a tendência a carregar a sobrecarga emocional por tempo longo antes de pedir alívio.",
   rigido:
-    "Em terceiro, o Rígido acrescenta capricho e a vontade de manter a forma — útil na entrega, arriscado quando vira couraça no afeto.",
+    "Em terceiro, o Rígido acrescenta capricho e a vontade de manter a forma: útil na entrega, arriscado quando vira couraça no afeto.",
 };
 
 function texto(...partes: Array<string | null | undefined>): string[] {
@@ -122,13 +122,13 @@ function significadoMapa(
 
 function necessidadePorTras(principal: EstruturaTraco): string {
   if (principal === "esquizoide") {
-    return "Por trás da distância costuma haver um desejo simples e profundo: existir por inteiro sem ser invadido, rejeitado ou obrigado a performar presença. Você não busca frieza — busca um espaço em que a alma caiba sem ter de se explicar o tempo todo.";
+    return "Por trás da distância costuma haver um desejo simples e profundo: existir por inteiro sem ser invadido, rejeitado ou obrigado a performar presença. Você não busca frieza. Busca um espaço em que a alma caiba sem ter de se explicar o tempo todo.";
   }
   if (principal === "oral") {
-    return "Por trás da busca pelo outro costuma haver o desejo de ser sustentado de forma constante: sentir que alguém fica, que o colo não some, que você não precisa merecer cuidado produzindo cuidado. Nomear isso não diminui a generosidade — coloca a necessidade no lugar certo.";
+    return "Por trás da busca pelo outro costuma haver o desejo de ser sustentado de forma constante: sentir que alguém fica, que o colo não some, que você não precisa merecer cuidado produzindo cuidado. Nomear isso não diminui a generosidade. Coloca a necessidade no lugar certo.";
   }
   if (principal === "psicopata") {
-    return "Por trás do controle costuma haver o desejo de não ser ferido outra vez e de manter dignidade. A força protege uma parte que ainda pergunta: se eu baixar a guarda, quem segura? Integrar não é abandonar o poder — é descobrir que vulnerabilidade escolhida também é poder.";
+    return "Por trás do controle costuma haver o desejo de não ser ferido outra vez e de manter dignidade. A força protege uma parte que ainda pergunta: se eu baixar a guarda, quem segura? Integrar não é abandonar o poder. É descobrir que vulnerabilidade escolhida também é poder.";
   }
   if (principal === "masoquista") {
     return "Por trás do aguentar costuma haver o desejo de pertencimento sem crítica: ficar e ser querido sem ter de encolher o próprio desejo. A lealdade é real. O convite é descobrir que você também cabe na conta do cuidado que oferece.";
@@ -149,7 +149,7 @@ function quandoOsTresSeEncontram(
     `Lendo os três juntos: o ${nomeP} conduz em torno de ${FOCO_CURTO[principal]}. ` +
     `O ${nomeS} dá a cor de ${FOCO_CURTO[secundaria]}. ` +
     `O ${nomeT} acrescenta um fio de ${FOCO_CURTO[terciaria]}. ` +
-    `O risco do conjunto é ${RISCO_CURTO[principal]} — reforçado pela tendência a ${RISCO_CURTO[secundaria]} ` +
+    `O risco do conjunto é ${RISCO_CURTO[principal]}, reforçado pela tendência a ${RISCO_CURTO[secundaria]} ` +
     `e atravessado pelo impulso de ${RISCO_CURTO[terciaria]}. ` +
     `Integração aqui não é apagar nenhum dos três. É deixar o ${nomeP} brilhar sem que os outros trabalhem só como defesa.`
   );
@@ -194,7 +194,7 @@ export function comporJornadaTraco(resultado: {
   const recomendacoes = T.RECOMENDACOES[principal];
   const mensagem = T.MENSAGENS[principal];
   const pergunta = T.PERGUNTAS_TRANSFORMACAO[principal];
-  // Mapa: só o traço principal — evita misturar Excelência/Organização sem contexto.
+  // Mapa: só o traço principal. Evita misturar Excelência/Organização sem contexto.
   const pontosFortes = T.PONTOS_FORTES[principal];
   const pontosAtencao = T.PONTOS_ATENCAO[principal];
   const significado = significadoMapa(principal, secundaria, terciaria);
@@ -263,7 +263,7 @@ export function comporJornadaTraco(resultado: {
         },
         blocoTexto(
           "A mensagem central",
-          "Você não precisa abandonar sua força para cuidar da dor. O mesmo movimento que um dia protegeu também gerou talento. O caminho é usar essa força sem precisar se proteger o tempo todo — e sem confundir excesso com virtude.",
+          "Você não precisa abandonar sua força para cuidar da dor. O mesmo movimento que um dia protegeu também gerou talento. O caminho é usar essa força sem precisar se proteger o tempo todo, e sem confundir excesso com virtude.",
         ),
       ]),
     },

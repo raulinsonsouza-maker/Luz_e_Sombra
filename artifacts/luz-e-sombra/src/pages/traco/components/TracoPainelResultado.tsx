@@ -273,7 +273,7 @@ export function TracoPainelResultado({
                     <div className="flex items-baseline justify-between gap-3 text-sm">
                       <span style={{ color: ESTRUTURAS_CONFIG[jornada.mapa.terciaria].cor }}>
                         {jornada.mapa.nomeTerciaria}
-                        <span style={{ color: "rgba(247,242,236,0.4)" }}> · terceiro tom</span>
+                        <span style={{ color: "rgba(247,242,236,0.4)" }}> · em terceiro</span>
                       </span>
                       <span
                         className="tabular-nums"
@@ -367,7 +367,7 @@ export function TracoPainelResultado({
                       {isPrincipal && <span className="ml-1.5 opacity-70">· principal</span>}
                       {isSecundaria && <span className="ml-1.5 opacity-70">· também presente</span>}
                       {isTerciaria && !isPrincipal && !isSecundaria && (
-                        <span className="ml-1.5 opacity-70">· terceiro tom</span>
+                        <span className="ml-1.5 opacity-70">· em terceiro</span>
                       )}
                     </span>
                     <span className="tabular-nums" style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.4)" }}>

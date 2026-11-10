@@ -37,7 +37,7 @@ export const ESTRUTURAS_CONFIG: Record<
     nome: "Psicopata",
     descricaoCurta: "Liderança e negociação. Você organiza o espaço e move as pessoas.",
     descricaoLonga:
-      "No Psicopata, a dor costuma ser a manipulação e a perda de controle — e o talento é liderar e negociar. Força, aqui, não pede controle o tempo todo. A leitura longa mostra onde isso te protege e onde te afasta.",
+      "No Psicopata, a dor costuma ser a manipulação e a perda de controle, e o talento é liderar e negociar. Força, aqui, não pede controle o tempo todo. A leitura longa mostra onde isso te protege e onde te afasta.",
     cor: "#e07b39",
     corBg: "rgba(224,123,57,0.08)",
     corBorder: "rgba(224,123,57,0.3)",
@@ -46,7 +46,7 @@ export const ESTRUTURAS_CONFIG: Record<
     nome: "Masoquista",
     descricaoCurta: "Planejamento, resistência e força. Você sustenta o que os outros soltam.",
     descricaoLonga:
-      "No Masoquista, a dor costuma ser a humilhação e a crítica — e o talento é planejar, resistir e permanecer. Você não precisa carregar tudo para ter valor. A análise detalhada mostra essa força e o custo de usá-la o tempo inteiro.",
+      "No Masoquista, a dor costuma ser a humilhação e a crítica, e o talento é planejar, resistir e permanecer. Você não precisa carregar tudo para ter valor. A análise detalhada mostra essa força e o custo de usá-la o tempo inteiro.",
     cor: "#6db96d",
     corBg: "rgba(109,185,109,0.08)",
     corBorder: "rgba(109,185,109,0.3)",
@@ -55,7 +55,7 @@ export const ESTRUTURAS_CONFIG: Record<
     nome: "Rígido",
     descricaoCurta: "Execução, dinamismo e capricho. Você entrega e mantém o padrão.",
     descricaoLonga:
-      "No Rígido, a dor costuma ser a exclusão afetiva e a quebra de confiança — e o talento é executar com precisão. Competência não exige esconder o que você sente. A leitura completa aprofunda esse jeito de funcionar.",
+      "No Rígido, a dor costuma ser a exclusão afetiva e a quebra de confiança, e o talento é executar com precisão. Competência não exige esconder o que você sente. A leitura completa aprofunda esse jeito de funcionar.",
     cor: "#c8a56b",
     corBg: "rgba(200,165,107,0.08)",
     corBorder: "rgba(200,165,107,0.3)",
