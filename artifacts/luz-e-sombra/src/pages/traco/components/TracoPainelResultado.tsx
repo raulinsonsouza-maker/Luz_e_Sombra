@@ -310,7 +310,7 @@ export function TracoPainelResultado({
             )}
 
             <div className="mb-3">
-              <TextoFormatado texto={jornada.mapa.significado} fluido={false} />
+              <TextoFormatado texto={jornada.mapa.significado} fluido />
             </div>
 
             <details className="group mb-1">

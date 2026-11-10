@@ -57,23 +57,18 @@ function observacaoPorFoto(
         : T.OBS_LADO[principal];
 
   if (!m.poseDetectada || m.qualidadeFoto < 0.22) {
-    return `${base} Nesta tomada a leitura biométrica foi limitada (qualidade estimada ${Math.round(m.qualidadeFoto * 100)}%); interprete como pista somente, junto às outras fotos. Intensidade ${bandaPct(pctPrincipal)} da estrutura ${T.NOMES[principal]} (${pctPrincipal}%).`;
+    return `${base} Nesta tomada a leitura ficou limitada; use as outras fotos como complemento. O traço ${T.NOMES[principal]} aparece de forma ${bandaPct(pctPrincipal)}.`;
   }
 
   const partes: string[] = [];
   if (m.shr != null) {
     if (m.shr > 1.35)
-      partes.push(
-        `Razão ombro–quadril elevada (~${m.shr.toFixed(2)}), silhueta com ênfase superior.`
-      );
+      partes.push("A silhueta enfatiza a metade de cima do corpo.");
     else if (m.shr < 0.88)
-      partes.push(
-        `Razão ombro–quadril mais baixa (~${m.shr.toFixed(2)}), mais volume na base do tronco.`
-      );
-    else partes.push(`Razão ombro–quadril ~${m.shr.toFixed(2)}.`);
+      partes.push("Há mais volume na base do tronco.");
   }
   if (m.simetria != null && m.simetria < 0.78) {
-    partes.push(`Assimetria bilateral perceptível nos landmarks (equilíbrio ~${Math.round(m.simetria * 100)}%).`);
+    partes.push("Há diferença perceptível entre os dois lados do corpo.");
   }
   if (m.ulr != null) {
     if (m.ulr > 1.2) partes.push(`Predomínio visual da metade superior do corpo (razão vertical ~${m.ulr.toFixed(2)}).`);
@@ -93,7 +88,7 @@ function observacaoPorFoto(
     partes.push(`Ombros adiantados em relação à pelve (~${m.ombrosAdiantados.toFixed(2)}).`);
   }
   if (m.colapsoToracico != null && m.colapsoToracico > 0.45) {
-    partes.push(`Sinais de colapso torácico superior (~${m.colapsoToracico.toFixed(2)}).`);
+    partes.push("O peito parece menos aberto, como quem ainda busca apoio.");
   }
   if (m.erroProcessamento) {
     partes.push(`Atenção: ${m.erroProcessamento}`);
@@ -224,7 +219,7 @@ function construirPerfilFisicoHumano(
   }
 
   if (pctS >= 22 && secundaria !== principal && secundaria === "oral" && principal === "rigido") {
-    frases.push("Por baixo dessa estrutura, também aparece uma abertura emocional e desejo de vínculo.");
+    frases.push("Por baixo desse padrão, também aparece uma abertura emocional e desejo de vínculo.");
   }
 
   if (frases.length === 0) {
@@ -272,12 +267,12 @@ function estiloComunicacaoModulado(
   if (pctS < 26) return { ...base };
   return {
     ...base,
-    descricao: `${base.descricao} Nota-se também colorido de ${T.NOMES[secundaria]} na forma como você organiza frases e ritmo.`,
+    descricao: `${base.descricao} Também aparece um toque de ${T.NOMES[secundaria]} no jeito de organizar frases e ritmo.`,
   };
 }
 
 const PADRAO_CONTENCAO_RIGIDA =
-  "O corpo apresenta organização e simetria notáveis, com contenção emocional perceptível. Não é colapso buscando sustentação, mas proteção funcional que mantém tudo no lugar. Há tensão discreta na cintura e região dorsal, sugerindo compressão crônica mais do que flacidez oral.";
+  "O corpo apresenta organização e simetria notáveis, com contenção emocional perceptível. Não é um ceder que busca sustentação, mas uma proteção que mantém tudo no lugar. Há tensão discreta na cintura e nas costas — mais compressão do que abertura.";
 
 function resolverPadraoPostural(
   principal: EstruturaTraco,
@@ -413,6 +408,7 @@ export function gerarNarrativa(input: GerarNarrativaInput): ResultadoAnalise {
 
   const comboKey = `${principal}-${secundaria}`;
   const perfilUnico =
+    T.PERFIS_PAR[comboKey] ??
     T.PERFIS_UNICOS[comboKey] ??
     `A combinação de ${T.NOMES[principal]} com ${T.NOMES[secundaria]} cria um perfil próprio. Observe como estes padrões convivem na sua história, não só no rótulo.`;
 

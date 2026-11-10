@@ -1,4 +1,4 @@
-export { comporJornadaTraco, idsEtapas, textosDaJornada } from "./compor.js";
+export { comporJornadaTraco, estruturaTerciariaDe, idsEtapas, textosDaJornada } from "./compor.js";
 export type {
   BlocoJornada,
   EtapaJornada,

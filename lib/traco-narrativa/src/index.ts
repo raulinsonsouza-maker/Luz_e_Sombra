@@ -12,6 +12,7 @@ export { gerarNarrativa, type GerarNarrativaInput } from "./gerarNarrativa.js";
 export { leituraDoTraco } from "./leitura.js";
 export {
   comporJornadaTraco,
+  estruturaTerciariaDe,
   idsEtapas,
   textosDaJornada,
   type BlocoJornada,

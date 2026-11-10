@@ -29,8 +29,10 @@ export type EtapaJornada = {
 export type MapaJornada = {
   principal: EstruturaTraco;
   secundaria: EstruturaTraco;
+  terciaria: EstruturaTraco;
   nomePrincipal: string;
   nomeSecundaria: string;
+  nomeTerciaria: string;
   percentuais: EstruturasPct;
   pontosFortes: string[];
   pontosAtencao: string[];

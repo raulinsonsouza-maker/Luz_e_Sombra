@@ -1,3 +1,4 @@
+import { limparJargao } from "@workspace/copy-voz";
 import * as T from "../tabelas.js";
 import type { EstruturaTraco, EstruturasPct, ResultadoAnalise } from "../types.js";
 import { INTEGRACAO_TABELA, RECURSOS_TABELA, SOMBRA_TABELA } from "./complementos.js";
@@ -10,8 +11,12 @@ function texto(...partes: Array<string | null | undefined>): string[] {
   return partes.map((p) => (p ?? "").trim()).filter(Boolean);
 }
 
+function prosa(valor: string | null | undefined): string {
+  return limparJargao((valor ?? "").trim());
+}
+
 function blocoTexto(rotulo: string | undefined, valor: string | null | undefined): BlocoJornada | null {
-  const t = (valor ?? "").trim();
+  const t = prosa(valor);
   if (!t) return null;
   return rotulo ? { tipo: "texto", rotulo, texto: t } : { tipo: "texto", texto: t };
 }
@@ -20,13 +25,51 @@ function limparBlocos(blocos: Array<BlocoJornada | null | undefined>): BlocoJorn
   return blocos.filter((b): b is BlocoJornada => b != null);
 }
 
-function significadoMapa(principal: EstruturaTraco, secundaria: EstruturaTraco): string {
+/** Terceiro maior percentual (diferente de principal e secundário). */
+export function estruturaTerciariaDe(
+  estruturas: EstruturasPct,
+  principal: EstruturaTraco,
+  secundaria: EstruturaTraco,
+): EstruturaTraco {
+  const ordenado = (Object.entries(estruturas) as Array<[EstruturaTraco, number]>).sort(
+    (a, b) => b[1] - a[1],
+  );
+  const terceiro = ordenado.find(([k]) => k !== principal && k !== secundaria);
+  return terceiro?.[0] ?? secundaria;
+}
+
+function significadoMapa(
+  principal: EstruturaTraco,
+  secundaria: EstruturaTraco,
+  terciaria: EstruturaTraco,
+): string {
   const nomeP = T.NOMES[principal];
   const nomeS = T.NOMES[secundaria];
+  const nomeT = T.NOMES[terciaria];
   if (principal === secundaria) {
     return `Seu resultado aponta com clareza para o traço ${nomeP}: ${T.SINTESE_FOCO[principal]}.`;
   }
-  return `Seu resultado mostra ${nomeP} como o jeito que mais aparece, ${T.SINTESE_ADJ_PRINCIPAL[principal]}, com presença de ${nomeS}, ${T.SINTESE_TOQUE_SECUNDARIO[secundaria]}.`;
+  const base = `Seu resultado mostra ${nomeP} como o jeito que mais aparece, ${T.SINTESE_ADJ_PRINCIPAL[principal]}, com presença de ${nomeS}, ${T.SINTESE_TOQUE_SECUNDARIO[secundaria]}`;
+  if (terciaria === secundaria || terciaria === principal) {
+    return `${base}.`;
+  }
+  return `${base}. Ainda aparece um terceiro tom de ${nomeT}, que colore o conjunto sem ocupar o centro.`;
+}
+
+function necessidadePorTras(principal: EstruturaTraco): string {
+  if (principal === "esquizoide") {
+    return "Por trás da distância pode haver o desejo de existir com segurança e ser acolhido sem invasão.";
+  }
+  if (principal === "oral") {
+    return "Por trás da busca pelo outro pode haver o desejo de ser sustentado de forma constante.";
+  }
+  if (principal === "psicopata") {
+    return "Por trás do controle pode haver o desejo de não ser ferido outra vez e de manter dignidade.";
+  }
+  if (principal === "masoquista") {
+    return "Por trás do aguentar pode haver o desejo de pertencimento sem crítica.";
+  }
+  return "Por trás da excelência pode haver o desejo de ser escolhido e amado sem precisar provar.";
 }
 
 export function comporJornadaTraco(resultado: {
@@ -48,27 +91,30 @@ export function comporJornadaTraco(resultado: {
 }): JornadaTraco {
   const principal = resultado.estruturaPrincipal;
   const secundaria = resultado.estruturaSecundaria;
+  const terciaria = estruturaTerciariaDe(resultado.estruturas, principal, secundaria);
   const nomeP = T.NOMES[principal];
   const nomeS = T.NOMES[secundaria];
-  const dia = resultado.dinamicaFuncional ?? T.DINAMICAS_FUNCIONAIS[principal];
-  const estilo = resultado.estiloComunicacao ?? T.ESTILOS_COMUNICACAO[principal];
-  const ferida = resultado.ferida ?? T.FERIDAS[principal];
-  const dorLivro = resultado.dorLivro ?? T.DORES_LIVRO[principal];
-  const recurso = resultado.recurso ?? T.RECURSOS[principal];
+  const nomeT = T.NOMES[terciaria];
+  // Preferir tabelas atuais para a prosa principal (resultado salvo pode estar desatualizado).
+  const dia = T.DINAMICAS_FUNCIONAIS[principal];
+  const estilo = T.ESTILOS_COMUNICACAO[principal];
+  const ferida = T.FERIDAS[principal];
+  const dorLivro = T.DORES_LIVRO[principal];
+  const recurso = T.RECURSOS[principal];
   const interp = T.INTERPRETACOES[principal];
   const comboKey = `${principal}-${secundaria}`;
-  const perfilUnico =
-    resultado.perfilUnico ??
+  const perfilPar =
+    T.PERFIS_PAR[comboKey] ??
     T.PERFIS_UNICOS[comboKey] ??
     `A combinação de ${nomeP} com ${nomeS} cria um perfil próprio. As duas forças se encontram no seu jeito de viver.`;
-  const comboCurto = T.COMBOS[comboKey];
   const recomendacoes = resultado.recomendacoesPraticas?.length
     ? resultado.recomendacoesPraticas
     : T.RECOMENDACOES[principal];
-  const mensagem = resultado.mensagemTerapeutica ?? T.MENSAGENS[principal];
-  const pergunta = resultado.perguntaTransformacao ?? T.PERGUNTAS_TRANSFORMACAO[principal];
+  const mensagem = T.MENSAGENS[principal];
+  const pergunta = T.PERGUNTAS_TRANSFORMACAO[principal];
   const pontosFortes = resultado.pontosFortes?.length ? resultado.pontosFortes : T.PONTOS_FORTES[principal];
   const pontosAtencao = resultado.pontosAtencao?.length ? resultado.pontosAtencao : T.PONTOS_ATENCAO[principal];
+  const significado = significadoMapa(principal, secundaria, terciaria);
 
   const etapas: EtapaJornada[] = [
     {
@@ -79,9 +125,9 @@ export function comporJornadaTraco(resultado: {
       blocos: limparBlocos([
         blocoTexto(
           "O que os números mostram",
-          "Cada percentual diz quanto aquele jeito aparece no seu perfil. Os cinco somam 100%. O maior é o que mais conduz; o segundo colore o primeiro.",
+          "Cada percentual diz quanto aquele jeito aparece no seu perfil. Os cinco somam 100%. O maior conduz; o segundo colore o primeiro; o terceiro acrescenta um tom.",
         ),
-        blocoTexto("O que isso significa?", significadoMapa(principal, secundaria)),
+        blocoTexto("O que isso significa?", significado),
       ]),
     },
     {
@@ -90,9 +136,10 @@ export function comporJornadaTraco(resultado: {
       titulo: "Como seu padrão se formou",
       subtitulo: "A história que este traço pode carregar",
       blocos: limparBlocos([
-        blocoTexto("Em uma frase", resultado.fraseIdentidade ?? T.FRASES_IDENTIDADE[principal]),
-        blocoTexto("A origem nesta abordagem", interp[0]),
+        blocoTexto("Em uma frase", T.FRASES_IDENTIDADE[principal]),
+        blocoTexto("De onde isso pode ter vindo", interp[0]),
         blocoTexto("O que essa proteção desenvolveu", interp[1]),
+        blocoTexto("Como isso pode aparecer hoje", interp[2]),
       ]),
     },
     {
@@ -103,18 +150,7 @@ export function comporJornadaTraco(resultado: {
       blocos: limparBlocos([
         blocoTexto("A experiência emocional", ferida),
         blocoTexto("Como isso pode ter ecoado na vida", dorLivro),
-        blocoTexto(
-          "A necessidade por trás",
-          principal === "esquizoide"
-            ? "Por trás da distância pode haver o desejo de existir com segurança e ser acolhido sem invasão."
-            : principal === "oral"
-              ? "Por trás da busca pelo outro pode haver o desejo de ser sustentado de forma constante."
-              : principal === "psicopata"
-                ? "Por trás do controle pode haver o desejo de não ser ferido outra vez e de manter dignidade."
-                : principal === "masoquista"
-                  ? "Por trás do aguentar pode haver o desejo de pertencimento sem crítica."
-                  : "Por trás da excelência pode haver o desejo de ser escolhido e amado sem precisar provar.",
-        ),
+        blocoTexto("A necessidade por trás", necessidadePorTras(principal)),
       ]),
     },
     {
@@ -184,17 +220,17 @@ export function comporJornadaTraco(resultado: {
       id: "outros",
       numero: 7,
       titulo: "A influência dos outros traços",
-      subtitulo: "Como o segundo traço colore o primeiro",
+      subtitulo: "Como o segundo e o terceiro coloram o primeiro",
       blocos: limparBlocos([
         blocoTexto(
-          "Seu par principal",
+          "Seu trio",
           principal === secundaria
             ? `O traço ${nomeP} aparece com bastante clareza no seu perfil.`
-            : `Principal: ${nomeP}. Secundário: ${nomeS}.`,
+            : `Principal: ${nomeP}. Também presente: ${nomeS}. Terceiro tom: ${nomeT}.`,
         ),
-        blocoTexto("Como essas forças se encontram", perfilUnico),
-        comboCurto && principal !== secundaria
-          ? blocoTexto("Em uma frase", `Entre ${nomeP} e ${nomeS}, ${comboCurto}`)
+        blocoTexto("Como as duas forças principais se encontram", perfilPar),
+        principal !== terciaria && secundaria !== terciaria
+          ? blocoTexto("O que o terceiro traço acrescenta", T.TOQUE_TERCIARIO[terciaria])
           : null,
       ]),
     },
@@ -204,6 +240,7 @@ export function comporJornadaTraco(resultado: {
       titulo: "Seu caminho de integração",
       subtitulo: "O que flexibilizar e o que praticar",
       blocos: limparBlocos([
+        blocoTexto("O caminho que se abre", interp[3]),
         {
           tipo: "tabela",
           rotulo: "Deixar de viver só assim · Aprender a experimentar",
@@ -224,13 +261,13 @@ export function comporJornadaTraco(resultado: {
       titulo: "Da sombra à luz",
       subtitulo: "Reconhecimento e um próximo passo",
       blocos: limparBlocos([
-        { tipo: "destaque", rotulo: "Para levar com você", texto: mensagem },
+        { tipo: "destaque", rotulo: "Para levar com você", texto: prosa(mensagem) },
         blocoTexto(
           undefined,
           interp[4] ??
             "Seu próximo passo não é se tornar outra pessoa. É descobrir quem você pode ser quando a proteção antiga não precisa mais conduzir sozinha.",
         ),
-        { tipo: "destaque", rotulo: "Para pensar", texto: pergunta },
+        { tipo: "destaque", rotulo: "Para pensar", texto: prosa(pergunta) },
       ]),
     },
   ];
@@ -240,12 +277,14 @@ export function comporJornadaTraco(resultado: {
     mapa: {
       principal,
       secundaria,
+      terciaria,
       nomePrincipal: nomeP,
       nomeSecundaria: nomeS,
+      nomeTerciaria: nomeT,
       percentuais: resultado.estruturas,
       pontosFortes,
       pontosAtencao,
-      significado: significadoMapa(principal, secundaria),
+      significado,
     },
     etapas,
   };
@@ -263,7 +302,9 @@ export function textosDaJornada(jornada: JornadaTraco): string[] {
       if (bloco.tipo === "texto" || bloco.tipo === "destaque") out.push(bloco.texto);
       if (bloco.tipo === "lista" || bloco.tipo === "passos") out.push(...bloco.itens);
       if (bloco.tipo === "tabela") {
-        for (const [a, b] of bloco.linhas) out.push(a, b);
+        for (const linha of bloco.linhas) {
+          out.push(...linha);
+        }
       }
     }
   }

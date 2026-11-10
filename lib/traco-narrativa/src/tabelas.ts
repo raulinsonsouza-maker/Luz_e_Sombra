@@ -20,15 +20,15 @@ const APELIDOSS: Record<keyof EstruturasPct, string> = {
 
 const FRASES_IDENTIDADE: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "Você pensa fundo e imagina caminhos que muita gente ainda não enxerga. Na abordagem dos traços, esse jeito se associa à fase mais cedo da vida, quando a dor da rejeição pode ter ensinado a se proteger pela distância. O corpo costuma ser mais alongado. O que segue é a leitura desse jeito de funcionar, não um rótulo.",
+    "Você pensa fundo e imagina caminhos que muita gente ainda não enxerga. Esse jeito pode ter se formado bem cedo, quando a dor da rejeição ensinou a se proteger pela distância. O corpo costuma ser mais alongado. O que segue é a leitura desse jeito de funcionar — não um rótulo.",
   oral:
-    "Você sente o outro e comunica afeto com facilidade. Na abordagem dos traços, isso se associa à amamentação, do nascimento até cerca de 1 ano, quando a dor do abandono pode ter pedido colo. O corpo tende a formas mais suaves. A leitura abaixo mostra como esse padrão pode aparecer na sua vida hoje.",
+    "Você sente o outro e comunica afeto com facilidade. Isso pode ter se formado no primeiro ano de vida, quando a dor do abandono pediu colo e sustentação. O corpo tende a formas mais suaves. A leitura abaixo mostra como esse padrão pode aparecer na sua vida hoje.",
   psicopata:
-    "Você organiza, lidera e negocia com naturalidade. Na abordagem dos traços, essa força se associa à fase entre 1 e 2,5 anos, quando a dor pode ter sido a de ser controlado ou de precisar controlar para se sentir seguro. O corpo muitas vezes mostra ombros mais largos que o quadril. A leitura longa explica como isso pode viver em você.",
+    "Você organiza, lidera e negocia com naturalidade. Essa força pode ter se formado entre 1 e 2 anos e meio, quando ser controlado — ou precisar controlar para se sentir seguro — deixou marca. O corpo muitas vezes mostra ombros mais largos que o quadril. A leitura aprofunda como isso pode viver em você.",
   masoquista:
-    "Você aguenta, planeja e sustenta. Na abordagem dos traços, isso se associa ao desfralde, entre 2,5 e 3,5 anos, quando a dor da crítica ou da humilhação pode ter ensinado a se proteger pelo silêncio e pela resistência. O corpo tende a ser mais encorpado. A análise detalhada continua abaixo, no nome Masoquista.",
+    "Você aguenta, planeja e sustenta. Isso pode ter se formado por volta dos 2 anos e meio a 3 anos e meio, quando a crítica ou a humilhação ensinou a se proteger pelo silêncio e pela resistência. O corpo tende a ser mais encorpado. A leitura a seguir aprofunda o Masoquista com cuidado.",
   rigido:
-    "Você executa, capricha e mantém o ritmo. Na abordagem dos traços, isso se associa à fase entre 3,5 e 5 anos, quando a dor da exclusão afetiva ou da traição do vínculo pode ter ensinado a se proteger pela excelência. O corpo costuma ser harmônico. O texto a seguir aprofunda o Rígido, sem apelido no lugar do traço.",
+    "Você executa, capricha e mantém o ritmo. Isso pode ter se formado entre 3 anos e meio e 5 anos, quando a exclusão afetiva ou a quebra de confiança ensinou a se proteger pela excelência. O corpo costuma ser harmônico. O texto a seguir aprofunda o Rígido sem trocar o nome do traço.",
 };
 
 const PONTOS_FORTES: Record<keyof EstruturasPct, string[]> = {
@@ -49,15 +49,15 @@ const PONTOS_ATENCAO: Record<keyof EstruturasPct, string[]> = {
 
 const FERIDAS: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "Na abordagem dos traços, a estrutura Esquizóide se associa a experiências muito cedo, ainda na gestação ou nos primeiros contatos com o mundo, em que existir plenamente pode ter parecido arriscado. A rejeição, a frieza ou a invasão podem ter ensinado a se proteger pela distância. Não é frieza. É um jeito antigo de cuidar de si, antes mesmo de haver palavras para isso. Observe se essa história faz sentido para a sua vida.",
+    "O Esquizóide costuma se ligar a experiências muito cedo — ainda na gestação ou nos primeiros contatos com o mundo — em que existir plenamente pode ter parecido arriscado. A rejeição, a frieza ou a invasão podem ter ensinado a se proteger pela distância. Não é frieza: é um jeito antigo de cuidar de si, antes mesmo de haver palavras para isso. Observe se essa história faz sentido para a sua vida.",
   oral:
-    "Na abordagem dos traços, a estrutura Oral se associa à fase do nascimento até cerca de 1 ano, quando o colo e a sustentação podem ter faltado ou chegado de forma irregular. A dor do abandono pode ter ensinado a buscar fora o que faltou por dentro. O abandono não define quem você é. Ele ajuda a entender por que receber ainda pode parecer difícil ou perigoso. Observe se essa experiência encontra eco na sua história.",
+    "O Oral costuma se ligar ao nascimento até cerca de 1 ano, quando o colo e a sustentação podem ter faltado ou chegado de forma irregular. A dor do abandono pode ter ensinado a buscar fora o que faltou por dentro. O abandono não define quem você é: ajuda a entender por que receber ainda pode parecer difícil ou perigoso. Observe se essa experiência encontra eco na sua história.",
   psicopata:
-    "Na abordagem dos traços, a estrutura Psicopata se associa à fase entre 1 e 2,5 anos, quando confiar pode ter custado caro e controlar o ambiente pode ter parecido a única forma de se sentir seguro. A dor de ser manipulado, interrompido ou forçado pode ter ensinado a liderar e a negociar para não ficar por baixo. A força é real. O custo aparece quando ninguém consegue te ver sem a estratégia. Observe se isso faz sentido para você.",
+    "O Psicopata costuma se ligar à fase entre 1 e 2 anos e meio, quando confiar pode ter custado caro e controlar o ambiente pode ter parecido a única forma de se sentir seguro. A dor de ser manipulado, interrompido ou forçado pode ter ensinado a liderar e a negociar para não ficar por baixo. A força é real. O custo aparece quando ninguém consegue te ver sem a estratégia. Observe se isso faz sentido para você.",
   masoquista:
-    "Na abordagem dos traços, a estrutura Masoquista se associa ao desfralde, entre 2,5 e 3,5 anos, quando querer algo seu pode ter custado crítica, humilhação ou pressão para se adaptar. Você pode ter aprendido a ficar forte, fiel e capaz de aguentar. Aguentar tudo não precisa ser a única prova de valor. A vida também cabe leve. Observe se essa leitura encontra eco na sua história.",
+    "O Masoquista costuma se ligar à fase entre 2 anos e meio e 3 anos e meio, quando querer algo seu pode ter custado crítica, humilhação ou pressão para se adaptar. Você pode ter aprendido a ficar forte, fiel e capaz de aguentar. Aguentar tudo não precisa ser a única prova de valor: a vida também cabe leve. Observe se essa leitura encontra eco na sua história.",
   rigido:
-    "Na abordagem dos traços, a estrutura Rígida se associa à fase entre 3,5 e 5 anos, quando demonstrar sentimento, confiar plenamente ou se entregar pode ter trazido frustração, rejeição ou sensação de não ser escolhido. Você pode ter aprendido a controlar melhor as emoções, a buscar reconhecimento pelo que realiza e a demonstrar valor sendo correto, competente e admirável. Por dentro, o sentimento continua. Ele só espera permissão para aparecer sem perder o seu padrão. Observe se essa história faz sentido para você.",
+    "O Rígido costuma se ligar à fase entre 3 anos e meio e 5 anos, quando demonstrar sentimento, confiar plenamente ou se entregar pode ter trazido frustração, rejeição ou sensação de não ser escolhido. Você pode ter aprendido a controlar melhor as emoções, a buscar reconhecimento pelo que realiza e a demonstrar valor sendo correto, competente e admirável. Por dentro, o sentimento continua: ele só espera permissão para aparecer sem perder o seu padrão. Observe se essa história faz sentido para você.",
 };
 
 const RECURSOS: Record<keyof EstruturasPct, string> = {
@@ -194,18 +194,32 @@ const SINTESE_FOCO: Record<keyof EstruturasPct, string> = {
 };
 
 const SINTESE_TOQUE_SECUNDARIO: Record<keyof EstruturasPct, string> = {
-  esquizoide: "também com necessidade de recolhimento e reflexão",
-  oral: "grande capacidade de vínculo e cuidado",
-  psicopata: "traços de liderança e determinação",
-  masoquista: "uma força de suporte que raramente pede ajuda",
-  rigido: "organização e compromisso com o que importa",
+  esquizoide: "com necessidade de recolhimento e reflexão",
+  oral: "com grande capacidade de vínculo e cuidado",
+  psicopata: "com traços de liderança e determinação",
+  masoquista: "com uma força de suporte que raramente pede ajuda",
+  rigido: "com organização e compromisso com o que importa",
+};
+
+/** Quando o traço aparece em 3º no mapa: o que ele acrescenta sem roubar o centro. */
+const TOQUE_TERCIARIO: Record<keyof EstruturasPct, string> = {
+  esquizoide:
+    "Em terceiro, o Esquizóide acrescenta um espaço interior: você pensa antes de se entregar por completo e precisa de momentos só seus para não se perder no contato. Essa distância discreta pode ser sabedoria — desde que não vire fuga quando a vida pede presença.",
+  oral:
+    "Em terceiro, o Oral acrescenta calor e sede de vínculo: mesmo quando outro traço conduz, você ainda busca ser visto e cuidar. Isso humaniza o perfil — e pede atenção para não se esvaziar dando o que ninguém pediu.",
+  psicopata:
+    "Em terceiro, o Psicopata acrescenta impulso de avanço e de organizar o entorno. Você consegue empurrar decisões e tomar frente quando precisa — o cuidado é não usar essa força só para não sentir.",
+  masoquista:
+    "Em terceiro, o Masoquista acrescenta capacidade de aguentar e permanecer. Você sustenta o que importa por tempo longo — e pode acabar carregando além do justo se não nomear o limite a tempo.",
+  rigido:
+    "Em terceiro, o Rígido acrescenta ordem, capricho e compromisso com a qualidade. Você fecha o que começa e mantém o padrão — o convite é deixar a excelência servir à vida, não substituir o afeto.",
 };
 
 const PADROES_POSTURAIS: Record<keyof EstruturasPct, string> = {
   esquizoide:
     "O corpo pode parecer mais estreito e menos contínuo, com ombros recolhidos e pouco espaço ocupado. Há uma qualidade de ausência parcial, como se só parte da pessoa estivesse presente. A leitura corporal é um apoio, não uma sentença sobre quem você é.",
   oral:
-    "O corpo pode comunicar colapso suave de cima para baixo: peito menos aberto, ombros para frente, cabeça um pouco avançada. Parece ainda buscar um apoio externo. Isso fala de necessidade de sustentação, não de fraqueza.",
+    "O corpo pode comunicar um ceder suave de cima para baixo: peito menos aberto, ombros para frente, cabeça um pouco avançada. Parece ainda buscar um apoio externo. Isso fala de necessidade de sustentação, não de fraqueza.",
   psicopata:
     "O corpo pode mostrar expansão na metade de cima: ombros largos, peito projetado, cabeça erguida. A vitalidade sobe e vai para frente. Pernas e base podem parecer menos expressivas. É um corpo de comando, e também de proteção.",
   masoquista:
@@ -241,7 +255,7 @@ const MENSAGENS: Record<keyof EstruturasPct, string> = {
   oral:
     "Receber apoio não enfraquece o seu jeito de cuidar. Quanto mais estrutura interna você constrói, mais consegue sustentar vínculos sem se esvaziar. Pedir o que precisa faz parte de como você funciona melhor, não de uma falha.",
   psicopata:
-    "Sua força já está provada. O próximo passo é permitir que vulnerabilidade e liderança caminhem juntas: mostrar limite e necessidade não reduz influência. Aumenta confiança.",
+    "Sua força já está provada. O próximo passo é permitir que vulnerabilidade e liderança caminhem juntas: mostrar limite e necessidade não reduz influência — aumenta confiança.",
   masoquista:
     "Suportar não precisa ser a sua única identidade. Expansão, prazer e leveza também cabem em você. Dizer não em doses pequenas reescreve o padrão antigo sem apagar a sua lealdade.",
   rigido:
@@ -250,35 +264,35 @@ const MENSAGENS: Record<keyof EstruturasPct, string> = {
 
 const INTERPRETACOES: Record<keyof EstruturasPct, string[]> = {
   esquizoide: [
-    "Na abordagem dos traços, a estrutura Esquizóide se associa a experiências muito cedo, em que estar inteiro no mundo pode ter parecido arriscado. A proteção pode ter sido se afastar, observar e criar um universo interior rico. Você pode ter aprendido que pensar era mais seguro do que sentir e ser visto. Observe se essa origem encontra eco na sua história.",
-    "Com o tempo, essa proteção pode ter desenvolvido um talento real: profundidade, criatividade e capacidade de ver o que outros não veem. Ao mesmo tempo, o corpo pode ter ficado um pouco de fora da conversa. Ombros se recolhem, a presença parece incompleta, a solidão vira fortaleza e, às vezes, prisão. O trabalho não é se tornar outra pessoa. É reunir o que já é seu.",
-    "Hoje, isso pode aparecer como necessidade de espaço, dificuldade de se manter em ambientes muito estimulantes e uma vida interior que poucos conhecem de verdade. Você pode ser leal e intenso nos poucos vínculos que escolhe. O desafio é confiar, em doses, que é seguro existir aqui e ser tocado pela vida real.",
+    "O Esquizóide costuma se ligar a experiências muito cedo, em que estar inteiro no mundo pode ter parecido arriscado. A proteção pode ter sido se afastar, observar e criar um universo interior rico. Você pode ter aprendido que pensar era mais seguro do que sentir e ser visto. Observe se essa origem encontra eco na sua história.",
+    "Com o tempo, essa proteção pode ter desenvolvido um talento real: profundidade, criatividade e capacidade de ver o que outros não veem. Ao mesmo tempo, o corpo pode ter ficado um pouco de fora da conversa. Ombros se recolhem, a presença parece incompleta, a solidão vira fortaleza e, às vezes, prisão. O trabalho não é se tornar outra pessoa: é reunir o que já é seu.",
+    "Hoje, isso pode aparecer como necessidade de espaço, dificuldade de se manter em ambientes muito estimulantes e uma vida interior que poucos conhecem de verdade. Você pode ser leal e intenso nos poucos vínculos que escolhe. O desafio é confiar, em doses, que é seguro existir aqui e deixar a vida real te alcançar.",
     "O caminho de integração passa pelo corpo e pela presença. Enquanto a mente já habita mundos sofisticados, o corpo espera ser habitado com a mesma atenção. Cada vez que você ancora a riqueza interior no aqui e agora, a experiência de ser você fica mais inteira.",
     "Integrar o Esquizóide não é se tornar 'comum'. É trazer o universo interior para o contato com o mundo. Quando a presença começa a acompanhar a visão, surge alguém criativo, conectado e profundamente autêntico.",
   ],
   oral: [
-    "Na abordagem dos traços, a estrutura Oral se associa à fase do nascimento até cerca de 1 ano, quando o suporte pode ter faltado ou chegado de forma irregular. A proteção pode ter sido buscar o outro, cuidar, sentir e se ligar. Você pode ter aprendido que o amor vem de fora. Observe se essa história faz sentido para você.",
-    "Com o tempo, essa proteção pode ter desenvolvido uma empatia rara: você lê o outro, aquece ambientes e sustenta vínculos. Ao mesmo tempo, o corpo pode ter aprendido a operar com menos sustentação própria. O peito cede, a energia cai quando a conexão falta, e a pergunta silenciosa aparece: 'e eu, quem me sustenta?'",
+    "O Oral costuma se ligar ao nascimento até cerca de 1 ano, quando o suporte pode ter faltado ou chegado de forma irregular. A proteção pode ter sido buscar o outro, cuidar, sentir e se ligar. Você pode ter aprendido que o afeto vem de fora. Observe se essa história faz sentido para você.",
+    "Com o tempo, essa proteção pode ter desenvolvido uma empatia rara: você lê o outro, aquece ambientes e sustenta vínculos. Ao mesmo tempo, o corpo pode ter aprendido a funcionar com menos sustentação própria. O peito cede, a energia cai quando a conexão falta, e a pergunta silenciosa aparece: e eu, quem me sustenta?",
     "Hoje, isso pode aparecer como generosidade grande, medo de abandonar e de ser abandonado, e dificuldade de receber sem se sentir em dívida. Você pode dar demais para não ficar sozinho. O desafio é construir um centro próprio sem fechar a abertura que já é seu talento.",
     "O caminho de integração passa por pedir, receber e se apoiar em si mesmo com a mesma entrega com que você cuida. Você merece isso como direito, não como recompensa. Limites e autocuidado não apagam o vínculo: tornam o vínculo sustentável.",
-    "Integrar o Oral é descobrir plenitude por dentro. Não é fechar a receptividade. É ter um centro tão forte quanto a capacidade de amar que você já carrega.",
+    "Integrar o Oral é descobrir plenitude por dentro. Não é fechar a receptividade. É ter um centro tão forte quanto a capacidade de cuidar e se ligar que você já carrega.",
   ],
   psicopata: [
-    "Na abordagem dos traços, a estrutura Psicopata se associa à fase entre 1 e 2,5 anos, quando a vontade pode ter sido interrompida e confiar pode ter custado caro. A proteção pode ter sido expandir, controlar e liderar. Você pode ter aprendido que força evita dor. Observe se isso encontra eco na sua vida.",
+    "O Psicopata costuma se ligar à fase entre 1 e 2 anos e meio, quando a vontade pode ter sido interrompida e confiar pode ter custado caro. A proteção pode ter sido expandir, controlar e liderar. Você pode ter aprendido que força evita dor. Observe se isso encontra eco na sua vida.",
     "Com o tempo, essa proteção pode ter desenvolvido magnetismo, visão e capacidade de fazer as coisas andarem. O corpo comunica presença antes da fala. O preço pode ter sido a distância da própria fragilidade: quanto mais forte por cima, menos espaço para ser cuidado por baixo.",
     "Hoje, isso pode aparecer como alta performance, impaciência com lentidão e dificuldade de mostrar necessidade. Você investe onde há respeito e estímulo. O desafio é descobrir que vulnerabilidade, nos momentos certos, não diminui liderança: humaniza e aprofunda a confiança.",
     "O caminho de integração passa por descer. Trazer a força do peito e dos ombros até o chão, até as pernas, até o descanso. Quando o poder vem do corpo inteiro e da verdade, ele se torna sustentável.",
-    "Integrar o Psicopata é permitir que a força e a fragilidade convivam. Líderes que conhecem o próprio limite inspiram uma lealdade que a performance sozinha nunca alcança.",
+    "Integrar o Psicopata é permitir que a força e a fragilidade convivam. Quem conhece o próprio limite inspira uma lealdade que a performance sozinha nunca alcança.",
   ],
   masoquista: [
-    "Na abordagem dos traços, a estrutura Masoquista se associa ao desfralde, entre 2,5 e 3,5 anos, quando expressar vontade pode ter custado crítica ou humilhação. A proteção pode ter sido engolir, aguentar e continuar. Você pode ter aprendido que submissão era mais segura do que expansão. Observe se essa leitura encontra eco em você.",
+    "O Masoquista costuma se ligar à fase entre 2 anos e meio e 3 anos e meio, quando expressar vontade pode ter custado crítica ou humilhação. A proteção pode ter sido engolir, aguentar e continuar. Você pode ter aprendido que ceder era mais seguro do que expandir. Observe se essa leitura encontra eco em você.",
     "Com o tempo, essa proteção pode ter desenvolvido lealdade, persistência e capacidade de sustentar o que outros abandonam. O corpo pode ter comprimido o que não podia ser dito. A força silenciosa é real. O custo é o prazer adiado e o espaço que você ainda hesita em ocupar.",
     "Hoje, isso pode aparecer como fazer demais, reclamar de menos e permanecer em situações que já pedem mudança. Você conhece a dor de dentro e por isso acolhe o outro com profundidade. O desafio é descobrir que o mundo não desaba quando você diz não.",
-    "O caminho de integração é a expansão gradual. Não a explosão. Um tom a mais na voz, um limite pequeno, um prazer permitido. Cada vez que você expressa em vez de engolir, reescreve a história do corpo.",
+    "O caminho de integração é a expansão gradual — não a explosão. Um tom a mais na voz, um limite pequeno, um prazer permitido. Cada vez que você expressa em vez de engolir, reescreve a história do corpo.",
     "Integrar o Masoquista é lembrar que alegria e leveza não são prêmio por sofrimento. São direito. A vida espera que você floresça além do que foi suportado.",
   ],
   rigido: [
-    "Na abordagem dos traços, a estrutura Rígida se associa a experiências infantis em que demonstrar sentimento, confiar plenamente ou se entregar emocionalmente pode ter trazido frustração, rejeição ou sensação de não ser escolhido. Como proteção, você pode ter aprendido a controlar melhor as emoções, buscar reconhecimento pelas capacidades e demonstrar valor pelo que realiza. Assim, em vez de mostrar que precisa de carinho, pode ter tentado merecê-lo sendo correto, competente e admirável. Observe se essa história faz sentido para a sua vida.",
+    "O Rígido costuma se ligar a experiências em que demonstrar sentimento, confiar plenamente ou se entregar pode ter trazido frustração, rejeição ou sensação de não ser escolhido. Como proteção, você pode ter aprendido a controlar melhor as emoções, buscar reconhecimento pelas capacidades e demonstrar valor pelo que realiza. Em vez de mostrar que precisa de carinho, pode ter tentado merecê-lo sendo correto, competente e admirável. Observe se essa história faz sentido para a sua vida.",
     "Com o tempo, essa proteção pode ter desenvolvido excelência, organização e confiabilidade reais. O corpo se mantém unido, a postura comunica competência. O preço pode ser a dificuldade de se desorganizar o suficiente para sentir. O que fica represado não desaparece: espera uma saída segura.",
     "Na vida adulta, essa estratégia pode continuar: você se esforça para ser admirado, sente necessidade de corresponder às expectativas e encontra dificuldade em demonstrar fragilidade, mesmo quando gostaria de receber acolhimento. Externamente você opera com clareza. Por dentro, a emoção pede permissão.",
     "O caminho de integração passa por flexibilizar o controle com intenção, não por perder padrão. Quando você relaxa o suficiente para sentir sem corrigir na hora, a competência ganha profundidade humana.",
@@ -389,11 +403,11 @@ const ESTILOS_COMUNICACAO: Record<keyof EstruturasPct, EstiloComunicacao> = {
   oral: {
     tipo: "Expressivo e relacional",
     descricao:
-      "Você se comunica com abertura. Emoção aparece na voz, no tom e no gesto. Falar ajuda a organizar o que sente. A conversa é conexão, não só troca de informação.",
+      "Você se comunica com abertura. A emoção aparece na voz e também no tom e no gesto. Falar ajuda a organizar o que sente. A conversa é conexão, não só troca de informação.",
     emGrupos:
       "Em grupos, busca calor genuíno e frequentemente aquece o ambiente. Percebe o que o outro precisa ouvir e tem generosidade para dizer. Pode ser o centro emocional sem ser o mais falante.",
     emRelacoes:
-      "Nas relações íntimas, a comunicação flui. Você compartilha e confessa. O desafio é perceber quando fala para aliviar a própria ansiedade e quando fala para conectar de verdade.",
+      "Nas relações íntimas, a comunicação flui com naturalidade. Você compartilha e confessa. O desafio é perceber quando fala para aliviar a própria ansiedade e quando fala para conectar de verdade.",
     emConflito:
       "No conflito, tende a harmonizar. A discórdia incomoda. Às vezes cede antes de dizer o que realmente pensa. Com o tempo, o não-dito vira peso.",
     emTensao:
@@ -440,48 +454,52 @@ const ESTILOS_COMUNICACAO: Record<keyof EstruturasPct, EstiloComunicacao> = {
   },
 };
 
-const PERFIS_UNICOS: Record<string, string> = {
+/** Perfil do par principal+secundário (camada única; substitui a duplicação COMBOS/PERFIS). */
+const PERFIS_PAR: Record<string, string> = {
   "esquizoide-oral":
-    "Você combina profundidade rara com desejo genuíno de conexão, duas forças que muitas vezes puxam em direções opostas. A mente habita universos interiores enquanto a parte que busca vínculo anseia por pertencimento. O resultado pode ser alguém que precisa de solidão e também sofre com ela, deseja o contato e recua diante dele. Essa tensão não é defeito: é o campo da sua integração. Quando as duas se encontram, emerge alguém capaz de unir visão e sentimento.",
+    "Você combina profundidade rara com desejo genuíno de conexão — duas forças que muitas vezes puxam em direções opostas. A mente habita universos interiores enquanto a parte que busca vínculo anseia por pertencimento. O resultado pode ser alguém que precisa de solidão e também sofre com ela: deseja o contato e recua diante dele. Essa tensão não é defeito; é o campo da sua integração. Quando as duas se encontram, emerge alguém capaz de unir visão e sentimento, sem precisar escolher entre pensar e pertencer.",
   "esquizoide-psicopata":
-    "Você é um estrategista que pensa de dentro para fora. A visão do Esquizóide aliada à influência do Psicopata cria alguém capaz de transformar ideias em movimento, muitas vezes preferindo os bastidores à exposição direta. A liderança existe, mas costuma passar por ideias e estruturas. Quando integradas, essas forças produzem um visionário com capacidade de realizar, difícil de ignorar.",
+    "Você pensa de dentro para fora e, ao mesmo tempo, sabe fazer as coisas andarem. A visão do Esquizóide aliada à influência do Psicopata cria alguém capaz de transformar ideias em movimento, muitas vezes preferindo os bastidores à exposição contínua. A liderança existe, mas costuma passar por ideias e direção. Quando as duas forças conversam, surge um visionário com capacidade de realizar — difícil de ignorar, e ainda assim seletivo sobre onde aparece.",
   "esquizoide-masoquista":
-    "A combinação cria uma experiência interna densa e silenciosa. O Esquizóide leva a energia para o pensamento; o Masoquista a segura no corpo. O mundo pode não perceber a intensidade do que acontece por dentro. Há riqueza real enterrada sob contenção. A integração passa por habitar o corpo com gentileza e permitir que o que está dentro ganhe voz e movimento.",
+    "A combinação cria uma experiência interna densa e silenciosa. O Esquizóide leva a energia para o pensamento; o Masoquista a segura no corpo. O mundo pode não perceber a intensidade do que acontece por dentro. Há riqueza real sob contenção. A integração passa por habitar o corpo com gentileza e permitir que o que está dentro ganhe voz e movimento, sem precisar explodir para ser ouvido.",
   "esquizoide-rigido":
-    "Precisão mental aliada à organização prática. A riqueza interior do Esquizóide é estruturada pelo Rígido, criando alguém que gera ideias profundas e as executa com consistência. O desafio compartilhado: ambas as estruturas tendem a manter o mundo emocional à distância. A integração convida o sentir a ocupar o mesmo espaço do pensar e do realizar.",
+    "Precisão mental aliada à organização prática. A riqueza interior do Esquizóide ganha forma com o Rígido: você gera ideias profundas e as executa com consistência. O desafio compartilhado é que os dois tendem a manter o mundo emocional à distância. A integração convida o sentir a ocupar o mesmo espaço do pensar e do realizar — sem perder a qualidade do que você entrega.",
   "oral-esquizoide":
-    "Um anseio de vínculo aliado a uma mente que precisa de distância. Você deseja profundamente e também teme o custo da proximidade. Essa tensão não precisa ser apagada: precisa ser habitada com consciência. Quando integradas, essas forças produzem empatia extraordinária e visão interior rara.",
+    "Um anseio de vínculo aliado a uma mente que precisa de distância. Você deseja profundamente e também teme o custo da proximidade. Essa tensão não precisa ser apagada: precisa ser habitada com consciência. Quando integradas, essas forças produzem empatia profunda e visão interior rara — alguém que cuida sem se perder, e que pensa sem abandonar o outro.",
   "oral-psicopata":
-    "O desejo de ser visto combinado com a força de quem lidera. Pode haver necessidade de reconhecimento disfarçada de generosidade ou de liderança. A pergunta viva é: quando você serve porque quer, e quando busca aprovação que ainda não aprendeu a dar a si? Integradas, essas forças criam um líder profundamente humano.",
+    "O desejo de ser visto combinado com a força de quem lidera. Pode haver necessidade de reconhecimento disfarçada de generosidade ou de liderança. A pergunta viva é: quando você serve porque quer, e quando busca aprovação que ainda não aprendeu a dar a si? Integradas, essas forças criam alguém que conduz com humanidade — forte o bastante para pedir e próximo o bastante para ser seguido de verdade.",
   "oral-masoquista":
-    "Duas histórias de necessidade não atendida podem se reforçar: abandono e humilhação criando autossacrifício. Você carrega muito, oferece muito e frequentemente recebe pouco. A compaixão que nasce disso é rara. A transformação começa com a decisão de que você merece receber tanto quanto oferece, e que pedir não é fraqueza.",
+    "Duas histórias de necessidade não atendida podem se reforçar: abandono e humilhação criando autossacrifício. Você carrega muito, oferece muito e frequentemente recebe pouco. A compaixão que nasce disso é rara. A transformação começa com a decisão de que você merece receber tanto quanto oferece — e que pedir não é fraqueza, é o que torna o cuidado sustentável.",
   "oral-rigido":
-    "A necessidade de vínculo contida por uma estrutura que aprendeu a gerenciar entrega e recebimento. O Oral quer se entregar; o Rígido organiza essa entrega. Você pode cuidar com consistência e raramente se permitir ser completamente vulnerável. A integração abre o vínculo sem perder a estrutura.",
+    "A necessidade de vínculo encontra uma organização que aprendeu a gerenciar entrega e recebimento. O Oral quer se entregar; o Rígido organiza essa entrega. Você pode cuidar com consistência e raramente se permitir ser completamente vulnerável no cuidado. A integração abre o vínculo sem perder a forma: receber sem se desorganizar, e se entregar sem se abandonar.",
   "psicopata-esquizoide":
-    "Um visionário estratégico que prefere a profundidade do pensamento à exposição direta. Você tem influência e visão, mas tende a exercê-las por ideias e estruturas. A liderança opera com distância de segurança. Quando integradas, essas forças produzem profundidade e capacidade de agir com intenção precisa.",
+    "Você tem influência e visão, e prefere a profundidade do pensamento à exposição direta. Tende a exercer liderança por ideias e direção, com uma distância de segurança. Quando integradas, essas forças produzem profundidade e capacidade de agir com intenção precisa — alguém que avança sem precisar estar sempre no centro do palco.",
   "psicopata-oral":
-    "Força por fora e vulnerabilidade por dentro em tensão permanente. A fachada poderosa pode esconder a necessidade de ser visto e sustentado sem impressionar. A integração acontece quando o poder deixa de ser defesa contra a necessidade, e você descobre que mostrar o que precisa humaniza a liderança.",
+    "Força por fora e necessidade de acolhimento por dentro em tensão permanente. A fachada poderosa pode esconder o desejo de ser visto e sustentado sem impressionar. A integração acontece quando o poder deixa de ser defesa contra a necessidade: mostrar o que você precisa humaniza a liderança e aprofunda a confiança de quem está perto.",
   "psicopata-masoquista":
-    "Energia densa: uma parte quer avançar, outra contém. Sem saída saudável, a tensão sobe. Quando integradas, essas forças criam liderança com raiz e humanidade, alguém que conhece ambição e peso ao mesmo tempo.",
+    "Energia densa: uma parte quer avançar, outra contém. Sem saída saudável, a tensão sobe. Quando integradas, essas forças criam liderança com raiz e humanidade — alguém que conhece ambição e peso ao mesmo tempo, e que escolhe crescer sem esmagar nem se esconder atrás do aguentar.",
   "psicopata-rigido":
-    "Excelência e poder na mesma composição. Alguém que lidera e organiza, influencia e entrega. O exterior brilha. O desafio está no interior: quem você é quando não está realizando. Muito feito por fora, com saudade crescente de intimidade real por dentro.",
+    "Excelência e poder na mesma composição. Você lidera e organiza, influencia e entrega. O exterior brilha. O desafio está no interior: quem você é quando não está realizando. Muito feito por fora pode conviver com saudade crescente de intimidade real por dentro — e essa descoberta não diminui o poder: enraíza.",
   "masoquista-esquizoide":
-    "Peso no corpo e distância na mente. Você carrega muito e tem dificuldade de estar presente no corpo que carrega esse peso. A riqueza interior existe, mas fica enterrada. O caminho é a presença encarnada: habitar o corpo com gentileza e permitir expressão.",
+    "Peso no corpo e distância na mente. Você carrega muito e tem dificuldade de estar presente no corpo que carrega esse peso. A riqueza interior existe, mas fica enterrada. O caminho é a presença gentil: habitar o corpo e permitir expressão, para que o que foi guardado deixe de ser só carga e vire história compartilhada.",
   "masoquista-oral":
-    "Duas estruturas que conhecem a dor de perto. Você oferece muito, aguenta muito e frequentemente vive a vida como esforço contínuo. A compaixão que nasce disso é extraordinária. A transformação começa com autocuidado concreto, tratandose com a mesma generosidade que oferece ao mundo.",
+    "Dois jeitos que conhecem a dor de perto. Você oferece muito, aguenta muito e frequentemente vive a vida como esforço contínuo. A compaixão que nasce disso é extraordinária. A transformação começa com autocuidado concreto: tratando-se com a mesma generosidade que oferece ao mundo, e permitindo receber sem culpa.",
   "masoquista-psicopata":
-    "Força em conflito com força: entre se submeter e avançar. Sem saída, pode haver explosão ou implosão. Quando integradas, essas forças criam liderança autêntica que conhece o peso das coisas e ainda assim escolhe crescer.",
+    "Força em conflito com força: entre ceder e avançar. Sem saída, pode haver explosão ou implosão. Quando integradas, essas forças criam liderança autêntica que conhece o peso das coisas e ainda assim escolhe crescer — com dignidade, sem precisar se submeter nem dominar para se sentir seguro.",
   "masoquista-rigido":
-    "Resistência e disciplina. Um guerreiro silencioso e confiável que entrega muito e reclama pouco. A organização cobre o peso. A integração pede permissão para leveza, prazer e alegria, não só resistência.",
+    "Resistência e disciplina. Você entrega muito e reclama pouco; a organização cobre o peso. A integração pede permissão para leveza, prazer e alegria — não só resistência. Flexibilizar não apaga a lealdade: libera espaço para você também caber na conta do cuidado.",
   "rigido-esquizoide":
-    "Organização no mundo e profundidade por dentro. Você funciona bem lá fora e habita universos ricos cá dentro. A estrutura rígida mostra competência; a esquizóide guarda o que raramente é compartilhado. A integração convida essa riqueza a ser vista e recebida.",
+    "Organização no mundo e profundidade por dentro. Você funciona bem lá fora e habita universos ricos cá dentro. O Rígido mostra competência; o Esquizóide guarda o que raramente é compartilhado. A integração convida essa riqueza a ser vista e recebida, sem perder a clareza com que você opera no cotidiano.",
   "rigido-oral":
-    "A necessidade de vínculo gerida pela organização. Você cuida com consistência e regula a entrega. A integração pede aprender a receber apoio com a mesma competência com que oferece, sem administrar cada troca afetiva.",
+    "A necessidade de vínculo é gerida pela organização. Você cuida com consistência e regula a entrega. A integração pede aprender a receber apoio com a mesma competência com que oferece — sem administrar cada troca afetiva, e sem transformar o afeto em tarefa a cumprir.",
   "rigido-psicopata":
-    "Excelência e influência em alto rendimento. O exterior é brilhante e a competência é real. O desafio é encontrar quem você é quando não está realizando ou liderando. Essa descoberta não diminui o poder: enraíza.",
+    "Excelência e influência em alto rendimento. O exterior é brilhante e a competência é real. O desafio é encontrar quem você é quando não está realizando ou liderando. Essa descoberta não diminui o poder: aprofunda. Você continua entregando — e passa a existir também além do que entrega.",
   "rigido-masoquista":
-    "Disciplina e resistência. Você entrega, mantém e quase nunca pede. A organização cobre o custo interno. A integração pede dois movimentos: relaxar o suficiente para sentir o acumulado e expandir o suficiente para não carregar tudo sozinho.",
+    "Disciplina e resistência. Você entrega, mantém e quase nunca pede. A organização cobre o custo interno. A integração pede dois movimentos: relaxar o suficiente para sentir o acumulado e expandir o suficiente para não carregar tudo sozinho — mantendo a qualidade, sem fazer dela a única prova de valor.",
 };
+
+/** @deprecated use PERFIS_PAR — mantido para compatibilidade. */
+const PERFIS_UNICOS = PERFIS_PAR;
 
 const DINAMICAS_FUNCIONAIS: Record<keyof EstruturasPct, DinamicaFuncional> = {
   esquizoide: {
@@ -559,7 +577,7 @@ const DINAMICAS_FUNCIONAIS: Record<keyof EstruturasPct, DinamicaFuncional> = {
 /** Dor associada ao traço, em linguagem acessível e hipotética. */
 const DORES_LIVRO: Record<keyof EstruturasPct, string> = {
   esquizoide:
-    "Na origem desta abordagem, o corpo pode ter aprendido que existir plenamente era arriscado. A distância não é frieza: é cuidado antigo. No cotidiano, o padrão costuma ser recuar antes de se sentir invadido ou rejeitado.",
+    "O corpo pode ter aprendido que existir plenamente era arriscado. A distância não é frieza: é cuidado antigo. No cotidiano, o padrão costuma ser recuar antes de se sentir invadido ou rejeitado.",
   oral:
     "O padrão pode nascer de suporte inconsistente no começo da vida. O corpo busca apoio externo. Na relação, aparece como dar demais, pedir pouco e sentir que nunca é sustentado o suficiente.",
   psicopata:
@@ -628,6 +646,8 @@ export {
   COMBOS,
   CARACTERISTICAS,
   ESTILOS_COMUNICACAO,
+  PERFIS_PAR,
   PERFIS_UNICOS,
+  TOQUE_TERCIARIO,
   DINAMICAS_FUNCIONAIS,
 };

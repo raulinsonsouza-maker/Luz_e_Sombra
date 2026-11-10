@@ -5,8 +5,8 @@ export const VOZ_REGRAS = {
   citacao: '"..."',
   preferir: "em vez de",
   /** Traço de Caráter: explicar como a pessoa funciona, não metáforas românticas. */
-  tracoEvitar: ["amar foi punido", "amor verdadeiro", "ser tocado pela vida", "maior riqueza do coração"] as const,
-  tracoPreferir: ["padrão adaptativo", "como o corpo aprendeu a operar", "mecanismo de proteção", "função no cotidiano"] as const,
+  tracoEvitar: ["amar foi punido", "amor verdadeiro", "ser tocado pela vida", "maior riqueza do coração", "padrão adaptativo", "mecanismo de proteção"] as const,
+  tracoPreferir: ["como você aprendeu a se proteger", "no cotidiano", "o que isso pede de você", "como isso aparece na sua vida"] as const,
 } as const;
 
 /** Substituições PT-PT → PT-BR (ordem importa: frases longas primeiro). */

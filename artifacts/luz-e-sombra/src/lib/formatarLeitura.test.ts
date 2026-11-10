@@ -82,4 +82,21 @@ describe("estruturarTexto", () => {
     assert.equal(pontuar("Dificuldade em mostrar vulnerabilidade"), "Dificuldade em mostrar vulnerabilidade.");
     assert.equal(pontuar("Já termina."), "Já termina.");
   });
+
+  it("não parte a prosa de comunicação Oral em tópicos preposicionais", () => {
+    const blocos = estruturarTexto(
+      "Você se comunica com abertura. A emoção aparece na voz e também no tom e no gesto. Falar ajuda a organizar o que sente.",
+    );
+    assert.ok(blocos.every((b) => b.tipo === "paragrafo"));
+    assert.equal(
+      blocos.some((b) => b.tipo === "lista"),
+      false,
+    );
+  });
+
+  it("não transforma 'nas palavras, no tom, no gesto' em lista", () => {
+    const blocos = estruturarTexto("As emoções aparecem nas palavras, no tom, no gesto.");
+    assert.equal(blocos.length, 1);
+    assert.equal(blocos[0]?.tipo, "paragrafo");
+  });
 });

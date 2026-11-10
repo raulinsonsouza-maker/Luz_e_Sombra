@@ -342,7 +342,7 @@ export default function TracodeCaraterPage() {
       const token = localStorage.getItem("luz_e_sombra_token") ?? "";
 
       // Build photo sources: prefer local File, fall back to server URL
-      setAnalisandoEtapa("Lendo marcadores corporais...");
+      setAnalisandoEtapa("Lendo o que o corpo mostra...");
       const photoSources: Array<{ tipo: TipoFoto; source: File | string }> = [];
       for (const tipo of fotosDisponiveis) {
         const localFile = fotoFiles[tipo];
@@ -355,7 +355,7 @@ export default function TracodeCaraterPage() {
         }
       }
 
-      setAnalisandoEtapa("Calculando estruturas biomecânicas...");
+      setAnalisandoEtapa("Cruzando fotos e respostas...");
       const diagnosticoEmocionalPayload = readDiagnosticoEmocional30Fusao(pessoaIdAtStart);
       const nomePessoa = user?.nome?.split(" ")[0] ?? "Você";
 

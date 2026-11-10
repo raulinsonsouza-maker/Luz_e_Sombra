@@ -98,6 +98,12 @@ function estruturarProsa(texto: string): BlocoLeitura[] {
   return blocos;
 }
 
+function ehSintagmaPreposicionalCurto(item: string): boolean {
+  const t = item.trim();
+  if (t.split(/\s+/).length > 4) return false;
+  return /^(no|na|nos|nas|em|com|por|para|do|da|dos|das|de|ao|à|às|aos)\b/i.test(t);
+}
+
 function fraseComoLista(frase: string): { intro?: string; itens: string[] } | null {
   const limpa = frase.replace(/[.!?]+$/, "").trim();
   const colon = limpa.indexOf(":");
@@ -111,6 +117,7 @@ function fraseComoLista(frase: string): { intro?: string; itens: string[] } | nu
   const minimo = intro ? 3 : 4;
   if (itens.length < minimo) return null;
   if (itens.some((item) => item.length > 72)) return null;
+  if (itens.some(ehSintagmaPreposicionalCurto)) return null;
   if (temAlgumVerbo(semParenteses(itens[itens.length - 1] ?? ""))) return null;
   if (itens.some((item) => ["que", "porque", "quando"].some((palavra) => temPalavra(semParenteses(item), palavra)))) return null;
   if (!intro && /\b(você|seu|sua)\b/i.test(itens[0] ?? "")) return null;
