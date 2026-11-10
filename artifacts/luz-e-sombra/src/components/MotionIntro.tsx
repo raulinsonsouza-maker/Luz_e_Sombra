@@ -90,10 +90,10 @@ export default function MotionIntro({ children }: { children: ReactNode }) {
             onClick={encerrar}
             className="absolute bottom-8 right-6 rounded-full px-4 py-2 text-xs font-semibold tracking-[0.14em] uppercase"
             style={{
-              background: "rgba(247,242,236,0.12)",
-              color: "rgba(247,242,236,0.88)",
-              border: "1px solid rgba(247,242,236,0.22)",
-              backdropFilter: "blur(8px)",
+              background: "linear-gradient(135deg, #c8a56b, #9c7742)",
+              color: "#1a1208",
+              border: "1px solid rgba(240,209,145,0.45)",
+              boxShadow: "0 8px 22px rgba(0,0,0,0.35)",
             }}
           >
             Pular

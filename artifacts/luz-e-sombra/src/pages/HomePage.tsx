@@ -6,7 +6,6 @@ import { dataDiaMes, dataPorExtenso } from "@/lib/frasesAno";
 import { buscarConteudoDia, type ConteudoDia } from "@/lib/conteudoDia";
 import { momentoNumerologico, type MomentoNumerologico } from "@/lib/momentoDoDia";
 import { coresSobreFoto, detectarTomLogo, srcLogo, type TomLogo } from "@/lib/tomLogoPorFundo";
-import { temPercepcaoHoje } from "@/lib/percepcoes";
 import { pedirLuz } from "@/lib/pedirLuz";
 import { toast } from "sonner";
 import { Bell } from "lucide-react";
@@ -60,7 +59,6 @@ export default function HomePage() {
   const [conteudo, setConteudo] = useState<ConteudoDia | null>(null);
   const [abaMomento, setAbaMomento] = useState<"dia" | "mes" | "coletivo">("dia");
   const [pausaAberta, setPausaAberta] = useState(false);
-  const [temPausaHoje, setTemPausaHoje] = useState(() => temPercepcaoHoje());
   const [abasMomentoVistas, setAbasMomentoVistas] = useState<Set<"dia" | "mes" | "coletivo">>(
     () => new Set(["dia"]),
   );
@@ -369,12 +367,10 @@ export default function HomePage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold" style={{ color: "#f7f2ec" }}>
-                {temPausaHoje ? "Seu momento foi guardado" : "Um espaço para se reconhecer."}
+                Um espaço para se reconhecer.
               </p>
               <p className="text-xs leading-relaxed mt-0.5" style={{ color: "rgba(247,242,236,0.45)" }}>
-                {temPausaHoje
-                  ? "Sua percepção de hoje está aqui. Você pode voltar a ela quando quiser."
-                  : "Como você está se sentindo hoje? Reserve um instante para se escutar, acolher o que está presente e perceber o que acontece dentro de você."}
+                Como você está se sentindo hoje? Reserve um instante para se escutar, acolher o que está presente e perceber o que acontece dentro de você.
               </p>
             </div>
             <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "rgba(200,165,107,0.4)" }} />
@@ -483,7 +479,6 @@ export default function HomePage() {
       <PausaDoDiaModal
         open={pausaAberta}
         onClose={() => setPausaAberta(false)}
-        onSaved={() => setTemPausaHoje(true)}
       />
     </div>
   );
