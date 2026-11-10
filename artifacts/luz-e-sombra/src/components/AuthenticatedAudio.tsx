@@ -224,7 +224,7 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
 
       {menuAberto && (
         <div
-          className="absolute left-2 right-2 z-20 mt-2 rounded-2xl px-3.5 pt-3 pb-4 shadow-2xl"
+          className="absolute left-3 right-3 z-20 mt-1.5 rounded-xl px-3 pt-2.5 pb-3 shadow-2xl"
           style={{
             top: "100%",
             background: "rgba(18,12,8,0.96)",
@@ -234,31 +234,31 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
           role="dialog"
           aria-label="Velocidade da reprodução"
         >
-          <div className="relative flex items-center justify-center mb-3 pb-2.5" style={{ borderBottom: "1px solid rgba(247,242,236,0.12)" }}>
+          <div className="relative flex items-center justify-center mb-2 pb-2" style={{ borderBottom: "1px solid rgba(247,242,236,0.12)" }}>
             <button
               type="button"
               onClick={() => setMenuAberto(false)}
-              className="absolute left-0 p-1 rounded-lg"
+              className="absolute left-0 p-0.5 rounded-lg"
               style={{ color: "rgba(247,242,236,0.85)" }}
               aria-label="Voltar"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </button>
-            <p className="text-sm font-medium" style={{ color: "#f7f2ec" }}>
+            <p className="text-xs font-medium" style={{ color: "#f7f2ec" }}>
               Velocidade da reprodução
             </p>
           </div>
 
-          <p className="text-center text-[1.65rem] font-semibold tabular-nums leading-none mb-4" style={{ color: "#f7f2ec" }}>
+          <p className="text-center text-xl font-semibold tabular-nums leading-none mb-3" style={{ color: "#f7f2ec" }}>
             {formatVelocidade(velocidade)}
           </p>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={() => mudarVelocidade(velocidade - PASSO)}
               disabled={velocidade <= MIN_VEL}
-              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+              className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
               style={{
                 background: "rgba(247,242,236,0.1)",
                 color: "#f7f2ec",
@@ -266,7 +266,7 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
               }}
               aria-label="Diminuir velocidade"
             >
-              <Minus className="w-4 h-4" />
+              <Minus className="w-3.5 h-3.5" />
             </button>
 
             <input
@@ -276,7 +276,7 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
               step={PASSO}
               value={velocidade}
               onChange={(e) => mudarVelocidade(Number(e.target.value))}
-              className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer audio-speed-slider"
+              className="flex-1 h-1 rounded-full appearance-none cursor-pointer audio-speed-slider"
               style={{
                 background: `linear-gradient(to right, #f7f2ec ${progressoVel}%, rgba(247,242,236,0.22) ${progressoVel}%)`,
               }}
@@ -287,7 +287,7 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
               type="button"
               onClick={() => mudarVelocidade(velocidade + PASSO)}
               disabled={velocidade >= MAX_VEL}
-              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+              className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
               style={{
                 background: "rgba(247,242,236,0.1)",
                 color: "#f7f2ec",
@@ -295,7 +295,7 @@ export function AuthenticatedAudio({ apiPath, className = "" }: Props) {
               }}
               aria-label="Aumentar velocidade"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
