@@ -573,11 +573,11 @@ function PostCard({
       className="rounded-2xl overflow-hidden shadow-lg shadow-black/20"
       style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}
     >
-      {/* Título + autor */}
-      <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-3">
-        <div className="flex items-start gap-3 min-w-0 flex-1">
+      {/* Autor */}
+      <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-2">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <div
-            className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
+            className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold shrink-0"
             style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.2), rgba(156,119,66,0.1))", color: "#c8a56b", border: "1px solid rgba(200,165,107,0.25)" }}
           >
             {post.autorFotoUrl ? (
@@ -592,24 +592,10 @@ function PostCard({
             )}
           </div>
           <div className="min-w-0">
-            {post.titulo?.trim() ? (
-              <>
-                <h2 className="text-base font-semibold leading-snug" style={{ color: "#f7f2ec" }}>
-                  {post.titulo.trim()}
-                </h2>
-                <p className="text-xs mt-1" style={{ color: "rgba(247,242,236,0.42)" }}>
-                  {post.autorNome}
-                  <span style={{ color: "rgba(247,242,236,0.28)" }}> · {timeAgo(post.criadoEm)}</span>
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-sm font-medium" style={{ color: "#f7f2ec" }}>{post.autorNome}</p>
-                <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
-                  {timeAgo(post.criadoEm)}
-                </p>
-              </>
-            )}
+            <p className="text-sm font-medium truncate" style={{ color: "#f7f2ec" }}>{post.autorNome}</p>
+            <p className="text-xs" style={{ color: "rgba(247,242,236,0.35)" }}>
+              {timeAgo(post.criadoEm)}
+            </p>
           </div>
         </div>
         {isAdmin && (
@@ -627,7 +613,25 @@ function PostCard({
         )}
       </div>
 
-      {/* Mídia em destaque (imagem / vídeo) */}
+      {/* Título */}
+      {post.titulo?.trim() && (
+        <div className="px-5 pt-1 pb-1.5">
+          <h2 className="font-tan-mon-cheri text-xl leading-snug" style={{ color: "#f7f2ec" }}>
+            {post.titulo.trim()}
+          </h2>
+        </div>
+      )}
+
+      {/* Descrição */}
+      {textoPost && (
+        <div className="px-5 pb-3 pt-0.5">
+          <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.78)", whiteSpace: "pre-wrap" }}>
+            {post.conteudo.trim()}
+          </p>
+        </div>
+      )}
+
+      {/* Mídia */}
       {showImagem && (
         <div className="px-0 sm:px-1 mb-1">
           <div className="rounded-none sm:rounded-xl overflow-hidden max-h-[min(70vh,420px)]" style={{ border: "1px solid rgba(200,165,107,0.12)" }}>
@@ -676,15 +680,6 @@ function PostCard({
               Abrir em nova aba
             </a>
           </div>
-        </div>
-      )}
-
-      {/* Texto */}
-      {textoPost && (
-        <div className="px-5 pb-3 pt-2">
-          <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.82)", whiteSpace: "pre-wrap" }}>
-            {post.conteudo.trim()}
-          </p>
         </div>
       )}
 
