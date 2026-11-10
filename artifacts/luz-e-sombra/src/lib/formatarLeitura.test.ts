@@ -99,4 +99,19 @@ describe("estruturarTexto", () => {
     assert.equal(blocos.length, 1);
     assert.equal(blocos[0]?.tipo, "paragrafo");
   });
+
+  it("não parte o cruzamento do trio do Traço em tópicos", () => {
+    const blocos = estruturarTexto(
+      "Lendo os três juntos, o centro da sua vida costuma girar em torno de vínculo e cuidado, com a cor de forma e compromisso e um fio de permanência e sustentação. Na prática, o Oral conduz; o Rígido organiza o jeito de conduzir; o Masoquista acrescenta textura.",
+    );
+    assert.ok(blocos.every((b) => b.tipo === "paragrafo"));
+  });
+
+  it("não parte a integração Oral+Rígido após dois-pontos longos", () => {
+    const blocos = estruturarTexto(
+      "A integração abre o vínculo sem perder a forma: receber sem se desorganizar, se entregar sem se abandonar, e deixar o afeto existir também fora da planilha emocional.",
+    );
+    assert.equal(blocos.length, 1);
+    assert.equal(blocos[0]?.tipo, "paragrafo");
+  });
 });

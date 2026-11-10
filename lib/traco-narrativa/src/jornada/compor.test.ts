@@ -42,7 +42,7 @@ describe("comporJornadaTraco", () => {
     const jornada = comporJornadaTraco(BASE);
     assert.match(jornada.mapa.significado, /Oral/);
     assert.match(jornada.mapa.significado, /Rígido/);
-    assert.match(jornada.mapa.significado, /terceiro tom|Masoquista/i);
+    assert.match(jornada.mapa.significado, /terceiro|Masoquista/i);
     assert.match(jornada.mapa.significado, /Rígido|organização|compromisso/i);
 
     const outros = jornada.etapas.find((e) => e.id === "outros");
@@ -53,8 +53,16 @@ describe("comporJornadaTraco", () => {
     assert.match(texto ?? "", /Oral/);
     assert.match(texto ?? "", /Rígido/);
     assert.match(texto ?? "", /Masoquista/);
-    assert.match(texto ?? "", /terceiro|Em terceiro/i);
-    assert.match(texto ?? "", /Quando os três|Lendo os três juntos/i);
+    assert.match(texto ?? "", /Em terceiro/i);
+    assert.match(texto ?? "", /Lendo os três juntos/i);
+
+    const vida = jornada.etapas.find((e) => e.id === "vida");
+    const vidaTexto = vida?.blocos
+      .filter((b) => b.tipo === "texto")
+      .map((b) => b.texto)
+      .join(" ");
+    assert.match(vidaTexto ?? "", /Rígido/);
+    assert.match(vidaTexto ?? "", /Masoquista/);
   });
 
   it("usa exercícios vivos e não carrega recomendações antigas do resultado", () => {

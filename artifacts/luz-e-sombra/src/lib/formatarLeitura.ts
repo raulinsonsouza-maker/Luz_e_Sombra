@@ -113,14 +113,24 @@ function fraseComoLista(frase: string): { intro?: string; itens: string[] } | nu
     intro = limpa.slice(0, colon).trim();
     corpo = limpa.slice(colon + 1).trim();
   }
+  // Dois-pontos no meio de uma frase longa = prosa, não rótulo de lista.
+  if (intro && intro.split(/\s+/).length > 6) return null;
   const itens = fatiarVirgulas(corpo).filter((item) => item.length >= 3);
   const minimo = intro ? 3 : 4;
   if (itens.length < minimo) return null;
   if (itens.some((item) => item.length > 72)) return null;
   if (itens.some(ehSintagmaPreposicionalCurto)) return null;
+  // Continuação de frase (“e deixar…”, “com a cor…”) não é item de lista.
+  if (itens.some((item) => /^(e|com|sem|para|por|como|ainda|também)\b/i.test(item.trim()))) return null;
   if (temAlgumVerbo(semParenteses(itens[itens.length - 1] ?? ""))) return null;
+  // Infinitivos em série após tese (“receber…, se entregar…”) = prosa concluindo.
+  if (itens.filter((item) => /^(se\s+)?\p{Ll}/u.test(item.trim()) && /\b(receber|deixar|entregar|pedir|cuidar|abrir|fechar)\b/i.test(item)).length >= 2) {
+    return null;
+  }
   if (itens.some((item) => ["que", "porque", "quando"].some((palavra) => temPalavra(semParenteses(item), palavra)))) return null;
-  if (!intro && /\b(você|seu|sua)\b/i.test(itens[0] ?? "")) return null;
+  if (!intro && /\b(você|seu|sua|lendo|na prática|o centro|o risco)\b/i.test(itens[0] ?? "")) return null;
+  // Se algum pedaço ainda carrega verbo de oração completa, é parágrafo.
+  if (itens.some((item) => /\b(costuma|gira|organiz|acrescent|reforç|atravessa|conduz)\b/i.test(item))) return null;
   return { intro, itens };
 }
 

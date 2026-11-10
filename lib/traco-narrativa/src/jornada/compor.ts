@@ -7,12 +7,13 @@ import type { BlocoJornada, EtapaJornada, JornadaTraco } from "./tipos.js";
 const AVISO =
   "Esta leitura é um caminho de autoconhecimento. Ela se apoia principalmente nas suas respostas. O corpo entra como apoio, com cuidado, e não como diagnóstico.";
 
+/** Sem vírgulas internas: entram em frases longas e o formatador não pode parti-las. */
 const FOCO_CURTO: Record<EstruturaTraco, string> = {
   esquizoide: "espaço interior e profundidade",
   oral: "vínculo e cuidado",
   psicopata: "direção e presença",
   masoquista: "permanência e sustentação",
-  rigido: "forma, padrão e compromisso",
+  rigido: "forma e compromisso",
 };
 
 const RISCO_CURTO: Record<EstruturaTraco, string> = {
@@ -21,6 +22,53 @@ const RISCO_CURTO: Record<EstruturaTraco, string> = {
   psicopata: "controlar para não sentir",
   masoquista: "carregar além do justo",
   rigido: "endurecer o afeto sob o nome de qualidade",
+};
+
+/** Como o 2º traço colore o cotidiano (uma frase objetiva por domínio). */
+const COR_SECUNDARIA: Record<EstruturaTraco, { trabalho: string; relacoes: string }> = {
+  esquizoide: {
+    trabalho:
+      "Com o Esquizóide também presente, você precisa de intervalos de silêncio para não perder a qualidade do que entrega.",
+    relacoes:
+      "O Esquizóide colore o vínculo: mesmo querendo perto, você precisa de espaço — e avisar isso evita que o outro leia distância como rejeição.",
+  },
+  oral: {
+    trabalho:
+      "Com o Oral também presente, o clima humano da equipe pesa no seu rendimento: sem vínculo, a entrega seca mais rápido.",
+    relacoes:
+      "O Oral colore o vínculo: há sede de proximidade e o risco de dar além do justo para não perder o calor.",
+  },
+  psicopata: {
+    trabalho:
+      "Com o Psicopata também presente, você empurra decisões e corta nós quando o grupo trava — o cuidado é não transformar urgência em pressão sobre quem está ao lado.",
+    relacoes:
+      "O Psicopata colore o vínculo: há força e direção, e também a tentação de conduzir a intimidade em vez de habitá-la.",
+  },
+  masoquista: {
+    trabalho:
+      "Com o Masoquista também presente, você segura sobrecarga por tempo longo antes de pedir alívio — e isso pode parecer competência até o corpo cobrar.",
+    relacoes:
+      "O Masoquista colore o vínculo: você permanece e aguenta, às vezes além do ponto em que um limite claro seria o verdadeiro cuidado.",
+  },
+  rigido: {
+    trabalho:
+      "Com o Rígido também presente, você cuida com constância e cobra de si um padrão alto — às vezes mais do que o cargo ou a equipe pediram.",
+    relacoes:
+      "O Rígido colore o vínculo: você ama com lealdade organizada e pode demorar a mostrar a parte frágil, mesmo quando o peito já pediu colo.",
+  },
+};
+
+const COR_TERCIARIA: Record<EstruturaTraco, string> = {
+  esquizoide:
+    "Em terceiro, o Esquizóide acrescenta a necessidade de um canto só seu — sem isso, o excesso de contato esgota a presença.",
+  oral:
+    "Em terceiro, o Oral acrescenta calor e a vontade de ser visto: mesmo quando outro traço conduz, o vínculo continua pedindo lugar.",
+  psicopata:
+    "Em terceiro, o Psicopata acrescenta impulso de corte e avanço quando a situação pede decisão rápida.",
+  masoquista:
+    "Em terceiro, o Masoquista acrescenta a tendência a carregar a sobrecarga emocional por tempo longo antes de pedir alívio.",
+  rigido:
+    "Em terceiro, o Rígido acrescenta capricho e a vontade de manter a forma — útil na entrega, arriscado quando vira couraça no afeto.",
 };
 
 function texto(...partes: Array<string | null | undefined>): string[] {
@@ -69,7 +117,7 @@ function significadoMapa(
   if (terciaria === secundaria || terciaria === principal) {
     return `${base}.`;
   }
-  return `${base}. Em terceiro aparece ${nomeT}, que dá um tom a mais ao conjunto sem ocupar o centro.`;
+  return `${base}. Em terceiro aparece ${nomeT}, que colore o conjunto sem ocupar o centro.`;
 }
 
 function necessidadePorTras(principal: EstruturaTraco): string {
@@ -96,19 +144,15 @@ function quandoOsTresSeEncontram(
   const nomeP = T.NOMES[principal];
   const nomeS = T.NOMES[secundaria];
   const nomeT = T.NOMES[terciaria];
+  // Frases curtas e sem listas de vírgulas: o formatador não deve partir este bloco.
   return (
-    `Lendo os três juntos, o centro da sua vida costuma girar em torno de ${FOCO_CURTO[principal]}, ` +
-    `com a cor de ${FOCO_CURTO[secundaria]} e um fio de ${FOCO_CURTO[terciaria]}. ` +
-    `Na prática, o ${nomeP} conduz; o ${nomeS} organiza o jeito de conduzir; o ${nomeT} acrescenta textura. ` +
-    `O risco do conjunto é ${RISCO_CURTO[principal]}, reforçado pela tendência a ${RISCO_CURTO[secundaria]} ` +
+    `Lendo os três juntos: o ${nomeP} conduz em torno de ${FOCO_CURTO[principal]}. ` +
+    `O ${nomeS} dá a cor de ${FOCO_CURTO[secundaria]}. ` +
+    `O ${nomeT} acrescenta um fio de ${FOCO_CURTO[terciaria]}. ` +
+    `O risco do conjunto é ${RISCO_CURTO[principal]} — reforçado pela tendência a ${RISCO_CURTO[secundaria]} ` +
     `e atravessado pelo impulso de ${RISCO_CURTO[terciaria]}. ` +
-    `Integração aqui não é apagar nenhum dos três: é deixar o ${nomeP} brilhar sem que os outros trabalhem só como defesa.`
+    `Integração aqui não é apagar nenhum dos três. É deixar o ${nomeP} brilhar sem que os outros trabalhem só como defesa.`
   );
-}
-
-function vidaComunicacao(estilo: ResultadoAnalise["estiloComunicacao"]): string {
-  if (!estilo) return "";
-  return [estilo.descricao, estilo.emRelacoes, estilo.emConflito].filter(Boolean).join(" ");
 }
 
 export function comporJornadaTraco(resultado: {
@@ -150,10 +194,22 @@ export function comporJornadaTraco(resultado: {
   const recomendacoes = T.RECOMENDACOES[principal];
   const mensagem = T.MENSAGENS[principal];
   const pergunta = T.PERGUNTAS_TRANSFORMACAO[principal];
-  const pontosFortes = resultado.pontosFortes?.length ? resultado.pontosFortes : T.PONTOS_FORTES[principal];
-  const pontosAtencao = resultado.pontosAtencao?.length ? resultado.pontosAtencao : T.PONTOS_ATENCAO[principal];
+  // Mapa: só o traço principal — evita misturar Excelência/Organização sem contexto.
+  const pontosFortes = T.PONTOS_FORTES[principal];
+  const pontosAtencao = T.PONTOS_ATENCAO[principal];
   const significado = significadoMapa(principal, secundaria, terciaria);
+  const temSecundario = secundaria !== principal;
   const temTerciarioDistinto = terciaria !== secundaria && terciaria !== principal;
+
+  const trabalho = temSecundario
+    ? `${dia.trabalho} ${COR_SECUNDARIA[secundaria].trabalho}`
+    : dia.trabalho;
+  const relacoes = temSecundario
+    ? `${dia.relacoes} ${COR_SECUNDARIA[secundaria].relacoes}`
+    : dia.relacoes;
+  const decisoes = temTerciarioDistinto
+    ? `${dia.decisoes} ${COR_TERCIARIA[terciaria]}`
+    : dia.decisoes;
 
   const etapas: EtapaJornada[] = [
     {
@@ -164,7 +220,7 @@ export function comporJornadaTraco(resultado: {
       blocos: limparBlocos([
         blocoTexto(
           "O que os números mostram",
-          "Cada percentual diz quanto aquele jeito aparece no seu perfil. Os cinco somam 100%. O maior conduz; o segundo colore o primeiro; o terceiro acrescenta um tom. Os menores não somem: ficam em segundo plano até a vida pedi-los.",
+          "Cada percentual diz quanto aquele jeito aparece no seu perfil. Os cinco somam 100%. O maior conduz; o segundo colore o primeiro; o terceiro acrescenta nuance. Os menores não somem: ficam em segundo plano até a vida pedi-los.",
         ),
         blocoTexto("O que isso significa?", significado),
       ]),
@@ -217,11 +273,12 @@ export function comporJornadaTraco(resultado: {
       titulo: "Como isso aparece na sua vida",
       subtitulo: "Trabalho, relações, decisões e o jeito de se comunicar",
       blocos: limparBlocos([
-        blocoTexto("No trabalho", dia.trabalho),
-        blocoTexto("Nas relações", dia.relacoes),
-        blocoTexto("Nas decisões", dia.decisoes),
-        blocoTexto("Sua energia e a pressão", `${dia.energia} ${dia.estresse}`),
-        blocoTexto("Como você se comunica", vidaComunicacao(estilo)),
+        blocoTexto("No trabalho", trabalho),
+        blocoTexto("Nas relações", relacoes),
+        blocoTexto("Nas decisões", decisoes),
+        blocoTexto("Sua energia", dia.energia),
+        blocoTexto("Quando a pressão sobe", dia.estresse),
+        blocoTexto("Como você se comunica", `${estilo.descricao} ${estilo.emConflito}`),
       ]),
     },
     {
@@ -253,7 +310,7 @@ export function comporJornadaTraco(resultado: {
           "Seu trio",
           principal === secundaria
             ? `O traço ${nomeP} aparece com bastante clareza no seu perfil.`
-            : `Principal: ${nomeP}. Também presente: ${nomeS}. Terceiro tom: ${nomeT}.`,
+            : `Principal: ${nomeP}. Também presente: ${nomeS}. Em terceiro: ${nomeT}.`,
         ),
         blocoTexto("Como as duas forças principais se encontram", perfilPar),
         temTerciarioDistinto

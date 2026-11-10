@@ -64,7 +64,7 @@ const RECURSOS: Record<keyof EstruturasPct, string> = {
   esquizoide:
     "O mesmo movimento que pode ter te afastado do mundo também desenvolveu uma mente capaz de criar o que ainda não existe. Você enxerga padrões, conecta ideias e imagina caminhos que outros não veem. Em uma reunião rasa, você já está três camadas à frente; em um problema complexo, encontra o fio que faltava. Quando essa visão deixa de ser só esconderijo e vira presença — quando o corpo acompanha a ideia — ela se torna um talento que o mundo realmente precisa.",
   oral:
-    "O mesmo anseio que pode ter te feito buscar o outro demais também desenvolveu uma empatia rara. Você lê o ambiente antes da fala, percebe o que não foi dito e aquece vínculos sem esforço. Em uma sala tensa, você desarma; em uma crise pessoal de alguém próximo, você fica. Quando essa generosidade deixa de esvaziar você e passa a nascer de um centro próprio — quando você também se coloca na conta do cuidado — ela vira conexão verdadeira, não sacrifício disfarçado.",
+    "O talento que nasceu desse movimento é concreto: você cria segurança emocional onde outros só negociam tarefa. Em uma sala tensa, desarma. Em uma crise de alguém próximo, fica. Pessoas saem do seu contato mais capazes de respirar. Quando essa generosidade nasce de um centro próprio — e não da urgência de não ficar só — ela deixa de ser sacrifício disfarçado e vira o seu recurso mais valioso: conexão verdadeira.",
   psicopata:
     "O mesmo impulso que pode ter te feito controlar o ambiente também desenvolveu uma presença que organiza e mobiliza. Você vê o caminho, articula e faz as coisas andarem quando outros ainda hesitam. Em caos, você decide; em dúvida coletiva, você corta o nó. Quando essa força deixa de ser só defesa e inclui vulnerabilidade escolhida, ela vira liderança que inspira confiança de verdade — não só obediência.",
   masoquista:
@@ -272,10 +272,10 @@ const INTERPRETACOES: Record<keyof EstruturasPct, string[]> = {
   ],
   oral: [
     "No começo, o suporte pode ter faltado ou chegado de forma irregular: colo presente e depois ausente, afeto que aquecia e sumia, uma casa em que cuidar do outro era o caminho mais seguro de não ficar só. A proteção foi buscar o outro — sentir, cuidar, se ligar. Você pode ter aprendido que o afeto vem de fora e que garantir o vínculo era a forma de garantir a si. Observe se essa história faz sentido para você.",
-    "Com o tempo, essa proteção desenvolveu uma empatia rara: você lê o outro antes da fala, aquece ambientes e sustenta pessoas em crise com uma presença que poucos conseguem oferecer. Ao mesmo tempo, o corpo pode ter aprendido a funcionar com menos sustentação própria — como se a energia viesse do contato e baixasse quando o contato falha. Quando a conexão some, aparece a pergunta antiga: e eu, quem me sustenta?",
-    "Hoje isso pode aparecer em cenas concretas: você é a pessoa para quem ligam; você antecipa a necessidade do outro e demora a nomear a sua; você sente culpa ao receber sem retribuir na hora; um domingo sozinho pode pesar mais do que deveria. A generosidade é real. O risco é dar demais para não ficar sozinho — e confundir vínculo com combustível. O desafio é construir um centro próprio sem fechar a abertura que já é seu talento.",
-    "O caminho passa por pedir, receber e se apoiar em si mesmo com a mesma entrega com que você cuida. Não como prêmio por ter sido 'boa o suficiente', e sim como direito. Limites claros, rotina que te nutre e a coragem de dizer 'preciso' não apagam o vínculo: tornam o vínculo sustentável. Quanto mais você se sustenta, mais o cuidado que oferece deixa de ser fuga e vira escolha.",
-    "Integrar o Oral é descobrir plenitude por dentro sem fechar a receptividade. Não é ficar fria nem deixar de amar. É ter um centro tão forte quanto a capacidade de cuidar e se ligar que você já carrega — para que o outro seja companhia, não muleta.",
+    "Com o tempo, essa proteção moldou um radar fino para o estado emocional alheio. Você aprendeu a aquecer o ambiente e a ficar quando alguém quebra. O custo dessa aprendizagem: a energia própria passou a depender demais do contato. Quando a conexão some, não é só falta de companhia — é como se faltasse chão. Observe se essa troca (dar para se sentir inteiro) ainda opera em você.",
+    "Hoje o padrão aparece menos como uma lista de sintomas e mais como um jeito de se posicionar: o vínculo vem primeiro; a própria necessidade, depois. Você se reconhece no papel de quem sustenta o clima. O risco não é amar — é confundir proximidade com combustível e adiar o centro próprio. O desafio é manter a abertura sem fazer dela a única fonte de estabilidade.",
+    "O caminho passa por pedir, receber e se apoiar em si mesmo com a mesma entrega com que você cuida. Não como prêmio por ter sido 'bom o bastante', e sim como direito. Limites claros, rotina que te nutre e a coragem de dizer 'preciso' não apagam o vínculo: tornam o vínculo sustentável. Quanto mais você se sustenta, mais o cuidado que oferece deixa de ser fuga e vira escolha.",
+    "Integrar o Oral é descobrir plenitude por dentro sem fechar a receptividade. Não é endurecer nem deixar de amar. É ter um centro tão forte quanto a capacidade de cuidar e se ligar que você já carrega — para que o outro seja companhia, não muleta.",
   ],
   psicopata: [
     "No começo, a vontade pode ter sido interrompida e confiar pode ter custado caro: promessas quebradas, humilhação, um ambiente em que baixar a guarda doía. A proteção foi expandir, controlar e liderar. Você pode ter aprendido que força evita dor e que organizar o entorno é a forma mais segura de existir. Observe se isso encontra eco na sua vida.",
@@ -403,15 +403,15 @@ const ESTILOS_COMUNICACAO: Record<keyof EstruturasPct, EstiloComunicacao> = {
   oral: {
     tipo: "Expressivo e relacional",
     descricao:
-      "Você se comunica com abertura. A emoção aparece na voz, no tom e no gesto. Falar ajuda a organizar o que sente: a conversa é conexão, não só troca de informação. Em grupos, busca calor genuíno e frequentemente aquece o ambiente — percebe o que o outro precisa ouvir e tem generosidade para dizer.",
+      "Você se comunica com abertura. A emoção aparece na voz, no tom e no gesto. Falar ajuda a organizar o que sente: a conversa é conexão, não só troca de informação. Em grupos, aquece o ambiente e percebe o que o outro precisa ouvir.",
     emGrupos:
       "Em grupos, busca calor genuíno e frequentemente aquece o ambiente. Percebe o que o outro precisa ouvir e tem generosidade para dizer. Pode ser o centro emocional sem ser o mais falante.",
     emRelacoes:
-      "Nas relações íntimas, a comunicação flui com naturalidade. Você compartilha e confessa com facilidade. O desafio é perceber quando fala para aliviar a própria ansiedade e quando fala para conectar de verdade — e praticar também o silêncio em que você se sustenta sem precisar do espelho do outro.",
+      "Nas relações íntimas, a comunicação flui. Você compartilha com facilidade. O desafio é perceber quando fala para aliviar a ansiedade e quando fala para conectar de verdade.",
     emConflito:
-      "No conflito, tende a harmonizar. A discórdia aperta o peito. Às vezes cede antes de dizer o que realmente pensa, só para recuperar o calor. Com o tempo, o não-dito vira peso e pode sair em cobrança indireta. Aprender a discordar sem abandonar o vínculo é um dos seus maiores treinamentos.",
+      "No conflito, tende a harmonizar. Às vezes cede antes de dizer o que realmente pensa, só para recuperar o calor. Com o tempo, o não-dito vira peso. Aprender a discordar sem abandonar o vínculo é um dos seus maiores treinamentos.",
     emTensao:
-      "Sob tensão, pode falar mais para manejar a ansiedade. Perceber isso ajuda a escolher as palavras que importam, em vez de só produzir volume. Uma frase clara vale mais do que dez mensagens de apaziguamento.",
+      "Sob tensão, pode falar mais para manejar a ansiedade. Uma frase clara vale mais do que dez mensagens de apaziguamento.",
   },
   psicopata: {
     tipo: "Direto e estratégico",
@@ -471,7 +471,7 @@ const PERFIS_PAR: Record<string, string> = {
   "oral-masoquista":
     "Duas histórias de necessidade não atendida podem se reforçar: abandono e crítica criando autossacrifício. Você carrega muito, oferece muito e frequentemente recebe pouco — e ainda assim permanece. A compaixão que nasce disso é rara. Em casa ou no trabalho, pode ser a pessoa que segura a emoção coletiva e engole a própria. A transformação começa com a decisão de que você merece receber tanto quanto oferece — e que pedir não é fraqueza: é o que torna o cuidado sustentável.",
   "oral-rigido":
-    "A necessidade de vínculo encontra uma organização que aprendeu a dosar entrega e recebimento. O Oral quer se entregar por inteiro; o Rígido organiza essa entrega para não perder a forma. Na prática, você pode cuidar com uma consistência rara — lembrar datas, manter a palavra, sustentar a rotina do outro — e ainda assim regular o quanto se deixa ver frágil. Pode parecer que o amor precisa estar 'bem feito' para ser seguro. A integração abre o vínculo sem perder a forma: receber sem se desorganizar, se entregar sem se abandonar, e deixar o afeto existir também fora da planilha emocional.",
+    "A necessidade de vínculo encontra uma organização que aprendeu a dosar entrega e recebimento. O Oral quer se entregar por inteiro; o Rígido organiza essa entrega para não perder a forma. Na prática, você pode cuidar com uma consistência rara — lembrar datas, manter a palavra, sustentar a rotina do outro — e ainda assim regular o quanto se deixa ver frágil. Pode parecer que o amor precisa estar 'bem feito' para ser seguro. A integração é abrir o vínculo sem perder a forma: receber sem se desorganizar, entregar-se sem se abandonar e deixar o afeto existir também quando não está perfeitamente organizado.",
   "psicopata-esquizoide":
     "Você tem influência e visão, e prefere a profundidade do pensamento à exposição direta. Tende a exercer liderança por ideias e direção, com uma distância de segurança. Quando integradas, essas forças produzem profundidade e capacidade de agir com intenção precisa — alguém que avança sem precisar estar sempre no centro do palco.",
   "psicopata-oral":
@@ -526,9 +526,9 @@ const DINAMICAS_FUNCIONAIS: Record<keyof EstruturasPct, DinamicaFuncional> = {
     decisoes:
       "Você decide com o impacto relacional bem presente: quem vai sentir, quem pode se magoar, o que isso faz com o vínculo. Às vezes isso é sabedoria. Outras vezes, a decisão saudável é exatamente a que vai desagradar alguém — e aí você trava, adia ou pede confirmação demais. Aprender a decidir por si, mesmo com o peito apertado, é prática de longo prazo e um dos maiores gestos de autoamor do seu mapa.",
     energia:
-      "Sua energia pede recarga em conexões genuínas, propósito e autocuidado concreto: sono, comida, tempo sem atender ninguém. Bem nutrida, você tem calor e vitalidade. Vazia, pode buscar o outro para se reabastecer — e aí a conexão se confunde com dependência. A pergunta útil não é 'quem está disponível?', e sim 'o que eu posso oferecer a mim agora?'.",
+      "Sua energia pede recarga em conexões genuínas, propósito e autocuidado concreto — sono, comida, um tempo do dia sem atender ninguém. Bem nutrido, você tem calor e vitalidade. Vazio, pode buscar o outro para se reabastecer e aí a conexão se confunde com dependência. A pergunta útil não é 'quem está disponível?'. É 'o que eu posso oferecer a mim agora?'.",
     sombra:
-      "O que pode doer reconhecer: a dependência disfarçada de generosidade, o autoabandono que parece cuidado, a dificuldade de se sustentar por dentro sem um testemunho externo. Pode haver um medo antigo de que, se você parar de dar, o lugar some. Nomear a necessidade diretamente — 'preciso de colo', 'preciso de pausa', 'preciso que fique' — é o começo da integração, não o fim do amor.",
+      "O que pode doer reconhecer: a dependência disfarçada de generosidade, o autoabandono que parece cuidado, a dificuldade de se sustentar por dentro sem um testemunho externo. Pode haver um medo antigo de que, se você parar de dar, o lugar some. Nomear a necessidade diretamente — preciso de colo, preciso de pausa, preciso que fique — é o começo da integração, não o fim do amor.",
   },
   psicopata: {
     trabalho:
@@ -613,7 +613,7 @@ const CUIDADOS_FERIDA: Record<keyof EstruturasPct, string> = {
   esquizoide:
     "Quando a vontade de sumir chegar, nomeie em voz alta (mesmo só para si) o que está sentindo — e só então escolha o recolhimento. Assim a distância vira escolha, não fuga automática.",
   oral:
-    "Escolha uma pessoa segura e diga, esta semana, uma necessidade concreta em uma frase — sem justificar demais e sem oferecer algo em troca na mesma frase.",
+    "Por 24 horas, resista ao impulso de 'salvar' o clima quando alguém fica em silêncio. Sente o aperto sem preencher o vazio — e note o que o corpo faz quando você não corre para cuidar.",
   psicopata:
     "Com alguém de confiança, mostre um limite ou uma necessidade real sem transformar isso em estratégia ou em piada. Observe o que acontece no corpo quando você é alcançado.",
   masoquista:
