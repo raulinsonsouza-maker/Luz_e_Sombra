@@ -43,7 +43,7 @@ describe("comporJornadaTraco", () => {
     assert.match(jornada.mapa.significado, /Oral/);
     assert.match(jornada.mapa.significado, /Rígido/);
     assert.match(jornada.mapa.significado, /terceiro tom|Masoquista/i);
-    assert.match(jornada.mapa.significado, /com organização|com presença de Rígido/i);
+    assert.match(jornada.mapa.significado, /Rígido|organização|compromisso/i);
 
     const outros = jornada.etapas.find((e) => e.id === "outros");
     const texto = outros?.blocos

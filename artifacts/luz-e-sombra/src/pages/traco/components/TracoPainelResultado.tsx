@@ -1,16 +1,14 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { RefreshCw, ChevronDown, ChevronUp, Info } from "lucide-react";
+import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import {
   sanitizarResultadoLegado,
   isResultadoLegado,
   comporJornadaTraco,
 } from "@workspace/traco-narrativa";
-import { limparJargao } from "@workspace/copy-voz";
 import JornadaTracoResultado from "@/pages/traco/components/JornadaTracoResultado";
 import { TextoFormatado } from "@/components/TextoLeitura";
 import {
   ESTRUTURAS_CONFIG,
-  FOTOS_CONFIG,
   type EstruturasPct,
   type TipoFoto,
 } from "@/pages/traco/tracoConfig";
@@ -81,16 +79,12 @@ interface AnaliseTraco {
 
 export interface TracoPainelResultadoProps {
   analise: AnaliseTraco;
-  onReanalisar: () => void | Promise<void>;
-  analisando: boolean;
-  fotosCount: number;
+  /** Mantido por compatibilidade; o botão Reanalisar foi removido da UI do resultado. */
+  onReanalisar?: () => void | Promise<void>;
+  analisando?: boolean;
+  fotosCount?: number;
   pessoaNome?: string | null;
   criadoEm?: string;
-}
-
-function lugarDoCentro(centro: string): string {
-  const lugar = centro.split(",")[0]?.trim();
-  return lugar || centro.trim();
 }
 
 function Capitulo({
@@ -143,9 +137,6 @@ function Capitulo({
 
 export function TracoPainelResultado({
   analise,
-  onReanalisar,
-  analisando,
-  fotosCount,
   pessoaNome = null,
   criadoEm,
 }: TracoPainelResultadoProps) {
@@ -156,7 +147,6 @@ export function TracoPainelResultado({
   const legado = isResultadoLegado(analise.resultado as Parameters<typeof isResultadoLegado>[0]);
   const estruturaPrincipal = resultado.estruturaPrincipal;
   const configPrincipal = estruturaPrincipal ? ESTRUTURAS_CONFIG[estruturaPrincipal] : null;
-  const [expandedObs, setExpandedObs] = useState(false);
   const dataAnalise = new Date(criadoEm ?? analise.criadoEm).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "long",
@@ -192,13 +182,14 @@ export function TracoPainelResultado({
   );
 
   const rankingTracos = useMemo(() => {
-    return (Object.entries(resultado.estruturas) as [keyof EstruturasPct, number][])
-      .sort(([, a], [, b]) => b - a);
+    return (Object.entries(resultado.estruturas) as [keyof EstruturasPct, number][]).sort(
+      ([, a], [, b]) => b - a,
+    );
   }, [resultado.estruturas]);
 
   return (
-    <div id="resultado-traco" className="space-y-10">
-      <div className="flex items-center gap-4">
+    <div id="resultado-traco" className="space-y-5">
+      <div className="flex items-center gap-4 mb-2">
         <div className="flex-1 h-px" style={{ background: "rgba(200,165,107,0.15)" }} />
         <span className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.4)" }}>
           Resultado da Análise
@@ -207,148 +198,159 @@ export function TracoPainelResultado({
       </div>
 
       {legado && (
-        <p className="text-sm leading-relaxed" style={{ color: "rgba(224,123,57,0.9)", lineHeight: 1.7 }}>
-          Este resultado foi gerado com uma versão anterior. Use <strong>Reanalisar</strong> para
-          atualizar a leitura completa.
+        <p
+          className="text-xs px-4 py-3 rounded-xl"
+          style={{
+            color: "rgba(224,123,57,0.9)",
+            background: "rgba(224,123,57,0.08)",
+            border: "1px solid rgba(224,123,57,0.2)",
+          }}
+        >
+          Este resultado foi gerado com uma versão anterior. A leitura abaixo já usa os textos atualizados.
         </p>
       )}
 
       {configPrincipal && estruturaPrincipal && jornada && (
-        <section className="space-y-6">
-          <header className="space-y-1.5">
-            <p className="text-[10px] tracking-[0.22em] uppercase" style={{ color: "rgba(200,165,107,0.55)" }}>
-              Etapa 01
-            </p>
-            <h2 className="font-tan-mon-cheri text-xl sm:text-2xl" style={{ color: "#e8d5b0" }}>
-              Seu mapa de personalidade
-            </h2>
-            <p className="text-sm" style={{ color: "rgba(247,242,236,0.45)", lineHeight: 1.5 }}>
-              Resultado de {alvoAnalise} · {dataAnalise}
-            </p>
-            <div
-              className="h-px w-16 mt-3"
-              style={{ background: "linear-gradient(to right, rgba(200,165,107,0.45), transparent)" }}
-            />
-          </header>
-
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "#c8a56b" }}>
-              O que mais aparece em você
-            </p>
-            <div className="flex items-baseline justify-between gap-4">
-              <h3 className="font-tan-mon-cheri text-3xl md:text-4xl" style={{ color: configPrincipal.cor }}>
-                {configPrincipal.nome}
-              </h3>
-              <span
-                className="font-tan-mon-cheri text-3xl md:text-4xl tabular-nums shrink-0"
-                style={{ color: configPrincipal.cor }}
+        <Capitulo
+          titulo="Seu mapa de personalidade"
+          subtitulo={`Resultado de ${alvoAnalise} · ${dataAnalise}`}
+          recolhivel={false}
+        >
+          <div
+            className="rounded-xl p-5"
+            style={{
+              background: `linear-gradient(135deg, ${configPrincipal.corBg} 0%, rgba(30,24,18,0.4) 100%)`,
+              border: `1px solid ${configPrincipal.corBorder}`,
+            }}
+          >
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>
+                  O que mais aparece em você
+                </p>
+                <h2 className="font-tan-mon-cheri text-2xl md:text-3xl" style={{ color: configPrincipal.cor }}>
+                  {configPrincipal.nome}
+                </h2>
+              </div>
+              <div
+                className="text-3xl font-bold font-tan-mon-cheri flex-shrink-0 tabular-nums"
+                style={{ color: configPrincipal.cor, opacity: 0.9 }}
               >
                 {resultado.estruturas[estruturaPrincipal]}%
-              </span>
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "#c8a56b" }}>
-              Seu trio
-            </p>
-            <ol className="space-y-2.5">
-              <li className="flex items-baseline justify-between gap-3 text-sm" style={{ color: "rgba(247,242,236,0.88)", lineHeight: 1.55 }}>
-                <span>
-                  <span style={{ color: configPrincipal.cor }}>{jornada.mapa.nomePrincipal}</span>
-                  <span style={{ color: "rgba(247,242,236,0.4)" }}> · principal</span>
-                </span>
-                <span className="tabular-nums" style={{ color: configPrincipal.cor }}>
-                  {resultado.estruturas[estruturaPrincipal]}%
-                </span>
-              </li>
-              {resultado.estruturaSecundaria && (
-                <li className="flex items-baseline justify-between gap-3 text-sm" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.55 }}>
-                  <span>
+            <div className="space-y-2 mb-4">
+              <p className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
+                Seu trio
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between gap-3 text-sm">
+                  <span style={{ color: configPrincipal.cor }}>
+                    {jornada.mapa.nomePrincipal}
+                    <span style={{ color: "rgba(247,242,236,0.4)" }}> · principal</span>
+                  </span>
+                  <span className="tabular-nums" style={{ color: configPrincipal.cor }}>
+                    {resultado.estruturas[estruturaPrincipal]}%
+                  </span>
+                </div>
+                {resultado.estruturaSecundaria && (
+                  <div className="flex items-baseline justify-between gap-3 text-sm">
                     <span style={{ color: ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].cor }}>
                       {jornada.mapa.nomeSecundaria}
+                      <span style={{ color: "rgba(247,242,236,0.4)" }}> · também presente</span>
                     </span>
-                    <span style={{ color: "rgba(247,242,236,0.4)" }}> · também presente</span>
-                  </span>
-                  <span className="tabular-nums" style={{ color: ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].cor }}>
-                    {resultado.estruturas[resultado.estruturaSecundaria]}%
-                  </span>
-                </li>
-              )}
-              {jornada.mapa.terciaria !== estruturaPrincipal &&
-                jornada.mapa.terciaria !== resultado.estruturaSecundaria && (
-                  <li className="flex items-baseline justify-between gap-3 text-sm" style={{ color: "rgba(247,242,236,0.72)", lineHeight: 1.55 }}>
-                    <span>
+                    <span
+                      className="tabular-nums"
+                      style={{ color: ESTRUTURAS_CONFIG[resultado.estruturaSecundaria].cor }}
+                    >
+                      {resultado.estruturas[resultado.estruturaSecundaria]}%
+                    </span>
+                  </div>
+                )}
+                {jornada.mapa.terciaria !== estruturaPrincipal &&
+                  jornada.mapa.terciaria !== resultado.estruturaSecundaria && (
+                    <div className="flex items-baseline justify-between gap-3 text-sm">
                       <span style={{ color: ESTRUTURAS_CONFIG[jornada.mapa.terciaria].cor }}>
                         {jornada.mapa.nomeTerciaria}
+                        <span style={{ color: "rgba(247,242,236,0.4)" }}> · terceiro tom</span>
                       </span>
-                      <span style={{ color: "rgba(247,242,236,0.4)" }}> · terceiro tom</span>
-                    </span>
-                    <span className="tabular-nums" style={{ color: ESTRUTURAS_CONFIG[jornada.mapa.terciaria].cor }}>
-                      {resultado.estruturas[jornada.mapa.terciaria]}%
-                    </span>
-                  </li>
-                )}
-            </ol>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "#c8a56b" }}>
-              O que isso significa
-            </p>
-            <TextoFormatado texto={jornada.mapa.significado} fluido />
-          </div>
-
-          <details className="group">
-            <summary
-              className="text-sm flex items-center gap-1.5 cursor-pointer list-none"
-              style={{ color: "rgba(200,165,107,0.7)" }}
-            >
-              <Info className="w-3.5 h-3.5" />
-              Saber mais sobre {configPrincipal.nome}
-            </summary>
-            <div className="mt-3">
-              <TextoFormatado texto={configPrincipal.descricaoLonga} fluido />
+                      <span
+                        className="tabular-nums"
+                        style={{ color: ESTRUTURAS_CONFIG[jornada.mapa.terciaria].cor }}
+                      >
+                        {resultado.estruturas[jornada.mapa.terciaria]}%
+                      </span>
+                    </div>
+                  )}
+              </div>
             </div>
-          </details>
+
+            <div className="mb-3">
+              <TextoFormatado texto={jornada.mapa.significado} fluido />
+            </div>
+
+            <details className="group">
+              <summary
+                className="text-xs flex items-center gap-1.5 cursor-pointer list-none"
+                style={{ color: "rgba(200,165,107,0.55)" }}
+              >
+                <Info className="w-3.5 h-3.5" />
+                Saber mais sobre {configPrincipal.nome}
+              </summary>
+              <div className="mt-2 pl-1">
+                <TextoFormatado texto={configPrincipal.descricaoLonga} fluido />
+              </div>
+            </details>
+          </div>
 
           {((jornada.mapa.pontosFortes?.length ?? 0) > 0 || (jornada.mapa.pontosAtencao?.length ?? 0) > 0) && (
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-3">
               {jornada.mapa.pontosFortes.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "rgba(109,185,109,0.75)" }}>
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-xs w-full tracking-widest uppercase" style={{ color: "rgba(109,185,109,0.6)" }}>
                     Pontos fortes
-                  </p>
-                  <ul className="space-y-1.5">
-                    {jornada.mapa.pontosFortes.map((p, i) => (
-                      <li key={i} className="flex gap-2 text-sm" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.55 }}>
-                        <span style={{ color: "rgba(109,185,109,0.7)" }}>·</span>
-                        <span>{p}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  </span>
+                  {jornada.mapa.pontosFortes.map((p, i) => (
+                    <span
+                      key={i}
+                      className="text-xs px-3 py-1.5 rounded-full"
+                      style={{
+                        background: "rgba(109,185,109,0.08)",
+                        border: "1px solid rgba(109,185,109,0.22)",
+                        color: "rgba(109,185,109,0.85)",
+                      }}
+                    >
+                      {p}
+                    </span>
+                  ))}
                 </div>
               )}
               {jornada.mapa.pontosAtencao.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "rgba(224,123,57,0.75)" }}>
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-xs w-full tracking-widest uppercase" style={{ color: "rgba(224,123,57,0.6)" }}>
                     Pontos de atenção
-                  </p>
-                  <ul className="space-y-1.5">
-                    {jornada.mapa.pontosAtencao.map((p, i) => (
-                      <li key={i} className="flex gap-2 text-sm" style={{ color: "rgba(247,242,236,0.78)", lineHeight: 1.55 }}>
-                        <span style={{ color: "rgba(224,123,57,0.7)" }}>·</span>
-                        <span>{p}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  </span>
+                  {jornada.mapa.pontosAtencao.map((p, i) => (
+                    <span
+                      key={i}
+                      className="text-xs px-3 py-1.5 rounded-full"
+                      style={{
+                        background: "rgba(224,123,57,0.08)",
+                        border: "1px solid rgba(224,123,57,0.22)",
+                        color: "rgba(224,123,57,0.85)",
+                      }}
+                    >
+                      {p}
+                    </span>
+                  ))}
                 </div>
               )}
             </div>
           )}
 
-          <div className="space-y-3">
-            <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "#c8a56b" }}>
+          <div className="space-y-3 pt-1">
+            <p className="text-xs tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.45)" }}>
               Quanto cada traço aparece no seu perfil
             </p>
             {rankingTracos.map(([key, pct]) => {
@@ -359,16 +361,16 @@ export function TracoPainelResultado({
               const isDestaque = isPrincipal || isSecundaria || isTerciaria;
               return (
                 <div key={key}>
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.4)" }}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.45)" }}>
                       {cfg.nome}
-                      {isPrincipal && <span className="ml-1.5 opacity-60">· principal</span>}
-                      {isSecundaria && <span className="ml-1.5 opacity-60">· também presente</span>}
+                      {isPrincipal && <span className="ml-1.5 opacity-70">· principal</span>}
+                      {isSecundaria && <span className="ml-1.5 opacity-70">· também presente</span>}
                       {isTerciaria && !isPrincipal && !isSecundaria && (
-                        <span className="ml-1.5 opacity-60">· terceiro tom</span>
+                        <span className="ml-1.5 opacity-70">· terceiro tom</span>
                       )}
                     </span>
-                    <span className="tabular-nums" style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.35)" }}>
+                    <span className="tabular-nums" style={{ color: isDestaque ? cfg.cor : "rgba(247,242,236,0.4)" }}>
                       {pct}%
                     </span>
                   </div>
@@ -377,118 +379,21 @@ export function TracoPainelResultado({
                       className="h-full rounded-full"
                       style={{
                         width: `${pct}%`,
-                        background: isDestaque ? cfg.cor : `${cfg.cor}55`,
+                        background: isDestaque ? cfg.cor : `${cfg.cor}66`,
                       }}
                     />
                   </div>
                 </div>
               );
             })}
-            <p className="text-sm leading-relaxed pt-1" style={{ color: "rgba(247,242,236,0.5)", lineHeight: 1.7 }}>
+            <p className="text-xs leading-relaxed pt-1" style={{ color: "rgba(247,242,236,0.45)" }}>
               Esta leitura é um caminho de autoconhecimento. Ela se apoia principalmente nas suas respostas. O corpo entra como apoio, com cuidado, e não como diagnóstico.
             </p>
           </div>
-        </section>
+        </Capitulo>
       )}
 
       {jornada && <JornadaTracoResultado jornada={jornada} mostrarAviso={false} />}
-
-      {(resultado.caracteristicasFisicasObservadas?.length ||
-        resultado.perfilFisicoNarrado ||
-        resultado.couracaCorporal ||
-        resultado.padraoPostural ||
-        (resultado.observacoesPorFoto && Object.keys(resultado.observacoesPorFoto).length > 0)) && (
-        <Capitulo titulo="O corpo fala" defaultOpen={false} subtitulo="Um apoio à leitura, com cuidado">
-          <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
-            O que aparece abaixo é observação, não diagnóstico. O corpo acompanha a leitura; as respostas continuam sendo a base.
-          </p>
-
-          {resultado.caracteristicasFisicasObservadas && resultado.caracteristicasFisicasObservadas.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {resultado.caracteristicasFisicasObservadas.map((tag, i) => (
-                <span
-                  key={i}
-                  className="text-xs px-3 py-1.5 rounded-full"
-                  style={{
-                    background: "rgba(200,165,107,0.08)",
-                    border: "1px solid rgba(200,165,107,0.18)",
-                    color: "rgba(200,165,107,0.8)",
-                  }}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {resultado.perfilFisicoNarrado && (
-            <TextoFormatado texto={resultado.perfilFisicoNarrado} fluido={false} />
-          )}
-
-          {resultado.couracaCorporal && (
-            <div
-              className="rounded-xl p-4"
-              style={{ background: "rgba(155,143,222,0.04)", border: "1px solid rgba(155,143,222,0.15)" }}
-            >
-              <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(155,143,222,0.55)" }}>
-                Como o corpo se protege
-              </p>
-              <TextoFormatado texto={limparJargao(resultado.couracaCorporal)} fluido={false} />
-              {(resultado.centroEnergetico || resultado.padraoEnergetico) && (
-                <div className="space-y-2 mt-3">
-                  {resultado.centroEnergetico && (
-                    <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
-                      <span style={{ color: "rgba(200,165,107,0.6)" }}>Onde isso se concentra: </span>
-                      {lugarDoCentro(limparJargao(resultado.centroEnergetico))}
-                    </p>
-                  )}
-                  {resultado.padraoEnergetico && (
-                    <p className="text-xs leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
-                      <span style={{ color: "rgba(200,165,107,0.6)" }}>Como a energia circula: </span>
-                      {limparJargao(resultado.padraoEnergetico)}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {resultado.padraoPostural && (
-            <div>
-              <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
-                Padrão postural
-              </p>
-              <TextoFormatado texto={resultado.padraoPostural} fluido={false} />
-            </div>
-          )}
-
-          {resultado.observacoesPorFoto && Object.keys(resultado.observacoesPorFoto).length > 0 && (
-            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.1)" }}>
-              <button
-                type="button"
-                onClick={() => setExpandedObs((v) => !v)}
-                className="w-full flex items-center justify-between px-4 py-3 text-sm"
-                style={{ background: "rgba(30,24,18,0.45)", color: "rgba(247,242,236,0.6)" }}
-              >
-                Leitura por foto
-                {expandedObs ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {expandedObs && (
-                <div className="px-4 py-4 space-y-4" style={{ borderTop: "1px solid rgba(200,165,107,0.08)" }}>
-                  {(Object.entries(resultado.observacoesPorFoto) as [TipoFoto, string][]).map(([tipo, obs]) => (
-                    <div key={tipo}>
-                      <p className="text-xs tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.45)" }}>
-                        {FOTOS_CONFIG[tipo]?.label ?? tipo}
-                      </p>
-                      <TextoFormatado texto={limparJargao(obs)} fluido={false} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </Capitulo>
-      )}
 
       {showAuditUi && (resultado.evidenciasMotor?.length || resultado.marcadoresPorFoto?.length) && (
         <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.1)" }}>
@@ -496,7 +401,7 @@ export function TracoPainelResultado({
             type="button"
             onClick={() => setExpandedAuditoria((v) => !v)}
             className="w-full flex items-center justify-between px-6 py-4"
-            style={{ background: "rgba(30,24,18,0.5)", color: "rgba(247,242,236,0.65)" }}
+            style={{ background: "rgba(30,24,18,0.45)", color: "rgba(247,242,236,0.55)" }}
           >
             <span className="text-sm font-medium">Detalhes técnicos da análise</span>
             {expandedAuditoria ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -527,22 +432,6 @@ export function TracoPainelResultado({
           )}
         </div>
       )}
-
-      <div className="flex items-center justify-between pt-2 pb-4">
-        <p className="text-xs" style={{ color: "rgba(247,242,236,0.22)" }}>
-          Análise realizada em {dataAnalise}
-        </p>
-        <button
-          type="button"
-          onClick={() => void onReanalisar()}
-          disabled={analisando || fotosCount === 0}
-          className="flex items-center gap-2 text-xs px-4 py-2 rounded-lg transition-all"
-          style={{ color: "rgba(200,165,107,0.6)", border: "1px solid rgba(200,165,107,0.2)" }}
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Reanalisar
-        </button>
-      </div>
     </div>
   );
 }

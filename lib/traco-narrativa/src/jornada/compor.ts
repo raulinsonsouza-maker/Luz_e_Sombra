@@ -49,11 +49,11 @@ function significadoMapa(
   if (principal === secundaria) {
     return `Seu resultado aponta com clareza para o traço ${nomeP}: ${T.SINTESE_FOCO[principal]}.`;
   }
-  const base = `Seu resultado mostra ${nomeP} como o jeito que mais aparece, ${T.SINTESE_ADJ_PRINCIPAL[principal]}, com presença de ${nomeS}, ${T.SINTESE_TOQUE_SECUNDARIO[secundaria]}`;
+  const base = `O traço que mais aparece em você é ${nomeP}: ${T.SINTESE_ADJ_PRINCIPAL[principal]}. Em seguida vem ${nomeS}, ${T.SINTESE_TOQUE_SECUNDARIO[secundaria]}`;
   if (terciaria === secundaria || terciaria === principal) {
     return `${base}.`;
   }
-  return `${base}. Ainda aparece um terceiro tom de ${nomeT}, que colore o conjunto sem ocupar o centro.`;
+  return `${base}. Em terceiro aparece ${nomeT}, que dá um tom a mais ao conjunto sem ocupar o centro.`;
 }
 
 function necessidadePorTras(principal: EstruturaTraco): string {
@@ -137,7 +137,7 @@ export function comporJornadaTraco(resultado: {
       subtitulo: "A história que este traço pode carregar",
       blocos: limparBlocos([
         blocoTexto("Em uma frase", T.FRASES_IDENTIDADE[principal]),
-        blocoTexto("De onde isso pode ter vindo", interp[0]),
+        blocoTexto("Como isso pode ter começado", interp[0]),
         blocoTexto("O que essa proteção desenvolveu", interp[1]),
         blocoTexto("Como isso pode aparecer hoje", interp[2]),
       ]),
