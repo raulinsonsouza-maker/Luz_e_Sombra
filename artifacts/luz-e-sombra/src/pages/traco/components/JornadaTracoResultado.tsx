@@ -56,7 +56,7 @@ function EtapaCard({ etapa }: { etapa: EtapaJornada }) {
           {etapa.subtitulo}
         </p>
       </div>
-      <div className="px-5 py-5 space-y-4">
+      <div className="px-5 py-5 space-y-5">
         {etapa.blocos.map((bloco, i) => (
           <Bloco key={i} bloco={bloco} />
         ))}
@@ -68,12 +68,9 @@ function EtapaCard({ etapa }: { etapa: EtapaJornada }) {
 function Bloco({ bloco }: { bloco: BlocoJornada }) {
   if (bloco.tipo === "texto") {
     return (
-      <div
-        className="rounded-xl px-4 py-3"
-        style={{ background: "rgba(255,255,255,0.025)", borderLeft: `2px solid ${OURO}` }}
-      >
+      <div className="space-y-2">
         {bloco.rotulo && (
-          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-1.5" style={{ color: OURO }}>
+          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
             {bloco.rotulo}
           </p>
         )}
@@ -102,9 +99,9 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
 
   if (bloco.tipo === "lista") {
     return (
-      <div>
+      <div className="space-y-2">
         {bloco.rotulo && (
-          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-2" style={{ color: OURO }}>
+          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
             {bloco.rotulo}
           </p>
         )}
@@ -122,9 +119,9 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
 
   if (bloco.tipo === "passos") {
     return (
-      <div>
+      <div className="space-y-3">
         {bloco.rotulo && (
-          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-3" style={{ color: OURO }}>
+          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
             {bloco.rotulo}
           </p>
         )}
@@ -147,38 +144,111 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
     );
   }
 
+  // Tabela 3 colunas: recurso / equilíbrio / excesso
+  if (bloco.cabecalhos.length >= 3) {
+    return (
+      <div className="space-y-3">
+        {bloco.rotulo && (
+          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
+            {bloco.rotulo}
+          </p>
+        )}
+        <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.5)", lineHeight: 1.6 }}>
+          O mesmo talento pode cuidar de você ou te cansar. Veja o limite entre usar bem e exagerar.
+        </p>
+        <div
+          className="rounded-xl overflow-hidden"
+          style={{ border: "1px solid rgba(200,165,107,0.14)", background: "rgba(255,255,255,0.02)" }}
+        >
+          {bloco.linhas.map((linha, i) => {
+            const [recurso, equilibrio, excesso] = linha;
+            return (
+              <div
+                key={i}
+                className="px-4 py-3.5 space-y-2"
+                style={{
+                  borderTop: i === 0 ? undefined : "1px solid rgba(200,165,107,0.1)",
+                }}
+              >
+                <p className="text-sm font-medium" style={{ color: FORTE }}>
+                  {recurso}
+                </p>
+                <div className="grid sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <p className="text-[10px] tracking-wider uppercase mb-0.5" style={{ color: "rgba(109,185,109,0.75)" }}>
+                      Em equilíbrio
+                    </p>
+                    <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
+                      {equilibrio}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] tracking-wider uppercase mb-0.5" style={{ color: "rgba(224,123,57,0.8)" }}>
+                      Em excesso
+                    </p>
+                    <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
+                      {excesso}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // Tabela 2 colunas: tenta / acaba · deixar / aprender
   return (
-    <div>
+    <div className="space-y-3">
       {bloco.rotulo && (
-        <p className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-3" style={{ color: OURO }}>
+        <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
           {bloco.rotulo}
         </p>
       )}
-      <div className="space-y-2">
-        {bloco.linhas.map((linha, i) => (
-          <div
-            key={i}
-            className="rounded-xl px-4 py-3 grid gap-2"
-            style={{
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(200,165,107,0.1)",
-              gridTemplateColumns: linha.length === 3 ? "1fr 1.2fr 1.2fr" : "1fr 1.4fr",
-            }}
-          >
-            {linha.map((celula, j) => (
-              <div key={j}>
-                {bloco.cabecalhos[j] && (
-                  <p className="text-[10px] tracking-wider uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
-                    {bloco.cabecalhos[j]}
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ border: "1px solid rgba(200,165,107,0.14)", background: "rgba(255,255,255,0.02)" }}
+      >
+        {bloco.linhas.map((linha, i) => {
+          const [esquerda, direita] = linha;
+          const rotuloEsq = bloco.cabecalhos[0] ?? "";
+          const rotuloDir = bloco.cabecalhos[1] ?? "";
+          return (
+            <div
+              key={i}
+              className="px-4 py-3.5"
+              style={{ borderTop: i === 0 ? undefined : "1px solid rgba(200,165,107,0.1)" }}
+            >
+              <div className="grid sm:grid-cols-[1fr_auto_1fr] gap-2 sm:gap-3 items-start">
+                <div>
+                  <p className="text-[10px] tracking-wider uppercase mb-0.5" style={{ color: "rgba(200,165,107,0.5)" }}>
+                    {rotuloEsq}
                   </p>
-                )}
-                <p className="text-sm leading-relaxed" style={{ color: j === 0 ? FORTE : TEXTO, lineHeight: 1.55 }}>
-                  {celula}
-                </p>
+                  <p className="text-sm leading-relaxed" style={{ color: FORTE, lineHeight: 1.55 }}>
+                    {esquerda}
+                  </p>
+                </div>
+                <span
+                  className="hidden sm:flex items-center justify-center text-xs mt-5"
+                  style={{ color: "rgba(200,165,107,0.45)" }}
+                  aria-hidden
+                >
+                  →
+                </span>
+                <div>
+                  <p className="text-[10px] tracking-wider uppercase mb-0.5" style={{ color: "rgba(200,165,107,0.5)" }}>
+                    {rotuloDir}
+                  </p>
+                  <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
+                    {direita}
+                  </p>
+                </div>
               </div>
-            ))}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
