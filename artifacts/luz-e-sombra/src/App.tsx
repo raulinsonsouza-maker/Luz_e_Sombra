@@ -1,6 +1,7 @@
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { Toaster as SonnerToaster } from "sonner";
+import AppErrorBoundary from "@/components/AppErrorBoundary";
 import MotionIntro from "@/components/MotionIntro";
 import SiteHeader from "@/components/SiteHeader";
 import BottomNav from "@/components/BottomNav";
@@ -144,14 +145,16 @@ function Router() {
 
 function App() {
   return (
-    <AuthProvider>
-      <MotionIntro>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-          <SonnerToaster theme="dark" position="top-center" richColors />
-        </WouterRouter>
-      </MotionIntro>
-    </AuthProvider>
+    <AppErrorBoundary>
+      <AuthProvider>
+        <MotionIntro>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+            <SonnerToaster theme="dark" position="top-center" richColors />
+          </WouterRouter>
+        </MotionIntro>
+      </AuthProvider>
+    </AppErrorBoundary>
   );
 }
 
