@@ -49,16 +49,6 @@ export const DIMENSAO_LABEL: Record<string, string> = {
   PRO: "Profundidade analítica",
 };
 
-export function labelTipoPerfil(tipo: TipoPerfil | string | undefined): string {
-  switch (tipo) {
-    case "DUPLO":
-      return "Predominante e secundário";
-    case "DOMINANTE":
-    case "ATIPICO":
-      return "Temperamento predominante";
-    case "MISTO":
-      return "Características de mais de um";
-    default:
-      return "Seu temperamento";
-  }
+export function labelTipoPerfil(_tipo?: TipoPerfil | string): string {
+  return "Seu temperamento";
 }

@@ -46,13 +46,13 @@ export const JORNADA_HUB_COPY: Record<
       "Descubra como você pensa, age e se relaciona. Colérico, Sanguíneo, Melancólico e Fleumático em um mapa claro sobre quem você é.",
     introTexto: [
       "Os temperamentos são uma forma de compreender diferentes tendências do nosso comportamento. Eles ajudam a observar como costumamos reagir às situações, expressar emoções, tomar decisões, lidar com mudanças e nos relacionar com outras pessoas.",
-      "Existem quatro temperamentos clássicos: Colérico, Sanguíneo, Melancólico e Fleumático. Cada um representa um conjunto de características e maneiras de funcionar. Uma pessoa pode apresentar características de mais de um temperamento, em diferentes intensidades.",
+      "Existem quatro temperamentos clássicos: Colérico, Sanguíneo, Melancólico e Fleumático. Cada um representa um conjunto de características e maneiras de funcionar.",
       "Nesta análise, você responderá a um questionário com 16 afirmações, escolhendo Sim ou Não de acordo com o que melhor representa seu comportamento na maior parte do tempo, e não apenas o que sente no momento.",
-      "A partir das suas respostas, você conhecerá seu temperamento predominante, as características secundárias e como essas tendências podem aparecer em diferentes áreas da sua vida.",
+      "A partir das suas respostas, você conhecerá o seu temperamento e como essa tendência pode aparecer em diferentes áreas da sua vida.",
       "Reserve cerca de 3 minutos para responder com sinceridade. Não existem respostas certas ou erradas: o objetivo é ampliar sua compreensão sobre si mesmo.",
     ],
     introBullets: [
-      "Seu perfil predominante e secundário: conheça quais dos quatro temperamentos aparecem com maior intensidade nas suas respostas.",
+      "Seu temperamento: conheça qual dos quatro aparece com maior intensidade nas suas respostas.",
       "Suas tendências comportamentais: compreenda aspectos relacionados à sua energia social, expressão emocional, estabilidade e maneira de reagir às situações.",
       "Uma análise para o dia a dia: explore como essas características podem se manifestar nos seus relacionamentos, no trabalho e no seu processo de autoconhecimento.",
     ],

@@ -268,16 +268,11 @@ export function montarSinteseHumana(opts: {
   const np = NOME_TEMPERAMENTO[primario];
   const ns = NOME_TEMPERAMENTO[secundario];
 
-  if (empateProximo) {
-    return `${frase_sintese} ${np} e ${ns} aparecem quase na mesma medida. Os dois explicam suas tendências, conforme o dia.`;
-  }
-  if (tipo === "DUPLO") {
-    return `${frase_sintese} Seu temperamento predominante é o ${np}, com características secundárias fortes de ${ns}. Um aparece na pressa, o outro quando você relaxa.`;
-  }
-  if (tipo === "DOMINANTE" || tipo === "ATIPICO") {
-    return `${frase_sintese} O temperamento que mais aparece em você é o ${np}.`;
-  }
-  return `${frase_sintese} Você é principalmente ${np}, e características de ${ns} aparecem em alguns momentos.`;
+  void tipo;
+  void secundario;
+  void empateProximo;
+  void ns;
+  return `${frase_sintese} O seu temperamento é o ${np}.`;
 }
 
 function montarPortraitIdentidade(opts: {

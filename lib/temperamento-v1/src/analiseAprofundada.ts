@@ -59,9 +59,8 @@ const PROTOCOLO: Record<TemperamentoCodigo, string[]> = {
 function mapaTemperamental(opts: EntradaAnaliseAprofundada): string[] {
   const np = NOME_TEMPERAMENTO[opts.primario];
   return [
-    `Isto descreve tendências do seu comportamento: como você costuma reagir, expressar emoções e tomar decisões. O temperamento que mais aparece nas suas respostas é o ${np}.`,
-    "Existem quatro temperamentos clássicos: Colérico, Sanguíneo, Melancólico e Fleumático. Cada um representa um conjunto de características e maneiras de funcionar.",
-    "Uma pessoa pode apresentar características de mais de um temperamento, em diferentes intensidades. Se um segundo temperamento aparece perto do primeiro, os dois fazem parte do seu perfil.",
+    `Isto descreve tendências do seu comportamento: como você costuma reagir, expressar emoções e tomar decisões. O seu temperamento é o ${np}.`,
+    "Existem quatro temperamentos clássicos: Colérico, Sanguíneo, Melancólico e Fleumático. A análise aprofunda aquele que mais aparece nas suas respostas.",
   ];
 }
 
@@ -130,7 +129,7 @@ function leituraEixosPedagogica(): string[] {
 }
 
 export function montarAnaliseAprofundada(opts: EntradaAnaliseAprofundada): RelatorioSecao[] {
-  const { primario, secundario, tipo, empateProximo } = opts;
+  const { primario } = opts;
   const secoes: RelatorioSecao[] = [
     { id: "mapa", titulo: "Seu temperamento", paragrafos: mapaTemperamental(opts) },
     { id: "motor", titulo: "O que te move", paragrafos: [paragrafoUnicoMotor(primario)] },
@@ -143,25 +142,12 @@ export function montarAnaliseAprofundada(opts: EntradaAnaliseAprofundada): Relat
       id: "crescimento",
       titulo: "O que observar agora",
       paragrafos: [
-        "Três passos para as próximas semanas. Faça um de cada vez, sem esperar o dia perfeito:",
+        "Três exercícios para a vida. Faça um de cada vez, sem esperar o dia perfeito:",
         ...PROTOCOLO[primario].map((p, i) => `${i + 1}. ${p}`),
       ],
     },
     { id: "eixos", titulo: "Como ler isto", paragrafos: leituraEixosPedagogica() },
   ];
-
-  if ((tipo === "DUPLO" || tipo === "MISTO" || empateProximo) && primario !== secundario) {
-    secoes.splice(1, 0, {
-      id: "dinamica",
-      titulo: "Predominante e secundário",
-      paragrafos: [
-        `O temperamento predominante é o ${NOME_TEMPERAMENTO[primario]}, com características secundárias de ${NOME_TEMPERAMENTO[secundario]}. Uma parte puxa para um lado. A outra ajusta o resultado.`,
-        empateProximo
-          ? "Os dois temperamentos aparecem com intensidades próximas. Por isso, em dias diferentes, você pode parecer outra pessoa."
-          : "As características secundárias não apagam o temperamento predominante. Elas aparecem nas decisões, nas conversas e quando a pressão sobe.",
-      ],
-    });
-  }
 
   return secoes;
 }

@@ -27,16 +27,20 @@ interface CenaItem {
   experimento?: string;
 }
 
-interface FatoOrdem {
-  depois: string;
-  encontro: string;
-  descoberta: string;
-  pergunta: string;
-  relacao: string;
-  trabalho: string;
+interface LeituraUnica {
+  essencia: string[];
+  mundo: string[];
+  motivacao: string[];
+  emocao: string[];
+  pressao: string[];
+  relacao: string[];
+  trabalho: string[];
+  forca: string[];
   atrapalhos: [string, string, string];
   passos: [string, string, string];
-  fechamento: string;
+  porquePassos: string;
+  fechamento: string[];
+  pergunta: string;
 }
 
 const NOME: Record<TemperamentoCodigo, string> = {
@@ -46,43 +50,229 @@ const NOME: Record<TemperamentoCodigo, string> = {
   FLEUMATICO: "fleumático",
 };
 
-const EXPLICACAO: Record<TemperamentoCodigo, string> = {
-  SANGUINEO:
-    "Sanguíneo: tendência a se animar com gente, conversa e novidade. Muitas vezes você descobre o que pensa enquanto fala.",
-  COLERICO:
-    "Colérico: tendência a olhar para o que precisa ser feito e começar. O caminho se ajusta no meio.",
-  MELANCOLICO:
-    "Melancólico: tendência a entender antes de escolher e reparar no que os outros deixam passar.",
-  FLEUMATICO:
-    "Fleumático: tendência a observar antes de entrar e preferir um ambiente em paz.",
-};
-
-const INTRO: Record<TemperamentoCodigo, string> = {
-  SANGUINEO:
-    "Quando você chega num lugar novo, você olha primeiro as pessoas, o clima e o que dá para conversar. Você descobre o que pensa enquanto fala. A conversa organiza a ideia.",
-  COLERICO:
-    "Diante de um problema, você procura a saída antes de reunir todos os detalhes. Uma tarefa atrasada vira a pergunta de quem faz o quê e como recuperar o prazo.",
-  MELANCOLICO:
-    "Diante de uma escolha, você quer o contexto: o que muda na rotina, o que pode falhar e o que combina com o que você valoriza. Uma decisão simples fica maior do que é.",
-  FLEUMATICO:
-    "Você observa o ambiente antes de participar. Numa discussão em casa, enquanto alguém quer resolver na hora, você espera as pessoas se acalmarem. Não reagir na hora não quer dizer que você não tenha opinião.",
+const NOME_TITULO: Record<TemperamentoCodigo, string> = {
+  SANGUINEO: "Sanguíneo",
+  COLERICO: "Colérico",
+  MELANCOLICO: "Melancólico",
+  FLEUMATICO: "Fleumático",
 };
 
 const AVISO_ANTIGO =
   "Este desenho vem da proporção das suas respostas anteriores. O que nenhuma pergunta nova cobriu fica como possibilidade: indica o que pode aparecer, não uma cena que você marcou.";
 
-const FACILIDADE: Record<TemperamentoCodigo, string> = {
-  SANGUINEO: "Você começa uma conversa e as pessoas ficam mais à vontade.",
-  COLERICO: "Você toma a frente quando ninguém decide.",
-  MELANCOLICO: "Você percebe um detalhe que melhora o que vai ser entregue.",
-  FLEUMATICO: "Você escuta com calma quando as outras pessoas estão apressadas.",
-};
-
-const PERGUNTA_JEITO: Record<TemperamentoCodigo, string> = {
-  SANGUINEO: "Você consegue continuar valorizando o que começou quando o ânimo passa e ninguém está te incentivando?",
-  COLERICO: "Você consegue deixar as coisas acontecerem de um jeito diferente do seu sem sentir que perdeu o controle?",
-  MELANCOLICO: "Quantas vezes você deixa de começar, decidir ou concluir porque ainda acha que poderia fazer melhor?",
-  FLEUMATICO: "Quantas vezes você deixa de dizer o que realmente quer só para evitar um desconforto?",
+const LEITURA: Record<TemperamentoCodigo, LeituraUnica> = {
+  SANGUINEO: {
+    essencia: [
+      "O seu temperamento é o sanguíneo. A conexão com as pessoas, a comunicação e as experiências ocupam um espaço importante na sua maneira de viver.",
+      "Você encontra entusiasmo no que acontece ao redor: conversas, encontros, novidades e a sensação de estar fazendo parte. Muitas vezes, uma experiência ganha mais sentido quando pode ser compartilhada.",
+      "O aprendizado deste temperamento não é deixar de ser espontâneo. É aprender a sustentar o que importa quando a novidade passa, e a valorizar o que você faz mesmo sem plateia.",
+    ],
+    mundo: [
+      "Você tende a perceber o mundo como um lugar de experiências, possibilidades e encontros. Num ambiente novo, presta atenção nas pessoas, no clima e no que dá para conversar.",
+      "Muitas vezes você descobre o que pensa enquanto fala. A interação organiza a ideia. Isso não significa falta de reflexão: conversar pode ser parte do seu jeito de compreender.",
+    ],
+    motivacao: [
+      "O que motiva você costuma estar ligado a experimentar, sentir-se incluído e compartilhar. O reconhecimento também importa, principalmente quando mostra que sua presença e suas ideias foram percebidas.",
+      "Quando falta resposta, o ânimo pode cair. O desenvolvimento acontece quando você aprende a valorizar o que fez mesmo quando ninguém está observando, elogiando ou participando.",
+    ],
+    emocao: [
+      "Você pode expressar com facilidade o que sente, sobretudo quando encontra alguém com quem conversar com liberdade. Na alegria, compartilha; na tristeza, pode buscar conversa, atenção ou uma atividade que recupere o ânimo.",
+      "Às vezes, a vontade de sair rápido de um desconforto faz com que o sentimento não seja compreendido antes de ser substituído por outra experiência. O convite é permanecer um pouco mais com o que você sente.",
+    ],
+    pressao: [
+      "Sob pressão, você pode procurar recuperar a conexão, o entusiasmo ou a sensação de liberdade: falar mais, explicar seu lado, pedir apoio ou mudar de assunto para aliviar o momento.",
+      "Também pode ser difícil permanecer concentrado em um problema que exige atenção longa e não oferece saída imediata. Escutar uma crítica sem tratá-la como rejeição é um ponto de crescimento.",
+    ],
+    relacao: [
+      "Nas relações, você valoriza presença, conversa, espontaneidade e demonstrações de interesse. Gosta de contar o dia, fazer planos e envolver as pessoas nas suas experiências.",
+      "Uma dificuldade possível é interpretar falta de comunicação como falta de interesse. Uma pessoa mais reservada pode demonstrar afeto de outro jeito, sem conversar com a mesma frequência.",
+      "Nas amizades e na família, você costuma ser a pessoa que reúne e movimenta. O desafio é manter proximidade também quando a relação pede constância, e não só entusiasmo.",
+    ],
+    trabalho: [
+      "No trabalho, ambientes com comunicação, criatividade, interação e variedade tendem a te motivar. Você pode apresentar ideias, criar conexões e perceber oportunidades com facilidade.",
+      "A fase de manutenção pede outro esforço. Quando a novidade diminui, pode surgir vontade de começar outra frente. Seu desenvolvimento passa por criar etapas de conclusão e terminar uma atividade antes de abrir a próxima.",
+    ],
+    forca: [
+      "Sua força está em aproximar pessoas, abrir conversas e trazer movimento para ambientes parados. Você transforma silêncio em troca e ideias em energia compartilhada.",
+      "Quando essa força está equilibrada, você anima sem atropelar o tempo do outro e transforma entusiasmo em continuidade.",
+    ],
+    atrapalhos: [
+      "A busca por novidade pode dificultar a continuidade: começos frequentes e conclusões adiadas.",
+      "A facilidade para conversar pode virar dificuldade de escutar, e o desejo de manter o clima bom pode evitar conversas necessárias.",
+      "Quando o reconhecimento externo define o valor do seu esforço, a frustração aparece rápido se a resposta não vem.",
+    ],
+    passos: [
+      "Escolha uma ideia ou tarefa já começada e leve até o fim antes de abrir outra.",
+      "Numa conversa, conte menos uma frase e pergunte o que a outra pessoa pensou.",
+      "Quando algo der certo, registre para você o que você fez, antes de contar para alguém.",
+    ],
+    porquePassos:
+      "Estes exercícios fortalecem a continuidade e a escuta, sem apagar sua espontaneidade. São práticas para a vida, no seu ritmo.",
+    fechamento: [
+      "Você não precisa falar menos para ser profundo, nem abrir mão do entusiasmo para ser constante. O ponto sensível é o instante em que a novidade passa e o que importa ainda pede presença.",
+      "Conhecer o seu temperamento sanguíneo é o começo. A partir daqui, observe como essa tendência aparece no dia a dia e amplie a compreensão sobre si mesmo.",
+    ],
+    pergunta: "Você consegue continuar valorizando o que começou quando o ânimo passa e ninguém está te incentivando?",
+  },
+  COLERICO: {
+    essencia: [
+      "O seu temperamento é o colérico. Iniciativa, autonomia e realização ocupam um espaço importante na sua maneira de viver.",
+      "Quando algo precisa ser feito, você sente vontade de agir, encontrar uma saída e assumir a responsabilidade. Prefere começar e ajustar o caminho durante a execução.",
+      "O aprendizado deste temperamento é compreender que realizar não significa controlar tudo, que ouvir não diminui sua capacidade e que nem toda situação precisa ser resolvida na hora.",
+    ],
+    mundo: [
+      "Você tende a perceber situações a partir do que precisa ser feito, resolvido ou alcançado. Diante de um problema, procura a saída antes de reunir todos os detalhes.",
+      "Isso favorece objetividade. Também pode fazer você passar rápido pela etapa de compreender o que aconteceu, quando as pessoas envolvidas ainda precisam ser ouvidas.",
+    ],
+    motivacao: [
+      "O que motiva você costuma estar ligado a conquistar objetivos, tomar decisões, superar desafios e ver resultados concretos. Autonomia pesa bastante.",
+      "Quando os resultados demoram ou dependem de terceiros, pode surgir irritação ou a sensação de estar impedido de avançar. O desenvolvimento está em separar o que depende de você do que exige tempo e colaboração.",
+    ],
+    emocao: [
+      "Você tende a transformar emoção em atitude. Quando algo incomoda, procura resolver, confrontar, estabelecer limite ou mudar a situação.",
+      "Às vezes a reação chega antes de você compreender o que sentiu. Por trás da irritação pode haver frustração ou medo de perder o rumo. O convite é reconhecer o sentimento antes da ação.",
+    ],
+    pressao: [
+      "Sob pressão, aumenta a necessidade de organização, direção e controle. Você pode falar mais direto, cobrar resultado e assumir o que estava distribuído.",
+      "A intenção pode ser evitar que tudo dê errado. Para o outro, isso pode parecer pressão ou falta de espaço para contribuir. Dividir responsabilidade também é uma forma de realizar.",
+    ],
+    relacao: [
+      "Nas relações, você valoriza sinceridade, clareza e confiança. Prefere conversas diretas e, quando há problema, quer encontrar uma solução.",
+      "A objetividade pode chegar como dureza quando você não percebe como as palavras chegam. Pode achar que está só sendo claro, enquanto a outra pessoa sente cobrança.",
+      "Demonstrar carinho por atitudes e resolução de problemas é natural para você. Vale lembrar que o outro também pode precisar de escuta e disponibilidade, não só de solução.",
+    ],
+    trabalho: [
+      "No trabalho, desafios, autonomia e objetivos claros te motivam. Você toma iniciativa, organiza tarefas e enfrenta o que outros evitam.",
+      "Quando o foco no resultado fica intenso, o processo e as pessoas podem ficar em segundo plano. Delegar e compartilhar decisões fortalece o resultado e reduz sobrecarga.",
+    ],
+    forca: [
+      "Sua força está em fazer a coisa andar: decidir, organizar e sustentar o caminho até o fim. Você entra quando ninguém decide.",
+      "Quando essa força está equilibrada, você lidera sem apagar a contribuição do outro e resolve sem transformar toda conversa em cobrança.",
+    ],
+    atrapalhos: [
+      "A vontade de resolver pode virar impaciência com o ritmo diferente do seu.",
+      "A objetividade pode virar comunicação dura, e a iniciativa pode virar necessidade de controlar.",
+      "Diante da demora, você toma a iniciativa e busca uma solução. A outra pessoa perde o lugar de pensar junto.",
+    ],
+    passos: [
+      "Antes da próxima decisão, faça uma pergunta e espere a resposta inteira.",
+      "Corrija uma coisa por conversa. Deixe o resto para outro momento.",
+      "Diga um acerto de outra pessoa sem emendar a correção na mesma frase.",
+    ],
+    porquePassos:
+      "Estes exercícios treinam escuta e partilha de controle, sem tirar sua capacidade de realizar. São práticas para a vida.",
+    fechamento: [
+      "Você não precisa desistir de resolver para deixar a outra pessoa participar da decisão. O ponto sensível é o instante em que a pressa vira pressão.",
+      "Conhecer o seu temperamento colérico é o começo. Observe como essa tendência aparece no dia a dia e escolha quando agir e quando esperar.",
+    ],
+    pergunta: "Você consegue deixar as coisas acontecerem de um jeito diferente do seu sem sentir que perdeu o controle?",
+  },
+  MELANCOLICO: {
+    essencia: [
+      "O seu temperamento é o melancólico. Reflexão, profundidade, observação e busca por qualidade ocupam um espaço importante na sua maneira de viver.",
+      "Você gosta de compreender antes de decidir. Nota detalhes, inconsistências e aspectos que outras pessoas deixam passar.",
+      "O aprendizado deste temperamento é preservar a profundidade sem transformar cada escolha em preocupação, e buscar qualidade sem exigir que tudo esteja impecável para começar.",
+    ],
+    mundo: [
+      "Você presta atenção no significado das situações, nos detalhes e nas possíveis consequências. Diante de uma decisão, quer o contexto antes de escolher.",
+      "Isso favorece decisões cuidadosas. Também pode fazer situações simples parecerem maiores do que são, quando a análise continua depois de já haver elementos suficientes.",
+    ],
+    motivacao: [
+      "O que motiva você costuma estar ligado a sentido, qualidade e responsabilidade. Fazer bem feito importa mais do que fazer rápido.",
+      "Quando a pressa externa ignora o cuidado, a frustração aparece. O desenvolvimento está em confiar que algumas experiências só se compreendem durante a realização.",
+    ],
+    emocao: [
+      "Você pode sentir com intensidade e processar por dentro antes de expressar. Uma crítica ou um detalhe pode continuar com você depois que a conversa acabou.",
+      "O risco é transformar um comentário sobre a tarefa numa dúvida sobre a sua capacidade. Separar o retorno do trabalho da avaliação de quem você é traz alívio.",
+    ],
+    pressao: [
+      "Sob pressão, o medo de errar pode travar o começo, a decisão ou a entrega. Você mexe de novo num detalhe de algo que já estava pronto.",
+      "O convite é marcar o que é suficiente e entregar quando chegar lá, sem tratar um erro pequeno como sentença sobre você.",
+    ],
+    relacao: [
+      "Nas relações, você valoriza profundidade, lealdade e compreensão. Pode esperar que o outro perceba o que você precisa sem você dizer.",
+      "O silêncio cuidadoso pode virar distância. Uma frase pequena no mesmo dia costuma ser mais leve do que uma noite inteira revisando o que não foi dito.",
+      "Quando confia, você explica com riqueza. Avisar que precisa de um tempo também é um jeito de cuidar da relação.",
+    ],
+    trabalho: [
+      "No trabalho, organização, previsão de problemas e capricho são marcas suas. Você melhora o que vai ser entregue.",
+      "O excesso aparece quando a qualidade vira adiamento. Mostrar o trabalho no meio do caminho, antes de estar impecável, acelera o aprendizado e reduz o peso sozinho.",
+    ],
+    forca: [
+      "Sua força está em ver o que outros não veem e cuidar da qualidade do que importa. Você traz profundidade para decisões e projetos.",
+      "Quando essa força está equilibrada, o cuidado serve à vida, e não a impede de acontecer.",
+    ],
+    atrapalhos: [
+      "Pensar demais pode adiar o começo, a escolha ou a conclusão.",
+      "Você transforma um comentário sobre a tarefa numa dúvida sobre a sua capacidade.",
+      "Carregar sozinho o que precisava de uma conversa cansa e isola.",
+    ],
+    passos: [
+      "Escreva o que é suficiente antes de começar. Quando chegar lá, entregue.",
+      "Diga uma preocupação pequena no mesmo dia em que ela aparecer.",
+      "Mostre um trabalho no meio, antes de ele estar impecável.",
+    ],
+    porquePassos:
+      "Estes exercícios abrem espaço entre cuidado e ação, sem abandonar sua profundidade. São práticas para a vida.",
+    fechamento: [
+      "Você pode continuar cuidadoso e, ainda assim, deixar as coisas acontecerem sem controlar cada detalhe. O ponto sensível é o instante em que a análise substitui o passo.",
+      "Conhecer o seu temperamento melancólico é o começo. Observe onde o cuidado te fortalece e onde ele te trava.",
+    ],
+    pergunta: "Quantas vezes você deixa de começar, decidir ou concluir porque ainda acha que poderia fazer melhor?",
+  },
+  FLEUMATICO: {
+    essencia: [
+      "O seu temperamento é o fleumático. Tranquilidade, estabilidade e preservação da harmonia ocupam um espaço importante na sua maneira de viver.",
+      "Você observa antes de participar, escuta antes de responder e prefere compreender o ambiente antes de agir. Sua calma pode acolher quem está ao redor.",
+      "O aprendizado deste temperamento é descobrir que preservar a paz não significa evitar todo conflito, e que dizer o que você quer também pode fortalecer uma relação.",
+    ],
+    mundo: [
+      "Você valoriza estabilidade e observa as situações antes de decidir como entrar. Em ambientes agitados, pode não sentir a mesma urgência que os outros.",
+      "Não reagir na hora não quer dizer ausência de opinião. Você pode estar percebendo muita coisa e escolher não colocar tudo para fora naquele momento.",
+    ],
+    motivacao: [
+      "O que motiva você costuma estar ligado a rotina segura, relações estáveis e ambientes respeitosos, sem cobrança constante.",
+      "A dificuldade aparece quando a busca por estabilidade evita mudanças necessárias. Segurança também se constrói ao enfrentar o que precisa mudar.",
+    ],
+    emocao: [
+      "Você pode demonstrar o que sente de forma mais reservada. Às vezes diz que está tudo bem mesmo quando algo não agradou, para não gerar atrito.",
+      "O desconforto pode permanecer em silêncio. Quando isso se repete, fica difícil explicar depois por que a situação passou a incomodar tanto.",
+    ],
+    pressao: [
+      "Sob pressão, você pode reduzir o contato com o desconforto: ficar mais quieto, adiar decisões ou esperar que a situação se resolva sozinha.",
+      "Isso evita briga imediata e também pode deixar problemas sem destino. Uma frase no meio do caminho costuma ser mais leve do que uma cobrança tardia.",
+    ],
+    relacao: [
+      "Nas relações, você valoriza harmonia, constância e respeito. Escuta até o fim e as pessoas se sentem à vontade para falar.",
+      "O risco é a conversa terminar agradável e incompleta: o que é seu não entra. Concordar por fora e revisar por dentro cansa.",
+      "Pedir uma mudança pequena não desfaz a paz. Dizer não a um pedido não é dizer não à pessoa.",
+    ],
+    trabalho: [
+      "No trabalho, você contribui com constância, cooperação e capacidade de sustentar processos sem precisar de holofote.",
+      "Pode aceitar tarefas para não criar atrito e adiar o que é realmente seu. Marcar limite e dividir a carga preserva sua energia e a qualidade do grupo.",
+    ],
+    forca: [
+      "Sua força está em acalmar ambientes, escutar com presença e manter o que precisa de continuidade. Você segura conversas difíceis para não virarem briga.",
+      "Quando essa força está equilibrada, a calma inclui a sua voz, e não só a dos outros.",
+    ],
+    atrapalhos: [
+      "Evitar desconforto pode deixar situações importantes sem solução.",
+      "Você pode engolir o incômodo até ele ficar grande demais.",
+      "O silêncio pode ser lido como acordo, quando na verdade você só não quis brigar.",
+    ],
+    passos: [
+      "Diga o incômodo no dia em que ele aparecer, em uma frase.",
+      "Recuse um pedido que não é seu, sem justificar demais.",
+      "Peça uma mudança em uma coisa só, no mesmo dia.",
+    ],
+    porquePassos:
+      "Estes exercícios treinam expressão e limite sem abandonar sua busca por harmonia. São práticas para a vida.",
+    fechamento: [
+      "Você pode continuar buscando um ambiente calmo e, ainda assim, ocupar um pedaço da conversa com o que é seu. O ponto sensível é o instante em que a paz vira silêncio sobre o que importa.",
+      "Conhecer o seu temperamento fleumático é o começo. Observe onde a calma te sustenta e onde ela te impede de pedir o que precisa.",
+    ],
+    pergunta: "Quantas vezes você deixa de dizer o que realmente quer só para evitar um desconforto?",
+  },
 };
 
 const CENAS: CenaItem[] = [
@@ -183,321 +373,6 @@ const CENAS: CenaItem[] = [
   },
 ];
 
-const ORDEM: Record<string, FatoOrdem> = {
-  SANGUINEO_COLERICO: {
-    depois:
-      "O colérico entra logo depois e muda o rumo. Você abre com leveza. Em seguida, quer que a ideia saia do papel. Quem entrou para trocar uma ideia percebe que o assunto ganhou um destino.",
-    encontro:
-      "Numa reunião ou num jantar, você puxa o assunto e as pessoas entram. Pouco depois, você já organiza o próximo passo. A força é juntar gente e fazer a coisa andar.",
-    descoberta:
-      "O aperto é outro: quem veio só conversar sai com a sensação de que a conversa virou tarefa.",
-    pergunta: "Na última vez em que você empolgou alguém com uma ideia, a pessoa saiu com vontade de participar ou com a sensação de que já tinha uma tarefa?",
-    relacao:
-      "Na convivência, você aproxima e também conduz. O incômodo pede conversa e rumo no mesmo momento. A outra pessoa ainda está sentindo, e você já quer o próximo passo.",
-    trabalho:
-      "No trabalho, você comunica a ideia e puxa as pessoas com você. Quando o grupo para, você escolhe o próximo passo. O trecho mais difícil é continuar quando a novidade passa e a tarefa pede conclusão.",
-    atrapalhos: [
-      "A intenção é aproveitar o ânimo enquanto ele está alto. Diante da demora, você toma a iniciativa e busca uma solução. A outra pessoa perde o lugar de pensar junto.",
-      "Você começa com muita energia e perde o ritmo quando a tarefa fica repetitiva.",
-      "Você lê o silêncio do outro como falta de interesse, e era só um tempo diferente do seu.",
-    ],
-    passos: [
-      "Numa conversa, deixe a pessoa terminar antes de organizar o próximo passo.",
-      "Escolha uma tarefa que a conversa já abriu e termine essa antes de começar outra ideia.",
-      "Quando algo der certo, registre para você o que você fez, antes de contar para alguém.",
-    ],
-    fechamento:
-      "Você não precisa falar menos para ouvir, nem abrir mão da iniciativa para respeitar o tempo de quem está com você. O instante que importa é aquele em que a conversa deixa de ser encontro e vira tarefa. Aí você escolhe.",
-  },
-  SANGUINEO_MELANCOLICO: {
-    depois:
-      "Você pode chegar sorrindo e puxar assunto. Depois, algo que foi dito fica com você, mesmo quando a conversa já tinha acabado bem.",
-    encontro:
-      "A conversa te anima e, às vezes, é nela que a ideia fica clara. Em seguida, uma frase pode continuar com você, e o entusiasmo encontra a vontade de fazer direito.",
-    descoberta:
-      "Você não precisa parar de contar o que vive para cuidar do que ficou. Pode escolher o que merece mais uma olhada e o que já pode seguir, sem transformar um comentário numa sentença sobre você.",
-    pergunta: "O que te incomodou numa conversa recente e você ainda não falou?",
-    relacao:
-      "Você pode contar o dia com leveza e, mais tarde, remoer uma frase que a outra pessoa já esqueceu.",
-    trabalho:
-      "Você pode aceitar uma tarefa no meio da conversa e, depois, achar que ela ainda não está boa o bastante para entregar.",
-    atrapalhos: [
-      "Você pode prometer no meio da conversa mais do que você consegue caprichar depois.",
-      "Você pode rir de um incômodo em vez de dizer o que sentiu.",
-      "Você pode revisar a mesma crítica por tempo demais.",
-    ],
-    passos: [
-      "Conte a uma pessoa o que te incomodou, sem transformar isso em piada.",
-      "Antes de prometer uma entrega, diga o que já está bom o suficiente.",
-      "Se a mesma crítica voltar por mais de uma hora, anote uma frase e pare.",
-    ],
-    fechamento:
-      "Você pode continuar leve com as pessoas e, ao mesmo tempo, falar o que ficou. Uma coisa não apaga a outra.",
-  },
-  SANGUINEO_FLEUMATICO: {
-    depois:
-      "Você anima a conversa e ajuda quem está perto. Quando o assunto fica difícil, você muda de tema para ninguém discutir.",
-    encontro:
-      "O começo é participação: você entra, conta, aproxima. O momento seguinte pode ser a vontade de manter a paz, e o assunto difícil sai da mesa.",
-    descoberta:
-      "Manter o clima bom é um cuidado. Ele atrapalha quando você evita a conversa desconfortável e, dias depois, o incômodo ainda está lá.",
-    pergunta: "Onde você mudou de assunto para não falar o que precisava?",
-    relacao:
-      "Em família, você pode ser a pessoa que alegra a mesa e também a que não traz o conflito.",
-    trabalho:
-      "No trabalho, você pode aceitar um pedido para não criar atrito, e a sua tarefa de verdade fica para depois.",
-    atrapalhos: [
-      "Você pode dizer sim para não estragar o clima.",
-      "Você pode empurrar a tarefa sem graça porque a conversa é mais fácil.",
-      "Você pode sair de um assunto difícil antes de ele ter um destino.",
-    ],
-    passos: [
-      "Diga não a um pedido que não é seu, em uma frase.",
-      "Marque um horário curto para a tarefa que você empurra.",
-      "Traga o assunto difícil no mesmo dia, antes de ele virar silêncio.",
-    ],
-    fechamento:
-      "Você pode continuar sendo a pessoa que aproxima os outros e, ainda assim, ficar numa conversa difícil até o fim.",
-  },
-  COLERICO_SANGUINEO: {
-    depois:
-      "Você já entra querendo resolver. A fala agradável vem em seguida, para as pessoas aceitarem o que você já tinha em mente.",
-    encontro:
-      "Você pode olhar primeiro para o que precisa ser resolvido e só depois deixar a conversa agradável. O carinho, nesse jeito, às vezes chega como solução, não como escuta.",
-    descoberta:
-      "Falar de um jeito bom ajuda as pessoas a ficarem perto. Vale perceber se elas estão escolhendo com você ou só concordando para a tarefa andar.",
-    pergunta: "Quem você tratou, nesta semana, como um meio para a tarefa andar?",
-    relacao:
-      "Numa relação, você pode trazer o assunto já com a solução, e a outra pessoa sente que a conversa era só um aviso.",
-    trabalho:
-      "No trabalho, você pode fechar o plano e usar a conversa para contar o que já foi decidido.",
-    atrapalhos: [
-      "Você pode decidir primeiro e chamar de conversa o que já era um aviso.",
-      "Você pode achar acordo onde só houve pressa de te agradar.",
-      "Você pode corrigir na mesma frase em que elogia.",
-    ],
-    passos: [
-      "Antes da próxima decisão, faça uma pergunta e espere a resposta inteira.",
-      "Separe o que é urgente do que só está no topo da sua lista. Risque um dos dois.",
-      "Diga um acerto de outra pessoa sem emendar a correção na mesma frase.",
-    ],
-    fechamento:
-      "Você não precisa desistir de resolver para deixar a outra pessoa participar da decisão.",
-  },
-  COLERICO_MELANCOLICO: {
-    depois:
-      "Você pode querer resolver agora e, antes de fechar, conferir o detalhe. A decisão sai mais tarde e pode sair mais dura.",
-    encontro:
-      "A pressa de achar uma saída encontra a vontade de não deixar um detalhe passar. As duas juntas podem atrasar justo o que você queria acelerar.",
-    descoberta:
-      "Fazer bem feito e fazer agora podem morar juntos. O aprendizado é dizer o que já é suficiente, e entregar quando chegar lá, sem tratar um erro como se dissesse quem você é.",
-    pergunta: "O que você ainda não entregou porque ainda não estava do seu jeito?",
-    relacao:
-      "Em casa, você pode cobrar uma mudança e, na mesma fala, listar o que ainda não está bom.",
-    trabalho:
-      "No trabalho, você pode segurar uma entrega para ajustar um detalhe, e o prazo passa.",
-    atrapalhos: [
-      "Você pode corrigir várias coisas na mesma conversa.",
-      "Você pode não entregar porque ainda vê um erro pequeno.",
-      "Você pode a pessoa do outro lado ouvir só a crítica, não o cuidado.",
-    ],
-    passos: [
-      "Escreva o que é suficiente antes de começar. Quando chegar lá, entregue.",
-      "Corrija uma coisa por conversa. Deixe o resto para outro dia.",
-      "Diga um acerto que você teria pulado.",
-    ],
-    fechamento:
-      "Você pode continuar exigente e, mesmo assim, soltar o que já está pronto.",
-  },
-  COLERICO_FLEUMATICO: {
-    depois:
-      "Você pode organizar a tarefa e seguir até o fim sem discutir na hora. A cobrança vem depois, quando o atraso já ficou grande.",
-    encontro:
-      "Por fora, a calma de quem não quer briga. Por dentro, a conta do que não foi dito. Quando a pressão sobe, você pode assumir o que era dos outros e cobrar de uma vez.",
-    descoberta:
-      "Esperar não é o mesmo que concordar. Dividir a tarefa também realiza. O outro só entende o seu limite se você disser no meio do caminho.",
-    pergunta: "O que você vai cobrar tarde se não disser hoje?",
-    relacao:
-      "Numa relação, o silêncio pode parecer acordo. A cobrança tardia parece, para o outro, ter vindo do nada.",
-    trabalho:
-      "No trabalho, você pode carregar a tarefa sozinho e só então cobrar quem não entrou.",
-    atrapalhos: [
-      "Você pode engolir o incômodo até ele ficar grande demais.",
-      "Você pode a outra pessoa achar que você concordou.",
-      "Você pode a cobrança chegar sem aviso.",
-    ],
-    passos: [
-      "Diga o incômodo no dia em que ele aparecer, em uma frase.",
-      "Tome uma decisão que você está segurando para não discutir.",
-      "Pergunte se o seu silêncio foi entendido como acordo.",
-    ],
-    fechamento:
-      "Você pode continuar firme na tarefa e falar o incômodo enquanto ele ainda é pequeno.",
-  },
-  MELANCOLICO_SANGUINEO: {
-    depois:
-      "Você pensa antes de falar. Quando confia, explica de um jeito que as pessoas entendem. Se a conversa fica longa demais, você sai sem avisar.",
-    encontro:
-      "Você pode pensar bastante antes de falar e, quando confia, contar com vontade. Os dois juntos podem prometer, no meio da conversa, mais do que o seu cuidado consegue sustentar depois.",
-    descoberta:
-      "Participar não exige que você tenha tudo organizado antes de dizer. Avisar que precisa de um tempo também é um jeito de cuidar da relação.",
-    pergunta: "O que você esconde quando está de bom humor com as pessoas?",
-    relacao:
-      "Com quem você gosta, pode contar bastante e, no dia seguinte, sentir que falou mais do que queria.",
-    trabalho:
-      "No trabalho, você pode mostrar só o que já está muito bom, e as pessoas não acompanham o caminho.",
-    atrapalhos: [
-      "Você pode sair de uma conversa sem dizer que vai sair.",
-      "Você pode prometer no entusiasmo o que o seu cuidado não vai conseguir entregar no prazo.",
-      "Você pode esconder o trabalho até ele parecer impecável.",
-    ],
-    passos: [
-      "Avise quando for sair: preciso de um tempo e eu volto.",
-      "Prometa menos do que a conversa te animou a prometer.",
-      "Mostre o trabalho no meio, antes de ele estar impecável.",
-    ],
-    fechamento:
-      "Você pode continuar cuidadoso e, ainda assim, deixar as pessoas verem o caminho, não só o fim.",
-  },
-  MELANCOLICO_COLERICO: {
-    depois:
-      "Você pode estudar o problema antes de agir. Quando decide, cobra a mudança. Quem esperou pode ouvir a crítica junto com a pressa.",
-    encontro:
-      "Há um tempo longo de entender o contexto e, de repente, a vontade de que tudo mude agora. Quem esperou pode ouvir, junto, a crítica e a pressa.",
-    descoberta:
-      "Dizer se você ainda está olhando ou se já decidiu tira o susto. Ouvir uma opinião diferente não tira a sua capacidade de realizar.",
-    pergunta: "O que você já entendeu e ainda não deixou acontecer?",
-    relacao:
-      "Numa relação, a pessoa pode achar que está tudo bem enquanto você junta argumentos, e levar a cobrança de uma vez.",
-    trabalho:
-      "No trabalho, a espera por certeza pode virar uma cobrança apressada quando o prazo aperta.",
-    atrapalhos: [
-      "Você pode ficar em silêncio no estudo e duro na hora de cobrar.",
-      "Você pode juntar vários incômodos para uma conversa só.",
-      "Você pode não soltar um detalhe que já poderia seguir.",
-    ],
-    passos: [
-      "Diga se você ainda está olhando ou se já decidiu.",
-      "Fale o incômodo na primeira vez, antes de juntar todos os argumentos.",
-      "Solte um detalhe hoje. O resto pode continuar caprichado.",
-    ],
-    fechamento:
-      "Você pode continuar pensando antes e, mesmo assim, avisar as pessoas em que etapa você está.",
-  },
-  MELANCOLICO_FLEUMATICO: {
-    depois:
-      "Você pode ver o erro e não falar na hora. Concorda na frente dos outros e continua pensando nisso sozinho.",
-    encontro:
-      "Você pode ver o detalhe e, ao mesmo tempo, não querer a briga. O que não foi dito continua com você, e a outra pessoa acha que está tudo bem.",
-    descoberta:
-      "Concordar por fora e revisar por dentro cansa. Uma frase no mesmo dia pode ser mais leve do que uma noite inteira pensando se você deveria ter respondido de outro jeito.",
-    pergunta: "O que você concordou na frente dos outros e continuou pensando depois?",
-    relacao:
-      "Em casa, você pode evitar a briga e guardar uma lista do que não ficou bom.",
-    trabalho:
-      "No trabalho, você pode aceitar um combinado e seguir corrigindo sozinho o que não disse.",
-    atrapalhos: [
-      "Você pode carregar sozinho uma tarefa que precisava de uma conversa.",
-      "Você pode a revisão da noite não ter hora para acabar.",
-      "Você pode o outro achar que você está de acordo.",
-    ],
-    passos: [
-      "Diga uma preocupação pequena no mesmo dia em que ela aparecer.",
-      "Marque o que é suficiente neste trabalho e pare quando chegar lá.",
-      "Peça uma ajuda concreta, em vez de carregar a tarefa sozinho.",
-    ],
-    fechamento:
-      "Você pode continuar cuidadoso com a paz e, ainda assim, pedir a mudança que já viu.",
-  },
-  FLEUMATICO_SANGUINEO: {
-    depois:
-      "Você escuta até o fim e deixa a conversa boa. O assunto que te incomoda não entra.",
-    encontro:
-      "A calma deixa a conversa fácil, e a vontade de participar fica no que é leve. O que te incomoda continua só com você, e as pessoas podem nem perceber que você precisava de ajuda.",
-    descoberta:
-      "Escutar é uma força. Ela fica pela metade quando a conversa nunca chega no que é seu. Dizer o que você quer não precisa estragar a paz.",
-    pergunta: "Onde você deixou a conversa boa para não falar o que te incomoda?",
-    relacao:
-      "Com amigos, você pode ser uma companhia agradável e sair sem ter dito o que precisava.",
-    trabalho:
-      "No trabalho, você pode ajudar no assunto dos outros e adiar o seu.",
-    atrapalhos: [
-      "Você pode a conversa terminar agradável e incompleta.",
-      "Você pode aceitar um favor que te atrapalha.",
-      "Você pode adiar a conversa que você já sabe que precisa ter.",
-    ],
-    passos: [
-      "Traga um assunto seu numa conversa em que você só escutaria.",
-      "Marque a conversa adiada e faça em vinte minutos.",
-      "Recuse um favor que te atrapalha, em uma frase.",
-    ],
-    fechamento:
-      "Você pode continuar escutando bem e também ocupar um pedaço da conversa com o que é seu.",
-  },
-  FLEUMATICO_COLERICO: {
-    depois:
-      "Você espera e não discute. Quando a tarefa para, você decide e cobra de uma vez.",
-    encontro:
-      "Há um tempo em que você espera a poeira baixar e, depois, um corte. Quem estava na calma pode não entender a cobrança, porque não viu o que você já tinha percebido.",
-    descoberta:
-      "Avisar no meio evita que a firmeza pareça ter vindo do nada. Você pode continuar paciente e, ainda assim, tomar uma posição.",
-    pergunta: "O que você vai cobrar de uma vez se não disser hoje?",
-    relacao:
-      "Numa relação, a paciência longa pode terminar numa frase dura, que junta vários dias.",
-    trabalho:
-      "No trabalho, você pode segurar a decisão para não criar atrito e, no fim, impor o caminho.",
-    atrapalhos: [
-      "Você pode a cobrança chegar sem os avisos do meio.",
-      "Você pode decidir sozinho o que estava sendo mediado.",
-      "Você pode o silêncio ser lido como acordo.",
-    ],
-    passos: [
-      "Avise no meio, antes da cobrança ficar grande.",
-      "Tome uma decisão pequena que você está mediando há dias.",
-      "Pergunte se o seu silêncio foi lido como acordo.",
-    ],
-    fechamento:
-      "Você pode continuar paciente e, ainda assim, dizer o limite antes de ele estourar.",
-  },
-  FLEUMATICO_MELANCOLICO: {
-    depois:
-      "Você mantém a rotina e evita briga. Quando algo fica mal feito, você guarda o incômodo e não pede a mudança.",
-    encontro:
-      "A rotina segue e o olhar para o detalhe fica com você. A casa ou o trabalho parecem em paz, e você continua vendo o que não ficou bom sem pedir a mudança.",
-    descoberta:
-      "Pedir uma mudança pequena não desfaz a paz. Mudar também pode fazer parte de uma vida mais tranquila, e dizer não a um pedido não é dizer não à pessoa.",
-    pergunta: "O que não ficou bom e você ainda não pediu para mudar?",
-    relacao:
-      "Em casa, você pode manter a harmonia e guardar, em silêncio, o que gostaria que fosse diferente.",
-    trabalho:
-      "No trabalho, a rotina segue e um erro pequeno se repete porque ninguém ouviu o seu reparo.",
-    atrapalhos: [
-      "Você pode não pedir a mudança para não criar onda.",
-      "Você pode revisar de noite o que não foi dito de dia.",
-      "Você pode pedir desculpa por apontar o que não ficou bom.",
-    ],
-    passos: [
-      "Peça uma mudança em uma coisa só, no mesmo dia.",
-      "Pare a revisão da noite num horário marcado.",
-      "Diga o que não ficou bom, em uma frase, sem pedir desculpa por dizer.",
-    ],
-    fechamento:
-      "Você pode continuar buscando um ambiente calmo e pedir o ajuste que já viu.",
-  },
-};
-
-const ABERTURA = [
-  "Os temperamentos são uma forma de compreender diferentes tendências do nosso comportamento: como costumamos reagir às situações, expressar emoções, tomar decisões, lidar com mudanças e nos relacionar.",
-  "A partir das suas respostas, você conhece o temperamento predominante, as características secundárias e como essas tendências podem aparecer nas relações, no trabalho e no seu processo de autoconhecimento.",
-];
-
-const FECHO_COMUM =
-  "Conhecer o seu temperamento é o começo. A partir daqui, o convite é observar como essas tendências aparecem no seu dia a dia e ampliar a compreensão sobre si mesmo.";
-
-function chave(a: TemperamentoCodigo, b: TemperamentoCodigo): string {
-  return `${a}_${b}`;
-}
-
 function ordenar(percentuais: Record<TemperamentoCodigo, number>): TemperamentoCodigo[] {
   return [...TEMPERAMENTOS].sort((a, b) => (percentuais[b] ?? 0) - (percentuais[a] ?? 0));
 }
@@ -509,7 +384,11 @@ function conta(id: string, respostas: Record<string, RespostaSimNao>): boolean {
   return respostas[id] === marca;
 }
 
-function cenasDe(alvos: TemperamentoCodigo[], respostas: Record<string, RespostaSimNao> | undefined, usar: boolean): CenaItem[] {
+function cenasDe(
+  alvos: TemperamentoCodigo[],
+  respostas: Record<string, RespostaSimNao> | undefined,
+  usar: boolean,
+): CenaItem[] {
   if (!usar || !respostas) return [];
   return CENAS.filter((cena) => alvos.includes(cena.alvo) && conta(cena.id, respostas));
 }
@@ -524,28 +403,6 @@ function textos(cenas: CenaItem[], campo: keyof CenaItem, max: number): string[]
   return saida;
 }
 
-function quaseNao(codigo: TemperamentoCodigo): string {
-  if (codigo === "FLEUMATICO") {
-    return "Este temperamento quase não apareceu nas suas respostas. Não quer dizer que você não possa usá-lo. Uma pausa, por exemplo, pode ser algo para experimentar, não algo que você já faz.";
-  }
-  return "Este temperamento quase não apareceu nas suas respostas. Pode ser algo para experimentar, não uma cena que você marcou.";
-}
-
-function blocoMenor(
-  codigo: TemperamentoCodigo,
-  respostas: Record<string, RespostaSimNao> | undefined,
-  usar: boolean,
-): string[] {
-  const nome = NOME[codigo];
-  if (!usar) {
-    return [`O temperamento ${nome} apareceu com menor intensidade. Você pode reconhecê-lo em algum dia, sem uma cena marcada.`];
-  }
-  const cenas = cenasDe([codigo], respostas, true);
-  const reconhecidos = textos(cenas, "reconhecer", 3);
-  if (reconhecidos.length === 0) return [`O temperamento ${nome} ficou baixo. ${quaseNao(codigo)}`];
-  return [`O temperamento ${nome} também aparece, em menor intensidade.`, ...reconhecidos];
-}
-
 function unicos(textosLista: Array<string | undefined>, max: number): string[] {
   const saida: string[] = [];
   for (const texto of textosLista) {
@@ -556,268 +413,129 @@ function unicos(textosLista: Array<string | undefined>, max: number): string[] {
   return saida;
 }
 
-const PERGUNTA_FECHO: Record<string, string> = {
-  SANGUINEO_COLERICO: "Onde a conversa leve virou um pedido de decisão antes da outra pessoa terminar?",
-  SANGUINEO_MELANCOLICO: "O que você contou com leveza e continuou pensando depois?",
-  SANGUINEO_FLEUMATICO: "Qual assunto você tirou da mesa para o clima continuar bom?",
-  COLERICO_SANGUINEO: "Quem concordou com você porque a conversa já era um aviso?",
-  COLERICO_MELANCOLICO: "O que já estava pronto e você segurou por um detalhe?",
-  COLERICO_FLEUMATICO: "O que você vai cobrar tarde se não disser hoje?",
-  MELANCOLICO_SANGUINEO: "O que você prometeu no meio da conversa e o cuidado não sustenta?",
-  MELANCOLICO_COLERICO: "Você ainda está olhando, ou já decidiu e a outra pessoa não sabe?",
-  MELANCOLICO_FLEUMATICO: "O que você concordou na frente dos outros e continuou pensando depois?",
-  FLEUMATICO_SANGUINEO: "Onde a conversa ficou boa e o que era seu não entrou?",
-  FLEUMATICO_COLERICO: "O que você segurou em silêncio e depois cobrou de uma vez?",
-  FLEUMATICO_MELANCOLICO: "O que não ficou bom e você ainda não pediu para mudar?",
-};
-
-function montarSanguineoColerico(opts: {
-  percentuais: Record<TemperamentoCodigo, number>;
-  respostas?: Record<string, RespostaSimNao>;
-  usar: boolean;
-}): CartaoConversa[] {
-  const respostas = opts.respostas;
-  const usar = opts.usar;
-  const marcadas = cenasDe(["SANGUINEO", "COLERICO", "MELANCOLICO", "FLEUMATICO"], respostas, usar);
-  const ordem = ordenar(opts.percentuais);
-  const terceiro = ordem[2] ?? "MELANCOLICO";
-  const quarto = ordem[3] ?? "FLEUMATICO";
-  const fato = ORDEM.SANGUINEO_COLERICO;
-  const reconhece = (id: CodigoItem) => marcadas.some((cena) => cena.id === id);
-  const doAlvo = (codigo: TemperamentoCodigo) => textos(cenasDe([codigo], respostas, usar), "reconhecer", 3);
-
-  const primeiro = [
-    "O sanguíneo é a característica mais presente nas suas respostas.",
-    ...(usar ? doAlvo("SANGUINEO") : ["Pelo conjunto, você se aproxima pelas pessoas e pela conversa."]),
-  ];
-
-  const menor = (codigo: TemperamentoCodigo, lugar: "terceira" | "quarta") => {
-    const nome = NOME[codigo];
-    const cenas = doAlvo(codigo);
-    const titulo = `O ${nome} aparece como uma ${lugar} tendência nas suas respostas.`;
-    if (!usar) return [titulo];
-    if (cenas.length === 0) {
-      return [titulo, "Nas perguntas desse temperamento, você não marcou um comportamento para destacar."];
-    }
-    return [titulo, ...cenas];
-  };
-
-  const relacoes = [fato.relacao];
-  if (reconhece("E03")) relacoes.push("Em casa, você conta o que sentiu e já segue em frente. A outra pessoa ainda está naquele assunto.");
-  if (reconhece("E08")) relacoes.push("Em casa, você cobra na hora quando alguém atrasa o combinado. A outra pessoa para de contar o que sentia.");
-
-  const atrapalhos: string[] = [];
-  if (!usar) {
-    atrapalhos.push("O aperto desta combinação, quando aparece, é a conversa que vira tarefa. Sem uma resposta que marque a cena, isso fica como possibilidade.");
-  } else if (reconhece("E06")) {
-    atrapalhos.push("A intenção é aproveitar o ânimo enquanto ele está alto. Diante da demora, você toma a iniciativa e busca uma solução. A outra pessoa perde o lugar de pensar junto.");
-  } else if (reconhece("E04")) {
-    atrapalhos.push("Você conta a história e a outra pessoa quase não entra. A conversa termina sem a opinião dela.");
-  }
-  for (const cena of marcadas) {
-    if (cena.alvo === "SANGUINEO" || cena.alvo === "COLERICO") continue;
-    if (cena.atrapalha && !atrapalhos.includes(cena.atrapalha)) atrapalhos.push(cena.atrapalha);
-  }
-  if (usar && atrapalhos.length === 0) atrapalhos.push("Nenhuma cena de aperto ficou marcada nas suas respostas.");
-
-  return [
-    { id: "antes", titulo: "Sobre o seu resultado", paragrafos: ABERTURA, perguntas: [], passos: [] },
-    {
-      id: "jeitos",
-      titulo: "Os quatro temperamentos",
-      paragrafos: [
-        "Existem quatro temperamentos clássicos. Cada um representa um conjunto de características e maneiras de funcionar. Uma pessoa pode apresentar características de mais de um, em diferentes intensidades.",
-        EXPLICACAO.SANGUINEO,
-        EXPLICACAO.COLERICO,
-        EXPLICACAO.MELANCOLICO,
-        EXPLICACAO.FLEUMATICO,
-      ],
-      perguntas: [],
-      passos: [],
-    },
-    {
-      id: "primeiro",
-      titulo: "Seu temperamento predominante",
-      paragrafos: primeiro,
-      perguntas: [PERGUNTA_JEITO.SANGUINEO],
-      passos: [],
-    },
-    { id: "depois", titulo: "Características secundárias", paragrafos: [fato.depois], perguntas: [], passos: [] },
-    {
-      id: "encontro",
-      titulo: "Como essas tendências se combinam",
-      paragrafos: [fato.encontro, fato.descoberta],
-      perguntas: [fato.pergunta],
-      passos: [],
-    },
-    {
-      id: "tambem",
-      titulo: "O que também aparece em você",
-      paragrafos: [...menor(terceiro, "terceira"), ...menor(quarto, "quarta")],
-      perguntas: [],
-      passos: [],
-    },
-    {
-      id: "aproveitar",
-      titulo: "Suas tendências comportamentais",
-      paragrafos: [
-        "A força desta combinação é esta: você junta as pessoas e, logo depois, coloca a ideia para andar. Você não fica só na conversa, e também não chega só cobrando.",
-      ],
-      perguntas: [],
-      passos: [],
-    },
-    { id: "relacoes", titulo: "Nos relacionamentos", paragrafos: relacoes, perguntas: [], passos: [] },
-    { id: "trabalho", titulo: "No trabalho", paragrafos: [fato.trabalho], perguntas: [], passos: [] },
-    { id: "atrapalha", titulo: "Quando essas tendências atrapalham", paragrafos: atrapalhos, perguntas: [], passos: [] },
-    {
-      id: "semana",
-      titulo: "Para observar nesta semana",
-      paragrafos: ["Nesta semana, observe como você reage e experimente uma atitude diferente."],
-      perguntas: [],
-      passos: [...fato.passos],
-    },
-    {
-      id: "fica",
-      titulo: "Para o seu autoconhecimento",
-      paragrafos: [fato.fechamento],
-      perguntas: [PERGUNTA_FECHO.SANGUINEO_COLERICO],
-      passos: [],
-    },
-  ];
-}
-
+/** Monta a leitura do temperamento único (sem combinação). `secundario` é ignorado e existe só por compatibilidade. */
 export function montarLeituraConversa(opts: {
   primario: TemperamentoCodigo;
-  secundario: TemperamentoCodigo;
+  secundario?: TemperamentoCodigo;
   percentuais: Record<TemperamentoCodigo, number>;
   respostas?: Record<string, RespostaSimNao>;
   questionarioClaro?: boolean;
 }): CartaoConversa[] {
   const ordem = ordenar(opts.percentuais);
   const primario = ordem[0] ?? opts.primario;
-  const secundario = ordem[1] && ordem[1] !== primario ? ordem[1] : opts.secundario;
-  const resto = ordem.filter((codigo) => codigo !== primario && codigo !== secundario);
-  const terceiro = resto[0] ?? "FLEUMATICO";
-  const quarto = resto[1] ?? "MELANCOLICO";
-  const fato = ORDEM[chave(primario, secundario)] ?? ORDEM[chave(secundario, primario)] ?? ORDEM.SANGUINEO_FLEUMATICO;
+  const base = LEITURA[primario];
   const usar = opts.questionarioClaro === true && !!opts.respostas;
   const respostas = opts.respostas;
-  if (primario === "SANGUINEO" && secundario === "COLERICO") {
-    return montarSanguineoColerico({ percentuais: opts.percentuais, respostas, usar });
-  }
-  const doPrimeiro = cenasDe([primario], respostas, usar);
-  const todas = cenasDe([primario, secundario, terceiro, quarto], respostas, usar);
+  const cenas = cenasDe([primario], respostas, usar);
   const aviso = usar ? [] : [AVISO_ANTIGO];
+  const reconhecidos = textos(cenas, "reconhecer", 3);
 
-  const atrapalhos = usar ? textos(todas, "atrapalha", 3) : [...fato.atrapalhos];
-  const cenasAtrapalho = usar ? todas.filter((cena) => cena.atrapalha && atrapalhos.includes(cena.atrapalha)) : [];
-  const experimentos = unicos(
-    [...cenasAtrapalho.map((cena) => cena.experimento), ...fato.passos],
-    3,
-  );
+  const atrapalhos = usar ? textos(cenas, "atrapalha", 3) : [...base.atrapalhos];
+  if (usar && atrapalhos.length === 0) {
+    atrapalhos.push("Nenhuma cena de aperto ficou marcada nas suas respostas deste temperamento.");
+  }
+  if (!usar) {
+    // Mantém a palavra "possibilidade" para leituras antigas sem questionário claro.
+    atrapalhos[0] = `${atrapalhos[0]} Isso aparece como possibilidade a partir do conjunto das respostas.`;
+  }
 
-  const facilidades = usar
-    ? textos(todas, "facilidade", 3)
-    : [FACILIDADE[primario], FACILIDADE[secundario]];
-  const relacoes = usar ? textos(todas, "relacao", 3) : [fato.relacao];
-  const trabalhos = usar ? textos(todas, "trabalho", 3) : [fato.trabalho];
-  const fecho = PERGUNTA_FECHO[chave(primario, secundario)] ?? PERGUNTA_FECHO.SANGUINEO_FLEUMATICO;
+  const cenasAtrapalho = usar
+    ? cenas.filter((cena) => cena.atrapalha && atrapalhos.includes(cena.atrapalha))
+    : [];
+  const experimentos = unicos([...cenasAtrapalho.map((cena) => cena.experimento), ...base.passos], 3);
+
+  const relacoes = usar ? unicos([...textos(cenas, "relacao", 3), ...base.relacao], 4) : [...base.relacao];
+  const trabalhos = usar ? unicos([...textos(cenas, "trabalho", 3), ...base.trabalho], 4) : [...base.trabalho];
+  const forcas = usar ? unicos([...textos(cenas, "facilidade", 3), ...base.forca], 4) : [...base.forca];
+
+  const primeiro = [
+    ...base.essencia,
+    ...aviso,
+    ...(reconhecidos.length
+      ? reconhecidos
+      : usar
+        ? ["Nas perguntas deste temperamento, você não marcou um comportamento para destacar."]
+        : []),
+  ];
 
   return [
-    { id: "antes", titulo: "Sobre o seu resultado", paragrafos: ABERTURA, perguntas: [], passos: [] },
     {
-      id: "jeitos",
-      titulo: "Os quatro temperamentos",
+      id: "antes",
+      titulo: "Sobre o seu resultado",
       paragrafos: [
-        "Existem quatro temperamentos clássicos. Cada um representa um conjunto de características e maneiras de funcionar. Uma pessoa pode apresentar características de mais de um, em diferentes intensidades.",
-        EXPLICACAO.SANGUINEO,
-        EXPLICACAO.COLERICO,
-        EXPLICACAO.MELANCOLICO,
-        EXPLICACAO.FLEUMATICO,
+        `A partir das suas respostas, o temperamento que mais aparece em você é o ${NOME[primario]}. Esta leitura aprofunda como essa tendência se manifesta nas emoções, nas relações, no trabalho e no seu processo de autoconhecimento.`,
       ],
       perguntas: [],
       passos: [],
     },
     {
       id: "primeiro",
-      titulo: "Seu temperamento predominante",
-      paragrafos: [
-        `O temperamento que mais apareceu nas suas respostas é o ${NOME[primario]}. ${INTRO[primario]}`,
-        ...aviso,
-        ...textos(doPrimeiro, "reconhecer", 3),
-      ],
-      perguntas: [PERGUNTA_JEITO[primario]],
+      titulo: `Seu temperamento: ${NOME_TITULO[primario]}`,
+      paragrafos: primeiro,
+      perguntas: [base.pergunta],
       passos: [],
     },
     {
-      id: "depois",
-      titulo: "Características secundárias",
-      paragrafos: [fato.depois],
+      id: "mundo",
+      titulo: "Como você costuma enxergar o mundo",
+      paragrafos: base.mundo,
       perguntas: [],
       passos: [],
     },
     {
-      id: "encontro",
-      titulo: "Como essas tendências se combinam",
-      paragrafos: [fato.encontro, fato.descoberta],
-      perguntas: [fato.pergunta],
+      id: "motivacao",
+      titulo: "O que te motiva",
+      paragrafos: base.motivacao,
+      perguntas: [],
       passos: [],
     },
     {
-      id: "tambem",
-      titulo: "O que também aparece em você",
-      paragrafos: [...blocoMenor(terceiro, respostas, usar), ...blocoMenor(quarto, respostas, usar)],
+      id: "emocao",
+      titulo: "Emoções e pressão",
+      paragrafos: [...base.emocao, ...base.pressao],
       perguntas: [],
       passos: [],
     },
     {
       id: "aproveitar",
       titulo: "Suas tendências comportamentais",
-      paragrafos: facilidades.length
-        ? facilidades
-        : ["As suas respostas não marcaram uma tendência específica para destacar nesta semana."],
+      paragrafos: forcas,
       perguntas: [],
       passos: [],
     },
     {
       id: "relacoes",
       titulo: "Nos relacionamentos",
-      paragrafos: relacoes.length
-        ? relacoes
-        : ["Nas suas respostas, não apareceu uma cena de relacionamento para destacar."],
+      paragrafos: relacoes,
       perguntas: [],
       passos: [],
     },
     {
       id: "trabalho",
       titulo: "No trabalho",
-      paragrafos: trabalhos.length ? trabalhos : ["Nas suas respostas, não apareceu uma cena de trabalho para destacar."],
+      paragrafos: trabalhos,
       perguntas: [],
       passos: [],
     },
     {
       id: "atrapalha",
-      titulo: "Quando essas tendências atrapalham",
-      paragrafos: atrapalhos.length
-        ? atrapalhos
-        : ["Nenhuma cena de aperto ficou marcada nas suas respostas."],
+      titulo: "Quando essa tendência atrapalha",
+      paragrafos: atrapalhos,
       perguntas: [],
       passos: [],
     },
     {
       id: "semana",
-      titulo: "Para observar nesta semana",
-      paragrafos: [
-        "Não é preciso acertar sempre. O convite é observar o que acontece e experimentar outro caminho, uma vez.",
-      ],
+      titulo: "Exercícios para a vida",
+      paragrafos: [base.porquePassos],
       perguntas: [],
       passos: experimentos,
     },
     {
       id: "fica",
       titulo: "Para o seu autoconhecimento",
-      paragrafos: [fato.fechamento, FECHO_COMUM],
-      perguntas: [fecho],
+      paragrafos: base.fechamento,
+      perguntas: [base.pergunta],
       passos: [],
     },
   ];

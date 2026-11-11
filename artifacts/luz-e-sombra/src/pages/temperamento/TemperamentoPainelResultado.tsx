@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { RespostaSimNao, TemperamentoCodigo } from "@workspace/temperamento-v1";
 import { montarLeituraConversa, NOME_TEMPERAMENTO } from "@workspace/temperamento-v1";
-import { labelTipoPerfil, TEMPERAMENTO_VISUAL } from "./temperamentoConfig";
+import { TEMPERAMENTO_VISUAL } from "./temperamentoConfig";
 import LeituraBlocos, { CartaoPadrao, CorpoCartao } from "@/components/LeituraBlocos";
 import { leituraTemperamento } from "@/lib/leiturasPortal";
 import {
@@ -21,19 +21,21 @@ export default function TemperamentoPainelResultado({
   const r = useMemo(() => enriquecerResultadoTemperamento(raw), [raw]);
   const perfil = r.perfil;
   const primario = perfil?.primario as TemperamentoCodigo | undefined;
-  const secundario = perfil?.secundario as TemperamentoCodigo | undefined;
   const pct = r.scores?.temperamentos_percentuais;
   const visP = primario ? TEMPERAMENTO_VISUAL[primario] : null;
   const IconP = visP?.icon;
 
-  const tituloPerfil = primario && secundario && perfil?.tipo ? perfil.arquetipo : perfil?.arquetipo ?? "";
+  const tituloPerfil = primario
+    ? (perfil?.arquetipo && NOME_TEMPERAMENTO[primario] === perfil.arquetipo
+        ? perfil.arquetipo
+        : NOME_TEMPERAMENTO[primario])
+    : (perfil?.arquetipo ?? "");
 
   const leitura = leituraTemperamento(r);
   const cartoes = useMemo(() => {
-    if (!primario || !secundario || !pct) return null;
+    if (!primario || !pct) return null;
     return montarLeituraConversa({
       primario,
-      secundario,
       percentuais: {
         COLERICO: pct.COLERICO ?? 0,
         SANGUINEO: pct.SANGUINEO ?? 0,
@@ -43,7 +45,7 @@ export default function TemperamentoPainelResultado({
       respostas: respostas ?? undefined,
       questionarioClaro: r.questionario === "claro",
     });
-  }, [primario, secundario, pct, respostas, r.questionario]);
+  }, [primario, pct, respostas, r.questionario]);
 
   return (
     <div className="space-y-5">
@@ -57,7 +59,7 @@ export default function TemperamentoPainelResultado({
           className="px-5 py-5 space-y-4"
           style={{ background: "rgba(30,24,18,0.35)", borderTop: "1px solid rgba(200,165,107,0.08)" }}
         >
-        {visP && IconP && perfil && (
+        {visP && IconP && perfil && primario && (
           <div
             className="rounded-2xl p-6 relative overflow-hidden"
             style={{
@@ -74,19 +76,11 @@ export default function TemperamentoPainelResultado({
               </div>
               <div className="min-w-0">
                 <p className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
-                  {labelTipoPerfil(perfil.tipo)}
+                  Seu temperamento
                 </p>
                 <h1 className="font-tan-mon-cheri text-xl md:text-2xl leading-snug break-words" style={{ color: "#f7f2ec" }}>
                   {tituloPerfil}
                 </h1>
-                {secundario && primario !== secundario && (
-                  <span
-                    className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full"
-                    style={{ background: "rgba(200,165,107,0.12)", color: "rgba(200,165,107,0.85)" }}
-                  >
-                    com características de {NOME_TEMPERAMENTO[secundario]}
-                  </span>
-                )}
               </div>
             </div>
           </div>
@@ -95,13 +89,13 @@ export default function TemperamentoPainelResultado({
         {pct && primario && (
           <div className="space-y-3 pt-2">
             <p className="text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>
-              A intensidade de cada temperamento nas suas respostas.
+              Distribuição das respostas. A análise aprofunda o temperamento que mais aparece em você.
             </p>
             {(Object.entries(pct) as [TemperamentoCodigo, number][])
               .sort((a, b) => b[1] - a[1])
               .map(([cod, val]) => {
                 const vis = TEMPERAMENTO_VISUAL[cod];
-                const destaque = cod === primario || cod === secundario;
+                const destaque = cod === primario;
                 return (
                   <div key={cod}>
                     <div className="flex justify-between text-xs mb-1">

@@ -1,6 +1,5 @@
 import type { ItemLeitura, LeituraPortal, SecaoLeitura } from "@workspace/copy-voz";
 import type { ReactNode } from "react";
-import { Sparkles } from "lucide-react";
 import { ConteudoGrupo, TextoFormatado } from "@/components/TextoLeitura";
 import { pontuar } from "@/lib/formatarLeitura";
 
@@ -19,17 +18,9 @@ export function CartaoPadrao({ titulo, children }: { titulo: string; children: R
         border: "1px solid rgba(200,165,107,0.16)",
       }}
     >
-      <div className="flex items-start gap-2.5 mb-4 min-w-0">
-        <span
-          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-          style={{ background: "rgba(200,165,107,0.14)", border: "1px solid rgba(200,165,107,0.28)" }}
-        >
-          <Sparkles className="w-3.5 h-3.5" style={{ color: OURO }} />
-        </span>
-        <h3 className="font-tan-mon-cheri text-base md:text-lg leading-snug min-w-0 break-words" style={{ color: "#e8d5b0" }}>
-          {titulo}
-        </h3>
-      </div>
+      <h3 className="font-tan-mon-cheri text-base md:text-lg leading-snug min-w-0 break-words mb-4" style={{ color: "#e8d5b0" }}>
+        {titulo}
+      </h3>
       {children}
     </section>
   );

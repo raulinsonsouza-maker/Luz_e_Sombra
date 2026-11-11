@@ -266,7 +266,7 @@ export function leituraTemperamento(r: TemperamentoUi | null | undefined): Leitu
         quemVoceE: "O que você faz primeiro",
         noDiaADia: "O que acontece depois",
         sombra: "Onde isso atrapalha",
-        oQueFazer: "O que fazer nesta semana",
+        oQueFazer: "Exercícios para a vida",
       },
     );
   }
