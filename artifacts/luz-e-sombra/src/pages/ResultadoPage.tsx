@@ -12,36 +12,10 @@ import PageIntroHeader from "@/components/PageIntroHeader";
 import { JORNADA_MODULE_NAV } from "@/lib/jornadaHubConfig";
 import { AREAS_DA_VIDA } from "@/lib/types";
 import {
-  ArrowRight, Sparkles, TrendingUp, ArrowUp, ArrowDown, Minus,
-  ChevronRight, AlertTriangle, CheckCircle, Target, Zap,
-  Smile, Activity, Brain, Scale, Home, Heart, Users,
-  Coins, Hand, Palette, LucideIcon,
+  Sparkles, TrendingUp, ArrowUp, ArrowDown, Minus,
 } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 import DarkCard from "@/components/DarkCard";
-
-// ─── Area icon ─────────────────────────────────────────────────────────────
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  Smile, Sparkles, Activity, Brain, Scale,
-  Home, Heart, Users, Target, Coins, Hand, Palette,
-};
-
-function AreaIconDark({ iconName, size = 24 }: { iconName: string; size?: number }) {
-  const Icon = ICON_MAP[iconName] || Smile;
-  return (
-    <div
-      className="inline-flex items-center justify-center rounded-xl flex-shrink-0"
-      style={{
-        width: size + 20, height: size + 20,
-        background: "linear-gradient(135deg, rgba(200,165,107,0.12) 0%, rgba(156,119,66,0.06) 100%)",
-        border: "1px solid rgba(200,165,107,0.25)",
-      }}
-    >
-      <Icon size={size} strokeWidth={1.4} style={{ color: "#c8a56b" }} />
-    </div>
-  );
-}
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -413,10 +387,6 @@ export default function ResultadoPage() {
   const areasComValores = AREAS_DA_VIDA.map((area, i) => ({ area, valor: valores[i] }));
   const areasOrdenadas = [...areasComValores].sort((a, b) => a.valor - b.valor);
 
-  const fortes = areasComValores.filter(a => a.valor >= 7);
-  const desenvolvendo = areasComValores.filter(a => a.valor >= 4 && a.valor < 7);
-  const urgentes = areasComValores.filter(a => a.valor < 4);
-
   const evolucaoData = todasAvaliacoes.length > 1 ? {
     labels: [...todasAvaliacoes].reverse().map(a => format(new Date(a.dataAvaliacao), "dd/MM", { locale: ptBR })),
     datasets: [{
@@ -473,7 +443,7 @@ export default function ResultadoPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
                 <p className="text-xs font-semibold tracking-[0.3em] uppercase mb-3" style={{ color: "rgba(200,165,107,0.5)" }}>
-                  Roda da Vida · Resultado
+                  Roda da Vida
                 </p>
                 <h1 className="font-tan-mon-cheri text-3xl md:text-4xl mb-1" style={{ color: "#e8d5b0" }}>
                   {avaliacao.usuario.nome}
@@ -534,123 +504,15 @@ export default function ResultadoPage() {
           <div className="h-px w-full" style={{ background: "linear-gradient(90deg, transparent, #c8a56b 40%, #9c7742 60%, transparent)" }} />
         </div>
 
-        {/* ── Panorama diagnóstico ────────────────────────────────────────── */}
-        <DarkCard className="p-6 md:p-8">
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-5" style={{ color: "rgba(200,165,107,0.5)" }}>
-            Panorama Diagnóstico
-          </p>
-          <div className="grid md:grid-cols-3 gap-4">
-
-            {urgentes.length > 0 && (
-              <div className="rounded-2xl p-4"
-                style={{ background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                  <p className="text-xs font-semibold tracking-wider uppercase text-red-500">Atenção imediata</p>
-                </div>
-                <div className="space-y-2">
-                  {urgentes.map(({ area, valor }) => (
-                    <div key={area.id} className="flex items-center justify-between">
-                      <span className="text-sm" style={{ color: "rgba(247,242,236,0.7)" }}>{area.titulo}</span>
-                      <span className="font-tan-mon-cheri text-lg text-red-500">{valor}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {desenvolvendo.length > 0 && (
-              <div className="rounded-2xl p-4"
-                style={{ background: "rgba(234,179,8,0.04)", border: "1px solid rgba(234,179,8,0.2)" }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <Target className="w-4 h-4 flex-shrink-0" style={{ color: "#ca8a04" }} />
-                  <p className="text-xs font-semibold tracking-wider uppercase" style={{ color: "#ca8a04" }}>Em desenvolvimento</p>
-                </div>
-                <div className="space-y-2">
-                  {desenvolvendo.map(({ area, valor }) => (
-                    <div key={area.id} className="flex items-center justify-between">
-                      <span className="text-sm" style={{ color: "rgba(247,242,236,0.7)" }}>{area.titulo}</span>
-                      <span className="font-tan-mon-cheri text-lg" style={{ color: "#ca8a04" }}>{valor}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {fortes.length > 0 && (
-              <div className="rounded-2xl p-4"
-                style={{ background: "rgba(200,165,107,0.05)", border: "1px solid rgba(200,165,107,0.25)" }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: "#c8a56b" }} />
-                  <p className="text-xs font-semibold tracking-wider uppercase" style={{ color: "#c8a56b" }}>Pontos fortes</p>
-                </div>
-                <div className="space-y-2">
-                  {fortes.sort((a, b) => b.valor - a.valor).map(({ area, valor }) => (
-                    <div key={area.id} className="flex items-center justify-between">
-                      <span className="text-sm" style={{ color: "rgba(247,242,236,0.7)" }}>{area.titulo}</span>
-                      <span className="font-tan-mon-cheri text-lg" style={{ color: "#c8a56b" }}>{valor}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-          </div>
-        </DarkCard>
-
         {/* ── Radar ───────────────────────────────────────────────────────── */}
         <DarkCard className="p-6 md:p-8">
           <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
-            Mapa Visual das Áreas
+            Mapa das áreas
           </p>
           <p className="text-sm mb-5" style={{ color: "rgba(247,242,236,0.4)" }}>
-            O gráfico revela o padrão de equilíbrio e desequilíbrio entre todas as dimensões da sua vida.
+            O desenho da sua roda. A leitura abaixo interpreta o contraste.
           </p>
           <RadarChart data={chartData} />
-        </DarkCard>
-
-        {/* ── Deep area analysis ──────────────────────────────────────────── */}
-        <DarkCard className="p-6 md:p-8">
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
-            Análise por área
-          </p>
-          <p className="text-sm mb-6" style={{ color: "rgba(247,242,236,0.4)" }}>
-            As notas de cada área. A leitura de cada uma vem logo abaixo.
-          </p>
-
-          <div className="space-y-4">
-            {areasOrdenadas.map(({ area, valor }) => {
-              const nivelInfo = getNivelInfo(area.id, valor);
-              const pct = (valor / 10) * 100;
-              return (
-                <div key={area.id}
-                  className="rounded-2xl p-5 md:p-6"
-                  style={{ background: nivelInfo.bgLight, border: `1px solid ${nivelInfo.borderColor}` }}>
-
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                      <AreaIconDark iconName={area.icon} size={22} />
-                      <div className="min-w-0">
-                        <h3 className="font-tan-mon-cheri text-lg leading-tight" style={{ color: "#f7f2ec" }}>{area.titulo}</h3>
-                        <p className="text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>{area.subtitulo}</p>
-                      </div>
-                    </div>
-                    <div className="flex-shrink-0 text-right">
-                      <p className="font-tan-mon-cheri text-4xl leading-none" style={{ color: nivelInfo.cor }}>{valor}</p>
-                      <p className="text-xs font-semibold tracking-wider mt-0.5" style={{ color: nivelInfo.cor }}>{nivelInfo.label}</p>
-                    </div>
-                  </div>
-
-                  <div className="w-full rounded-full h-1.5" style={{ background: "rgba(255,255,255,0.06)" }}>
-                    <div
-                      className="h-1.5 rounded-full"
-                      style={{ width: `${pct}%`, background: nivelInfo.cor }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </DarkCard>
 
         {leitura && <LeituraBlocos leitura={leitura} />}
@@ -696,51 +558,6 @@ export default function ResultadoPage() {
             )}
           </DarkCard>
         )}
-
-        {/* ── Actions ─────────────────────────────────────────────────────── */}
-        <div className="flex flex-wrap gap-3 justify-center pt-2">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold transition-all"
-            style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1e1812" }}
-          >
-            {primeiroAcesso ? <Sparkles className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-            {primeiroAcesso ? "Acessar Área de Membro" : "Início"}
-          </button>
-          {!primeiroAcesso && (
-            <button
-              onClick={() => navigate("/avaliacao?novo=true")}
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-medium transition-all"
-              style={{ border: "1px solid rgba(200,165,107,0.3)", color: "rgba(247,242,236,0.7)" }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.55)";
-                (e.currentTarget as HTMLElement).style.color = "#c8a56b";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.3)";
-                (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.7)";
-              }}
-            >
-              Nova Avaliação
-            </button>
-          )}
-          <button
-            onClick={() => navigate("/numerologia")}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-medium transition-all"
-            style={{ border: "1px solid rgba(200,165,107,0.3)", color: "rgba(247,242,236,0.7)" }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.55)";
-              (e.currentTarget as HTMLElement).style.color = "#c8a56b";
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,165,107,0.3)";
-              (e.currentTarget as HTMLElement).style.color = "rgba(247,242,236,0.7)";
-            }}
-          >
-            <ChevronRight className="w-4 h-4" />
-            Explorar Numerologia
-          </button>
-        </div>
 
       </div>
     </div>

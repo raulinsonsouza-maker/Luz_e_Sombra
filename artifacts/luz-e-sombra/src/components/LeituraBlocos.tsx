@@ -115,27 +115,33 @@ function Paragrafos({ secao }: { secao: SecaoLeitura }) {
     (itens[0]?.texto.length ?? 0) <= 180;
   const faixa = abreComFaixa ? itens[0]?.texto : undefined;
   const corpo = abreComFaixa ? itens.slice(1) : itens;
+  const partes = grupos(corpo);
+  const soTextoCorrido = partes.length > 0 && partes.every((grupo) => !grupo.rotulo);
 
   return (
     <div className="space-y-3">
       {faixa && <Faixa texto={faixa} />}
-      {grupos(corpo).map((grupo, i) => (
-        <div
-          key={i}
-          className="rounded-xl px-4 py-3"
-          style={{
-            background: "rgba(255,255,255,0.025)",
-            borderLeft: "2px solid rgba(200,165,107,0.55)",
-          }}
-        >
-          {grupo.rotulo && (
-            <p className="text-[11px] font-semibold tracking-[0.04em] sm:tracking-[0.14em] uppercase mb-1.5 break-words" style={{ color: OURO }}>
-              {grupo.rotulo}
-            </p>
-          )}
-          <ConteudoGrupo textos={grupo.textos} fluido={false} />
-        </div>
-      ))}
+      {soTextoCorrido ? (
+        <ConteudoGrupo textos={partes.flatMap((grupo) => grupo.textos)} fluido={false} />
+      ) : (
+        partes.map((grupo, i) => (
+          <div
+            key={i}
+            className="rounded-xl px-4 py-3"
+            style={{
+              background: "rgba(255,255,255,0.025)",
+              borderLeft: "2px solid rgba(200,165,107,0.55)",
+            }}
+          >
+            {grupo.rotulo && (
+              <p className="text-[11px] font-semibold tracking-[0.04em] sm:tracking-[0.14em] uppercase mb-1.5 break-words" style={{ color: OURO }}>
+                {grupo.rotulo}
+              </p>
+            )}
+            <ConteudoGrupo textos={grupo.textos} fluido={false} />
+          </div>
+        ))
+      )}
     </div>
   );
 }

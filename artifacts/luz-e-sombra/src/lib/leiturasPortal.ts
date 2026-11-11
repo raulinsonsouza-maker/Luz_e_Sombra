@@ -105,7 +105,7 @@ export function leituraDoMes(mes: {
   );
 }
 
-/** Leitura do Ano Pessoal — mais densa, com áreas da vida. */
+/** Leitura do Ano Pessoal: mais densa, com áreas da vida. */
 export function leituraAnoPessoal(ano: {
   titulo?: string;
   essencia?: string;
@@ -142,7 +142,7 @@ export function leituraAnoPessoal(ano: {
           item("Desenvolvimento", t.desenvolvimento),
           item("Espiritualidade", t.espiritualidade),
         ),
-        "Olhe para trabalho, dinheiro, vínculos e corpo — o ano toca os quatro.",
+        "Olhe para trabalho, dinheiro, vínculos e corpo. O ano toca os quatro.",
       ),
       sombra: ou(
         lista(
@@ -357,30 +357,155 @@ export function leituraLinguagens(narr: NarrativaAmor | null | undefined): Leitu
   );
 }
 
+function primeiraFrase(texto: string): string {
+  const corte = texto.match(/^(.+?[.!?])(?:\s|$)/);
+  return (corte?.[1] ?? texto).trim();
+}
+
+function ligarFrase(texto: string): string {
+  const t = texto.trim();
+  if (!t) return t;
+  return t.charAt(0).toLowerCase() + t.slice(1);
+}
+
+function nomeAreaBaixa(titulo: string): string {
+  return titulo.trim().replace(/^\w/, (letra) => letra.toLowerCase());
+}
+
+function juntaTitulos(itens: Array<{ titulo: string }>): string {
+  return listaNatural(itens.map((a) => nomeAreaBaixa(a.titulo)));
+}
+
+function textoAreas(chave: string): boolean {
+  return /plenitude|criatividade|diversão|hobby|alegria/.test(chave);
+}
+
+function vinculoAreas(chave: string): boolean {
+  return /social|amoroso|família|familia/.test(chave);
+}
+
+function menteAreas(chave: string): boolean {
+  return /intelectual|emocional|espiritualidade/.test(chave);
+}
+
+/** Nomeia o padrão da roda sem repetir a lista de notas. */
+function padraoDaRoda(
+  foco: Array<{ titulo: string; valor: number }>,
+  apoios: Array<{ titulo: string; valor: number }>,
+  amplitude: number,
+): string {
+  const chaveFoco = foco.map((a) => a.titulo.toLowerCase()).join(" ");
+  const chaveApoio = apoios.map((a) => a.titulo.toLowerCase()).join(" ");
+  const alegriaFina = textoAreas(chaveFoco);
+  const vinculoForte = vinculoAreas(chaveApoio);
+  const menteForte = menteAreas(chaveApoio);
+
+  if (alegriaFina && vinculoForte && menteForte) {
+    return "Há um contraste claro: vínculo, mente e sentido estão cheios, mas a alegria simples e o jogo ainda pedem lugar. Não é falta de conquista. É falta de leveza.";
+  }
+  if (alegriaFina && vinculoForte) {
+    return "Você tem gente perto, e mesmo assim a plenitude ainda parece distante. Relação forte não substitui alegria própria.";
+  }
+  if (alegriaFina && menteForte) {
+    return "Sua mente e sua busca interior avançam, mas o prazer de viver ainda fica em segundo plano. Entender a vida não é o mesmo que senti-la.";
+  }
+  if (vinculoAreas(chaveFoco) && menteForte) {
+    return "Há força interior e direção, mas os vínculos pedem cuidado agora. Sozinho, o crescimento fica incompleto.";
+  }
+  if (amplitude >= 5) {
+    return `A amplitude de ${amplitude} pontos mostra uma roda que não gira redonda: uma parte puxa a vida para frente enquanto outra segura o freio.`;
+  }
+  if (amplitude <= 2) {
+    return "Sua roda está relativamente nivelada. O trabalho agora não é apagar um incêndio, é escolher com intenção onde aprofundar.";
+  }
+  return "Sua roda pede olhar no contraste, não só na média. O que está alto sustenta. O que está baixo orienta o próximo passo.";
+}
+
+function sombraDaRoda(
+  foco: Array<{ titulo: string }>,
+  apoios: Array<{ titulo: string }>,
+): string {
+  const chaveFoco = foco.map((a) => a.titulo.toLowerCase()).join(" ");
+  const chaveApoio = apoios.map((a) => a.titulo.toLowerCase()).join(" ");
+  const nomesFoco = juntaTitulos(foco);
+  const nomesApoio = juntaTitulos(apoios);
+
+  if (textoAreas(chaveFoco) && (vinculoAreas(chaveApoio) || menteAreas(chaveApoio))) {
+    return `A sombra desta roda é deixar ${nomesApoio} carregar o dia inteiro enquanto ${nomesFoco} espera a vida melhorar sozinha. Quando o resto parece bem, a falta de leveza vira detalhe. Não é. Sem ela, o que está forte começa a virar desempenho.`;
+  }
+  return `A sombra desta roda é medir a vida por ${nomesApoio} e adiar o cuidado com ${nomesFoco}. Tratar a média como resposta é a forma mais elegante de não mudar nada.`;
+}
+
+/** Une frases de áreas num parágrafo contínuo, sem rótulos. */
+function paragrafoAreas(
+  itens: Array<{ titulo: string; interpretacao: string }>,
+  trecho: (interpretacao: string) => string = (t) => t,
+): string {
+  return itens
+    .map((a) => {
+      const corpo = trecho(a.interpretacao).trim();
+      if (!corpo) return "";
+      return `Em ${nomeAreaBaixa(a.titulo)}, ${ligarFrase(corpo)}`;
+    })
+    .filter(Boolean)
+    .join(" ");
+}
+
 export function leituraRoda(
   areas: Array<{ titulo: string; interpretacao: string; acao: string; valor: number }>,
 ): LeituraPortal | null {
   if (areas.length === 0) return null;
   const ordenadas = [...areas].sort((a, b) => a.valor - b.valor);
   const fracas = ordenadas.filter((a) => a.valor <= 5);
-  const foco = (fracas.length ? fracas : ordenadas).slice(0, 4);
-  const primeiraFrase = (texto: string) => {
-    const corte = texto.match(/^(.+?[.!?])(?:\s|$)/);
-    return (corte?.[1] ?? texto).trim();
-  };
-  return comporLeitura({
-    quemVoceE: "Sua roda mostra onde a vida está mais cheia e onde pede cuidado. A média não conta a história inteira. As áreas falam.",
-    noDiaADia: ordenadas.map((a) => ({
-      rotulo: `${a.titulo} · ${a.valor}/10`,
-      texto: primeiraFrase(a.interpretacao),
-    })),
-    sombra: foco.map((a) => {
-      const frase = primeiraFrase(a.interpretacao);
-      const resto = a.interpretacao.slice(frase.length).trim();
-      return { rotulo: a.titulo, texto: resto || `${a.titulo} pede atenção.` };
-    }),
-    oQueFazer: foco.map((a) => ({ rotulo: a.titulo, texto: a.acao })),
-  });
+  const fortes = [...ordenadas].filter((a) => a.valor >= 8).reverse();
+  const foco = (fracas.length ? fracas : ordenadas).slice(0, 2);
+  const apoios = (fortes.length ? fortes : [...ordenadas].reverse()).slice(0, 3);
+  const meio = ordenadas.filter((a) => a.valor >= 6 && a.valor <= 7);
+  const maisAlta = ordenadas[ordenadas.length - 1];
+  const maisBaixa = ordenadas[0];
+  const amplitude = maisAlta.valor - maisBaixa.valor;
+  const media = areas.reduce((soma, a) => soma + a.valor, 0) / areas.length;
+
+  const mapaFoco = listaNatural(foco.map((a) => `${nomeAreaBaixa(a.titulo)} (${a.valor}/10)`));
+  const mapaApoio = listaNatural(apoios.map((a) => `${nomeAreaBaixa(a.titulo)} (${a.valor}/10)`));
+
+  return comporLeitura(
+    {
+      quemVoceE: lista(
+        padraoDaRoda(foco, apoios, amplitude),
+        `A média marca ${media.toFixed(1)}, com ${amplitude} pontos entre ${nomeAreaBaixa(maisAlta.titulo)} e ${nomeAreaBaixa(maisBaixa.titulo)}. O cuidado começa em ${mapaFoco}. O chão está em ${mapaApoio}.`,
+      ),
+      noDiaADia: ou(
+        lista(
+          ...foco.map((a) => a.interpretacao),
+          apoios.length
+            ? `Do outro lado, ${paragrafoAreas(apoios, primeiraFrase)} Isso é recurso real. Serve para sustentar o cuidado do que ainda está fino, sem virar desculpa para adiar.`
+            : null,
+          meio.length >= 3
+            ? `Entre o vazio e a força, ${juntaTitulos(meio.slice(0, 4))} estão estáveis o bastante para não pedir alarme, e ainda abertas o bastante para crescer com continuidade.`
+            : null,
+        ),
+        "Repare em qual área desta semana a roda apertou de verdade.",
+      ),
+      sombra: ou(
+        lista(sombraDaRoda(foco, apoios)),
+        "A sombra da roda é tratar a média como resposta e deixar a área mais frágil no piloto automático.",
+      ),
+      oQueFazer: ou(
+        lista(
+          ...foco.map((a) => a.acao),
+          `Se ${nomeAreaBaixa(foco[0].titulo)} subisse um ponto neste mês, o que mudaria na sua semana?`,
+        ),
+        "Escolha uma área desta leitura e faça um gesto concreto ainda hoje.",
+      ),
+    },
+    {
+      quemVoceE: "Sua roda agora",
+      noDiaADia: "No dia a dia",
+      sombra: "O que pede cuidado",
+      oQueFazer: "O que fazer com isso",
+    },
+  );
 }
 
 export function leituraDossie(dossie: {
