@@ -390,9 +390,10 @@ export default function LandingPage() {
       </div>
 
       <LpOfferSection onCheckout={goCheckout} variant="control" />
-      <LpCheckoutSection checkoutToken={checkoutToken} onTokenChange={setCheckoutToken} />
       <LpFaqSection variant="control" />
       <LpFinalCtaSection onCheckout={goCheckout} variant="control" />
+      {/* Checkout por último: cliente chega focado, sem seções depois. */}
+      <LpCheckoutSection checkoutToken={checkoutToken} onTokenChange={setCheckoutToken} />
 
       <footer
         className="py-8 px-5 text-center"
