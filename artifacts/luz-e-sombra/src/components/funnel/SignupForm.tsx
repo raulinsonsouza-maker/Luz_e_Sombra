@@ -269,7 +269,6 @@ export default function SignupForm({ variant, onRegistered }: Props) {
               setEmail(e.target.value);
               setEmailStatus("idle");
               setEmailErro(null);
-              setPendingCheckoutToken(null);
             }}
             onBlur={verificarEmail}
             required
@@ -288,7 +287,6 @@ export default function SignupForm({ variant, onRegistered }: Props) {
           {emailErro && (
             <p className="text-xs mt-1.5 leading-relaxed" style={{ color: "#e88" }} role="alert">
               {emailErro}
-              {pendingCheckoutToken && " Clique em continuar para retomar o pagamento."}
             </p>
           )}
           {emailStatus === "available" && (
@@ -313,7 +311,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
               setTelefoneErro(null);
             }}
             onBlur={validarTelefone}
-            required={!pendingCheckoutToken}
+            required
             maxLength={16}
             className={inputClass}
             style={{ ...inputStyle, border: borderForError(!!telefoneErro) }}
@@ -330,33 +328,29 @@ export default function SignupForm({ variant, onRegistered }: Props) {
           )}
         </div>
 
-        {!pendingCheckoutToken && (
-          <>
-            <LpPasswordInput
-              id="signup-senha"
-              label="Senha *"
-              value={senha}
-              onChange={setSenha}
-              placeholder="Crie uma senha segura"
-              autoComplete="new-password"
-              hint={PASSWORD_HINT}
-            />
+        <LpPasswordInput
+          id="signup-senha"
+          label="Senha *"
+          value={senha}
+          onChange={setSenha}
+          placeholder="Crie uma senha segura"
+          autoComplete="new-password"
+          hint={PASSWORD_HINT}
+        />
 
-            <LpPasswordInput
-              id="signup-confirmar"
-              label="Confirmar senha *"
-              value={confirmarSenha}
-              onChange={setConfirmarSenha}
-              placeholder="Repita a senha"
-              autoComplete="new-password"
-              hasError={senhasDiferentes}
-            />
-            {senhasDiferentes && (
-              <p className="text-xs -mt-2" style={{ color: "#e88" }} role="alert">
-                As senhas não coincidem.
-              </p>
-            )}
-          </>
+        <LpPasswordInput
+          id="signup-confirmar"
+          label="Confirmar senha *"
+          value={confirmarSenha}
+          onChange={setConfirmarSenha}
+          placeholder="Repita a senha"
+          autoComplete="new-password"
+          hasError={senhasDiferentes}
+        />
+        {senhasDiferentes && (
+          <p className="text-xs -mt-2" style={{ color: "#e88" }} role="alert">
+            As senhas não coincidem.
+          </p>
         )}
 
         <button
@@ -373,8 +367,6 @@ export default function SignupForm({ variant, onRegistered }: Props) {
               <Loader2 size={18} className="animate-spin" />
               Cadastrando...
             </>
-          ) : pendingCheckoutToken ? (
-            "Continuar pagamento"
           ) : (
             "Continuar para pagamento"
           )}
