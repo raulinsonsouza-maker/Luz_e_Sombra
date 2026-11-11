@@ -257,10 +257,10 @@ export function combinacaoTrioDe(
   return BY_KEY.get(chave([a, b, c])) ?? null;
 }
 
-/** Mini apresentação individual para a etapa 7. */
+/** Mini apresentação individual (fallback quando não há texto de trio). Sem repetir o nome no corpo. */
 export function miniBlocoIndividual(traco: EstruturaTraco): string {
   const p = PERFIS_TRACO[traco];
-  return `${p.nome}: ${p.identidade.titulo}. ${p.formacao.necessidadeEmocional}`;
+  return `${p.identidade.titulo}.`;
 }
 
 export { COMBINACOES as COMBINACOES_TRIO };

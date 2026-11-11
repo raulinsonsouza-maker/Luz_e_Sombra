@@ -1,5 +1,5 @@
-import { useMemo, useState, type ReactNode } from "react";
-import { Copy, Check, Heart, Sparkles } from "lucide-react";
+import { useMemo, type ReactNode } from "react";
+import { Heart } from "lucide-react";
 import { LABEL_LINGUAGEM, type LinguagemAmor } from "@workspace/cinco-linguagens-amor";
 import { LINGUAGEM_VISUAL } from "./linguagensConfig";
 import { enriquecerResultado, isV2, isV3, type ResultadoLinguagensUi } from "./enriquecerResultado";
@@ -104,17 +104,9 @@ function PainelV3({
   const vis = LINGUAGEM_VISUAL[principal];
   const Icon = vis.icon;
   const ranking = resultado.distribuicao ?? resultado.receber?.ranking ?? [];
-  const [copiado, setCopiado] = useState(false);
 
   const intensidade = resultado.metricas?.intensidade;
   const confLabel = resultado.metricas?.confiancaLabel;
-
-  function copiarCarta() {
-    void navigator.clipboard.writeText(narr.cartaParceiro).then(() => {
-      setCopiado(true);
-      setTimeout(() => setCopiado(false), 2000);
-    });
-  }
 
   const leitura = leituraLinguagens(narr);
 
@@ -137,7 +129,7 @@ function PainelV3({
           </div>
           <div>
             <p className="text-[10px] tracking-widest uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
-              {nomePessoa ? `Perfil de ${nomePessoa}` : "Sua linguagem principal"}
+              {nomePessoa ? `Perfil de ${nomePessoa}` : "Como você gosta de receber amor"}
             </p>
             <h1 className="font-tan-mon-cheri text-xl md:text-2xl" style={{ color: "#f7f2ec" }}>
               {LABEL_LINGUAGEM[principal]}
@@ -147,16 +139,16 @@ function PainelV3({
         <div className="flex flex-wrap gap-2 mb-4">
           {intensidade && (
             <Badge cor={vis.cor}>
-              Intensidade {intensidade === "forte" ? "forte" : intensidade === "moderada" ? "moderada" : "equilibrada"}
+              Preferência {intensidade === "forte" ? "clara" : intensidade === "moderada" ? "moderada" : "equilibrada"}
             </Badge>
           )}
           {confLabel && (
             <Badge cor="#6b9fd4">
-              Confiança {confLabel === "alta" ? "alta" : confLabel === "media" ? "média" : "baixa"}
+              Clareza {confLabel === "alta" ? "alta" : confLabel === "media" ? "média" : "baixa"}
             </Badge>
           )}
           {sec && principal !== sec && (
-            <Badge cor={LINGUAGEM_VISUAL[sec].cor}>+ {LABEL_LINGUAGEM[sec]}</Badge>
+            <Badge cor={LINGUAGEM_VISUAL[sec].cor}>também {LABEL_LINGUAGEM[sec]}</Badge>
           )}
         </div>
       </header>
@@ -168,25 +160,13 @@ function PainelV3({
           style={{ background: "rgba(30,24,18,0.45)", border: "1px solid rgba(200,165,107,0.12)" }}
         >
           <p className="text-[10px] tracking-widest uppercase mb-3" style={{ color: "rgba(200,165,107,0.45)" }}>
-            Distribuição do seu perfil
+            Como as cinco maneiras aparecem nas suas respostas
           </p>
           <BarrasRanking ranking={ranking} destaque={principal} />
         </div>
       )}
 
       {leitura && <LeituraBlocos leitura={leitura} />}
-
-      {narr.cartaParceiro && (
-        <button
-          type="button"
-          onClick={copiarCarta}
-          className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg"
-          style={{ background: "rgba(200,165,107,0.12)", color: GOLD }}
-        >
-          {copiado ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-          {copiado ? "Copiado!" : "Copiar carta para quem te ama"}
-        </button>
-      )}
 
       {!resultado.expressarCompleto && onIniciarExpressar && (
         <div

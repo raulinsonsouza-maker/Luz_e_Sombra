@@ -81,7 +81,7 @@ describe("comporJornadaTraco", () => {
     assert.equal(cenas.length, 6);
   });
 
-  it("etapa 7 traz síntese do trio Oral+Rígido+Masoquista", () => {
+  it("etapa 7 traz síntese do trio sem ecoar mapa nem mini-blocos por traço", () => {
     const jornada = comporJornadaTraco(BASE);
     const outros = jornada.etapas.find((e) => e.id === "outros");
     const texto = outros?.blocos
@@ -95,11 +95,14 @@ describe("comporJornadaTraco", () => {
     const combo = combinacaoTrioDe("oral", "rigido", "masoquista");
     assert.ok(combo);
     assert.match(texto ?? "", /dedicada, comprometida e muito presente/i);
-    const rotulos = outros?.blocos
+    const rotulos = (outros?.blocos ?? [])
       .filter((b) => b.tipo === "texto" && b.rotulo)
-      .map((b) => (b.tipo === "texto" ? b.rotulo : ""))
-      .join(" ");
-    assert.match(rotulos ?? "", /vínculo|reconhecimento|sustentar/i);
+      .map((b) => (b.tipo === "texto" ? b.rotulo! : ""));
+    assert.equal(rotulos.some((r) => /^Seu trio$/i.test(r)), false);
+    assert.equal(rotulos.some((r) => /^O que Oral acrescenta$/i.test(r)), false);
+    assert.equal(rotulos.some((r) => /aparecer na vida/i.test(r)), false);
+    assert.match(rotulos.join(" "), /vínculo|reconhecimento|sustentar/i);
+    assert.match(rotulos.join(" "), /O que cada traço acrescenta/i);
   });
 
   it("não coloca jargão residual nem travessão na saída", () => {

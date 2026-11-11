@@ -65,7 +65,7 @@ export { textoDominante, textoParPrincipalSecundaria } from "./interpretacao.js"
 export { montarNarrativaV3, montarBlocosNarrativa } from "./narrativa/blocos.js";
 export { validarBlocosUnicos, overlapRatio } from "./narrativa/anti-repeticao.js";
 export { CONTEUDO_LINGUAGEM, COMBINACAO_PAR, PONTE_COMPATIBILIDADE } from "./narrativa/tabelas.js";
-export { CONTEUDO_V3, DINAMICA_PAR, TOM_VEREDITO } from "./narrativa/conteudo-v3.js";
+export { CONTEUDO_V3, DEFINICAO_LINGUAGEM, DINAMICA_PAR, TOM_VEREDITO } from "./narrativa/conteudo-v3.js";
 
 /** Retrocompat: perfilDetalhe para resultados v2. */
 export { perfilDetalhe } from "./perfilDetalhe.js";

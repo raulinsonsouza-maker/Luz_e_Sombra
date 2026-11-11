@@ -66,14 +66,16 @@ export const JORNADA_HUB_COPY: Record<
     introFallback:
       "As cinco linguagens do amor, descubra como você pede afeto, como você o demonstra e o que isso muda nas suas relações.",
     introTexto: [
-      "Cada pessoa dá e recebe afeto de um jeito diferente. As cinco linguagens do amor — palavras de afirmação, tempo de qualidade, presentes, atos de serviço e toque físico — ajudam a entender por que certas relações fluem e outras parecem sempre em descompasso.",
-      "O questionário tem 30 escolhas rápidas: metade sobre como você prefere receber afeto, metade sobre como você naturalmente o expressa. Muitas vezes essas duas dimensões são diferentes — e saber disso muda tudo nas suas relações.",
-      "Reserve alguns minutos e responda com o que você realmente sente, não com o que acha que deveria sentir. O resultado mostra suas linguagens principais e secundárias em cada dimensão.",
+      "Cada pessoa tem maneiras diferentes de demonstrar carinho e de se sentir amada. Algumas valorizam palavras de carinho e reconhecimento. Outras se sentem mais próximas quando recebem atenção, passam tempo juntas, ganham pequenos presentes, recebem ajuda ou vivem momentos de contato físico.",
+      "As cinco linguagens do amor são uma ferramenta de autoconhecimento que ajuda a compreender essas diferentes formas de expressar e perceber o afeto.",
+      "Nesta análise, você vai responder a 30 escolhas sobre suas preferências e comportamentos. As perguntas exploram duas dimensões: como você prefere receber amor e como costuma demonstrar carinho pelas pessoas importantes da sua vida.",
+      "Essas duas formas nem sempre são iguais. Você pode demonstrar amor de uma maneira e esperar recebê-lo de outra. Reconhecer essa diferença pode ajudar a compreender melhor suas necessidades afetivas e a maneira como se relaciona.",
+      "Reserve alguns minutos e responda pensando no que realmente faz sentido para você, e não no que acredita que deveria escolher. Não existem respostas certas ou erradas: o objetivo é conhecer melhor seu jeito de viver o afeto.",
     ],
     introBullets: [
-      "Como você prefere receber afeto",
-      "Como você naturalmente demonstra amor aos outros",
-      "Insights para melhorar relações pessoais e familiares",
+      "Como você gosta de receber amor: descubra quais demonstrações de carinho fazem você se sentir mais amado e valorizado.",
+      "Como você demonstra amor: reconheça as formas pelas quais costuma expressar afeto às pessoas importantes da sua vida.",
+      "Como essas diferenças aparecem nas relações: compreenda melhor suas necessidades afetivas e encontre novas maneiras de fortalecer seus relacionamentos.",
     ],
     analiseTitulo: "5 Linguagens do Amor",
     analiseDescricaoSem:
@@ -86,14 +88,16 @@ export const JORNADA_HUB_COPY: Record<
     introFallback:
       "Avalie as 12 áreas da sua vida e veja onde você floresce, e onde merece atenção agora.",
     introTexto: [
-      "A Roda da Vida é um raio-x honesto das 12 dimensões que compõem sua existência: saúde, carreira, finanças, relacionamentos, família, lazer, crescimento pessoal e mais. Cada área recebe uma nota de 1 a 10, criando um mapa visual do seu momento atual.",
-      "O valor está na sinceridade: não existe nota certa ou errada. O objetivo é enxergar desequilíbrios — áreas que drenam energia enquanto outras prosperam — e decidir onde focar sua atenção agora.",
-      "A avaliação leva poucos minutos e pode ser refeita ao longo do tempo para acompanhar sua evolução na jornada.",
+      "A Roda da Vida é uma ferramenta de autoconhecimento que ajuda você a observar diferentes áreas da sua vida e perceber como está sua satisfação em cada uma delas neste momento.",
+      "Nesta análise, você vai avaliar 12 áreas importantes, que envolvem aspectos como saúde, carreira, finanças, relacionamentos, família, lazer e crescimento pessoal.",
+      "Cada área recebe uma nota de 1 a 10, de acordo com a sua percepção atual. Ao final, suas respostas formam um mapa visual que permite enxergar quais áreas estão mais satisfatórias, quais merecem mais atenção e onde você gostaria de promover mudanças.",
+      "Não existem notas certas ou erradas. O mais importante é responder com sinceridade, considerando como você realmente se sente em relação a cada área, e não como gostaria que ela estivesse.",
+      "Reserve alguns minutos para olhar para sua vida com calma. Essa avaliação representa seu momento atual e pode ser refeita ao longo do tempo para acompanhar suas percepções e mudanças.",
     ],
     introBullets: [
-      "Nota de 1 a 10 em cada uma das 12 áreas da vida",
-      "Mapa visual dos seus pontos fortes e gaps",
-      "Base para priorizar ações com clareza",
+      "Como está cada área da sua vida: avalie seu nível de satisfação nas 12 dimensões analisadas.",
+      "O que está em equilíbrio e o que merece atenção: visualize suas áreas de maior satisfação e aquelas que podem precisar de mais cuidado.",
+      "Onde concentrar sua atenção: reconheça quais mudanças ou atitudes podem contribuir para uma vida mais equilibrada e alinhada ao que é importante para você.",
     ],
     analiseTitulo: "Roda da Vida",
     analiseDescricaoSem: "Nota cada dimensão de 1 a 10. Seja honesto consigo, é só para você.",

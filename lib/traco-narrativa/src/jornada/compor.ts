@@ -199,7 +199,7 @@ export function comporJornadaTraco(resultado: {
         temSecundario
           ? blocoTexto(
               "Um toque do segundo traço",
-              `Com ${perfilS.nome} também presente, essa dinâmica ganha a cor de ${perfilS.identidade.titulo.toLowerCase()}. ${perfilS.formacao.necessidadeEmocional}`,
+              `Com ${perfilS.nome} também presente, essa dinâmica ganha a cor de ${perfilS.identidade.titulo.toLowerCase()}.`,
             )
           : null,
       ]),
@@ -225,22 +225,14 @@ export function comporJornadaTraco(resultado: {
       numero: 7,
       titulo: "A influência dos outros traços",
       subtitulo: "Como o segundo e o terceiro coloram o primeiro",
+      // Com trio conhecido: um fio só (abertura → papel de cada um → tensão → integração).
+      // Sem repetir mapa, necessidades da formação nem as cenas da etapa 5.
       blocos: limparBlocos([
-        blocoTexto(
-          "Seu trio",
-          temSecundario
-            ? `Principal: ${perfil.nome}. Também presente: ${perfilS.nome}.${temTerciario ? ` Em terceiro: ${perfilT.nome}.` : ""}`
-            : `O traço ${perfil.nome} aparece com bastante clareza no seu perfil.`,
-        ),
-        temSecundario ? blocoTexto(`O que ${perfil.nome} acrescenta`, miniBlocoIndividual(principal)) : null,
-        temSecundario ? blocoTexto(`O que ${perfilS.nome} acrescenta`, miniBlocoIndividual(secundaria)) : null,
-        temTerciario ? blocoTexto(`O que ${perfilT.nome} acrescenta`, miniBlocoIndividual(terciaria)) : null,
         combo ? blocoTexto(combo.titulo, combo.abertura) : null,
         combo ? blocoTexto("O que cada traço acrescenta", combo.oQueCadaAcrescenta) : null,
         combo ? blocoTexto("O que existe em comum", combo.emComum) : null,
         combo ? blocoTexto("Onde podem surgir tensões", combo.tensoes) : null,
         combo ? blocoTexto("Como os três podem aparecer juntos", combo.comoAparecemJuntos) : null,
-        combo ? blocoTexto("Como essa combinação pode aparecer na vida", combo.comoApareceNaVida) : null,
         combo
           ? {
               tipo: "lista",
@@ -252,9 +244,21 @@ export function comporJornadaTraco(resultado: {
         combo ? blocoTexto("Caminho de integração do trio", combo.caminhoIntegracao) : null,
         combo ? { tipo: "destaque", rotulo: "Para pensar sobre a combinação", texto: prosa(combo.pergunta) } : null,
         !combo && temSecundario
+          ? blocoTexto(`O que ${perfilS.nome} acrescenta`, miniBlocoIndividual(secundaria))
+          : null,
+        !combo && temTerciario
+          ? blocoTexto(`O que ${perfilT.nome} acrescenta`, miniBlocoIndividual(terciaria))
+          : null,
+        !combo && temSecundario
           ? blocoTexto(
               "Como as duas forças se encontram",
-              `A combinação de ${perfil.nome} com ${perfilS.nome} cria um perfil próprio. Observe como a necessidade de ${perfil.formacao.necessidadeEmocional.toLowerCase()} conversa com ${perfilS.formacao.necessidadeEmocional.toLowerCase()}.`,
+              `A combinação de ${perfil.nome} com ${perfilS.nome} cria um perfil próprio: a proteção central permanece, e o segundo traço colore o jeito de pedir, decidir e se relacionar.`,
+            )
+          : null,
+        !combo && !temSecundario
+          ? blocoTexto(
+              undefined,
+              `O traço ${perfil.nome} aparece com bastante clareza no seu perfil. Os demais padrões entram de forma mais discreta.`,
             )
           : null,
       ]),
@@ -276,7 +280,7 @@ export function comporJornadaTraco(resultado: {
         },
         {
           tipo: "passos",
-          rotulo: "Exercícios para esta semana",
+          rotulo: "Exercícios recomendados para a vida",
           itens: perfil.integracao.exercicios.map((e) => `${e.titulo}: ${e.descricao}`),
         },
       ]),

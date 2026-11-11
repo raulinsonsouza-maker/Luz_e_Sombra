@@ -7,43 +7,46 @@ import type {
 } from "../types.js";
 import {
   CONTEUDO_V3,
+  DEFINICAO_LINGUAGEM,
   ESPELHO_EXPRESSAR,
   PONTE_COMUNICACAO,
-  TOM_VEREDITO,
   dinamicaPar,
 } from "./conteudo-v3.js";
 import { normalizarObjetoTextos } from "@workspace/copy-voz";
 
-function abertura(principal: LinguagemAmor, secundaria: LinguagemAmor, intensidade: MetricasQualidade["intensidade"]): string {
-  const lp = LABEL_LINGUAGEM[principal].toLowerCase();
-  const c = CONTEUDO_V3[principal];
+function abertura(
+  principal: LinguagemAmor,
+  secundaria: LinguagemAmor,
+  intensidade: MetricasQualidade["intensidade"],
+): string {
+  const lp = LABEL_LINGUAGEM[principal];
   if (intensidade === "equilibrada" && principal !== secundaria) {
-    const ls = LABEL_LINGUAGEM[secundaria].toLowerCase();
-    return `Seu coração responde com força tanto a ${lp} quanto a ${ls}. Você não precisa escolher entre elas, relações que duram costumam nutrir as duas, não só a primeira da lista. ${c.mecanismoEmocional.split(".")[0]}.`;
+    const ls = LABEL_LINGUAGEM[secundaria];
+    return `Suas respostas mostram que você responde com força tanto a ${lp.toLowerCase()} quanto a ${ls.toLowerCase()}. Não é preciso escolher uma como a única certa. Preferências podem mudar ao longo da vida, e conhecer essas diferenças favorece o diálogo e a compreensão mútua.`;
   }
-  return `Para você, amor se mede principalmente em ${lp}. ${c.mecanismoEmocional}`;
+  return `A maneira que mais aparece nas suas respostas para receber afeto é ${lp.toLowerCase()}. Isso não é uma regra fixa sobre seus relacionamentos. É um mapa para compreender melhor o que te alcança e como conversar sobre isso.`;
 }
 
 function confiancaNarrativa(metricas: MetricasQualidade, receber: DimensaoPerfil): string {
   if (metricas.confiancaLabel === "alta" && metricas.intensidade === "forte") {
-    return "Seu perfil tem distância clara entre primeira e segunda linguagem. Isso indica um resultado sólido, use-o como ponto de partida para conversas e gestos concretos.";
+    return "Há uma diferença clara entre a primeira e a segunda preferência. Use este mapa como ponto de partida para diálogo e gestos concretos, não como regra fixa sobre seus relacionamentos.";
   }
   if (metricas.desempateUsado) {
-    return "Refinamos seu perfil com perguntas extras porque as duas primeiras linguagens estavam muito próximas. O resultado agora reflete melhor suas escolhas.";
+    return "Refinamos o perfil com perguntas extras porque as duas primeiras preferências estavam próximas. O resultado reflete melhor suas escolhas atuais. Preferências podem mudar ao longo da vida.";
   }
   if (metricas.perfilEquilibradoReceber) {
-    return "Seu perfil é genuinamente bilíngue: duas linguagens competem com força parecida. Isso não é indecisão, é riqueza. Peça as duas na relação.";
+    return "Seu perfil traz duas maneiras de receber afeto com intensidades parecidas. Isso é riqueza, não indecisão. Você pode pedir as duas na relação.";
   }
   if (metricas.confiancaLabel === "baixa") {
-    return "Algumas respostas indicam perfil difuso ou muito rápido. Considere refazer com mais calma se quiser mais precisão, mas o que você leu aqui já é um bom mapa para começar.";
+    return "Algumas respostas ficaram difusas ou muito rápidas. Se quiser mais clareza, pode refazer com mais calma. Mesmo assim, o que você lê aqui já ajuda a conversar sobre afeto.";
   }
-  return `Seu perfil aponta com boa confiança para ${LABEL_LINGUAGEM[receber.principal].toLowerCase()}, com ${LABEL_LINGUAGEM[receber.secundaria].toLowerCase()} como complemento relevante.`;
+  return `Suas respostas apontam principalmente para ${LABEL_LINGUAGEM[receber.principal].toLowerCase()}, com ${LABEL_LINGUAGEM[receber.secundaria].toLowerCase()} também presente. Nenhuma linguagem é melhor do que a outra.`;
 }
 
 function textoDesalinhamento(receber: LinguagemAmor, expressar: LinguagemAmor): string {
   const lr = LABEL_LINGUAGEM[receber].toLowerCase();
   const le = LABEL_LINGUAGEM[expressar].toLowerCase();
-  return `Você precisa receber principalmente ${lr}, mas demonstra amor naturalmente em ${le}. Quem te ama pode estar falando a língua errada sem querer, não por falta de carinho, mas por desconhecer seu mapa. Compartilhe a carta abaixo e peça o gesto que enche você.`;
+  return `Você prefere receber afeto principalmente por meio de ${lr}, e costuma demonstrá-lo por meio de ${le}. Essas duas formas nem sempre são iguais. Isso não significa erro seu nem da outra pessoa. Reconhecer a diferença favorece o diálogo e a compreensão mútua.`;
 }
 
 export function montarBlocosNarrativa(input: {
@@ -61,23 +64,23 @@ export function montarBlocosNarrativa(input: {
 
   const veredito =
     p === s
-      ? `Sua linguagem principal é ${LABEL_LINGUAGEM[p]}.`
-      : `Sua linguagem principal é ${LABEL_LINGUAGEM[p]}, com ${LABEL_LINGUAGEM[s]} como segunda força.`;
+      ? `A maneira principal como você gosta de receber amor é ${LABEL_LINGUAGEM[p]}.`
+      : `A maneira principal como você gosta de receber amor é ${LABEL_LINGUAGEM[p]}. Também aparece com força ${LABEL_LINGUAGEM[s]}.`;
 
   const narrativa: NarrativaV3 = {
     veredito,
     abertura: abertura(p, s, metricas.intensidade),
-    mecanismo: cp.mecanismoEmocional,
+    mecanismo: `${DEFINICAO_LINGUAGEM[p]} ${cp.mecanismoEmocional}`,
     cenas: cp.cenasCotidiano,
     feridaPadrao: `${cp.feridaPadrao} ${cp.sinalDeAlerta}`,
     sinalDeAlerta: cp.sinalDeAlerta,
     dinamicaPar:
       p === s
-        ? "Seu perfil concentra-se numa linguagem dominante. Invista nela com intenção e peça explicitamente o que enche seu coração."
-        : `${din.dinamicaRelacional} Tensão comum: ${din.tensaoComum} Alavanca: ${din.alavancaRelacional}`,
+        ? "Seu perfil concentra-se em uma maneira principal de receber afeto. Nomear isso com clareza ajuda quem te ama a cuidar de você sem precisar adivinhar."
+        : `${din.dinamicaRelacional} Diferença comum: ${din.tensaoComum} Um caminho possível: ${din.alavancaRelacional}`,
     cartaParceiro: cp.cartaParaParceiro,
     planoSeteDias: [...cp.planoSeteDias],
-    linguagemAnti: `Sua linguagem menos natural hoje é ${LABEL_LINGUAGEM[anti].toLowerCase()}. ${CONTEUDO_V3[anti].comoInterpretarAnti}`,
+    linguagemAnti: `A maneira menos natural para você hoje é ${LABEL_LINGUAGEM[anti].toLowerCase()}. ${CONTEUDO_V3[anti].comoInterpretarAnti} Isso não a torna pior. Só mostra o que alcança menos neste momento.`,
     confiancaNarrativa: confiancaNarrativa(metricas, receber),
   };
 
@@ -85,14 +88,15 @@ export function montarBlocosNarrativa(input: {
     narrativa.espelhoExpressar = `${ESPELHO_EXPRESSAR[expressar.principal]} ${textoDesalinhamento(receber.principal, expressar.principal)}`;
     narrativa.ponteComunicacao = PONTE_COMUNICACAO;
   } else if (expressarCompleto) {
-    narrativa.espelhoExpressar = ESPELHO_EXPRESSAR[expressar.principal];
+    narrativa.espelhoExpressar = `${ESPELHO_EXPRESSAR[expressar.principal]} Neste momento, a forma como você demonstra e a forma como prefere receber caminham na mesma direção.`;
   }
 
   const desalinhamento = {
     ativo: expressarCompleto && receber.principal !== expressar.principal,
-    texto: expressarCompleto && receber.principal !== expressar.principal
-      ? textoDesalinhamento(receber.principal, expressar.principal)
-      : "",
+    texto:
+      expressarCompleto && receber.principal !== expressar.principal
+        ? textoDesalinhamento(receber.principal, expressar.principal)
+        : "",
   };
 
   return normalizarObjetoTextos({ ...narrativa, desalinhamento }) as NarrativaV3 & {

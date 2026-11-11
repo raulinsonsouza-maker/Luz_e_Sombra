@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useLocation, useSearch } from "wouter";
-import { ArrowRight, Heart, Loader2, RotateCcw } from "lucide-react";
+import { ArrowRight, Heart, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
 import { storageKeyLinguagensAmorDraft, parsePessoaIdFromSearch } from "@/lib/tracoFormStorage";
@@ -21,7 +21,6 @@ import {
 } from "@workspace/cinco-linguagens-amor";
 import LinguagensPainelResultado, { type ResultadoLinguagensUi } from "./linguagens-amor/LinguagensPainelResultado";
 import LinguagensSeletorPessoa, { type PessoaAnalise } from "./linguagens-amor/LinguagensSeletorPessoa";
-import LinguagensCruzamento from "./linguagens-amor/LinguagensCruzamento";
 
 const LING_NAV = JORNADA_MODULE_NAV["linguagens-amor"];
 
@@ -76,8 +75,6 @@ export default function LinguagensAmorPage() {
   const [addNome, setAddNome] = useState("");
   const [addRelacao, setAddRelacao] = useState("parceiro/a");
   const [addErro, setAddErro] = useState<string | null>(null);
-  const [historicoIds, setHistoricoIds] = useState<Set<number>>(new Set());
-  const [showCruzamento, setShowCruzamento] = useState(false);
   const pessoaSwitchGenRef = useRef(0);
 
   const draftKey = useCallback(
@@ -89,7 +86,6 @@ export default function LinguagensAmorPage() {
     const next = resetEstadoPerfil();
     setResultadoApi(null);
     setNomeResultado(null);
-    setShowCruzamento(false);
     setErro(null);
     setMsgIntro(null);
     setAnswers(next.answers);
@@ -147,23 +143,9 @@ export default function LinguagensAmorPage() {
       .catch(() => {});
   }, []);
 
-  const carregarHistorico = useCallback(() => {
-    apiFetch("/linguagens-amor/historico")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((rows: { pessoaId?: number | null }[]) => {
-        const ids = new Set<number>();
-        for (const row of rows) {
-          if (row.pessoaId) ids.add(row.pessoaId);
-        }
-        setHistoricoIds(ids);
-      })
-      .catch(() => {});
-  }, []);
-
   useEffect(() => {
     carregarPessoas();
-    carregarHistorico();
-  }, [carregarPessoas, carregarHistorico]);
+  }, [carregarPessoas]);
 
   const carregarUltimoServidor = useCallback(async () => {
     const gen = pessoaSwitchGenRef.current;
@@ -252,7 +234,6 @@ export default function LinguagensAmorPage() {
   const refazer = useCallback(() => {
     localStorage.removeItem(draftKey(selectedPessoaId));
     setResultadoApi(null);
-    setShowCruzamento(false);
     iniciarOuRecuperar();
   }, [selectedPessoaId, draftKey, iniciarOuRecuperar]);
 
@@ -367,7 +348,6 @@ export default function LinguagensAmorPage() {
       setNomeResultado(nome);
       setResultadoApi(data as ResultadoLinguagensUi);
       setFase("resultado");
-      carregarHistorico();
     } catch {
       if (selectedPessoaId === pessoaIdAtStart) {
         setErro("Falha de rede.");
@@ -442,7 +422,7 @@ export default function LinguagensAmorPage() {
   if (fase === "resultado" && resultadoApi) {
     const subtituloResultado = nomeResultado
       ? `Perfil de ${nomeResultado}`
-      : "Seu mapa de receber amor";
+      : "Como você recebe e demonstra amor";
     return (
       <div className="min-h-screen pb-28 px-4 pt-6" style={{ background: bg }}>
         <MobileTopBar titulo="Linguagens do amor" voltar={LING_NAV.hub} subtitulo={subtituloResultado} />
@@ -463,39 +443,6 @@ export default function LinguagensAmorPage() {
             onRefazer={refazer}
             onIniciarExpressar={podeAprofundarExpressar ? iniciarExpressar : undefined}
           />
-
-          <div
-            className="rounded-2xl p-4 flex flex-col sm:flex-row gap-2"
-            style={{ background: "rgba(30,24,18,0.45)", border: "1px solid rgba(200,165,107,0.12)" }}
-          >
-            <button
-              type="button"
-              onClick={refazer}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-              style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a1208" }}
-            >
-              <RotateCcw className="w-4 h-4" />
-              Refazer questionário
-            </button>
-            {selectedPessoaId === null && (
-              <button
-                type="button"
-                onClick={() => setShowCruzamento((s) => !s)}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold"
-                style={{ background: "rgba(255,255,255,0.04)", color: "rgba(247,242,236,0.75)", border: "1px solid rgba(200,165,107,0.18)" }}
-              >
-                {showCruzamento ? "Ocultar cruzamento" : "Cruzar com alguém"}
-              </button>
-            )}
-          </div>
-
-          {showCruzamento && selectedPessoaId === null && (
-            <LinguagensCruzamento
-              pessoas={pessoas}
-              historicoIds={historicoIds}
-              onFechar={() => setShowCruzamento(false)}
-            />
-          )}
         </div>
       </div>
     );

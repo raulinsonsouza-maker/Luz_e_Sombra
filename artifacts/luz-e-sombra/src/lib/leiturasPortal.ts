@@ -320,26 +320,41 @@ type NarrativaAmor = {
 export function leituraLinguagens(narr: NarrativaAmor | null | undefined): LeituraPortal | null {
   if (!narr?.veredito && !narr?.abertura) return null;
   const cenas = Array.isArray(narr.cenas) ? narr.cenas : narr.cenas ? [narr.cenas] : [];
-  return comporLeitura({
-    quemVoceE: lista(
-      narr.veredito,
-      item("Por onde isso começa", narr.abertura),
-      item("Como funciona", narr.mecanismo),
-      item("Vocês dois", narr.dinamicaPar),
-    ),
-    noDiaADia: ou(
-      lista(comTitulo("Uma cena", cenas), item("Como você expressa", narr.espelhoExpressar), item("Como pedir", narr.ponteComunicacao)),
-      "Pense na última vez em que você se sentiu amada ou invisível. A forma importa tanto quanto a intenção.",
-    ),
-    sombra: ou(
-      lista(item("A ferida", narr.feridaPadrao), item("O que não alcança", narr.linguagemAnti)),
-      "A sombra é esperar que o outro adivinhe a linguagem que te alcança.",
-    ),
-    oQueFazer: ou(
-      lista(narr.planoSeteDias, item("A carta", narr.cartaParceiro)),
-      "Diga a uma pessoa próxima, em uma frase, o que faz você se sentir amada.",
-    ),
-  });
+  return comporLeitura(
+    {
+      quemVoceE: lista(
+        narr.veredito,
+        item("Como você gosta de receber", narr.abertura),
+        item("O que isso significa", narr.mecanismo),
+        item("Nas relações", narr.dinamicaPar),
+      ),
+      noDiaADia: ou(
+        lista(
+          comTitulo("No cotidiano", cenas),
+          item("Como você demonstra amor", narr.espelhoExpressar),
+          item("Para conversar", narr.ponteComunicacao),
+        ),
+        "Pense na última vez em que você se sentiu amado ou distante. A forma do gesto importa tanto quanto a intenção.",
+      ),
+      sombra: ou(
+        lista(
+          item("Quando falta o que você precisa", narr.feridaPadrao),
+          item("O que alcança menos hoje", narr.linguagemAnti),
+        ),
+        "Um ponto de atenção é esperar que a outra pessoa adivinhe a maneira que mais te alcança.",
+      ),
+      oQueFazer: ou(
+        lista(narr.planoSeteDias, item("Para quem te ama", narr.cartaParceiro)),
+        "Diga a uma pessoa próxima, em uma frase, o que faz você se sentir amado.",
+      ),
+    },
+    {
+      quemVoceE: "Como você gosta de receber amor",
+      noDiaADia: "Como isso aparece no dia a dia",
+      sombra: "Quando as diferenças aparecem",
+      oQueFazer: "Exercícios para a vida",
+    },
+  );
 }
 
 export function leituraRoda(
