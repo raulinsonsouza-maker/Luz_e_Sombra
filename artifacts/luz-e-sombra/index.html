@@ -77,6 +77,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      /* Fallback de boot: evita “tela branca” se o CSS/JS demorar ou falhar. */
+      html, body, #root { min-height: 100%; margin: 0; }
+      body {
+        background: #1e1812;
+        color: #f7f2ec;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
