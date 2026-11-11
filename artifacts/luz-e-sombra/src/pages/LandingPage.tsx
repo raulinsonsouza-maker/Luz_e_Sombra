@@ -18,7 +18,7 @@ import {
   LpFaqSection,
   LpFinalCtaSection,
 } from "@/components/lp/LpOfferSections";
-import SignupModal from "@/components/funnel/SignupModal";
+import LpCheckoutSection from "@/components/checkout/LpCheckoutSection";
 import LogoPortal from "@/components/LogoPortal";
 import { captureUtmsFromUrl } from "@/lib/utm";
 import { trackLpEvent } from "@/lib/lpAnalytics";
@@ -30,6 +30,7 @@ import {
   LP_CTA_LOGIN,
   LP_HERO,
   LP_GUARANTEE_DAYS,
+  LP_ACCESS_MONTHS,
   formatLpPrice,
   LP_PRICE,
 } from "@/lib/lpConfig";
@@ -45,8 +46,8 @@ export default function LandingPage() {
   const [, navigate] = useLocation();
   const { status, user } = useAuth();
   const trackedView = useRef(false);
-  const [signupOpen, setSignupOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [checkoutToken, setCheckoutToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "authenticated") navigate(user?.isAdmin ? "/admin" : "/dashboard");
@@ -57,6 +58,15 @@ export default function LandingPage() {
     if (trackedView.current) return;
     trackedView.current = true;
     trackLpEvent("lp_view", "control");
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("checkout") || params.get("token");
+      if (token) setCheckoutToken(token);
+      const pending = sessionStorage.getItem("pending_checkout_token");
+      if (!token && pending) setCheckoutToken(pending);
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   useEffect(() => {
@@ -65,7 +75,9 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const goCheckout = () => setSignupOpen(true);
+  const goCheckout = () => {
+    document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   const goLogin = () => navigate("/login");
 
   return (
@@ -366,42 +378,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Problema → solução */}
       <section className="py-14 sm:py-16 px-5" style={{ background: "#faf8f4" }}>
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-xs font-bold tracking-[0.3em] uppercase mb-3" style={{ color: "#9c7742" }}>
-              Você se reconhece?
-            </p>
-            <h2
-              className="font-tan-mon-cheri"
-              style={{ fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)", color: "#2f251b", lineHeight: 1.3 }}
-            >
-              Repete os mesmos padrões — e ainda não tem um mapa claro de quem você é.
-            </h2>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-4">
-            {[
-              { title: "Vive no automático", desc: "Os dias se repetem e a sensação de que falta algo não sai." },
-              { title: "Sabe que pode mais", desc: "Existe propósito e clareza — mas por onde começar de verdade?" },
-              { title: "Quer sair da sombra", desc: "Relações, trabalho, escolhas: os mesmos ciclos voltam sem explicação." },
-            ].map(({ title, desc }) => (
-              <div
-                key={title}
-                className="p-5 rounded-2xl"
-                style={{ background: "#fff", border: "1px solid rgba(200,165,107,0.18)" }}
-              >
-                <h3 className="font-tan-mon-cheri text-lg mb-2" style={{ color: "#2f251b" }}>
-                  {title}
-                </h3>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(47,37,27,0.6)" }}>
-                  {desc}
-                </p>
-              </div>
-            ))}
-          </div>
-          <p className="text-center mt-8 text-sm max-w-lg mx-auto" style={{ color: "rgba(47,37,27,0.55)" }}>
-            A <strong>{LP_JOURNEY_NAME}</strong> conecta 9 análises numa trilha — para você entender padrões e agir com consciência.
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-xs font-bold tracking-[0.3em] uppercase mb-3" style={{ color: "#9c7742" }}>
+            Um portal. Diferentes caminhos
+          </p>
+          <h2
+            className="font-tan-mon-cheri mb-5"
+            style={{ fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)", color: "#2f251b", lineHeight: 1.3 }}
+          >
+            Uma descoberta: você.
+          </h2>
+          <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(47,37,27,0.6)" }}>
+            Você já tentou se entender, mas sente que ainda existem peças que não se encaixam?
+            Por que certos comportamentos se repetem? O que realmente motiva suas escolhas?
+          </p>
+          <p className="text-sm leading-relaxed" style={{ color: "rgba(47,37,27,0.6)" }}>
+            O {LP_PORTAL_NAME} reúne ferramentas de autoconhecimento em uma experiência integrada
+            para ajudar você a encontrar essas respostas.
           </p>
         </div>
       </section>
@@ -410,11 +404,45 @@ export default function LandingPage() {
         <LpModulesSection theme="dark" variant="control" />
       </div>
 
+      <section className="py-14 sm:py-16 px-5" style={{ background: "#1e1812" }}>
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold tracking-[0.28em] uppercase mb-3" style={{ color: "rgba(200,165,107,0.6)" }}>
+              Depois das primeiras descobertas
+            </p>
+            <h2 className="font-tan-mon-cheri" style={{ fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)", color: "#f7f2ec" }}>
+              O autoconhecimento não termina no resultado.
+            </h2>
+            <p className="text-sm mt-3" style={{ color: "rgba(247,242,236,0.5)" }}>
+              A transformação acontece na experiência.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[
+              { title: "Sua reflexão diária", desc: "Um convite para desenvolver consciência e levar o autoconhecimento para o cotidiano." },
+              { title: "Meu Espaço", desc: "Um ambiente pessoal para registrar emoções, pensamentos e percepções sobre sua jornada." },
+              { title: "Missões e descobertas", desc: "Uma experiência guiada, com etapas e desafios que incentivam você a continuar avançando." },
+              { title: "Comunidade", desc: "Um espaço para compartilhar experiências e caminhar ao lado de quem também busca autoconhecimento." },
+            ].map(({ title, desc }) => (
+              <div
+                key={title}
+                className="p-5 rounded-2xl"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,165,107,0.12)" }}
+              >
+                <h3 className="font-tan-mon-cheri text-lg mb-2" style={{ color: "#f7f2ec" }}>{title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <div id="como-funciona">
         <LpHowItWorksSection theme="light" variant="control" />
       </div>
 
       <LpOfferSection onCheckout={goCheckout} variant="control" />
+      <LpCheckoutSection checkoutToken={checkoutToken} onTokenChange={setCheckoutToken} />
       <LpFaqSection variant="control" />
       <LpFinalCtaSection onCheckout={goCheckout} variant="control" />
 
@@ -424,11 +452,9 @@ export default function LandingPage() {
       >
         <LogoPortal className="h-10 w-auto mx-auto mb-3" />
         <p className="text-xs tracking-wide" style={{ color: "rgba(247,242,236,0.25)" }}>
-          {LP_JOURNEY_NAME}
+          {LP_JOURNEY_NAME} · {LP_ACCESS_MONTHS} meses · {formatLpPrice(LP_PRICE)}
         </p>
       </footer>
-
-      <SignupModal open={signupOpen} onClose={() => setSignupOpen(false)} variant="control" />
     </div>
   );
 }

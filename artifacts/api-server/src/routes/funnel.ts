@@ -5,15 +5,16 @@ import { db } from "@workspace/db";
 import {
   usuariosTable,
   comprasCaktoTable,
+  comprasMpTable,
   gamificacaoTable,
 } from "@workspace/db/schema";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { parseBody, funnelRegisterSchema } from "../lib/schemas";
 import { signToken } from "./auth";
 import { sendCheckoutWelcomeEmail } from "../lib/email";
-import {
-  syncKommoOnRegister,
-} from "../lib/kommo";
+import { syncKommoOnRegister } from "../lib/kommo";
+import { nextPurchaseVariant } from "../lib/acesso/activateMpPurchase";
+import { PRECO_OFERTA, isAccessExpired } from "../lib/acesso/periodo";
 
 const router = Router();
 
@@ -44,6 +45,22 @@ async function uniqueUsername(base: string): Promise<string> {
   return `${base.slice(0, 16)}${randomUUID().slice(0, 8)}`;
 }
 
+async function findCheckoutToken(usuarioId: number): Promise<string | null> {
+  const [mp] = await db
+    .select({ checkoutToken: comprasMpTable.checkoutToken, status: comprasMpTable.status })
+    .from(comprasMpTable)
+    .where(eq(comprasMpTable.usuarioId, usuarioId))
+    .orderBy(desc(comprasMpTable.criadoEm))
+    .limit(1);
+  if (mp) return mp.checkoutToken;
+  const [cakto] = await db
+    .select({ checkoutToken: comprasCaktoTable.checkoutToken })
+    .from(comprasCaktoTable)
+    .where(eq(comprasCaktoTable.usuarioId, usuarioId))
+    .limit(1);
+  return cakto?.checkoutToken ?? null;
+}
+
 // GET /api/funnel/checkout-token-by-email?email=...
 router.get("/checkout-token-by-email", async (req: Request, res: Response) => {
   try {
@@ -59,6 +76,7 @@ router.get("/checkout-token-by-email", async (req: Request, res: Response) => {
         id: usuariosTable.id,
         statusAcesso: usuariosTable.statusAcesso,
         ativo: usuariosTable.ativo,
+        acessoAte: usuariosTable.acessoAte,
       })
       .from(usuariosTable)
       .where(eq(usuariosTable.email, email))
@@ -68,23 +86,18 @@ router.get("/checkout-token-by-email", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "E-mail não encontrado" });
     }
 
-    if (usuario.ativo && usuario.statusAcesso === "active") {
+    if (
+      usuario.ativo &&
+      usuario.statusAcesso === "active" &&
+      !isAccessExpired(usuario.acessoAte)
+    ) {
       return res.json({ status: "active", checkoutToken: null });
     }
 
-    const [compra] = await db
-      .select({ checkoutToken: comprasCaktoTable.checkoutToken, status: comprasCaktoTable.status })
-      .from(comprasCaktoTable)
-      .where(eq(comprasCaktoTable.usuarioId, usuario.id))
-      .limit(1);
-
-    if (!compra) {
-      return res.json({ status: usuario.statusAcesso, checkoutToken: null });
-    }
-
+    const checkoutToken = await findCheckoutToken(usuario.id);
     return res.json({
-      status: compra.status === "paid" ? "paid" : usuario.statusAcesso,
-      checkoutToken: compra.checkoutToken,
+      status: usuario.statusAcesso,
+      checkoutToken,
     });
   } catch (error) {
     req.log.error({ error }, "Erro ao buscar checkout token por e-mail");
@@ -107,6 +120,7 @@ router.get("/check-email", async (req: Request, res: Response) => {
         id: usuariosTable.id,
         ativo: usuariosTable.ativo,
         statusAcesso: usuariosTable.statusAcesso,
+        acessoAte: usuariosTable.acessoAte,
       })
       .from(usuariosTable)
       .where(eq(usuariosTable.email, email))
@@ -116,7 +130,11 @@ router.get("/check-email", async (req: Request, res: Response) => {
       return res.json({ available: true });
     }
 
-    if (existing.ativo && existing.statusAcesso === "active") {
+    if (
+      existing.ativo &&
+      existing.statusAcesso === "active" &&
+      !isAccessExpired(existing.acessoAte)
+    ) {
       return res.json({
         available: false,
         status: "active",
@@ -124,17 +142,12 @@ router.get("/check-email", async (req: Request, res: Response) => {
       });
     }
 
-    const [pendingCompra] = await db
-      .select({ checkoutToken: comprasCaktoTable.checkoutToken })
-      .from(comprasCaktoTable)
-      .where(eq(comprasCaktoTable.usuarioId, existing.id))
-      .limit(1);
-
-    if (pendingCompra) {
+    const checkoutToken = await findCheckoutToken(existing.id);
+    if (checkoutToken) {
       return res.json({
         available: false,
         status: "pending",
-        checkoutToken: pendingCompra.checkoutToken,
+        checkoutToken,
         message: "Este e-mail já está cadastrado. Continue o pagamento ou faça login.",
       });
     }
@@ -162,23 +175,28 @@ router.post("/register", async (req: Request, res: Response) => {
     const emailNorm = email.trim().toLowerCase();
 
     const [emailExisting] = await db
-      .select({ id: usuariosTable.id, ativo: usuariosTable.ativo, statusAcesso: usuariosTable.statusAcesso })
+      .select({
+        id: usuariosTable.id,
+        ativo: usuariosTable.ativo,
+        statusAcesso: usuariosTable.statusAcesso,
+        acessoAte: usuariosTable.acessoAte,
+      })
       .from(usuariosTable)
       .where(eq(usuariosTable.email, emailNorm))
       .limit(1);
 
     if (emailExisting) {
-      if (emailExisting.ativo && emailExisting.statusAcesso === "active") {
+      if (
+        emailExisting.ativo &&
+        emailExisting.statusAcesso === "active" &&
+        !isAccessExpired(emailExisting.acessoAte)
+      ) {
         return res.status(409).json({ error: "Este e-mail já possui acesso ativo. Faça login." });
       }
-      const [pendingCompra] = await db
-        .select({ checkoutToken: comprasCaktoTable.checkoutToken })
-        .from(comprasCaktoTable)
-        .where(eq(comprasCaktoTable.usuarioId, emailExisting.id))
-        .limit(1);
-      if (pendingCompra) {
+      const pendingToken = await findCheckoutToken(emailExisting.id);
+      if (pendingToken) {
         return res.json({
-          checkoutToken: pendingCompra.checkoutToken,
+          checkoutToken: pendingToken,
           userId: emailExisting.id,
           existing: true,
         });
@@ -192,6 +210,7 @@ router.post("/register", async (req: Request, res: Response) => {
     const username = await uniqueUsername(usernameBase);
     const senhaHash = await bcrypt.hash(senha, 10);
     const checkoutToken = randomUUID();
+    const mpVariant = await nextPurchaseVariant();
 
     const [novoUsuario] = await db
       .insert(usuariosTable)
@@ -209,17 +228,32 @@ router.post("/register", async (req: Request, res: Response) => {
       .returning({ id: usuariosTable.id });
 
     await db.insert(gamificacaoTable).values({ usuarioId: novoUsuario.id });
-    await db.insert(comprasCaktoTable).values({
-      usuarioId: novoUsuario.id,
-      checkoutToken,
-      status: "pending",
-      variant,
-      valor: "57.90",
+
+    const utmFields = {
       utmSource: utm?.source ?? null,
       utmMedium: utm?.medium ?? null,
       utmCampaign: utm?.campaign ?? null,
       utmContent: utm?.content ?? null,
       utmTerm: utm?.term ?? null,
+    };
+
+    await db.insert(comprasMpTable).values({
+      usuarioId: novoUsuario.id,
+      checkoutToken,
+      status: "pending",
+      variant: mpVariant,
+      valor: PRECO_OFERTA,
+      ...utmFields,
+    });
+
+    // Dual-write legado para Kommo / admin compras antigo
+    await db.insert(comprasCaktoTable).values({
+      usuarioId: novoUsuario.id,
+      checkoutToken,
+      status: "pending",
+      variant: variant || mpVariant,
+      valor: PRECO_OFERTA,
+      ...utmFields,
     });
 
     sendCheckoutWelcomeEmail(
@@ -255,25 +289,68 @@ router.post("/register", async (req: Request, res: Response) => {
   }
 });
 
+async function loadCheckoutByToken(token: string) {
+  const [mpRow] = await db
+    .select({
+      compraStatus: comprasMpTable.status,
+      variant: comprasMpTable.variant,
+      usuario: usuariosTable,
+    })
+    .from(comprasMpTable)
+    .innerJoin(usuariosTable, eq(comprasMpTable.usuarioId, usuariosTable.id))
+    .where(eq(comprasMpTable.checkoutToken, token))
+    .limit(1);
+
+  if (mpRow) {
+    return {
+      nome: mpRow.usuario.nome,
+      email: mpRow.usuario.email,
+      telefone: mpRow.usuario.telefone,
+      variant: mpRow.variant,
+      status: mpRow.compraStatus,
+      ativo: mpRow.usuario.ativo,
+      statusAcesso: mpRow.usuario.statusAcesso,
+      acessoAte: mpRow.usuario.acessoAte,
+      usuario: mpRow.usuario,
+      provider: "mercadopago" as const,
+    };
+  }
+
+  const [caktoRow] = await db
+    .select({
+      compraStatus: comprasCaktoTable.status,
+      variant: comprasCaktoTable.variant,
+      usuario: usuariosTable,
+    })
+    .from(comprasCaktoTable)
+    .innerJoin(usuariosTable, eq(comprasCaktoTable.usuarioId, usuariosTable.id))
+    .where(eq(comprasCaktoTable.checkoutToken, token))
+    .limit(1);
+
+  if (caktoRow) {
+    return {
+      nome: caktoRow.usuario.nome,
+      email: caktoRow.usuario.email,
+      telefone: caktoRow.usuario.telefone,
+      variant: caktoRow.variant,
+      status: caktoRow.compraStatus,
+      ativo: caktoRow.usuario.ativo,
+      statusAcesso: caktoRow.usuario.statusAcesso,
+      acessoAte: caktoRow.usuario.acessoAte,
+      usuario: caktoRow.usuario,
+      provider: "cakto" as const,
+    };
+  }
+  return null;
+}
+
 // GET /api/funnel/checkout-info?token=...
 router.get("/checkout-info", async (req: Request, res: Response) => {
   try {
     const token = String(req.query.token ?? "").trim();
     if (!token) return res.status(400).json({ error: "Token obrigatório" });
 
-    const [row] = await db
-      .select({
-        nome: usuariosTable.nome,
-        email: usuariosTable.email,
-        telefone: usuariosTable.telefone,
-        variant: comprasCaktoTable.variant,
-        status: comprasCaktoTable.status,
-      })
-      .from(comprasCaktoTable)
-      .innerJoin(usuariosTable, eq(comprasCaktoTable.usuarioId, usuariosTable.id))
-      .where(eq(comprasCaktoTable.checkoutToken, token))
-      .limit(1);
-
+    const row = await loadCheckoutByToken(token);
     if (!row) return res.status(404).json({ error: "Checkout não encontrado" });
 
     return res.json({
@@ -282,6 +359,7 @@ router.get("/checkout-info", async (req: Request, res: Response) => {
       telefone: row.telefone,
       variant: row.variant,
       status: row.status,
+      provider: row.provider,
     });
   } catch (error) {
     req.log.error({ error }, "Erro ao buscar checkout-info");
@@ -295,23 +373,18 @@ router.get("/checkout-status", async (req: Request, res: Response) => {
     const token = String(req.query.token ?? "").trim();
     if (!token) return res.status(400).json({ error: "Token obrigatório" });
 
-    const [row] = await db
-      .select({
-        compraStatus: comprasCaktoTable.status,
-        ativo: usuariosTable.ativo,
-        statusAcesso: usuariosTable.statusAcesso,
-      })
-      .from(comprasCaktoTable)
-      .innerJoin(usuariosTable, eq(comprasCaktoTable.usuarioId, usuariosTable.id))
-      .where(eq(comprasCaktoTable.checkoutToken, token))
-      .limit(1);
-
+    const row = await loadCheckoutByToken(token);
     if (!row) return res.status(404).json({ error: "Checkout não encontrado" });
 
-    const ready = row.compraStatus === "paid" && row.ativo && row.statusAcesso === "active";
+    const acessoOk =
+      row.statusAcesso === "active" &&
+      row.ativo &&
+      !isAccessExpired(row.acessoAte);
+    const ready = row.status === "paid" && acessoOk;
+
     return res.json({
       ready,
-      status: row.compraStatus,
+      status: row.status,
       statusAcesso: row.statusAcesso,
     });
   } catch (error) {
@@ -328,20 +401,16 @@ router.post("/complete-checkout", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "checkoutToken obrigatório" });
     }
 
-    const [row] = await db
-      .select({
-        usuario: usuariosTable,
-        compraStatus: comprasCaktoTable.status,
-      })
-      .from(comprasCaktoTable)
-      .innerJoin(usuariosTable, eq(comprasCaktoTable.usuarioId, usuariosTable.id))
-      .where(eq(comprasCaktoTable.checkoutToken, checkoutToken))
-      .limit(1);
-
+    const row = await loadCheckoutByToken(checkoutToken);
     if (!row) return res.status(404).json({ error: "Checkout não encontrado" });
 
-    const { usuario } = row;
-    if (row.compraStatus !== "paid" || !usuario.ativo || usuario.statusAcesso !== "active") {
+    const usuario = row.usuario;
+    const acessoOk =
+      usuario.statusAcesso === "active" &&
+      usuario.ativo &&
+      !isAccessExpired(usuario.acessoAte);
+
+    if (row.status !== "paid" || !acessoOk) {
       return res.status(402).json({ error: "pagamento_pendente" });
     }
 
@@ -366,6 +435,9 @@ router.post("/complete-checkout", async (req: Request, res: Response) => {
         isAdmin: usuario.isAdmin,
         dataNascimento: usuario.dataNascimento,
         fotoPerfil: usuario.fotoPerfil,
+        acessoInicio: usuario.acessoInicio?.toISOString() ?? null,
+        acessoAte: usuario.acessoAte?.toISOString() ?? null,
+        garantiaAte: usuario.garantiaAte?.toISOString() ?? null,
       },
     });
   } catch (error) {

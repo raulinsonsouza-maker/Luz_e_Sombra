@@ -16,6 +16,7 @@ import { CursosTab } from "./admin/CursosTab";
 import { ComprasTab } from "./admin/ComprasTab";
 import { WebhooksTab } from "./admin/WebhooksTab";
 import { EmailsTab } from "./admin/EmailsTab";
+import { PagamentosTab } from "./admin/PagamentosTab";
 import { ConteudoDiaTab } from "./admin/ConteudoDiaTab";
 import { GaleriaTab } from "./admin/GaleriaTab";
 import { PerfilAdminTab } from "./admin/PerfilAdminTab";
@@ -52,6 +53,7 @@ const NAV_OPERACIONAL: NavGroup[] = [
 ];
 
 const NAV_CONFIG: NavItem[] = [
+  { key: "pagamentos", label: "Pagamentos", icon: CreditCard },
   { key: "webhooks", label: "Webhooks", icon: Webhook },
   { key: "emails", label: "E-mails", icon: Mail },
 ];
@@ -350,6 +352,7 @@ export default function AdminPage() {
           {aba === "dashboard" && <DashboardTab showMsg={showMsg} onIrPara={(t) => setAba(t as Tab)} />}
           {aba === "usuarios" && <UsuariosTab showMsg={showMsg} />}
           {aba === "compras" && <ComprasTab showMsg={showMsg} />}
+          {aba === "pagamentos" && <PagamentosTab showMsg={showMsg} />}
           {aba === "webhooks" && <WebhooksTab />}
           {aba === "emails" && <EmailsTab />}
           {aba === "comunidade" && <ComunidadeTab showMsg={showMsg} />}

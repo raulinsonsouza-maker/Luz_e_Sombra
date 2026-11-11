@@ -6,8 +6,8 @@ export { preencher } from "./casca.js";
 /** Textos de superfície. Telas e e-mails leem daqui, não guardam parágrafo próprio. */
 export const CATALOGO = {
   lp: {
-    heroSubline: `Nove leituras, no seu ritmo, reunidas num mapa. Você entende quem é, o que se repete e qual passo cabe agora. ${MARCA.voceEstaAqui}`,
-    tagline: "Uma trilha guiada para sair do automático e enxergar, com clareza, quem você é.",
+    heroSubline: `Uma jornada para compreender quem você é, reconhecer seus padrões, entender seus ciclos e transformar a maneira como vive. ${MARCA.voceEstaAqui}`,
+    tagline: "Um portal. Diferentes caminhos. Uma descoberta: você.",
     ...CASCA.lp,
   },
   home: {

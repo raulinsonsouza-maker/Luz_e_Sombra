@@ -13,7 +13,6 @@ import {
 } from "@/components/lp/LpOfferSections";
 import { VSL_UNLOCK_KEY, VSL_COPY, LP_GATE_PERCENT, formatLpPriceLabel, LP_PORTAL_NAME, LP_JOURNEY_NAME, LP_CTA_LOGIN } from "@/lib/lpConfig";
 import { trackLpEvent } from "@/lib/lpAnalytics";
-import SignupModal from "@/components/funnel/SignupModal";
 import LogoPortal from "@/components/LogoPortal";
 import { captureUtmsFromUrl } from "@/lib/utm";
 
@@ -29,7 +28,6 @@ export default function VslLandingPage() {
   const [, navigate] = useLocation();
   const { status, user } = useAuth();
   const [unlocked, setUnlocked] = useState(readUnlocked);
-  const [signupOpen, setSignupOpen] = useState(false);
   const trackedView = useRef(false);
   const trackedUnlock = useRef(false);
 
@@ -58,8 +56,8 @@ export default function VslLandingPage() {
 
   const goCheckout = useCallback(() => {
     if (!unlocked) return;
-    setSignupOpen(true);
-  }, [unlocked]);
+    navigate("/#checkout");
+  }, [unlocked, navigate]);
 
   return (
     <div style={{ background: "#0f0c09", minHeight: "100vh" }}>
@@ -202,7 +200,6 @@ export default function VslLandingPage() {
         </p>
       </footer>
 
-      <SignupModal open={signupOpen} onClose={() => setSignupOpen(false)} variant="vsl" />
     </div>
   );
 }

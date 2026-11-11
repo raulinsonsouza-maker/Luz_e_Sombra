@@ -17,7 +17,10 @@ import conteudoDiaRouter from "./conteudoDia";
 import galeriaRouter from "./galeria";
 import funnelRouter from "./funnel";
 import webhooksCaktoRouter from "./webhooks/cakto";
+import webhooksMpRouter from "./webhooks/mercadopago";
 import adminOpsRouter from "./adminOps";
+import adminMercadopagoRouter from "./admin/mercadopago";
+import paymentsMpRouter from "./payments/mp";
 
 const router: IRouter = Router();
 
@@ -25,7 +28,10 @@ router.use(healthRouter);
 router.use("/auth", authRouter);
 router.use("/funnel", funnelRouter);
 router.use("/webhooks", webhooksCaktoRouter);
+router.use("/webhooks", webhooksMpRouter);
+router.use("/payments/mp", paymentsMpRouter);
 router.use("/admin", adminOpsRouter);
+router.use("/admin/mercadopago", adminMercadopagoRouter);
 router.use("/avaliacoes", avaliacoesRouter);
 router.use("/usuarios", usuariosRouter);
 router.use("/traco", tracoRouter);

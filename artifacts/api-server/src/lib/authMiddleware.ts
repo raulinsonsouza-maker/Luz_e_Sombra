@@ -3,6 +3,7 @@ import { verifyToken } from "../routes/auth";
 import { db } from "@workspace/db";
 import { usuariosTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
+import { accessFieldsForClient, ensureAccessValid } from "./acesso/ensureAccess";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -13,6 +14,11 @@ export interface AuthRequest extends Request {
     primeiroAcesso: boolean;
     isAdmin: boolean;
     dataNascimento: string | null;
+    acessoInicio?: string | null;
+    acessoAte?: string | null;
+    garantiaAte?: string | null;
+    diasRestantes?: number | null;
+    statusAcesso?: string;
   };
 }
 
@@ -31,10 +37,25 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
       .where(eq(usuariosTable.id, decoded.id))
       .limit(1);
 
-    if (!usuario || !usuario.ativo) {
+    if (!usuario) {
       return res.status(401).json({ error: "Usuário não encontrado ou inativo" });
     }
 
+    const access = await ensureAccessValid(usuario);
+
+    if (usuario.isAdmin) {
+      // admin passa
+    } else if (access.expired || access.statusAcesso === "expired") {
+      return res.status(403).json({
+        error: "Seu período de acesso terminou.",
+        code: "acesso_expirado",
+        ...accessFieldsForClient(access),
+      });
+    } else if (access.statusAcesso === "revoked" || !access.ativo) {
+      return res.status(401).json({ error: "Usuário não encontrado ou inativo" });
+    }
+
+    const fields = accessFieldsForClient(access);
     req.user = {
       id: usuario.id,
       username: usuario.username,
@@ -43,6 +64,7 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
       primeiroAcesso: usuario.primeiroAcesso,
       isAdmin: usuario.isAdmin,
       dataNascimento: usuario.dataNascimento,
+      ...fields,
     };
     return next();
   } catch (error) {

@@ -35,11 +35,22 @@ export function accessGrantedEmail(params: {
   email: string;
   loginUrl: string;
   jornadaUrl: string;
+  acessoAte?: Date | null;
 }): { subject: string; html: string } {
   const nome = primeiroNome(params.nome);
+  const acessoAteLabel = params.acessoAte
+    ? params.acessoAte.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : null;
   const bodyHtml = [
     p(`Olá, ${strong(nome)}.`),
     p(preencher(CATALOGO.email.pagamentoConfirmado, { portal: strong(EMAIL_PORTAL_NAME) })),
+    acessoAteLabel
+      ? p(preencher(CATALOGO.email.acessoAteLinha, { data: strong(acessoAteLabel) }))
+      : "",
     p(preencher(CATALOGO.email.comoEntrar, { email: strong(params.email) })),
     p(preencher(CATALOGO.email.comecePeloTraco, { jornada: strong(EMAIL_JOURNEY_NAME) })),
   ].join("");

@@ -483,7 +483,7 @@ export default function MeuPerfilPage() {
               </div>
 
               {/* Birth date row */}
-              <div className="flex items-center justify-between px-5 py-4">
+              <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: user?.acessoAte ? "1px solid rgba(200,165,107,0.06)" : undefined }}>
                 <div className="flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5" style={{ color: "rgba(200,165,107,0.4)" }} />
                   <p className="text-xs font-semibold" style={{ color: "rgba(247,242,236,0.35)" }}>Data de nascimento</p>
@@ -492,6 +492,16 @@ export default function MeuPerfilPage() {
                   {user?.dataNascimento ? formatarData(user.dataNascimento) : "Não informada"}
                 </p>
               </div>
+
+              {user?.acessoAte && (
+                <div className="flex items-center justify-between px-5 py-4">
+                  <p className="text-xs font-semibold" style={{ color: "rgba(247,242,236,0.35)" }}>Acesso até</p>
+                  <p className="text-sm text-right" style={{ color: "#c8a56b" }}>
+                    {new Date(user.acessoAte).toLocaleDateString("pt-BR")}
+                    {typeof user.diasRestantes === "number" ? ` · ${user.diasRestantes} dias` : ""}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Password row — read only (just shows locked state) */}

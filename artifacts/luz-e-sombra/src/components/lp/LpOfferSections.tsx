@@ -148,7 +148,7 @@ export function LpHowItWorksSection({ theme = "light", variant = "control" }: Se
             ) : null}
           </h2>
         </div>
-        <div className="grid sm:grid-cols-3 gap-8">
+        <div className={`grid gap-8 ${copy.steps.length > 3 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"}`}>
           {copy.steps.map(({ step, title, desc }) => (
             <div key={step} className="flex gap-4">
               <p

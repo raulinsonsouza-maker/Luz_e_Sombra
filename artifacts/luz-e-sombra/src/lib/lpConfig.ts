@@ -24,14 +24,17 @@ export const LP_JOURNEY_TAGLINE = CATALOGO.lp.tagline;
 export const LP_PRODUCT_NAME = LP_JOURNEY_NAME;
 export const LP_PRODUCT_TAGLINE = LP_JOURNEY_TAGLINE;
 export const LP_CHECKOUT_SUBTITLE = `Acesso completo no ${LP_PORTAL_NAME}`;
-export const LP_PRICE = 57.9;
-export const LP_PRICE_INSTALLMENTS = 3;
-export const LP_PRICE_INSTALLMENT_VALUE = 21.19;
-export const LP_PRICE_ORIGINAL = 97;
+export const LP_PRICE = 111.11;
+export const LP_PRICE_INSTALLMENTS = 1;
+export const LP_PRICE_INSTALLMENT_VALUE = 111.11;
+export const LP_PRICE_ORIGINAL = 111.11;
 export const LP_PRICE_PERIOD = "";
 export const LP_BILLING_LABEL = "Pagamento único";
 export const LP_GUARANTEE_DAYS = 7;
+export const LP_ACCESS_MONTHS = 6;
+export const LP_FOUNDERS_CAP = 111;
 export const LP_CTA_PRIMARY = "Começar minha jornada";
+export const LP_CTA_FOUNDER = "Quero ser um membro fundador";
 export const LP_CTA_NAV = "Começar jornada";
 export const LP_CTA_LOGIN = "Entrar";
 
@@ -64,7 +67,7 @@ export const CONTROL_SECTIONS = {
   ...CATALOGO.lp.controle,
   offer: {
     ...CATALOGO.lp.controle.offer,
-    subtitle: `${LP_BILLING_LABEL} · Acesso no ${LP_PORTAL_NAME} após confirmação do pagamento.`,
+    subtitle: `${LP_BILLING_LABEL} · ${LP_ACCESS_MONTHS} meses de acesso · Garantia de ${LP_GUARANTEE_DAYS} dias.`,
   },
 };
 
@@ -74,7 +77,7 @@ export function getLpSections(variant: LpSectionVariant = "control") {
   return variant === "vsl" ? LP_SECTIONS : CONTROL_SECTIONS;
 }
 
-/** URL do checkout Cakto */
+/** URL do checkout Cakto (legado) */
 export const CAKTO_CHECKOUT_URL =
   import.meta.env.VITE_CAKTO_CHECKOUT_URL || "https://pay.cakto.com.br/3dr2icy_975648";
 
@@ -111,13 +114,14 @@ export const LP_FAQ = CATALOGO.lp.faq.map((item) => ({
     parcela: formatLpPrice(LP_PRICE_INSTALLMENT_VALUE),
     avista: formatLpPrice(LP_PRICE),
     garantia: LP_GUARANTEE_DAYS,
+    meses: LP_ACCESS_MONTHS,
   }),
 }));
 
 export const LP_INCLUDED_ITEMS = CATALOGO.lp.inclusos;
 
 export function formatLpPriceLabel(): string {
-  return `${formatLpPrice(LP_PRICE)} à vista ou ${LP_PRICE_INSTALLMENTS}x de ${formatLpPrice(LP_PRICE_INSTALLMENT_VALUE)}`;
+  return `${formatLpPrice(LP_PRICE)} · pagamento único · ${LP_ACCESS_MONTHS} meses`;
 }
 
 export function formatLpPrice(value: number): string {

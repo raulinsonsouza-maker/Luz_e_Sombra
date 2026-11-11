@@ -7,6 +7,11 @@ export interface User {
   isAdmin: boolean;
   dataNascimento: string | null;
   fotoPerfil: string | null;
+  acessoInicio?: string | null;
+  acessoAte?: string | null;
+  garantiaAte?: string | null;
+  diasRestantes?: number | null;
+  statusAcesso?: string;
 }
 
 const TOKEN_KEY = "luz_e_sombra_token";

@@ -2,8 +2,13 @@ import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { db } from "@workspace/db";
-import { usuariosTable, passwordResetTokensTable, comprasCaktoTable } from "@workspace/db/schema";
-import { eq, and, isNull, gt } from "drizzle-orm";
+import {
+  usuariosTable,
+  passwordResetTokensTable,
+  comprasCaktoTable,
+  comprasMpTable,
+} from "@workspace/db/schema";
+import { eq, and, isNull, gt, desc } from "drizzle-orm";
 import { parseBody, forgotPasswordSchema, resetPasswordSchema } from "../lib/schemas";
 import {
   generateResetToken,
@@ -13,6 +18,23 @@ import {
   recordResetRequest,
 } from "../lib/passwordReset";
 import { sendPasswordResetEmail, sendPasswordChangedEmail } from "../lib/email";
+import { accessFieldsForClient, ensureAccessValid } from "../lib/acesso/ensureAccess";
+
+async function resolveCheckoutToken(usuarioId: number): Promise<string | null> {
+  const [mp] = await db
+    .select({ checkoutToken: comprasMpTable.checkoutToken })
+    .from(comprasMpTable)
+    .where(eq(comprasMpTable.usuarioId, usuarioId))
+    .orderBy(desc(comprasMpTable.criadoEm))
+    .limit(1);
+  if (mp?.checkoutToken) return mp.checkoutToken;
+  const [cakto] = await db
+    .select({ checkoutToken: comprasCaktoTable.checkoutToken })
+    .from(comprasCaktoTable)
+    .where(eq(comprasCaktoTable.usuarioId, usuarioId))
+    .limit(1);
+  return cakto?.checkoutToken ?? null;
+}
 
 const router = Router();
 
@@ -72,27 +94,45 @@ router.post("/login", async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Usuário ou senha inválidos" });
     }
 
-    if (!usuario.ativo) {
-      if (usuario.statusAcesso === "pending") {
-        const [compra] = await db
-          .select({ checkoutToken: comprasCaktoTable.checkoutToken })
-          .from(comprasCaktoTable)
-          .where(eq(comprasCaktoTable.usuarioId, usuario.id))
-          .limit(1);
+    if (!usuario.isAdmin) {
+      if (usuario.statusAcesso === "pending" || (!usuario.ativo && usuario.statusAcesso === "pending")) {
+        const checkoutToken = await resolveCheckoutToken(usuario.id);
         return res.status(402).json({
           error: "pagamento_pendente",
           code: "pagamento_pendente",
-          checkoutToken: compra?.checkoutToken ?? null,
+          checkoutToken,
         });
       }
-      if (usuario.statusAcesso === "revoked") {
+
+      const access = await ensureAccessValid(usuario);
+      if (access.statusAcesso === "revoked") {
         return res.status(403).json({
           error: "Seu acesso foi encerrado por reembolso ou estorno. Entre em contato com o suporte se precisar de ajuda.",
           code: "acesso_revogado",
         });
       }
-      return res.status(401).json({ error: "Usuário ou senha inválidos" });
+      if (access.expired || access.statusAcesso === "expired") {
+        return res.status(403).json({
+          error: "Seu período de acesso de 6 meses terminou.",
+          code: "acesso_expirado",
+          ...accessFieldsForClient(access),
+        });
+      }
+      if (!access.ativo) {
+        if (access.statusAcesso === "pending") {
+          const checkoutToken = await resolveCheckoutToken(usuario.id);
+          return res.status(402).json({
+            error: "pagamento_pendente",
+            code: "pagamento_pendente",
+            checkoutToken,
+          });
+        }
+        return res.status(401).json({ error: "Usuário ou senha inválidos" });
+      }
     }
+
+    const access = await ensureAccessValid(usuario);
+    const accessFields = accessFieldsForClient(access);
 
     const token = signToken({
       id: usuario.id,
@@ -115,6 +155,7 @@ router.post("/login", async (req: Request, res: Response) => {
         isAdmin: usuario.isAdmin,
         dataNascimento: usuario.dataNascimento,
         fotoPerfil: usuario.fotoPerfil,
+        ...accessFields,
       },
     });
   } catch (error) {
@@ -144,8 +185,18 @@ router.get("/session", async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Usuário não encontrado ou inativo" });
     }
 
-    if (!usuario.ativo) {
-      return res.status(401).json({ error: "Usuário não encontrado ou inativo" });
+    const access = await ensureAccessValid(usuario);
+    if (!usuario.isAdmin) {
+      if (access.expired || access.statusAcesso === "expired") {
+        return res.status(403).json({
+          error: "Seu período de acesso terminou.",
+          code: "acesso_expirado",
+          ...accessFieldsForClient(access),
+        });
+      }
+      if (!access.ativo) {
+        return res.status(401).json({ error: "Usuário não encontrado ou inativo" });
+      }
     }
 
     return res.json({
@@ -158,6 +209,7 @@ router.get("/session", async (req: Request, res: Response) => {
         isAdmin: usuario.isAdmin,
         dataNascimento: usuario.dataNascimento,
         fotoPerfil: usuario.fotoPerfil,
+        ...accessFieldsForClient(access),
       },
     });
   } catch (error) {

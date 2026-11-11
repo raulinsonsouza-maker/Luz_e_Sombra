@@ -196,7 +196,7 @@ export default function LoginPage() {
                     <p className="text-sm text-red-700">{erro}</p>
                     {pagamentoPendente && checkoutToken && (
                       <Link
-                        href={`/checkout?token=${encodeURIComponent(checkoutToken)}&from=control`}
+                        href={`/?checkout=${encodeURIComponent(checkoutToken)}#checkout`}
                         className="text-sm font-semibold mt-2 inline-block underline"
                         style={{ color: "#9c7742" }}
                       >

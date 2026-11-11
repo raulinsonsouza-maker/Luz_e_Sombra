@@ -3,10 +3,12 @@ import { db } from "@workspace/db";
 import {
   usuariosTable,
   comprasCaktoTable,
+  comprasMpTable,
   webhookEventosCaktoTable,
   emailEnviosTable,
   gamificacaoTable,
 } from "@workspace/db/schema";
+import { computeAccessWindow, addMonths } from "../lib/acesso/periodo";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { requireAdmin, AuthRequest } from "../lib/authMiddleware";
 import { buildModulosJornadaLista } from "./modulosJornada";
@@ -222,8 +224,8 @@ router.post("/usuarios/:id/acesso", requireAdmin, async (req: AuthRequest, res: 
   try {
     const usuarioId = parseInt(String(req.params.id), 10);
     const acao = String(req.body?.acao ?? "").trim();
-    if (!Number.isFinite(usuarioId) || !["grant", "revoke"].includes(acao)) {
-      return res.status(400).json({ error: "Parâmetros inválidos (acao: grant | revoke)" });
+    if (!Number.isFinite(usuarioId) || !["grant", "revoke", "extend"].includes(acao)) {
+      return res.status(400).json({ error: "Parâmetros inválidos (acao: grant | revoke | extend)" });
     }
 
     const [usuario] = await db
@@ -234,9 +236,26 @@ router.post("/usuarios/:id/acesso", requireAdmin, async (req: AuthRequest, res: 
     if (!usuario) return res.status(404).json({ error: "Usuário não encontrado" });
 
     if (acao === "grant") {
+      const meses = Number(req.body?.meses);
+      const withPrazo = Number.isFinite(meses) ? meses > 0 : true;
+      const window = withPrazo
+        ? computeAccessWindow(new Date())
+        : { acessoInicio: null as Date | null, acessoAte: null as Date | null, garantiaAte: null as Date | null };
+
+      if (withPrazo && Number.isFinite(meses) && meses !== 6) {
+        window.acessoAte = addMonths(window.acessoInicio!, meses);
+      }
+
       await db
         .update(usuariosTable)
-        .set({ ativo: true, statusAcesso: "active", atualizadoEm: new Date() })
+        .set({
+          ativo: true,
+          statusAcesso: "active",
+          acessoInicio: window.acessoInicio,
+          acessoAte: window.acessoAte,
+          garantiaAte: window.garantiaAte,
+          atualizadoEm: new Date(),
+        })
         .where(eq(usuariosTable.id, usuarioId));
 
       await db
@@ -244,12 +263,48 @@ router.post("/usuarios/:id/acesso", requireAdmin, async (req: AuthRequest, res: 
         .set({ status: "paid", pagoEm: new Date(), atualizadoEm: new Date() })
         .where(eq(comprasCaktoTable.usuarioId, usuarioId));
 
+      await db
+        .update(comprasMpTable)
+        .set({
+          status: "paid",
+          pagoEm: new Date(),
+          acessoInicio: window.acessoInicio ?? undefined,
+          acessoAte: window.acessoAte ?? undefined,
+          garantiaAte: window.garantiaAte ?? undefined,
+          atualizadoEm: new Date(),
+        })
+        .where(eq(comprasMpTable.usuarioId, usuarioId));
+
       if (usuario.email) {
         sendAccessGrantedEmail(
-          { usuarioId, nome: usuario.nome, email: usuario.email },
+          {
+            usuarioId,
+            nome: usuario.nome,
+            email: usuario.email,
+            acessoAte: window.acessoAte,
+          },
           req.log,
         );
       }
+    } else if (acao === "extend") {
+      const meses = Number(req.body?.meses ?? 6);
+      if (!Number.isFinite(meses) || meses <= 0) {
+        return res.status(400).json({ error: "meses inválido" });
+      }
+      const base =
+        usuario.acessoAte && usuario.acessoAte.getTime() > Date.now()
+          ? usuario.acessoAte
+          : new Date();
+      const novoAte = addMonths(base, meses);
+      await db
+        .update(usuariosTable)
+        .set({
+          ativo: true,
+          statusAcesso: "active",
+          acessoAte: novoAte,
+          atualizadoEm: new Date(),
+        })
+        .where(eq(usuariosTable.id, usuarioId));
     } else {
       await db
         .update(usuariosTable)
@@ -260,6 +315,11 @@ router.post("/usuarios/:id/acesso", requireAdmin, async (req: AuthRequest, res: 
         .update(comprasCaktoTable)
         .set({ status: "refunded", atualizadoEm: new Date() })
         .where(eq(comprasCaktoTable.usuarioId, usuarioId));
+
+      await db
+        .update(comprasMpTable)
+        .set({ status: "refunded", atualizadoEm: new Date() })
+        .where(eq(comprasMpTable.usuarioId, usuarioId));
 
       if (usuario.email) {
         sendAccessRevokedEmail(

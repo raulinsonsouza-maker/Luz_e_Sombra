@@ -1,0 +1,226 @@
+import { useEffect, useState } from "react";
+import { Loader2, Shield } from "lucide-react";
+import { useLocation } from "wouter";
+import { toast } from "sonner";
+import SignupModal from "@/components/funnel/SignupModal";
+import MpPaymentBrick from "@/components/checkout/MpPaymentBrick";
+import {
+  formatLpPrice,
+  LP_BILLING_LABEL,
+  LP_FOUNDERS_CAP,
+  LP_GUARANTEE_DAYS,
+  LP_PRICE,
+  LP_ACCESS_MONTHS,
+  LP_CTA_FOUNDER,
+} from "@/lib/lpConfig";
+
+type MpConfig = {
+  connected: boolean;
+  publicKey: string | null;
+  amount: number;
+  fundadoresRestantes: number;
+  edicaoEspecialAtiva: boolean;
+  fundadoresCap: number;
+};
+
+type Props = {
+  checkoutToken?: string | null;
+  onTokenChange?: (token: string) => void;
+};
+
+export default function LpCheckoutSection({ checkoutToken: tokenProp, onTokenChange }: Props) {
+  const [, navigate] = useLocation();
+  const [config, setConfig] = useState<MpConfig | null>(null);
+  const [loadingConfig, setLoadingConfig] = useState(true);
+  const [signupOpen, setSignupOpen] = useState(false);
+  const [token, setToken] = useState(tokenProp ?? "");
+  const [payerEmail, setPayerEmail] = useState<string | null>(null);
+  const [pendingPix, setPendingPix] = useState(false);
+  const [polling, setPolling] = useState(false);
+
+  useEffect(() => {
+    if (tokenProp) setToken(tokenProp);
+  }, [tokenProp]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/payments/mp/public-config");
+        const data = await res.json();
+        if (!cancelled) setConfig(data);
+      } catch {
+        if (!cancelled) setConfig(null);
+      } finally {
+        if (!cancelled) setLoadingConfig(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/funnel/checkout-info?token=${encodeURIComponent(token)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) {
+          setPayerEmail(data.email ?? null);
+          if (data.status === "paid") {
+            navigate(`/acesso-pos-compra?token=${encodeURIComponent(token)}`);
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, navigate]);
+
+  useEffect(() => {
+    if (!token || !pendingPix) return;
+    setPolling(true);
+    const id = window.setInterval(async () => {
+      try {
+        const res = await fetch(`/api/funnel/checkout-status?token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+        if (data.ready) {
+          window.clearInterval(id);
+          navigate(`/acesso-pos-compra?token=${encodeURIComponent(token)}`);
+        }
+      } catch {
+        /* ignore */
+      }
+    }, 3000);
+    return () => {
+      window.clearInterval(id);
+      setPolling(false);
+    };
+  }, [token, pendingPix, navigate]);
+
+  function handleRegistered(checkoutToken: string) {
+    setToken(checkoutToken);
+    onTokenChange?.(checkoutToken);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("checkout", checkoutToken);
+      url.hash = "checkout";
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const edicaoAtiva = config?.edicaoEspecialAtiva ?? true;
+
+  return (
+    <section id="checkout" className="py-16 sm:py-20 px-5 scroll-mt-24" style={{ background: "#120e0a" }}>
+      <div className="max-w-xl mx-auto">
+        <div className="text-center mb-8">
+          <p className="text-xs font-bold tracking-[0.28em] uppercase mb-3" style={{ color: "rgba(200,165,107,0.65)" }}>
+            {edicaoAtiva ? "Edição especial de lançamento" : "Lançamento"}
+          </p>
+          <h2 className="font-tan-mon-cheri" style={{ fontSize: "clamp(1.7rem, 4vw, 2.4rem)", color: "#f7f2ec" }}>
+            {edicaoAtiva ? "Quero ser um membro fundador" : "Começar minha jornada"}
+          </h2>
+          <p className="text-sm mt-3 leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
+            {formatLpPrice(LP_PRICE)} · {LP_BILLING_LABEL} · {LP_ACCESS_MONTHS} meses de acesso · Garantia de {LP_GUARANTEE_DAYS} dias
+          </p>
+          {edicaoAtiva && (
+            <p className="text-xs mt-2" style={{ color: "rgba(200,165,107,0.7)" }}>
+              {config?.fundadoresRestantes ?? LP_FOUNDERS_CAP} badges de Membros Fundadores ainda disponíveis (de {LP_FOUNDERS_CAP})
+            </p>
+          )}
+        </div>
+
+        <div
+          className="rounded-3xl p-5 sm:p-7"
+          style={{
+            background: "linear-gradient(165deg, rgba(30,24,18,0.95), rgba(18,14,10,0.98))",
+            border: "1px solid rgba(200,165,107,0.22)",
+          }}
+        >
+          {loadingConfig ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#c8a56b" }} />
+            </div>
+          ) : !config?.connected || !config.publicKey ? (
+            <div className="text-center py-10 space-y-3">
+              <p className="text-sm" style={{ color: "rgba(247,242,236,0.7)" }}>
+                Pagamento temporariamente indisponível. Estamos finalizando a conexão com o Mercado Pago.
+              </p>
+              <p className="text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>
+                Tente novamente em alguns minutos.
+              </p>
+            </div>
+          ) : !token ? (
+            <div className="text-center space-y-5 py-4">
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
+                Crie seu cadastro e conclua o pagamento nesta mesma página. PIX ou cartão, com segurança do Mercado Pago.
+              </p>
+              <button
+                type="button"
+                onClick={() => setSignupOpen(true)}
+                className="inline-flex items-center justify-center px-8 py-4 rounded-2xl font-bold text-sm tracking-wide"
+                style={{
+                  background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)",
+                  color: "#fff",
+                  boxShadow: "0 12px 40px rgba(200,165,107,0.3)",
+                }}
+              >
+                {edicaoAtiva ? LP_CTA_FOUNDER : "Começar minha jornada"}
+              </button>
+              <div className="flex items-center justify-center gap-2 text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>
+                <Shield size={14} />
+                Pagamento seguro · Sem renovação automática
+              </div>
+            </div>
+          ) : pendingPix ? (
+            <div className="text-center py-10 space-y-3">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto" style={{ color: "#c8a56b" }} />
+              <p className="text-sm font-medium" style={{ color: "#f7f2ec" }}>
+                Aguardando confirmação do PIX
+              </p>
+              <p className="text-xs" style={{ color: "rgba(247,242,236,0.45)" }}>
+                {polling
+                  ? "Assim que o pagamento confirmar, liberamos seu acesso automaticamente."
+                  : "Finalize o PIX e aguarde alguns instantes."}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-xs text-center" style={{ color: "rgba(247,242,236,0.45)" }}>
+                Cadastro pronto{payerEmail ? ` · ${payerEmail}` : ""}. Escolha o meio de pagamento:
+              </p>
+              <MpPaymentBrick
+                publicKey={config.publicKey}
+                amount={config.amount || LP_PRICE}
+                checkoutToken={token}
+                payerEmail={payerEmail}
+                onApproved={() => navigate(`/acesso-pos-compra?token=${encodeURIComponent(token)}`)}
+                onPending={() => {
+                  setPendingPix(true);
+                  toast.message("PIX gerado. Assim que confirmar, seu acesso abre.");
+                }}
+                onError={(message) => toast.error(message)}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <SignupModal
+        open={signupOpen}
+        onClose={() => setSignupOpen(false)}
+        variant="control"
+        onRegistered={handleRegistered}
+      />
+    </section>
+  );
+}

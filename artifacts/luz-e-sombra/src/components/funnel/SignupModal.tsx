@@ -13,6 +13,8 @@ interface Props {
   open: boolean;
   onClose: () => void;
   variant: LpVariant;
+  /** Se definido, permanece na página e entrega o token (checkout embutido). */
+  onRegistered?: (checkoutToken: string) => void;
 }
 
 type EmailStatus = "idle" | "checking" | "available" | "unavailable";
@@ -116,7 +118,7 @@ function resetFormState(setters: {
   setters.setPendingCheckoutToken(null);
 }
 
-export default function SignupModal({ open, onClose, variant }: Props) {
+export default function SignupModal({ open, onClose, variant, onRegistered }: Props) {
   const [, navigate] = useLocation();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -289,7 +291,11 @@ export default function SignupModal({ open, onClose, variant }: Props) {
         /* ignore */
       }
       onClose();
-      navigate(`/checkout?token=${encodeURIComponent(data.checkoutToken)}&from=${variant}`);
+      if (onRegistered) {
+        onRegistered(String(data.checkoutToken));
+      } else {
+        navigate(`/?checkout=${encodeURIComponent(data.checkoutToken)}#checkout`);
+      }
     } catch {
       toastApiError("Erro de conexão. Tente novamente.");
       setEnviando(false);

@@ -9,8 +9,14 @@ export const usuariosTable = pgTable("usuarios", {
   nome: text("nome").notNull(),
   email: text("email").unique(),
   telefone: text("telefone"),
-  /** pending = aguardando pagamento; active = acesso pago; revoked = reembolso/chargeback */
+  /** pending = aguardando pagamento; active = acesso pago; expired = prazo esgotado; revoked = reembolso/chargeback */
   statusAcesso: text("status_acesso").notNull().default("active"),
+  /** Início do período de acesso (pagamento aprovado). Null = legado sem prazo. */
+  acessoInicio: timestamp("acesso_inicio"),
+  /** Fim do período de acesso. Null = legado sem prazo. */
+  acessoAte: timestamp("acesso_ate"),
+  /** Fim da janela de garantia (pagoEm + 7 dias). */
+  garantiaAte: timestamp("garantia_ate"),
   dataNascimento: text("data_nascimento"),
   fotoPerfil: text("foto_perfil"),
   primeiroAcesso: boolean("primeiro_acesso").notNull().default(true),

@@ -110,7 +110,7 @@ export function sendCheckoutWelcomeEmail(
   log?: Logger,
 ): void {
   const { publicUrl } = getEmailConfig();
-  const checkoutUrl = `${publicUrl}/checkout?token=${encodeURIComponent(params.checkoutToken)}`;
+  const checkoutUrl = `${publicUrl}/?checkout=${encodeURIComponent(params.checkoutToken)}#checkout`;
   const loginUrl = `${publicUrl}/login`;
   const { subject, html } = checkoutWelcomeEmail({ nome: params.nome, checkoutUrl, loginUrl });
 
@@ -128,7 +128,7 @@ export function sendCheckoutWelcomeEmail(
 }
 
 export function sendAccessGrantedEmail(
-  params: { usuarioId: number; nome: string; email: string },
+  params: { usuarioId: number; nome: string; email: string; acessoAte?: Date | null },
   log?: Logger,
 ): void {
   const { publicUrl } = getEmailConfig();
@@ -137,6 +137,7 @@ export function sendAccessGrantedEmail(
     email: params.email,
     loginUrl: `${publicUrl}/login`,
     jornadaUrl: `${publicUrl}/jornada/traco`,
+    acessoAte: params.acessoAte ?? null,
   });
 
   void sendTransactionalEmail(

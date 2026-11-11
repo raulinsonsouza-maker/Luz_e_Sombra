@@ -17,12 +17,12 @@ describe("email templates", () => {
   it("checkout_welcome inclui checkout e login", () => {
     const { subject, html } = checkoutWelcomeEmail({
       nome: "Maria Silva",
-      checkoutUrl: "https://portaliluminando.com.br/checkout?token=abc",
+      checkoutUrl: "https://portaliluminando.com.br/?checkout=abc#checkout",
       loginUrl: LOGIN,
     });
     assert.match(subject, /Bem-vinda/i);
     assert.match(subject, new RegExp(EMAIL_PORTAL_NAME));
-    assert.match(html, /checkout\?token=abc/);
+    assert.match(html, /checkout=abc/);
     assert.match(html, /\/login/);
     assert.match(html, /Maria/);
     assert.match(html, /Jornada Da Sombra à Luz/);
@@ -34,6 +34,7 @@ describe("email templates", () => {
       email: "joao@test.com",
       loginUrl: LOGIN,
       jornadaUrl: JORNADA,
+      acessoAte: new Date(2026, 10, 10),
     });
     assert.match(subject, /acesso está liberado/i);
     assert.match(html, /joao@test\.com/);
@@ -41,6 +42,8 @@ describe("email templates", () => {
     assert.match(html, /\/login/);
     assert.match(html, /Traço de Caráter/);
     assert.match(html, /jornada\/traco/);
+    assert.match(html, /6 meses/);
+    assert.match(html, /10\/11\/2026/);
   });
 
   it("password_reset inclui link de redefinição", () => {
@@ -64,11 +67,11 @@ describe("email templates", () => {
   it("payment_pending_reminder inclui checkout e login", () => {
     const { subject, html } = paymentPendingReminderEmail({
       nome: "Ana",
-      checkoutUrl: "https://portaliluminando.com.br/checkout?token=xyz",
+      checkoutUrl: "https://portaliluminando.com.br/?checkout=xyz#checkout",
       loginUrl: LOGIN,
     });
     assert.match(subject, /pagamento/i);
-    assert.match(html, /checkout\?token=xyz/);
+    assert.match(html, /checkout=xyz/);
     assert.match(html, /\/login/);
   });
 

@@ -7,16 +7,16 @@ import { MARCA } from "./marca.js";
 export const CASCA = {
   lp: {
     hero: {
-      badge: "Trilha guiada de autoconhecimento",
+      badge: "Autoconhecimento · Consciência · Transformação",
       headlineLine1: "Jornada",
       headlineLine2: "Da Sombra",
       headlineAccent: "à Luz",
       bullets: [
-        "A leitura é sua, não um texto genérico",
-        "A trilha vai passo a passo",
-        "A primeira leitura cabe em cerca de 15 minutos",
+        "Existe muito sobre você que ainda merece ser descoberto",
+        "Compreenda padrões, ciclos e o passo que cabe agora",
+        "Você não precisa ter todas as respostas. Precisa começar a se conhecer",
       ],
-      priceTeaser: "A partir de R$ 57,90 · pagamento único",
+      priceTeaser: "Acesso por 6 meses · Pagamento único · Garantia de 7 dias",
     },
     vslCopy: {
       navCta: "Começar jornada",
@@ -50,7 +50,7 @@ export const CASCA = {
           {
             step: "02",
             title: "Ative sua jornada",
-            desc: "R$ 57,90 à vista ou 3x de R$ 21,19 no cartão. Pagamento seguro e acesso no Portal Iluminando depois da confirmação.",
+            desc: "R$ 111,11 · pagamento único · 6 meses de acesso. Pagamento seguro e entrada no Portal Iluminando depois da confirmação.",
           },
           {
             step: "03",
@@ -88,24 +88,29 @@ export const CASCA = {
         subtitle: "Cada etapa ilumina uma parte de quem você é. Todas te levam da sombra à luz.",
       },
       howItWorks: {
-        eyebrow: "Como funciona",
-        title: "Cadastre-se, percorra,",
-        titleAccent: "e siga.",
+        eyebrow: "Como funciona?",
+        title: "Seu caminho começa",
+        titleAccent: "com um primeiro passo.",
         steps: [
           {
             step: "01",
-            title: "Garanta sua jornada",
-            desc: "Cadastro rápido e pagamento seguro. Acesso ao Portal Iluminando depois da confirmação.",
+            title: "Entre no Portal",
+            desc: "Faça seu cadastro e tenha acesso à Jornada Da Sombra à Luz.",
           },
           {
             step: "02",
-            title: "Percorra as análises",
-            desc: "Traço, temperamento, roda da vida e mais, na ordem da trilha, no seu ritmo.",
+            title: "Descubra suas características",
+            desc: "Responda aos testes, realize suas análises e explore seu mapa pessoal.",
           },
           {
             step: "03",
-            title: "Ganhe clareza integrada",
-            desc: "Cada resultado conversa com o próximo. Em minutos você vê padrões que antes pareciam soltos.",
+            title: "Conecte suas descobertas",
+            desc: "Avance pelas etapas e encontre no Dossiê de Vida uma visão integrada das suas características e padrões.",
+          },
+          {
+            step: "04",
+            title: "Continue sua jornada",
+            desc: "Volte diariamente, faça suas reflexões, registre suas emoções e desenvolva uma relação mais consciente consigo mesmo.",
           },
         ],
       },
@@ -114,16 +119,16 @@ export const CASCA = {
         title: "Resultados reais",
       },
       offer: {
-        eyebrow: "O que você está comprando",
-        title: MARCA.jornada,
+        eyebrow: "Edição especial de lançamento",
+        title: "111 Membros Fundadores",
         titleAccent: "",
-        subtitle: `Pagamento único · Acesso no ${MARCA.portal} após confirmação do pagamento.`,
-        footnote: "PIX ou cartão · Acesso após pagamento · Garantia de 7 dias",
+        subtitle: "R$ 111,11 · Pagamento único · 6 meses de acesso · Garantia de 7 dias.",
+        footnote: "PIX ou cartão · Sem renovação automática · Venda continua após os 111",
       },
       finalCta: {
-        title: "Sua jornada da sombra à luz",
-        titleAccent: "começa com uma escolha",
-        body: "Nove análises integradas esperando por você. Cada passo é consciência, no seu tempo.",
+        title: "O primeiro passo não é mudar quem você é.",
+        titleAccent: "É conhecer quem você é.",
+        body: "Sua história não precisa continuar sendo um mistério para você. Volte para si.",
       },
       faq: {
         eyebrow: "Perguntas frequentes",
@@ -132,40 +137,40 @@ export const CASCA = {
     },
     modulos: [
       {
-        title: "Traço de Caráter",
-        desc: "O que o seu corpo mostra sobre padrões que você repete, lido nas fotos.",
+        title: "01. Linguagem Corporal",
+        desc: "Os cinco traços de caráter a partir das suas características corporais e fotografias. Reconheça padrões, mecanismos de proteção e potenciais.",
       },
       {
-        title: "Temperamento",
-        desc: "Por que você reage e se relaciona do jeito que reage, e o que muda quando você entende isso.",
+        title: "02. Temperamento",
+        desc: "Descubra as características predominantes do seu temperamento e compreenda melhor suas reações, emoções, decisões e comportamentos.",
       },
       {
-        title: "Linguagens do Amor",
-        desc: "Como você pede e demonstra afeto, e por que certas relações não fluem do seu jeito.",
+        title: "03. Linguagens do Amor",
+        desc: "Identifique suas principais linguagens do amor e compreenda como você expressa afeto, reconhece carinho e constrói relacionamentos.",
       },
       {
-        title: "Roda da Vida",
-        desc: "Um raio-x de 12 áreas: onde está sua energia, onde você se sabota e o que pede atenção agora.",
+        title: "04. Roda da Vida",
+        desc: "Explore 12 áreas importantes da sua vida. Identifique onde existe satisfação, onde sua energia está concentrada e o que merece atenção.",
       },
       {
-        title: "Numerologia",
-        desc: "Missão, talentos e ciclos da sua data de nascimento, em reflexão e em um passo concreto.",
+        title: "05. Mapa Numerológico",
+        desc: "Leitura com base no nome e na data de nascimento: Caminho de Vida, Expressão, Alma, Personalidade e Triângulo Numerológico.",
       },
       {
-        title: "Trilha gamificada",
-        desc: "A jornada guiada com pontos e missões diárias. Constância sem peso, um passo de cada vez.",
+        title: "06. Seus Ciclos Numerológicos",
+        desc: "Explore ciclos pessoais, Ano Pessoal e movimentos mensais. Anos anteriores, atual e próximo, para compreender sua trajetória.",
       },
       {
-        title: "Aprofundamentos",
-        desc: "Conteúdos da trilha para ir mais fundo em cada etapa, no momento certo (em breve).",
+        title: "07. Numerologia Diária",
+        desc: "Acompanhe a leitura numerológica diária e os significados simbólicos da energia de cada dia, com reflexões para a sua vida.",
       },
       {
-        title: "Comunidade",
-        desc: "Pessoas na mesma fase. Você não caminha sozinho.",
+        title: "08. Sua Experiência Diária",
+        desc: "Um espaço para desacelerar, reconhecer emoções, refletir sobre o momento presente e registrar pensamentos.",
       },
       {
-        title: "Dossiê de Vida",
-        desc: "O cruzamento das análises: como você funciona, onde trava e o que priorizar.",
+        title: "09. Dossiê de Vida",
+        desc: "A conexão de tudo o que você descobriu. Visão ampla de quem você é, padrões, potencialidades e pontos de atenção.",
       },
     ],
     depoimentos: [
@@ -187,41 +192,50 @@ export const CASCA = {
     ],
     faq: [
       {
-        q: "O que exatamente estou comprando?",
-        a: `A ${MARCA.jornada}: uma trilha com 9 análises integradas no ${MARCA.portal}. Não são ferramentas soltas. É um percurso guiado da sombra à luz.`,
+        q: "O que é o Portal Iluminando?",
+        a: "É uma plataforma de autoconhecimento que reúne ferramentas, análises e experiências para ajudar você a compreender sua personalidade, seus padrões e seu momento de vida.",
       },
       {
-        q: "Preciso entender de numerologia ou de leitura corporal?",
-        a: "Não. A jornada guia cada passo com perguntas claras e a leitura pronta. Você responde com honestidade. O resto a gente organiza para você.",
+        q: "O que é a Jornada Da Sombra à Luz?",
+        a: "É o percurso guiado dentro do Portal. Você passa por diferentes análises, conecta suas descobertas e desenvolve uma compreensão mais ampla sobre si mesmo.",
       },
       {
-        q: "Como recebo o acesso depois de comprar?",
-        a: "Assim que o pagamento for confirmado (PIX ou cartão), você entra na plataforma com o e-mail e a senha que cadastrou.",
+        q: "Preciso conhecer numerologia ou linguagem corporal?",
+        a: "Não. Todas as experiências são apresentadas de maneira guiada. Você responde às perguntas, fornece as informações solicitadas e recebe suas leituras organizadas.",
       },
       {
-        q: "Posso parcelar?",
-        a: "Sim. No cartão você pode pagar em até {parcelas}x de {parcela} ou {avista} à vista.",
+        q: "O que é o Dossiê de Vida?",
+        a: "É a síntese integrada das suas análises. Ele conecta diferentes dimensões do seu perfil para oferecer uma visão mais completa das suas características, padrões e possibilidades.",
       },
       {
-        q: "Quanto tempo até eu ver algo concreto?",
-        a: "A primeira leitura leva cerca de 15 minutos. A maioria das pessoas sente clareza já na primeira sessão, especialmente na Roda da Vida e no Temperamento.",
+        q: "Preciso fazer tudo de uma vez?",
+        a: "Não. Você pode percorrer a jornada no seu próprio ritmo e retornar às experiências durante seu período de acesso.",
       },
       {
-        q: "Meus dados e fotos ficam privados?",
-        a: "Sim. Avaliações, fotos e resultados são só seus. Não vendemos nem compartilhamos com terceiros.",
+        q: "Por quanto tempo terei acesso?",
+        a: "A edição Membros Fundadores oferece {meses} meses de acesso ao Portal Iluminando, com pagamento único.",
       },
       {
-        q: "E se não fizer sentido para mim?",
-        a: "Você tem {garantia} dias de garantia. Não gostou? Devolvemos 100% do valor, sem perguntas.",
+        q: "Como recebo meu acesso?",
+        a: "Após a confirmação do pagamento, você entra na plataforma com o e-mail e a senha do cadastro.",
+      },
+      {
+        q: "E se eu não gostar?",
+        a: "Você tem {garantia} dias de garantia. Se não quiser continuar, poderá solicitar o reembolso integral dentro desse período.",
+      },
+      {
+        q: "Meus dados e resultados são privados?",
+        a: "Suas informações e resultados são pessoais. O Portal preserva a privacidade dos seus registros e fotografias, conforme a política de proteção de dados.",
       },
     ],
     inclusos: [
-      `Acesso completo à ${MARCA.jornada}`,
-      "9 análises integradas na trilha guiada",
-      "Leituras suas, nada genérico",
-      "48+ leituras por pontuação",
-      "Histórico para acompanhar sua evolução",
-      `Portal ${MARCA.portal} com missões e suporte inclusos`,
+      `Acesso à ${MARCA.jornada}`,
+      "Análises de personalidade, comportamento e autoconhecimento",
+      "Mapa e ciclos numerológicos",
+      "Dossiê de Vida integrado",
+      "Reflexões e experiências diárias",
+      "Meu Espaço para registros pessoais",
+      "Missões e comunidade do Portal",
     ],
   },
   email: {
@@ -232,6 +246,7 @@ export const CASCA = {
     ctaPagamento: "Continuar pagamento",
     rodapeJaPagou: "Já pagou? Aguarde alguns instantes e acesse com seu e-mail e senha.",
     pagamentoConfirmado: "Seu pagamento foi confirmado. Seu acesso ao {portal} está liberado.",
+    acessoAteLinha: "Acesso por 6 meses, até {data}. Pagamento único, sem renovação automática.",
     comoEntrar: "Para entrar, use o e-mail {email} e a senha que você definiu no cadastro.",
     comecePeloTraco: "Depois do login, comece pela primeira etapa da {jornada}: Traço de Caráter.",
     preheaderAcesso: "Acesso liberado à {jornada}. Faça login para começar.",

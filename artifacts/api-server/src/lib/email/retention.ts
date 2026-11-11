@@ -8,7 +8,7 @@ export async function sendPaymentPendingReminderEmail(
   log?: Logger,
 ): Promise<void> {
   const { publicUrl } = getEmailConfig();
-  const checkoutUrl = `${publicUrl}/checkout?token=${encodeURIComponent(params.checkoutToken)}`;
+  const checkoutUrl = `${publicUrl}/?checkout=${encodeURIComponent(params.checkoutToken)}#checkout`;
   const loginUrl = `${publicUrl}/login`;
   const { subject, html } = paymentPendingReminderEmail({
     nome: params.nome,
