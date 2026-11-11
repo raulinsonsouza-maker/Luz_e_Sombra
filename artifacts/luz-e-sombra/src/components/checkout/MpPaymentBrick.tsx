@@ -98,7 +98,7 @@ export default function MpPaymentBrick({
               debitCard: "all",
               ticket: "all",
               bankTransfer: "all",
-              maxInstallments: 12,
+              maxInstallments: 6,
             },
             visual: {
               style: {

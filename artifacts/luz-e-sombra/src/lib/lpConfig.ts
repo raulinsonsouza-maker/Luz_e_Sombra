@@ -25,11 +25,11 @@ export const LP_PRODUCT_NAME = LP_JOURNEY_NAME;
 export const LP_PRODUCT_TAGLINE = LP_JOURNEY_TAGLINE;
 export const LP_CHECKOUT_SUBTITLE = `Acesso completo no ${LP_PORTAL_NAME}`;
 export const LP_PRICE = 111.11;
-export const LP_PRICE_INSTALLMENTS = 1;
-export const LP_PRICE_INSTALLMENT_VALUE = 111.11;
+export const LP_PRICE_INSTALLMENTS = 6;
+export const LP_PRICE_INSTALLMENT_VALUE = 18.52;
 export const LP_PRICE_ORIGINAL = 111.11;
 export const LP_PRICE_PERIOD = "";
-export const LP_BILLING_LABEL = "Pagamento único";
+export const LP_BILLING_LABEL = "À vista ou até 6x no cartão";
 export const LP_GUARANTEE_DAYS = 7;
 export const LP_ACCESS_MONTHS = 6;
 export const LP_FOUNDERS_CAP = 111;
@@ -121,7 +121,7 @@ export const LP_FAQ = CATALOGO.lp.faq.map((item) => ({
 export const LP_INCLUDED_ITEMS = CATALOGO.lp.inclusos;
 
 export function formatLpPriceLabel(): string {
-  return `${formatLpPrice(LP_PRICE)} · pagamento único · ${LP_ACCESS_MONTHS} meses`;
+  return `${formatLpPrice(LP_PRICE)} ou ${LP_PRICE_INSTALLMENTS}x de ${formatLpPrice(LP_PRICE_INSTALLMENT_VALUE)} · ${LP_ACCESS_MONTHS} meses`;
 }
 
 export function formatLpPrice(value: number): string {

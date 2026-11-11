@@ -130,7 +130,7 @@ export default function LpCheckoutSection({ checkoutToken: tokenProp, onTokenCha
             {edicaoAtiva ? "Quero ser um membro fundador" : "Começar minha jornada"}
           </h2>
           <p className="text-sm mt-3 leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
-            {formatLpPrice(LP_PRICE)} · {LP_BILLING_LABEL} · {LP_ACCESS_MONTHS} meses de acesso · Garantia de {LP_GUARANTEE_DAYS} dias
+            {formatLpPrice(LP_PRICE)} ou até 6x no cartão · {LP_ACCESS_MONTHS} meses de acesso · Garantia de {LP_GUARANTEE_DAYS} dias
           </p>
           {edicaoAtiva && (
             <p className="text-xs mt-2" style={{ color: "rgba(200,165,107,0.7)" }}>

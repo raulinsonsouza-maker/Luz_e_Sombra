@@ -88,6 +88,7 @@ router.post("/process", async (req: Request, res: Response) => {
     const notificationUrl = `${publicUrl}/api/webhooks/mercadopago`;
 
     const paymentBody: Record<string, unknown> = {
+      ...formData,
       transaction_amount: PRECO_OFERTA_NUM,
       description: "Portal Iluminando · Jornada Da Sombra à Luz",
       external_reference: checkoutToken,
@@ -96,11 +97,6 @@ router.post("/process", async (req: Request, res: Response) => {
         email: compra.email,
         ...(formData.payer && typeof formData.payer === "object" ? formData.payer : {}),
       },
-      ...formData,
-      transaction_amount: PRECO_OFERTA_NUM,
-      external_reference: checkoutToken,
-      description: "Portal Iluminando · Jornada Da Sombra à Luz",
-      notification_url: notificationUrl,
     };
 
     // Garante e-mail do cadastro

@@ -16,7 +16,7 @@ export const CASCA = {
         "Compreenda padrões, ciclos e o passo que cabe agora",
         "Você não precisa ter todas as respostas. Precisa começar a se conhecer",
       ],
-      priceTeaser: "Acesso por 6 meses · Pagamento único · Garantia de 7 dias",
+      priceTeaser: "Acesso por 6 meses · À vista ou até 6x no cartão · Garantia de 7 dias",
     },
     vslCopy: {
       navCta: "Começar jornada",
@@ -50,7 +50,7 @@ export const CASCA = {
           {
             step: "02",
             title: "Ative sua jornada",
-            desc: "R$ 111,11 · pagamento único · 6 meses de acesso. Pagamento seguro e entrada no Portal Iluminando depois da confirmação.",
+            desc: "R$ 111,11 à vista ou até 6x no cartão · 6 meses de acesso. Pagamento seguro e entrada no Portal Iluminando depois da confirmação.",
           },
           {
             step: "03",
@@ -67,8 +67,8 @@ export const CASCA = {
         eyebrow: "Para quem assistiu até aqui",
         title: MARCA.jornada,
         titleAccent: "no Portal Iluminando",
-        subtitle: "Pagamento único. 7 dias de garantia total.",
-        footnote: "PIX ou cartão · Acesso após confirmação · Garantia de 7 dias",
+        subtitle: "À vista ou até 6x no cartão. 7 dias de garantia total.",
+        footnote: "PIX ou cartão em até 6x · Acesso após confirmação · Garantia de 7 dias",
       },
       finalCta: {
         title: "Da próxima vez que você se perguntar",
@@ -122,8 +122,8 @@ export const CASCA = {
         eyebrow: "Edição especial de lançamento",
         title: "111 Membros Fundadores",
         titleAccent: "",
-        subtitle: "R$ 111,11 · Pagamento único · 6 meses de acesso · Garantia de 7 dias.",
-        footnote: "PIX ou cartão · Sem renovação automática · Venda continua após os 111",
+        subtitle: "R$ 111,11 à vista ou até 6x no cartão · 6 meses de acesso · Garantia de 7 dias.",
+        footnote: "PIX ou cartão em até 6x · Sem renovação automática · Venda continua após os 111",
       },
       finalCta: {
         title: "O primeiro passo não é mudar quem você é.",
@@ -213,7 +213,7 @@ export const CASCA = {
       },
       {
         q: "Por quanto tempo terei acesso?",
-        a: "A edição Membros Fundadores oferece {meses} meses de acesso ao Portal Iluminando, com pagamento único.",
+        a: "A edição Membros Fundadores oferece {meses} meses de acesso ao Portal Iluminando. Você pode pagar à vista (PIX ou cartão) ou parcelar em até 6x no cartão.",
       },
       {
         q: "Como recebo meu acesso?",
@@ -246,7 +246,7 @@ export const CASCA = {
     ctaPagamento: "Continuar pagamento",
     rodapeJaPagou: "Já pagou? Aguarde alguns instantes e acesse com seu e-mail e senha.",
     pagamentoConfirmado: "Seu pagamento foi confirmado. Seu acesso ao {portal} está liberado.",
-    acessoAteLinha: "Acesso por 6 meses, até {data}. Pagamento único, sem renovação automática.",
+    acessoAteLinha: "Acesso por 6 meses, até {data}. Sem renovação automática.",
     comoEntrar: "Para entrar, use o e-mail {email} e a senha que você definiu no cadastro.",
     comecePeloTraco: "Depois do login, comece pela primeira etapa da {jornada}: Traço de Caráter.",
     preheaderAcesso: "Acesso liberado à {jornada}. Faça login para começar.",
