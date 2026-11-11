@@ -111,10 +111,13 @@ export default function LpCheckoutSection({ checkoutToken: tokenProp, onTokenCha
     setToken(checkoutToken);
     onTokenChange?.(checkoutToken);
     try {
+      sessionStorage.setItem("pending_checkout_token", checkoutToken);
+      // Não persiste o token na URL (Referer/histórico) — só #checkout.
       const url = new URL(window.location.href);
-      url.searchParams.set("checkout", checkoutToken);
+      url.searchParams.delete("checkout");
+      url.searchParams.delete("token");
       url.hash = "checkout";
-      window.history.replaceState({}, "", url.toString());
+      window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
     } catch {
       /* ignore */
     }

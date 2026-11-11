@@ -19,19 +19,27 @@ import {
 } from "../lib/passwordReset";
 import { sendPasswordResetEmail, sendPasswordChangedEmail } from "../lib/email";
 import { accessFieldsForClient, ensureAccessValid } from "../lib/acesso/ensureAccess";
+import {
+  constantLoginDelay,
+  loginAbuseGuard,
+  rateLimit,
+} from "../lib/security/rateLimit";
+
+const loginGuard = loginAbuseGuard();
 
 async function resolveCheckoutToken(usuarioId: number): Promise<string | null> {
   const [mp] = await db
     .select({ checkoutToken: comprasMpTable.checkoutToken })
     .from(comprasMpTable)
-    .where(eq(comprasMpTable.usuarioId, usuarioId))
+    .where(and(eq(comprasMpTable.usuarioId, usuarioId), eq(comprasMpTable.status, "pending")))
     .orderBy(desc(comprasMpTable.criadoEm))
     .limit(1);
   if (mp?.checkoutToken) return mp.checkoutToken;
   const [cakto] = await db
     .select({ checkoutToken: comprasCaktoTable.checkoutToken })
     .from(comprasCaktoTable)
-    .where(eq(comprasCaktoTable.usuarioId, usuarioId))
+    .where(and(eq(comprasCaktoTable.usuarioId, usuarioId), eq(comprasCaktoTable.status, "pending")))
+    .orderBy(desc(comprasCaktoTable.criadoEm))
     .limit(1);
   return cakto?.checkoutToken ?? null;
 }
@@ -66,7 +74,11 @@ export function verifyToken(token: string): JwtPayload {
 }
 
 // POST /api/auth/login
-router.post("/login", async (req: Request, res: Response) => {
+router.post(
+  "/login",
+  rateLimit({ name: "auth-login-ip", windowMs: 15 * 60 * 1000, max: 60 }),
+  loginGuard.middleware,
+  async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -74,6 +86,8 @@ router.post("/login", async (req: Request, res: Response) => {
     }
 
     const usernameNorm = String(username).trim().toLowerCase();
+    // Compat: body.email também conta para a chave de abuso
+    if (!req.body.email) req.body.email = usernameNorm;
     const isEmail = usernameNorm.includes("@");
     const [usuario] = await db
       .select()
@@ -86,13 +100,18 @@ router.post("/login", async (req: Request, res: Response) => {
       .limit(1);
 
     if (!usuario) {
+      loginGuard.recordFailure(req);
+      await constantLoginDelay();
       return res.status(401).json({ error: "Usuário ou senha inválidos" });
     }
 
     const senhaValida = await bcrypt.compare(String(password), usuario.senha);
     if (!senhaValida) {
+      loginGuard.recordFailure(req);
+      await constantLoginDelay();
       return res.status(401).json({ error: "Usuário ou senha inválidos" });
     }
+    loginGuard.recordSuccess(req);
 
     if (!usuario.isAdmin) {
       if (usuario.statusAcesso === "pending" || (!usuario.ativo && usuario.statusAcesso === "pending")) {

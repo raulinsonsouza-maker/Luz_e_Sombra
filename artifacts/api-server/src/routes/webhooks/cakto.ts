@@ -11,10 +11,14 @@ import {
   syncKommoOnPaymentPaid,
   syncKommoOnAccessRevoked,
 } from "../../lib/kommo";
+import { computeAccessWindow } from "../../lib/acesso/periodo";
+import { verifyCaktoWebhookSecret } from "../../lib/security/caktoWebhookAuth";
 
 const router = Router();
 
-const WEBHOOK_SECRET = process.env.CAKTO_WEBHOOK_SECRET ?? "";
+const WEBHOOK_SECRET = (process.env.CAKTO_WEBHOOK_SECRET ?? "").trim();
+/** Opt-out explícito: funil só-MP pode desligar ativação Cakto mesmo com secret. */
+const CAKTO_ACTIVATION_ENABLED = process.env.CAKTO_ACTIVATION_ENABLED !== "false";
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === "object" && !Array.isArray(value)
@@ -90,13 +94,11 @@ function extractPaymentMethod(payload: Record<string, unknown>): string | null {
   return null;
 }
 
-function verifyWebhookSecret(req: Request, payload: Record<string, unknown>): boolean {
-  if (!WEBHOOK_SECRET) return true;
+function verifyWebhookSecret(req: Request): boolean {
   const headerSecret =
     (req.headers["x-cakto-secret"] as string | undefined) ??
     (req.headers["x-webhook-secret"] as string | undefined);
-  const bodySecret = pickString(payload, "secret");
-  return headerSecret === WEBHOOK_SECRET || bodySecret === WEBHOOK_SECRET;
+  return verifyCaktoWebhookSecret(headerSecret, WEBHOOK_SECRET);
 }
 
 async function activatePurchase(params: {
@@ -139,23 +141,34 @@ async function activatePurchase(params: {
 
   if (!usuarioId) return null;
 
+  // Exige checkoutToken conhecido — não ativar só por e-mail forjado.
+  if (!params.checkoutToken || !compraId) return null;
+
+  const pagoEm = new Date();
+  const window = computeAccessWindow(pagoEm);
+
   await db
     .update(usuariosTable)
-    .set({ ativo: true, statusAcesso: "active", atualizadoEm: new Date() })
+    .set({
+      ativo: true,
+      statusAcesso: "active",
+      acessoInicio: window.acessoInicio,
+      acessoAte: window.acessoAte,
+      garantiaAte: window.garantiaAte,
+      atualizadoEm: new Date(),
+    })
     .where(eq(usuariosTable.id, usuarioId));
 
-  if (compraId) {
-    await db
-      .update(comprasCaktoTable)
-      .set({
-        status: "paid",
-        caktoOrderId: params.orderId ?? undefined,
-        metodoPagamento: params.paymentMethod ?? undefined,
-        pagoEm: new Date(),
-        atualizadoEm: new Date(),
-      })
-      .where(eq(comprasCaktoTable.id, compraId));
-  }
+  await db
+    .update(comprasCaktoTable)
+    .set({
+      status: "paid",
+      caktoOrderId: params.orderId ?? undefined,
+      metodoPagamento: params.paymentMethod ?? undefined,
+      pagoEm,
+      atualizadoEm: new Date(),
+    })
+    .where(eq(comprasCaktoTable.id, compraId));
 
   return usuarioId;
 }
@@ -210,11 +223,20 @@ async function revokePurchase(params: {
 // POST /api/webhooks/cakto
 router.post("/cakto", async (req: Request, res: Response) => {
   try {
-    const payload = asRecord(req.body) ?? {};
-    if (!verifyWebhookSecret(req, payload)) {
+    if (!WEBHOOK_SECRET) {
+      req.log?.warn("Webhook Cakto rejeitado: CAKTO_WEBHOOK_SECRET ausente");
       return res.status(401).json({ error: "Webhook não autorizado" });
     }
+    if (!verifyWebhookSecret(req)) {
+      return res.status(401).json({ error: "Webhook não autorizado" });
+    }
+    if (!CAKTO_ACTIVATION_ENABLED) {
+      // Aceita o evento autenticado, mas não libera acesso (funil = Mercado Pago).
+      req.log?.info("Webhook Cakto autenticado — ativação desabilitada (use MP)");
+      return res.json({ ok: true, activationDisabled: true });
+    }
 
+    const payload = asRecord(req.body) ?? {};
     const eventId = extractEventId(payload);
     const eventType = extractEventType(payload);
 
@@ -246,7 +268,16 @@ router.post("/cakto", async (req: Request, res: Response) => {
       normalizedType.includes("approved") ||
       normalizedType === "paid"
     ) {
-      const usuarioId = await activatePurchase({ checkoutToken: ref, email, orderId, paymentMethod });
+      if (!ref) {
+        req.log?.warn("Webhook Cakto approved sem checkoutToken — ignorado");
+        return res.json({ ok: true, skipped: "missing_ref" });
+      }
+      const usuarioId = await activatePurchase({
+        checkoutToken: ref,
+        email,
+        orderId,
+        paymentMethod,
+      });
       if (usuarioId) {
         const [usuario] = await db
           .select({
@@ -269,7 +300,7 @@ router.post("/cakto", async (req: Request, res: Response) => {
               nome: usuario.nome,
               email: usuario.email,
               telefone: usuario.telefone,
-              checkoutToken: ref ?? undefined,
+              checkoutToken: ref,
             },
             req.log,
           );

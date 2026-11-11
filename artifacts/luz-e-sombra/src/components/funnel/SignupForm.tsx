@@ -101,7 +101,6 @@ export default function SignupForm({ variant, onRegistered }: Props) {
   const [enviando, setEnviando] = useState(false);
   const [emailStatus, setEmailStatus] = useState<EmailStatus>("idle");
   const [emailErro, setEmailErro] = useState<string | null>(null);
-  const [pendingCheckoutToken, setPendingCheckoutToken] = useState<string | null>(null);
   const [telefoneErro, setTelefoneErro] = useState<string | null>(null);
 
   const senhasDiferentes = confirmarSenha.length > 0 && senha !== confirmarSenha;
@@ -110,19 +109,16 @@ export default function SignupForm({ variant, onRegistered }: Props) {
   async function verificarEmail(): Promise<{
     available: boolean;
     message?: string;
-    checkoutToken?: string;
   }> {
     const emailNorm = email.trim().toLowerCase();
     if (!emailNorm || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNorm)) {
       setEmailStatus("idle");
       setEmailErro(null);
-      setPendingCheckoutToken(null);
       return { available: false, message: "Informe um e-mail válido." };
     }
 
     setEmailStatus("checking");
     setEmailErro(null);
-    setPendingCheckoutToken(null);
 
     try {
       const res = await fetch(`/api/funnel/check-email?email=${encodeURIComponent(emailNorm)}`);
@@ -136,16 +132,9 @@ export default function SignupForm({ variant, onRegistered }: Props) {
         return { available: true };
       }
       setEmailStatus("unavailable");
-      const message = data.message || "Este e-mail já está cadastrado.";
+      const message = data.message || "Este e-mail já está cadastrado. Faça login.";
       setEmailErro(message);
-      if (data.checkoutToken) {
-        setPendingCheckoutToken(data.checkoutToken);
-      }
-      return {
-        available: false,
-        message,
-        checkoutToken: data.checkoutToken,
-      };
+      return { available: false, message };
     } catch {
       setEmailStatus("idle");
       return { available: false, message: "Erro ao verificar e-mail. Tente novamente." };
@@ -168,11 +157,6 @@ export default function SignupForm({ variant, onRegistered }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (pendingCheckoutToken) {
-      onRegistered(pendingCheckoutToken);
-      return;
-    }
-
     if (nome.trim().length < 2) {
       toast.error("Informe seu nome completo.");
       return;
@@ -184,11 +168,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
         : await verificarEmail();
 
     if (!emailCheck.available) {
-      if (emailCheck.checkoutToken) {
-        onRegistered(emailCheck.checkoutToken);
-        return;
-      }
-      toast.error(emailCheck.message || "Este e-mail já está cadastrado.");
+      toast.error(emailCheck.message || "Este e-mail já está cadastrado. Faça login.");
       return;
     }
 

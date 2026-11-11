@@ -43,6 +43,11 @@ export const comprasMpTable = pgTable("compras_mp", {
   kommoContactId: integer("kommo_contact_id"),
   kommoLastSyncAt: timestamp("kommo_last_sync_at"),
   kommoLastEvent: text("kommo_last_event"),
+  /** Lembrete e-mail imediato (PIX pending no /process). */
+  emailPendingReminderSentAt: timestamp("email_pending_reminder_sent_at"),
+  /** Recuperação pós-cadastro sem pagamento. */
+  emailReminder2hSentAt: timestamp("email_reminder_2h_sent_at"),
+  emailReminder24hSentAt: timestamp("email_reminder_24h_sent_at"),
 }, (table) => ({
   checkoutTokenUnique: unique("uq_compras_mp_checkout_token").on(table.checkoutToken),
   usuarioIdx: index("idx_compras_mp_usuario_id").on(table.usuarioId),

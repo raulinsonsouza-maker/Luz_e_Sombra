@@ -44,15 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setStatus("unauthenticated");
       }
     } catch {
-      const stored = getStoredUser();
-      if (stored) {
-        setUser(stored);
-        setStatus("authenticated");
-      } else {
-        clearAuth();
-        setUser(null);
-        setStatus("unauthenticated");
-      }
+      // Sem rede: não confiar em localStorage como sessão válida (evita "logado fantasma").
+      setUser(null);
+      setStatus("unauthenticated");
     }
   }, []);
 

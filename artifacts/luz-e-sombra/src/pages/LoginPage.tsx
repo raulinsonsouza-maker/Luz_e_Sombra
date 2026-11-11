@@ -16,21 +16,6 @@ export default function LoginPage() {
   const [carregando, setCarregando] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  async function resolverCheckoutToken(emailOuUser: string): Promise<string | null> {
-    const trimmed = emailOuUser.trim().toLowerCase();
-    if (!trimmed.includes("@")) return null;
-    try {
-      const res = await fetch(
-        `/api/funnel/checkout-token-by-email?email=${encodeURIComponent(trimmed)}`,
-      );
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data.checkoutToken ?? null;
-    } catch {
-      return null;
-    }
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
@@ -44,10 +29,7 @@ export default function LoginPage() {
     }
     if (result.code === "pagamento_pendente") {
       setPagamentoPendente(true);
-      let token = result.checkoutToken ?? null;
-      if (!token) {
-        token = await resolverCheckoutToken(username);
-      }
+      const token = result.checkoutToken ?? null;
       setCheckoutToken(token);
       setErro("Seu pagamento ainda não foi confirmado. Continue o checkout para liberar o acesso.");
     } else if (result.code === "acesso_revogado") {

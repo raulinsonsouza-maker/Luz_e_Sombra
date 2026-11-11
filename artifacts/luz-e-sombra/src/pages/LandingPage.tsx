@@ -56,9 +56,18 @@ export default function LandingPage() {
     try {
       const params = new URLSearchParams(window.location.search);
       const token = params.get("checkout") || params.get("token");
-      if (token) setCheckoutToken(token);
-      const pending = sessionStorage.getItem("pending_checkout_token");
-      if (!token && pending) setCheckoutToken(pending);
+      if (token) {
+        setCheckoutToken(token);
+        sessionStorage.setItem("pending_checkout_token", token);
+        // Consome o deep link e remove o token da barra de endereço.
+        params.delete("checkout");
+        params.delete("token");
+        const qs = params.toString();
+        window.history.replaceState({}, "", `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash || "#checkout"}`);
+      } else {
+        const pending = sessionStorage.getItem("pending_checkout_token");
+        if (pending) setCheckoutToken(pending);
+      }
     } catch {
       /* ignore */
     }

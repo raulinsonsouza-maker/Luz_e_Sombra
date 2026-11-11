@@ -8,13 +8,14 @@ import {
   comprasMpTable,
   gamificacaoTable,
 } from "@workspace/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { parseBody, funnelRegisterSchema } from "../lib/schemas";
 import { signToken } from "./auth";
 import { sendCheckoutWelcomeEmail } from "../lib/email";
 import { syncKommoOnRegister } from "../lib/kommo";
 import { nextPurchaseVariant } from "../lib/acesso/activateMpPurchase";
 import { PRECO_OFERTA, isAccessExpired } from "../lib/acesso/periodo";
+import { rateLimit } from "../lib/security/rateLimit";
 
 const router = Router();
 
@@ -45,68 +46,28 @@ async function uniqueUsername(base: string): Promise<string> {
   return `${base.slice(0, 16)}${randomUUID().slice(0, 8)}`;
 }
 
-async function findCheckoutToken(usuarioId: number): Promise<string | null> {
-  const [mp] = await db
-    .select({ checkoutToken: comprasMpTable.checkoutToken, status: comprasMpTable.status })
-    .from(comprasMpTable)
-    .where(eq(comprasMpTable.usuarioId, usuarioId))
-    .orderBy(desc(comprasMpTable.criadoEm))
-    .limit(1);
-  if (mp) return mp.checkoutToken;
-  const [cakto] = await db
-    .select({ checkoutToken: comprasCaktoTable.checkoutToken })
-    .from(comprasCaktoTable)
-    .where(eq(comprasCaktoTable.usuarioId, usuarioId))
-    .limit(1);
-  return cakto?.checkoutToken ?? null;
-}
-
-// GET /api/funnel/checkout-token-by-email?email=...
-router.get("/checkout-token-by-email", async (req: Request, res: Response) => {
-  try {
-    const email = String(req.query.email ?? "")
-      .trim()
-      .toLowerCase();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ error: "E-mail inválido" });
-    }
-
-    const [usuario] = await db
-      .select({
-        id: usuariosTable.id,
-        statusAcesso: usuariosTable.statusAcesso,
-        ativo: usuariosTable.ativo,
-        acessoAte: usuariosTable.acessoAte,
-      })
-      .from(usuariosTable)
-      .where(eq(usuariosTable.email, email))
-      .limit(1);
-
-    if (!usuario) {
-      return res.status(404).json({ error: "E-mail não encontrado" });
-    }
-
-    if (
-      usuario.ativo &&
-      usuario.statusAcesso === "active" &&
-      !isAccessExpired(usuario.acessoAte)
-    ) {
-      return res.json({ status: "active", checkoutToken: null });
-    }
-
-    const checkoutToken = await findCheckoutToken(usuario.id);
-    return res.json({
-      status: usuario.statusAcesso,
-      checkoutToken,
+// GET /api/funnel/checkout-token-by-email — desativado (vazava token sem senha).
+router.get(
+  "/checkout-token-by-email",
+  rateLimit({ name: "funnel-token-by-email", windowMs: 15 * 60 * 1000, max: 20 }),
+  async (_req: Request, res: Response) => {
+    return res.status(401).json({
+      error: "Faça login para continuar o pagamento.",
+      code: "auth_required",
     });
-  } catch (error) {
-    req.log.error({ error }, "Erro ao buscar checkout token por e-mail");
-    return res.status(500).json({ error: "Erro ao buscar checkout" });
-  }
-});
+  },
+);
 
 // GET /api/funnel/check-email?email=...
-router.get("/check-email", async (req: Request, res: Response) => {
+router.get(
+  "/check-email",
+  rateLimit({
+    name: "funnel-check-email",
+    windowMs: 15 * 60 * 1000,
+    max: 40,
+    keyFrom: (req) => String(req.query.email ?? ""),
+  }),
+  async (req: Request, res: Response) => {
   try {
     const email = String(req.query.email ?? "")
       .trim()
@@ -142,13 +103,11 @@ router.get("/check-email", async (req: Request, res: Response) => {
       });
     }
 
-    const checkoutToken = await findCheckoutToken(existing.id);
-    if (checkoutToken) {
+    if (existing.statusAcesso === "pending") {
       return res.json({
         available: false,
         status: "pending",
-        checkoutToken,
-        message: "Este e-mail já está cadastrado. Continue o pagamento ou faça login.",
+        message: "Este e-mail já está cadastrado. Faça login para continuar o pagamento.",
       });
     }
 
@@ -164,7 +123,15 @@ router.get("/check-email", async (req: Request, res: Response) => {
 });
 
 // POST /api/funnel/register
-router.post("/register", async (req: Request, res: Response) => {
+router.post(
+  "/register",
+  rateLimit({
+    name: "funnel-register",
+    windowMs: 60 * 60 * 1000,
+    max: 10,
+    keyFrom: (req) => String(req.body?.email ?? ""),
+  }),
+  async (req: Request, res: Response) => {
   try {
     const parsed = parseBody(funnelRegisterSchema, req.body);
     if (!parsed.success) {
@@ -193,16 +160,11 @@ router.post("/register", async (req: Request, res: Response) => {
       ) {
         return res.status(409).json({ error: "Este e-mail já possui acesso ativo. Faça login." });
       }
-      const pendingToken = await findCheckoutToken(emailExisting.id);
-      if (pendingToken) {
-        return res.json({
-          checkoutToken: pendingToken,
-          userId: emailExisting.id,
-          existing: true,
-        });
-      }
+      // Não devolve checkoutToken sem autenticação — peça login (402 devolve token).
       return res.status(409).json({
-        error: "E-mail já cadastrado. Tente fazer login ou use outro e-mail.",
+        error: "E-mail já cadastrado. Faça login para continuar.",
+        code: "email_exists",
+        status: emailExisting.statusAcesso,
       });
     }
 
@@ -353,10 +315,15 @@ router.get("/checkout-info", async (req: Request, res: Response) => {
     const row = await loadCheckoutByToken(token);
     if (!row) return res.status(404).json({ error: "Checkout não encontrado" });
 
+    const email = row.email ?? "";
+    const maskedEmail = email.includes("@")
+      ? `${email.slice(0, 2)}***@${email.split("@")[1]}`
+      : null;
+
     return res.json({
       nome: row.nome,
       email: row.email,
-      telefone: row.telefone,
+      emailMasked: maskedEmail,
       variant: row.variant,
       status: row.status,
       provider: row.provider,

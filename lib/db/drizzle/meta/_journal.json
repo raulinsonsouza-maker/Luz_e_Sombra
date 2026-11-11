@@ -92,6 +92,13 @@
       "when": 1763100000000,
       "tag": "0013_mercadopago_acesso",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1763150000000,
+      "tag": "0014_mp_email_reminders",
+      "breakpoints": true
     }
   ]
 }
