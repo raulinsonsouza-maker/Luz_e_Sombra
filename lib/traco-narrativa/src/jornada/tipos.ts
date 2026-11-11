@@ -16,7 +16,15 @@ export type BlocoJornada =
   | { tipo: "lista"; rotulo?: string; itens: string[] }
   | { tipo: "tabela"; rotulo?: string; cabecalhos: string[]; linhas: string[][] }
   | { tipo: "passos"; rotulo?: string; itens: string[] }
-  | { tipo: "destaque"; rotulo?: string; texto: string };
+  | { tipo: "destaque"; rotulo?: string; texto: string }
+  | {
+      tipo: "cena";
+      rotulo?: string;
+      oQue: string;
+      reacao: string;
+      protege: string;
+      consequencia: string;
+    };
 
 export type EtapaJornada = {
   id: EtapaJornadaId;

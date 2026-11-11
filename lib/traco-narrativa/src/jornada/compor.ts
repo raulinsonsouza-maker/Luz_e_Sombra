@@ -1,79 +1,17 @@
 import { limparJargao } from "@workspace/copy-voz";
-import * as T from "../tabelas.js";
-import type { EstruturaTraco, EstruturasPct, ResultadoAnalise } from "../types.js";
-import { INTEGRACAO_TABELA, RECURSOS_TABELA, SOMBRA_TABELA } from "./complementos.js";
+import { combinacaoTrioDe, miniBlocoIndividual } from "../combinacoes-trio.js";
+import { perfilDe } from "../perfis/index.js";
+import type { EstruturaTraco, EstruturasPct } from "../types.js";
 import type { BlocoJornada, EtapaJornada, JornadaTraco } from "./tipos.js";
 
 const AVISO =
-  "Esta leitura é um caminho de autoconhecimento. Ela se apoia principalmente nas suas respostas. O corpo entra como apoio, com cuidado, e não como diagnóstico.";
+  "Esta leitura é um caminho de autoconhecimento. Ela se apoia principalmente nas suas respostas. Os percentuais mostram a distribuição relativa entre os cinco padrões observados, não uma porcentagem da sua personalidade nem um diagnóstico. O corpo, quando entra, é apenas apoio cuidadoso.";
 
-/** Sem vírgulas internas: entram em frases longas e o formatador não pode parti-las. */
-const FOCO_CURTO: Record<EstruturaTraco, string> = {
-  esquizoide: "espaço interior e profundidade",
-  oral: "vínculo e cuidado",
-  psicopata: "direção e presença",
-  masoquista: "permanência e sustentação",
-  rigido: "forma e compromisso",
-};
+const ABERTURA_MAPA =
+  "Você é uma combinação de características, experiências e maneiras de enxergar o mundo. Algumas delas aparecem com mais intensidade, enquanto outras se manifestam de maneira mais discreta. Neste mapa, você vai conhecer os cinco padrões observados em suas respostas e descobrir quais deles aparecem com maior destaque. Mais do que identificar um perfil, nossa proposta é compreender como essas características podem se combinar e influenciar a maneira como você pensa, sente, se relaciona e toma decisões.";
 
-const RISCO_CURTO: Record<EstruturaTraco, string> = {
-  esquizoide: "sumir quando a vida pede presença",
-  oral: "se esvaziar cuidando do outro",
-  psicopata: "controlar para não sentir",
-  masoquista: "carregar além do justo",
-  rigido: "endurecer o afeto sob o nome de qualidade",
-};
-
-/** Como o 2º traço colore o cotidiano (uma frase objetiva por domínio). */
-const COR_SECUNDARIA: Record<EstruturaTraco, { trabalho: string; relacoes: string }> = {
-  esquizoide: {
-    trabalho:
-      "Com o Esquizóide também presente, você precisa de intervalos de silêncio para não perder a qualidade do que entrega.",
-    relacoes:
-      "O Esquizóide colore o vínculo: mesmo querendo perto, você precisa de espaço, e avisar isso evita que o outro leia distância como rejeição.",
-  },
-  oral: {
-    trabalho:
-      "Com o Oral também presente, o clima humano da equipe pesa no seu rendimento: sem vínculo, a entrega seca mais rápido.",
-    relacoes:
-      "O Oral colore o vínculo: há sede de proximidade e o risco de dar além do justo para não perder o calor.",
-  },
-  psicopata: {
-    trabalho:
-      "Com o Psicopata também presente, você empurra decisões e corta nós quando o grupo trava. O cuidado é não transformar urgência em pressão sobre quem está ao lado.",
-    relacoes:
-      "O Psicopata colore o vínculo: há força e direção, e também a tentação de conduzir a intimidade em vez de habitá-la.",
-  },
-  masoquista: {
-    trabalho:
-      "Com o Masoquista também presente, você segura sobrecarga por tempo longo antes de pedir alívio, e isso pode parecer competência até o corpo cobrar.",
-    relacoes:
-      "O Masoquista colore o vínculo: você permanece e aguenta, às vezes além do ponto em que um limite claro seria o verdadeiro cuidado.",
-  },
-  rigido: {
-    trabalho:
-      "Com o Rígido também presente, você cuida com constância e cobra de si um padrão alto, às vezes mais do que o cargo ou a equipe pediram.",
-    relacoes:
-      "O Rígido colore o vínculo: você ama com lealdade organizada e pode demorar a mostrar a parte frágil, mesmo quando o peito já pediu colo.",
-  },
-};
-
-const COR_TERCIARIA: Record<EstruturaTraco, string> = {
-  esquizoide:
-    "Em terceiro, o Esquizóide acrescenta a necessidade de um canto só seu. Sem isso, o excesso de contato esgota a presença.",
-  oral:
-    "Em terceiro, o Oral acrescenta calor e a vontade de ser visto: mesmo quando outro traço conduz, o vínculo continua pedindo lugar.",
-  psicopata:
-    "Em terceiro, o Psicopata acrescenta impulso de corte e avanço quando a situação pede decisão rápida.",
-  masoquista:
-    "Em terceiro, o Masoquista acrescenta a tendência a carregar a sobrecarga emocional por tempo longo antes de pedir alívio.",
-  rigido:
-    "Em terceiro, o Rígido acrescenta capricho e a vontade de manter a forma: útil na entrega, arriscado quando vira couraça no afeto.",
-};
-
-function texto(...partes: Array<string | null | undefined>): string[] {
-  return partes.map((p) => (p ?? "").trim()).filter(Boolean);
-}
+const MENSAGEM_RECURSO =
+  "Você não precisa abandonar sua força para transformar sua dor. Precisa aprender a utilizar sua força sem precisar se proteger o tempo todo.";
 
 function prosa(valor: string | null | undefined): string {
   return limparJargao((valor ?? "").trim());
@@ -89,7 +27,6 @@ function limparBlocos(blocos: Array<BlocoJornada | null | undefined>): BlocoJorn
   return blocos.filter((b): b is BlocoJornada => b != null);
 }
 
-/** Terceiro maior percentual (diferente de principal e secundário). */
 export function estruturaTerciariaDe(
   estruturas: EstruturasPct,
   principal: EstruturaTraco,
@@ -102,57 +39,26 @@ export function estruturaTerciariaDe(
   return terceiro?.[0] ?? secundaria;
 }
 
+function ranking(estruturas: EstruturasPct): Array<[EstruturaTraco, number]> {
+  return (Object.entries(estruturas) as Array<[EstruturaTraco, number]>).sort((a, b) => b[1] - a[1]);
+}
+
 function significadoMapa(
   principal: EstruturaTraco,
   secundaria: EstruturaTraco,
   terciaria: EstruturaTraco,
 ): string {
-  const nomeP = T.NOMES[principal];
-  const nomeS = T.NOMES[secundaria];
-  const nomeT = T.NOMES[terciaria];
+  const p = perfilDe(principal);
+  const s = perfilDe(secundaria);
+  const t = perfilDe(terciaria);
   if (principal === secundaria) {
-    return `Seu resultado aponta com clareza para o traço ${nomeP}: ${T.SINTESE_FOCO[principal]}.`;
+    return `Seu resultado aponta com clareza para o traço ${p.nome}: ${p.identidade.titulo.toLowerCase()}.`;
   }
-  const base = `O traço que mais aparece em você é ${nomeP}: ${T.SINTESE_ADJ_PRINCIPAL[principal]}. Em seguida vem ${nomeS}, ${T.SINTESE_TOQUE_SECUNDARIO[secundaria]}`;
-  if (terciaria === secundaria || terciaria === principal) {
-    return `${base}.`;
+  let texto = `O traço que mais aparece em você é ${p.nome}: ${p.identidade.titulo.toLowerCase()}. Em seguida vem ${s.nome}.`;
+  if (terciaria !== secundaria && terciaria !== principal) {
+    texto += ` Em terceiro aparece ${t.nome}, que colore o conjunto sem ocupar o centro.`;
   }
-  return `${base}. Em terceiro aparece ${nomeT}, que colore o conjunto sem ocupar o centro.`;
-}
-
-function necessidadePorTras(principal: EstruturaTraco): string {
-  if (principal === "esquizoide") {
-    return "Por trás da distância costuma haver um desejo simples e profundo: existir por inteiro sem ser invadido, rejeitado ou obrigado a performar presença. Você não busca frieza. Busca um espaço em que a alma caiba sem ter de se explicar o tempo todo.";
-  }
-  if (principal === "oral") {
-    return "Por trás da busca pelo outro costuma haver o desejo de ser sustentado de forma constante: sentir que alguém fica, que o colo não some, que você não precisa merecer cuidado produzindo cuidado. Nomear isso não diminui a generosidade. Coloca a necessidade no lugar certo.";
-  }
-  if (principal === "psicopata") {
-    return "Por trás do controle costuma haver o desejo de não ser ferido outra vez e de manter dignidade. A força protege uma parte que ainda pergunta: se eu baixar a guarda, quem segura? Integrar não é abandonar o poder. É descobrir que vulnerabilidade escolhida também é poder.";
-  }
-  if (principal === "masoquista") {
-    return "Por trás do aguentar costuma haver o desejo de pertencimento sem crítica: ficar e ser querido sem ter de encolher o próprio desejo. A lealdade é real. O convite é descobrir que você também cabe na conta do cuidado que oferece.";
-  }
-  return "Por trás da excelência costuma haver o desejo de ser escolhido e amado sem precisar provar. A competência abre portas. O que ainda pede espaço é o direito de ser visto também quando não está entregando a versão impecável.";
-}
-
-function quandoOsTresSeEncontram(
-  principal: EstruturaTraco,
-  secundaria: EstruturaTraco,
-  terciaria: EstruturaTraco,
-): string {
-  const nomeP = T.NOMES[principal];
-  const nomeS = T.NOMES[secundaria];
-  const nomeT = T.NOMES[terciaria];
-  // Frases curtas e sem listas de vírgulas: o formatador não deve partir este bloco.
-  return (
-    `Lendo os três juntos: o ${nomeP} conduz em torno de ${FOCO_CURTO[principal]}. ` +
-    `O ${nomeS} dá a cor de ${FOCO_CURTO[secundaria]}. ` +
-    `O ${nomeT} acrescenta um fio de ${FOCO_CURTO[terciaria]}. ` +
-    `O risco do conjunto é ${RISCO_CURTO[principal]}, reforçado pela tendência a ${RISCO_CURTO[secundaria]} ` +
-    `e atravessado pelo impulso de ${RISCO_CURTO[terciaria]}. ` +
-    `Integração aqui não é apagar nenhum dos três. É deixar o ${nomeP} brilhar sem que os outros trabalhem só como defesa.`
-  );
+  return texto;
 }
 
 export function comporJornadaTraco(resultado: {
@@ -161,67 +67,41 @@ export function comporJornadaTraco(resultado: {
   estruturaSecundaria: EstruturaTraco;
   pontosFortes?: string[];
   pontosAtencao?: string[];
-  fraseIdentidade?: string;
-  ferida?: string;
-  dorLivro?: string;
-  recurso?: string;
-  perfilUnico?: string;
-  dinamicaFuncional?: ResultadoAnalise["dinamicaFuncional"];
-  estiloComunicacao?: ResultadoAnalise["estiloComunicacao"];
-  recomendacoesPraticas?: string[];
-  mensagemTerapeutica?: string;
-  perguntaTransformacao?: string;
 }): JornadaTraco {
   const principal = resultado.estruturaPrincipal;
   const secundaria = resultado.estruturaSecundaria;
   const terciaria = estruturaTerciariaDe(resultado.estruturas, principal, secundaria);
-  const nomeP = T.NOMES[principal];
-  const nomeS = T.NOMES[secundaria];
-  const nomeT = T.NOMES[terciaria];
-  // Preferir tabelas atuais para a prosa principal (resultado salvo pode estar desatualizado).
-  const dia = T.DINAMICAS_FUNCIONAIS[principal];
-  const estilo = T.ESTILOS_COMUNICACAO[principal];
-  const ferida = T.FERIDAS[principal];
-  const dorLivro = T.DORES_LIVRO[principal];
-  const recurso = T.RECURSOS[principal];
-  const interp = T.INTERPRETACOES[principal];
-  const comboKey = `${principal}-${secundaria}`;
-  const perfilPar =
-    T.PERFIS_PAR[comboKey] ??
-    T.PERFIS_UNICOS[comboKey] ??
-    `A combinação de ${nomeP} com ${nomeS} cria um perfil próprio. As duas forças se encontram no seu jeito de viver.`;
-  // Sempre a tabela viva: resultados salvos podem carregar exercícios antigos/rasos.
-  const recomendacoes = T.RECOMENDACOES[principal];
-  const mensagem = T.MENSAGENS[principal];
-  const pergunta = T.PERGUNTAS_TRANSFORMACAO[principal];
-  // Mapa: só o traço principal. Evita misturar Excelência/Organização sem contexto.
-  const pontosFortes = T.PONTOS_FORTES[principal];
-  const pontosAtencao = T.PONTOS_ATENCAO[principal];
-  const significado = significadoMapa(principal, secundaria, terciaria);
+  const perfil = perfilDe(principal);
+  const perfilS = perfilDe(secundaria);
+  const perfilT = perfilDe(terciaria);
   const temSecundario = secundaria !== principal;
-  const temTerciarioDistinto = terciaria !== secundaria && terciaria !== principal;
+  const temTerciario = terciaria !== secundaria && terciaria !== principal;
+  const combo = temTerciario ? combinacaoTrioDe(principal, secundaria, terciaria) : null;
+  const significado = significadoMapa(principal, secundaria, terciaria);
+  const ordenado = ranking(resultado.estruturas);
 
-  const trabalho = temSecundario
-    ? `${dia.trabalho} ${COR_SECUNDARIA[secundaria].trabalho}`
-    : dia.trabalho;
-  const relacoes = temSecundario
-    ? `${dia.relacoes} ${COR_SECUNDARIA[secundaria].relacoes}`
-    : dia.relacoes;
-  const decisoes = temTerciarioDistinto
-    ? `${dia.decisoes} ${COR_TERCIARIA[terciaria]}`
-    : dia.decisoes;
+  const listaCinco = ordenado
+    .map(([id, pct], i) => {
+      const nome = perfilDe(id).nome;
+      const papel =
+        i === 0 ? "principal" : i === 1 ? "também presente" : i === 2 ? "em terceiro" : "mais discreto";
+      return `${nome} (${pct}%): ${papel}. ${perfilDe(id).identidade.titulo}.`;
+    })
+    .join(" ");
 
   const etapas: EtapaJornada[] = [
     {
       id: "mapa",
       numero: 1,
       titulo: "Seu mapa de personalidade",
-      subtitulo: "Como os cinco traços se organizam em você",
+      subtitulo: "Como os cinco padrões se organizam em você",
       blocos: limparBlocos([
+        blocoTexto(undefined, ABERTURA_MAPA),
         blocoTexto(
-          "O que os números mostram",
-          "Cada percentual diz quanto aquele jeito aparece no seu perfil. Os cinco somam 100%. O maior conduz; o segundo colore o primeiro; o terceiro acrescenta nuance. Os menores não somem: ficam em segundo plano até a vida pedi-los.",
+          "Como ler os percentuais",
+          "Os percentuais representam a distribuição relativa entre os cinco padrões observados nas suas respostas (e na fusão com as fotos, quando houver). Não representam porcentagens da sua personalidade, precisão psicológica nem diagnóstico clínico.",
         ),
+        blocoTexto("Os cinco padrões no seu mapa", listaCinco),
         blocoTexto("O que isso significa?", significado),
       ]),
     },
@@ -229,12 +109,18 @@ export function comporJornadaTraco(resultado: {
       id: "formacao",
       numero: 2,
       titulo: "Como seu padrão se formou",
-      subtitulo: "A história que este traço pode carregar",
+      subtitulo: "A história emocional que este traço pode carregar",
       blocos: limparBlocos([
-        blocoTexto("Em uma frase", T.FRASES_IDENTIDADE[principal]),
-        blocoTexto("Como isso pode ter começado", interp[0]),
-        blocoTexto("O que essa proteção desenvolveu", interp[1]),
-        blocoTexto("Como isso pode aparecer hoje", interp[2]),
+        blocoTexto("Em uma frase", `${perfil.identidade.apresentacao} ${perfil.identidade.essencia}`),
+        blocoTexto("Fase de desenvolvimento associada", perfil.formacao.faseDesenvolvimento),
+        blocoTexto("Experiências possíveis", perfil.formacao.experienciasPossiveis),
+        {
+          tipo: "lista",
+          rotulo: "O que a criança pode ter interpretado",
+          itens: perfil.formacao.interpretacoesDaCrianca,
+        },
+        blocoTexto("Necessidade emocional", perfil.formacao.necessidadeEmocional),
+        blocoTexto("Estratégia de proteção", perfil.formacao.estrategiaDeProtecao),
       ]),
     },
     {
@@ -243,61 +129,95 @@ export function comporJornadaTraco(resultado: {
       titulo: "A dor que você aprendeu a proteger",
       subtitulo: "O que esse padrão procura evitar",
       blocos: limparBlocos([
-        blocoTexto("A experiência emocional", ferida),
-        blocoTexto("Como isso pode ter ecoado na vida", dorLivro),
-        blocoTexto("A necessidade por trás", necessidadePorTras(principal)),
+        blocoTexto("Experiência emocional", perfil.dorEmocional.experienciaEmocional),
+        blocoTexto("Interpretação interna", perfil.dorEmocional.interpretacaoInterna),
+        blocoTexto("Crença protetora", perfil.dorEmocional.crencaProtetora),
+        blocoTexto("O que esse padrão tenta evitar", perfil.dorEmocional.oQueTentaEvitar),
+        blocoTexto("A necessidade que permanece", perfil.dorEmocional.necessidadePorTrasDoPadrao),
+        blocoTexto("Como pode aparecer na vida adulta", perfil.dorEmocional.manifestacaoNaVidaAdulta),
       ]),
     },
     {
       id: "recurso",
       numero: 4,
-      titulo: "A inteligência da sua proteção",
+      titulo: "A inteligência da proteção: seu recurso",
       subtitulo: "O talento que nasceu do mesmo movimento",
       blocos: limparBlocos([
-        blocoTexto("O recurso que já é seu", recurso),
+        blocoTexto("Talento natural", perfil.inteligenciaProtecao.talentoNatural),
+        blocoTexto("Recurso desenvolvido", perfil.inteligenciaProtecao.recursoDesenvolvido),
+        blocoTexto("Potencial de expansão", perfil.inteligenciaProtecao.potencialDeExpansao),
         {
           tipo: "tabela",
-          rotulo: "Quando equilibra e quando exagera",
-          cabecalhos: ["Recurso", "Em equilíbrio", "Em excesso"],
-          linhas: RECURSOS_TABELA[principal].map(([nome, bom, excesso]) => [nome, bom, excesso]),
+          rotulo: "Quando equilibra, quando exagera e para onde pode expandir",
+          cabecalhos: ["Recurso", "Quando está equilibrado", "Quando está em excesso", "Potencial de expansão"],
+          linhas: perfil.inteligenciaProtecao.recursos.map((r) => [
+            r.nome,
+            r.equilibrio,
+            r.excesso,
+            r.expansao,
+          ]),
         },
-        blocoTexto(
-          "A mensagem central",
-          "Você não precisa abandonar sua força para cuidar da dor. O mesmo movimento que um dia protegeu também gerou talento. O caminho é usar essa força sem precisar se proteger o tempo todo, e sem confundir excesso com virtude.",
-        ),
+        { tipo: "destaque", rotulo: "Mensagem central", texto: MENSAGEM_RECURSO },
       ]),
     },
     {
       id: "vida",
       numero: 5,
       titulo: "Como isso aparece na sua vida",
-      subtitulo: "Trabalho, relações, decisões e o jeito de se comunicar",
+      subtitulo: "Trabalho, amor, família, comunicação, decisões e relação consigo",
       blocos: limparBlocos([
-        blocoTexto("No trabalho", trabalho),
-        blocoTexto("Nas relações", relacoes),
-        blocoTexto("Nas decisões", decisoes),
-        blocoTexto("Sua energia", dia.energia),
-        blocoTexto("Quando a pressão sobe", dia.estresse),
-        blocoTexto("Como você se comunica", `${estilo.descricao} ${estilo.emConflito}`),
+        {
+          tipo: "cena",
+          rotulo: "Trabalho e realização",
+          ...perfil.manifestacoes.trabalho,
+        },
+        {
+          tipo: "cena",
+          rotulo: "Amor e relacionamentos",
+          ...perfil.manifestacoes.amor,
+        },
+        {
+          tipo: "cena",
+          rotulo: "Família e convivência",
+          ...perfil.manifestacoes.familia,
+        },
+        {
+          tipo: "cena",
+          rotulo: "Comunicação",
+          ...perfil.manifestacoes.comunicacao,
+        },
+        {
+          tipo: "cena",
+          rotulo: "Decisões e emoções",
+          ...perfil.manifestacoes.decisoesEmocoes,
+        },
+        {
+          tipo: "cena",
+          rotulo: "Relação consigo",
+          ...perfil.manifestacoes.relacaoConsigo,
+        },
+        temSecundario
+          ? blocoTexto(
+              "Um toque do segundo traço",
+              `Com ${perfilS.nome} também presente, essa dinâmica ganha a cor de ${perfilS.identidade.titulo.toLowerCase()}. ${perfilS.formacao.necessidadeEmocional}`,
+            )
+          : null,
       ]),
     },
     {
       id: "sombra",
       numero: 6,
-      titulo: "Sua sombra: quando a proteção limita",
+      titulo: "Sua sombra: quando a proteção começa a limitar",
       subtitulo: "A intenção boa e o efeito que cansa",
       blocos: limparBlocos([
-        blocoTexto("O que está por trás", dia.sombra),
         {
           tipo: "tabela",
           rotulo: "Você tenta… e pode acabar…",
-          cabecalhos: ["Você tenta", "Pode acabar"],
-          linhas: SOMBRA_TABELA[principal],
+          cabecalhos: ["Você tenta", "Mas pode acabar"],
+          linhas: perfil.sombra.pares,
         },
-        blocoTexto(
-          "Lembrete",
-          "O que um dia foi proteção pode, sem que você perceba, virar prisão. A sombra não é defeito: é o excesso de uma estratégia que já teve função. Olhar para ela com honestidade é o começo de recuperar escolha.",
-        ),
+        blocoTexto("O desafio", perfil.sombra.desafio),
+        { tipo: "destaque", rotulo: "Lembrete", texto: prosa(perfil.sombra.fraseCentral) },
       ]),
     },
     {
@@ -308,18 +228,33 @@ export function comporJornadaTraco(resultado: {
       blocos: limparBlocos([
         blocoTexto(
           "Seu trio",
-          principal === secundaria
-            ? `O traço ${nomeP} aparece com bastante clareza no seu perfil.`
-            : `Principal: ${nomeP}. Também presente: ${nomeS}. Em terceiro: ${nomeT}.`,
+          temSecundario
+            ? `Principal: ${perfil.nome}. Também presente: ${perfilS.nome}.${temTerciario ? ` Em terceiro: ${perfilT.nome}.` : ""}`
+            : `O traço ${perfil.nome} aparece com bastante clareza no seu perfil.`,
         ),
-        blocoTexto("Como as duas forças principais se encontram", perfilPar),
-        temTerciarioDistinto
-          ? blocoTexto("O que o terceiro traço acrescenta", T.TOQUE_TERCIARIO[terciaria])
+        temSecundario ? blocoTexto(`O que ${perfil.nome} acrescenta`, miniBlocoIndividual(principal)) : null,
+        temSecundario ? blocoTexto(`O que ${perfilS.nome} acrescenta`, miniBlocoIndividual(secundaria)) : null,
+        temTerciario ? blocoTexto(`O que ${perfilT.nome} acrescenta`, miniBlocoIndividual(terciaria)) : null,
+        combo ? blocoTexto(combo.titulo, combo.abertura) : null,
+        combo ? blocoTexto("O que cada traço acrescenta", combo.oQueCadaAcrescenta) : null,
+        combo ? blocoTexto("O que existe em comum", combo.emComum) : null,
+        combo ? blocoTexto("Onde podem surgir tensões", combo.tensoes) : null,
+        combo ? blocoTexto("Como os três podem aparecer juntos", combo.comoAparecemJuntos) : null,
+        combo ? blocoTexto("Como essa combinação pode aparecer na vida", combo.comoApareceNaVida) : null,
+        combo
+          ? {
+              tipo: "lista",
+              rotulo: "Recursos da combinação",
+              itens: combo.recursosDaCombinacao,
+            }
           : null,
-        temTerciarioDistinto
+        combo ? blocoTexto("Ponto de atenção", combo.pontoDeAtencao) : null,
+        combo ? blocoTexto("Caminho de integração do trio", combo.caminhoIntegracao) : null,
+        combo ? { tipo: "destaque", rotulo: "Para pensar sobre a combinação", texto: prosa(combo.pergunta) } : null,
+        !combo && temSecundario
           ? blocoTexto(
-              "Quando os três se encontram na vida",
-              quandoOsTresSeEncontram(principal, secundaria, terciaria),
+              "Como as duas forças se encontram",
+              `A combinação de ${perfil.nome} com ${perfilS.nome} cria um perfil próprio. Observe como a necessidade de ${perfil.formacao.necessidadeEmocional.toLowerCase()} conversa com ${perfilS.formacao.necessidadeEmocional.toLowerCase()}.`,
             )
           : null,
       ]),
@@ -330,19 +265,20 @@ export function comporJornadaTraco(resultado: {
       titulo: "Seu caminho de integração",
       subtitulo: "O que flexibilizar e o que praticar",
       blocos: limparBlocos([
-        blocoTexto("O caminho que se abre", interp[3]),
+        blocoTexto("O que precisa aprender a reconhecer", perfil.integracao.reconhecer),
+        blocoTexto("O que pode flexibilizar", perfil.integracao.flexibilizar),
+        blocoTexto("O que pode desenvolver", perfil.integracao.desenvolver),
         {
           tipo: "tabela",
           rotulo: "Deixar de viver só assim · Aprender a experimentar",
           cabecalhos: ["Deixar de viver só assim", "Aprender a experimentar"],
-          linhas: INTEGRACAO_TABELA[principal],
+          linhas: perfil.integracao.deixarAprender,
         },
         {
           tipo: "passos",
           rotulo: "Exercícios para esta semana",
-          itens: recomendacoes.slice(0, 3),
+          itens: perfil.integracao.exercicios.map((e) => `${e.titulo}: ${e.descricao}`),
         },
-        blocoTexto("Um cuidado próximo da ferida", T.CUIDADOS_FERIDA[principal]),
       ]),
     },
     {
@@ -351,13 +287,12 @@ export function comporJornadaTraco(resultado: {
       titulo: "Da sombra à luz",
       subtitulo: "Reconhecimento e um próximo passo",
       blocos: limparBlocos([
-        { tipo: "destaque", rotulo: "Para levar com você", texto: prosa(mensagem) },
+        { tipo: "destaque", rotulo: "Para levar com você", texto: prosa(perfil.reflexaoFinal.mensagem) },
         blocoTexto(
           undefined,
-          interp[4] ??
-            "Seu próximo passo não é se tornar outra pessoa. É descobrir quem você pode ser quando a proteção antiga não precisa mais conduzir sozinha.",
+          "Da sombra à luz não significa abandonar quem você é. Significa reconhecer aquilo que aprendeu a fazer para se proteger e descobrir que, a partir da consciência, você pode escolher caminhos diferentes.",
         ),
-        { tipo: "destaque", rotulo: "Para pensar", texto: prosa(pergunta) },
+        { tipo: "destaque", rotulo: "Para pensar", texto: prosa(perfil.reflexaoFinal.pergunta) },
       ]),
     },
   ];
@@ -368,19 +303,18 @@ export function comporJornadaTraco(resultado: {
       principal,
       secundaria,
       terciaria,
-      nomePrincipal: nomeP,
-      nomeSecundaria: nomeS,
-      nomeTerciaria: nomeT,
+      nomePrincipal: perfil.nome,
+      nomeSecundaria: perfilS.nome,
+      nomeTerciaria: perfilT.nome,
       percentuais: resultado.estruturas,
-      pontosFortes,
-      pontosAtencao,
+      pontosFortes: perfil.pontosFortes,
+      pontosAtencao: perfil.pontosAtencao,
       significado,
     },
     etapas,
   };
 }
 
-/** Garante que a jornada tenha as 9 partes na ordem. */
 export function idsEtapas(jornada: JornadaTraco): string[] {
   return jornada.etapas.map((e) => e.id);
 }
@@ -392,11 +326,12 @@ export function textosDaJornada(jornada: JornadaTraco): string[] {
       if (bloco.tipo === "texto" || bloco.tipo === "destaque") out.push(bloco.texto);
       if (bloco.tipo === "lista" || bloco.tipo === "passos") out.push(...bloco.itens);
       if (bloco.tipo === "tabela") {
-        for (const linha of bloco.linhas) {
-          out.push(...linha);
-        }
+        for (const linha of bloco.linhas) out.push(...linha);
+      }
+      if (bloco.tipo === "cena") {
+        out.push(bloco.oQue, bloco.reacao, bloco.protege, bloco.consequencia);
       }
     }
   }
-  return texto(...out);
+  return out.map((p) => p.trim()).filter(Boolean);
 }

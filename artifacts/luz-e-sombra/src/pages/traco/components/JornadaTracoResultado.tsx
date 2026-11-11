@@ -5,6 +5,7 @@ import { pontuar } from "@/lib/formatarLeitura";
 const OURO = "#c8a56b";
 const TEXTO = "rgba(247,242,236,0.78)";
 const FORTE = "rgba(247,242,236,0.94)";
+const MUTED = "rgba(200,165,107,0.5)";
 
 export default function JornadaTracoResultado({
   jornada,
@@ -65,15 +66,27 @@ function EtapaCard({ etapa }: { etapa: EtapaJornada }) {
   );
 }
 
+function Rotulo({ children }: { children: string }) {
+  return (
+    <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
+      {children}
+    </p>
+  );
+}
+
+function MicroRotulo({ children, cor = MUTED }: { children: string; cor?: string }) {
+  return (
+    <p className="text-[10px] tracking-wider uppercase mb-0.5" style={{ color: cor }}>
+      {children}
+    </p>
+  );
+}
+
 function Bloco({ bloco }: { bloco: BlocoJornada }) {
   if (bloco.tipo === "texto") {
     return (
       <div className="space-y-2">
-        {bloco.rotulo && (
-          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
-            {bloco.rotulo}
-          </p>
-        )}
+        {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
         <TextoFormatado texto={bloco.texto} fluido />
       </div>
     );
@@ -100,11 +113,7 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
   if (bloco.tipo === "lista") {
     return (
       <div className="space-y-2">
-        {bloco.rotulo && (
-          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
-            {bloco.rotulo}
-          </p>
-        )}
+        {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
         <ul className="space-y-2">
           {bloco.itens.map((item, i) => (
             <li key={i} className="flex gap-2 text-sm" style={{ color: TEXTO, lineHeight: 1.6 }}>
@@ -120,11 +129,7 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
   if (bloco.tipo === "passos") {
     return (
       <div className="space-y-3">
-        {bloco.rotulo && (
-          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
-            {bloco.rotulo}
-          </p>
-        )}
+        {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
         <ol className="space-y-3">
           {bloco.itens.map((item, i) => (
             <li key={i} className="flex gap-3">
@@ -144,18 +149,90 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
     );
   }
 
-  // Tabela 3 colunas: recurso / equilíbrio / excesso
-  if (bloco.cabecalhos.length >= 3) {
+  if (bloco.tipo === "cena") {
+    const linhas = [
+      { rotulo: "O que acontece", texto: bloco.oQue },
+      { rotulo: "Como você pode reagir", texto: bloco.reacao },
+      { rotulo: "O que pode estar tentando proteger", texto: bloco.protege },
+      { rotulo: "Possível consequência", texto: bloco.consequencia },
+    ];
     return (
       <div className="space-y-3">
-        {bloco.rotulo && (
-          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
-            {bloco.rotulo}
-          </p>
-        )}
-        <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.5)", lineHeight: 1.6 }}>
-          O mesmo talento pode cuidar de você ou te cansar. Veja o limite entre usar bem e exagerar.
-        </p>
+        {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
+        <div
+          className="rounded-xl px-4 py-3.5 space-y-3"
+          style={{ border: "1px solid rgba(200,165,107,0.14)", background: "rgba(255,255,255,0.02)" }}
+        >
+          {linhas.map((l) => (
+            <div key={l.rotulo}>
+              <MicroRotulo>{l.rotulo}</MicroRotulo>
+              <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.65 }}>
+                {l.texto}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (bloco.tipo !== "tabela") return null;
+
+  const cols = bloco.cabecalhos.length;
+
+  // 4 colunas: recurso / equilíbrio / excesso / potencial
+  if (cols >= 4) {
+    return (
+      <div className="space-y-3">
+        {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
+        <div
+          className="rounded-xl overflow-hidden"
+          style={{ border: "1px solid rgba(200,165,107,0.14)", background: "rgba(255,255,255,0.02)" }}
+        >
+          {bloco.linhas.map((linha, i) => {
+            const [recurso, equilibrio, excesso, expansao] = linha;
+            return (
+              <div
+                key={i}
+                className="px-4 py-3.5 space-y-2.5"
+                style={{ borderTop: i === 0 ? undefined : "1px solid rgba(200,165,107,0.1)" }}
+              >
+                <p className="text-sm font-medium" style={{ color: FORTE }}>
+                  {recurso}
+                </p>
+                <div className="grid sm:grid-cols-3 gap-2.5">
+                  <div>
+                    <MicroRotulo cor="rgba(109,185,109,0.75)">{bloco.cabecalhos[1] ?? "Em equilíbrio"}</MicroRotulo>
+                    <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
+                      {equilibrio}
+                    </p>
+                  </div>
+                  <div>
+                    <MicroRotulo cor="rgba(224,123,57,0.8)">{bloco.cabecalhos[2] ?? "Em excesso"}</MicroRotulo>
+                    <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
+                      {excesso}
+                    </p>
+                  </div>
+                  <div>
+                    <MicroRotulo cor="rgba(200,165,107,0.75)">{bloco.cabecalhos[3] ?? "Potencial"}</MicroRotulo>
+                    <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
+                      {expansao}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // 3 colunas: recurso / equilíbrio / excesso
+  if (cols >= 3) {
+    return (
+      <div className="space-y-3">
+        {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
         <div
           className="rounded-xl overflow-hidden"
           style={{ border: "1px solid rgba(200,165,107,0.14)", background: "rgba(255,255,255,0.02)" }}
@@ -166,26 +243,20 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
               <div
                 key={i}
                 className="px-4 py-3.5 space-y-2"
-                style={{
-                  borderTop: i === 0 ? undefined : "1px solid rgba(200,165,107,0.1)",
-                }}
+                style={{ borderTop: i === 0 ? undefined : "1px solid rgba(200,165,107,0.1)" }}
               >
                 <p className="text-sm font-medium" style={{ color: FORTE }}>
                   {recurso}
                 </p>
                 <div className="grid sm:grid-cols-2 gap-2.5">
                   <div>
-                    <p className="text-[10px] tracking-wider uppercase mb-0.5" style={{ color: "rgba(109,185,109,0.75)" }}>
-                      Em equilíbrio
-                    </p>
+                    <MicroRotulo cor="rgba(109,185,109,0.75)">{bloco.cabecalhos[1] ?? "Em equilíbrio"}</MicroRotulo>
                     <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
                       {equilibrio}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] tracking-wider uppercase mb-0.5" style={{ color: "rgba(224,123,57,0.8)" }}>
-                      Em excesso
-                    </p>
+                    <MicroRotulo cor="rgba(224,123,57,0.8)">{bloco.cabecalhos[2] ?? "Em excesso"}</MicroRotulo>
                     <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
                       {excesso}
                     </p>
@@ -199,22 +270,16 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
     );
   }
 
-  // Tabela 2 colunas: tenta / acaba · deixar / aprender
+  // 2 colunas
   return (
     <div className="space-y-3">
-      {bloco.rotulo && (
-        <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
-          {bloco.rotulo}
-        </p>
-      )}
+      {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
       <div
         className="rounded-xl overflow-hidden"
         style={{ border: "1px solid rgba(200,165,107,0.14)", background: "rgba(255,255,255,0.02)" }}
       >
         {bloco.linhas.map((linha, i) => {
           const [esquerda, direita] = linha;
-          const rotuloEsq = bloco.cabecalhos[0] ?? "";
-          const rotuloDir = bloco.cabecalhos[1] ?? "";
           return (
             <div
               key={i}
@@ -223,9 +288,7 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
             >
               <div className="grid sm:grid-cols-[1fr_auto_1fr] gap-2 sm:gap-3 items-start">
                 <div>
-                  <p className="text-[10px] tracking-wider uppercase mb-0.5" style={{ color: "rgba(200,165,107,0.5)" }}>
-                    {rotuloEsq}
-                  </p>
+                  <MicroRotulo>{bloco.cabecalhos[0] ?? ""}</MicroRotulo>
                   <p className="text-sm leading-relaxed" style={{ color: FORTE, lineHeight: 1.55 }}>
                     {esquerda}
                   </p>
@@ -238,9 +301,7 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
                   →
                 </span>
                 <div>
-                  <p className="text-[10px] tracking-wider uppercase mb-0.5" style={{ color: "rgba(200,165,107,0.5)" }}>
-                    {rotuloDir}
-                  </p>
+                  <MicroRotulo>{bloco.cabecalhos[1] ?? ""}</MicroRotulo>
                   <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
                     {direita}
                   </p>
