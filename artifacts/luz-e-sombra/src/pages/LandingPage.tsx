@@ -192,7 +192,7 @@ export default function LandingPage() {
                 ))}
               </ul>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+              <div className="flex justify-center lg:justify-start">
                 <button
                   type="button"
                   onClick={goCheckout}
@@ -207,17 +207,6 @@ export default function LandingPage() {
                   {LP_CTA_PRIMARY}
                   <ArrowRight size={18} />
                 </button>
-                <a
-                  href="#jornada"
-                  className="flex items-center justify-center gap-2 px-7 py-4 rounded-xl font-semibold text-sm transition-all hover:bg-white/5"
-                  style={{
-                    border: "1px solid rgba(200,165,107,0.3)",
-                    color: "rgba(200,165,107,0.9)",
-                    textDecoration: "none",
-                  }}
-                >
-                  Ver as 9 análises
-                </a>
               </div>
             </div>
 
