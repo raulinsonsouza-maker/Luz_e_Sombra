@@ -54,18 +54,25 @@ describe("gerarAnaliseRodaCruzada", () => {
 
   it("inclui temperamento, traço e linguagens quando há contexto", () => {
     const r = gerarAnaliseRodaCruzada(scoresLeticia, {
-      temperamento: { primario: "MELANCOLICO", pontoCego: "cobrar demais de si" },
+      temperamento: {
+        primario: "MELANCOLICO",
+        pontoCego: "Cobrar demais de si.",
+        trechoRelacoes: "Você cria conexão com leveza e presença. Depois vem o desafio da constância.",
+        trechoTrabalho: "Você brilha com pessoas e precisa de variedade. Rotina simples ajuda na entrega.",
+      },
       traco: {
         estruturaPrincipal: "rigido",
         dinamicaFuncional: {
-          relacoes: "Nas relações, a correção aparece antes do calor.",
-          energia: "A energia sobe com dever cumprido.",
+          relacoes: "Nas relações, a correção aparece antes do calor. Isso se repete em vários vínculos.",
+          energia: "A energia sobe com dever cumprido. Sem lista, falta combustível.",
+          trabalho: "No trabalho, o acerto importa mais que o ritmo. Isolamento longo drena.",
         },
       },
       linguagens: {
         receberPrincipal: "tempo",
         expressarPrincipal: "servicos",
         desalinhamento: { ativo: true, texto: "Você cuida na prática e precisa de presença." },
+        cena: "Você fez algo difícil e ouviu um obrigado.",
       },
     });
     assert.equal(r.fontes.temperamento, true);
@@ -76,13 +83,26 @@ describe("gerarAnaliseRodaCruzada", () => {
     assert.ok(plenitude?.comoTemperamentoEntra);
     assert.ok(plenitude?.comoTracoEntra);
     assert.ok(plenitude?.comoLinguagensEntram);
+    assert.ok(!plenitude?.comoTracoEntra?.includes("energia sobe com dever"));
 
     const saude = r.analises.find((a) => a.id === "saudeDisposicao");
     assert.ok(saude?.comoTemperamentoEntra);
     assert.equal(saude?.comoLinguagensEntram, undefined);
+    assert.ok(!saude?.comoTracoEntra?.includes("baixa voltagem") && !saude?.comoTracoEntra?.includes("energia sobe"));
 
     const amor = r.analises.find((a) => a.id === "desenvolvimentoAmoroso");
-    assert.ok(amor?.comoLinguagensEntram?.includes("tempo") || amor?.comoLinguagensEntram?.includes("presença"));
+    assert.ok(amor?.comoLinguagensEntram);
+    assert.ok(!amor?.comoLinguagensEntram?.includes("obrigado"));
+
+    // trecho de relações não pode se repetir em família + amor + social
+    const comTrechoLeveza = r.analises.filter((a) => a.comoTemperamentoEntra?.includes("leveza e presença"));
+    assert.equal(comTrechoLeveza.length, 1);
+
+    // gesto genérico do temperamento só nas frágeis, uma vez
+    const gestoPlateia = r.analises.filter((a) =>
+      a.comoMelhorar.some((p) => p.includes("sem plateia") || p.includes("bom o bastante") || p.includes("pare dois minutos")),
+    );
+    assert.ok(gestoPlateia.length <= 2);
   });
 
   it("não coloca travessão na saída", () => {
@@ -96,7 +116,7 @@ describe("gerarAnaliseRodaCruzada", () => {
     assert.equal(AREAS_RODA_ORDEM.length, 12);
   });
 
-  it("coloca gestos concretos nas áreas frágeis", () => {
+  it("coloca gestos concretos nas áreas frágeis sem repetir o mesmo em todas", () => {
     const r = gerarAnaliseRodaCruzada(scoresLeticia, {
       temperamento: { primario: "SANGUINEO" },
       traco: { estruturaPrincipal: "masoquista" },
@@ -108,5 +128,10 @@ describe("gerarAnaliseRodaCruzada", () => {
       assert.ok(a.comoMelhorar.length >= 1);
       assert.ok(a.comoMelhorar.join(" ").length > 30);
     }
+    const meio = r.analises.filter((a) => a.valor === 7);
+    const meioComGestoSanguineo = meio.filter((a) =>
+      a.comoMelhorar.some((p) => p.includes("sem plateia")),
+    );
+    assert.equal(meioComGestoSanguineo.length, 0);
   });
 });

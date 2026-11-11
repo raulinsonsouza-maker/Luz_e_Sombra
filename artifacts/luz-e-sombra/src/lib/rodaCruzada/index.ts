@@ -9,7 +9,7 @@ export type {
   NivelArea,
 } from "./tipos";
 export { AREA_TITULO, AREAS_RODA_ORDEM } from "./tipos";
-export { gerarAnaliseRodaCruzada, scoresDeAvaliacao, NOME_TRACO } from "./gerar";
+export { gerarAnaliseRodaCruzada, scoresDeAvaliacao, NOME_TRACO, ROTULO_LINGUAGEM } from "./gerar";
 export {
   parseTemperamentoCruzado,
   parseLinguagensCruzadas,

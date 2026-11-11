@@ -1,13 +1,11 @@
-import { NOME_TEMPERAMENTO } from "@workspace/temperamento-v1";
 import { normalizarObjetoTextos } from "@workspace/copy-voz";
 import { CONTEUDO_NIVEL, LABEL_NIVEL, nivelDe } from "./conteudoNivel";
 import { CONTEUDO_TEMPERAMENTO, GESTO_TEMPERAMENTO } from "./conteudoTemperamento";
-import { AREA_PARA_DINAMICA, CONTEUDO_TRACO, GESTO_TRACO } from "./conteudoTraco";
+import { CONTEUDO_TRACO, GESTO_TRACO } from "./conteudoTraco";
 import {
   AREAS_LINGUAGEM,
   CONTEUDO_LINGUAGEM_RECEBER,
   NOME_LINGUAGEM,
-  textoDesalinhamentoArea,
 } from "./conteudoLinguagens";
 import {
   AREA_TITULO,
@@ -24,6 +22,13 @@ const NOME_TRACO: Record<string, string> = {
   psicopata: "psicopata",
   masoquista: "masoquista",
   rigido: "rígido",
+};
+
+export const ROTULO_LINGUAGEM: Partial<Record<AreaVidaId, string>> = {
+  desenvolvimentoAmoroso: "No jeito de amar",
+  familia: "No afeto da família",
+  vidaSocial: "Nas amizades",
+  plenitudeFelicidade: "O que aquece a alegria",
 };
 
 function prosa(titulo: string): string {
@@ -50,9 +55,17 @@ function ehMente(chave: string): boolean {
   return /intelectual|emocional|espiritualidade/.test(chave);
 }
 
-function montarAbertura(
-  scores: Record<AreaVidaId, number>,
-): string[] {
+/** Primeira frase de um texto longo, sem virar parágrafo-ensaio. */
+function primeiraFrase(texto: string, max = 180): string | undefined {
+  const t = texto.trim();
+  if (!t) return undefined;
+  const corte = t.match(/^(.+?[.!?])(?:\s|$)/);
+  const frase = (corte?.[1] ?? t).trim();
+  if (frase.length <= max) return frase;
+  return `${frase.slice(0, max - 1).trim()}…`;
+}
+
+function montarAbertura(scores: Record<AreaVidaId, number>): string[] {
   const ordenadas = AREAS_RODA_ORDEM
     .map((id) => ({ id, titulo: AREA_TITULO[id], valor: scores[id] ?? 0 }))
     .sort((a, b) => a.valor - b.valor);
@@ -95,7 +108,7 @@ function montarAbertura(
   ];
 }
 
-function textoLinguagens(area: AreaVidaId, ctx: ContextoCruzado): string | undefined {
+function textoLinguagens(area: AreaVidaId, ctx: ContextoCruzado, detalhar: boolean): string | undefined {
   if (!ctx.linguagens) return undefined;
   if (!AREAS_LINGUAGEM.includes(area)) return undefined;
   const receber = String(ctx.linguagens.receberPrincipal);
@@ -104,79 +117,51 @@ function textoLinguagens(area: AreaVidaId, ctx: ContextoCruzado): string | undef
   const nomeExp = NOME_LINGUAGEM[expressar] ?? expressar;
   const base =
     CONTEUDO_LINGUAGEM_RECEBER[area]?.[receber as keyof (typeof CONTEUDO_LINGUAGEM_RECEBER)[typeof area]] ??
-    `Você gosta de receber amor principalmente por ${nomeRec}. Nesta área, isso muda o que aquece e o que falta.`;
+    `Você se sente mais cuidado quando recebe ${nomeRec}. Nesta área, isso muda o que aquece e o que falta.`;
+
+  if (!detalhar) return base;
 
   const partes = [base];
   if (receber !== expressar) {
     partes.push(
-      `Você costuma demonstrar carinho por ${nomeExp}, e isso nem sempre é o que mais te alcança. A diferença importa nesta área.`,
+      `Você costuma demonstrar carinho por ${nomeExp}, e isso nem sempre é o que mais te alcança.`,
     );
   }
-  if (ctx.linguagens.desalinhamento?.ativo && ctx.linguagens.desalinhamento.texto) {
-    const extra = textoDesalinhamentoArea(area, ctx.linguagens.desalinhamento.texto);
-    if (extra) partes.push(extra);
-  } else if (ctx.linguagens.cena && (area === "desenvolvimentoAmoroso" || area === "familia")) {
-    partes.push(ctx.linguagens.cena);
+  if (ctx.linguagens.desalinhamento?.ativo && area === "desenvolvimentoAmoroso") {
+    const trecho = primeiraFrase(ctx.linguagens.desalinhamento.texto, 160);
+    if (trecho) partes.push(trecho);
   }
   return partes.join(" ");
 }
 
 function textoTraco(area: AreaVidaId, ctx: ContextoCruzado): string | undefined {
   if (!ctx.traco) return undefined;
-  const est = ctx.traco.estruturaPrincipal;
-  const banco = CONTEUDO_TRACO[area]?.[est];
-  const partes: string[] = [];
-  if (banco) partes.push(banco);
-  const campo = AREA_PARA_DINAMICA[area];
-  const din = campo && ctx.traco.dinamicaFuncional?.[campo];
-  if (din && !partes.some((p) => p.includes(din.slice(0, 40)))) {
-    partes.push(din);
-  }
-  return partes.length ? partes.join(" ") : undefined;
+  return CONTEUDO_TRACO[area]?.[ctx.traco.estruturaPrincipal];
 }
 
-function textoTemperamento(area: AreaVidaId, ctx: ContextoCruzado): string | undefined {
+function textoTemperamento(
+  area: AreaVidaId,
+  ctx: ContextoCruzado,
+  extras: { relacoes?: boolean; trabalho?: boolean; pontoCego?: boolean },
+): string | undefined {
   if (!ctx.temperamento) return undefined;
   const prim = ctx.temperamento.primario;
   const base = CONTEUDO_TEMPERAMENTO[area]?.[prim];
   if (!base) return undefined;
-  const nome = NOME_TEMPERAMENTO[prim] ?? prim;
   const partes = [base];
-  if (
-    ctx.temperamento.trechoRelacoes &&
-    (area === "desenvolvimentoAmoroso" || area === "familia" || area === "vidaSocial")
-  ) {
-    partes.push(ctx.temperamento.trechoRelacoes);
+  if (extras.relacoes) {
+    const trecho = primeiraFrase(ctx.temperamento.trechoRelacoes ?? "", 160);
+    if (trecho) partes.push(trecho);
   }
-  if (
-    ctx.temperamento.trechoTrabalho &&
-    (area === "realizacaoProposito" || area === "recursosFinanceiros")
-  ) {
-    partes.push(ctx.temperamento.trechoTrabalho);
+  if (extras.trabalho) {
+    const trecho = primeiraFrase(ctx.temperamento.trechoTrabalho ?? "", 160);
+    if (trecho) partes.push(trecho);
   }
-  if (ctx.temperamento.pontoCego && area === "equilibrioEmocional") {
-    partes.push(`Ponto cego do temperamento ${nome.toLowerCase()}: ${ctx.temperamento.pontoCego}`);
+  if (extras.pontoCego && ctx.temperamento.pontoCego) {
+    const trecho = primeiraFrase(ctx.temperamento.pontoCego, 140);
+    if (trecho) partes.push(`Um cuidado do seu temperamento: ${trecho.replace(/^./, (c) => c.toLowerCase())}`);
   }
   return partes.join(" ");
-}
-
-function passosArea(
-  area: AreaVidaId,
-  nivelTextoPasso: string,
-  ctx: ContextoCruzado,
-  valor: number,
-): string[] {
-  const passos: string[] = [nivelTextoPasso];
-  if (valor <= 7 && ctx.temperamento) {
-    const g = GESTO_TEMPERAMENTO[ctx.temperamento.primario];
-    if (g && !passos.includes(g)) passos.push(g);
-  }
-  if (valor <= 5 && ctx.traco) {
-    const g = GESTO_TRACO[ctx.traco.estruturaPrincipal];
-    if (g && !passos.includes(g)) passos.push(g);
-  }
-  // no máximo 2 passos para não sobrecarregar
-  return passos.slice(0, 2);
 }
 
 /**
@@ -189,10 +174,59 @@ export function gerarAnaliseRodaCruzada(
 ): ResultadoRodaCruzada {
   const abertura = montarAbertura(scores);
 
-  const analises: AnaliseAreaRoda[] = AREAS_RODA_ORDEM.map((id) => {
-    const valor = Math.max(0, Math.min(10, Number(scores[id] ?? 0)));
+  const ordenadas = AREAS_RODA_ORDEM
+    .map((id) => ({ id, valor: Math.max(0, Math.min(10, Number(scores[id] ?? 0))) }))
+    .sort((a, b) => a.valor - b.valor);
+
+  const focoIds = new Set(ordenadas.filter((a) => a.valor <= 5).slice(0, 2).map((a) => a.id));
+  if (focoIds.size === 0) {
+    ordenadas.slice(0, 2).forEach((a) => focoIds.add(a.id));
+  }
+
+  // Extras de temperamento só uma vez, na área mais frágil do grupo
+  const maisFracaDe = (candidatas: AreaVidaId[]) =>
+    ordenadas.find((a) => candidatas.includes(a.id))?.id;
+
+  const areaRelacoesExtra = maisFracaDe(["desenvolvimentoAmoroso", "familia", "vidaSocial"]);
+  const areaTrabalhoExtra = maisFracaDe(["realizacaoProposito", "recursosFinanceiros"]);
+  const areaPontoCego =
+    (scores.equilibrioEmocional ?? 10) <= 7 ? ("equilibrioEmocional" as AreaVidaId) : null;
+
+  const gestosUsados = new Set<string>();
+
+  const analises: AnaliseAreaRoda[] = ordenadas.map(({ id, valor }) => {
     const nivel = nivelDe(valor);
     const nivelTxt = CONTEUDO_NIVEL[id][nivel];
+    const noFoco = focoIds.has(id);
+
+    const comoTemperamentoEntra = textoTemperamento(id, contexto, {
+      relacoes: id === areaRelacoesExtra,
+      trabalho: id === areaTrabalhoExtra,
+      pontoCego: id === areaPontoCego,
+    });
+    const comoTracoEntra = textoTraco(id, contexto);
+    const comoLinguagensEntram = textoLinguagens(
+      id,
+      contexto,
+      id === "desenvolvimentoAmoroso",
+    );
+
+    const passos: string[] = [nivelTxt.passo];
+    if (noFoco && contexto.temperamento) {
+      const g = GESTO_TEMPERAMENTO[contexto.temperamento.primario];
+      if (g && !gestosUsados.has(g)) {
+        passos.push(g);
+        gestosUsados.add(g);
+      }
+    }
+    if (noFoco && passos.length < 2 && contexto.traco) {
+      const g = GESTO_TRACO[contexto.traco.estruturaPrincipal];
+      if (g && !gestosUsados.has(g)) {
+        passos.push(g);
+        gestosUsados.add(g);
+      }
+    }
+
     return {
       id,
       titulo: AREA_TITULO[id],
@@ -200,13 +234,13 @@ export function gerarAnaliseRodaCruzada(
       nivel,
       labelNivel: LABEL_NIVEL[nivel],
       oQueAcontece: nivelTxt.oQueAcontece,
-      comoTemperamentoEntra: textoTemperamento(id, contexto),
-      comoTracoEntra: textoTraco(id, contexto),
-      comoLinguagensEntram: textoLinguagens(id, contexto),
-      comoMelhorar: passosArea(id, nivelTxt.passo, contexto, valor),
+      comoTemperamentoEntra,
+      comoTracoEntra,
+      comoLinguagensEntram,
+      comoMelhorar: passos.slice(0, 2),
       pergunta: nivelTxt.pergunta,
     };
-  }).sort((a, b) => a.valor - b.valor);
+  });
 
   return normalizarObjetoTextos({
     abertura,

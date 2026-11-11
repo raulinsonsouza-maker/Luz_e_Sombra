@@ -1,4 +1,4 @@
-import type { AnaliseAreaRoda, NivelArea } from "@/lib/rodaCruzada";
+import { ROTULO_LINGUAGEM, type AnaliseAreaRoda, type NivelArea } from "@/lib/rodaCruzada";
 
 const COR_TEXTO = "rgba(247,242,236,0.78)";
 const COR_FORTE = "rgba(247,242,236,0.94)";
@@ -82,7 +82,10 @@ export default function RodaAnaliseArea({ analise }: { analise: AnaliseAreaRoda 
         <Bloco titulo="O que o traço revela" texto={analise.comoTracoEntra} />
       )}
       {analise.comoLinguagensEntram && (
-        <Bloco titulo="No jeito de amar" texto={analise.comoLinguagensEntram} />
+        <Bloco
+          titulo={ROTULO_LINGUAGEM[analise.id] ?? "No jeito de receber carinho"}
+          texto={analise.comoLinguagensEntram}
+        />
       )}
 
       {analise.comoMelhorar.length > 0 && (
