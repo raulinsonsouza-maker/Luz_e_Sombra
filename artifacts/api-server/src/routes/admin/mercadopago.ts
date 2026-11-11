@@ -9,6 +9,7 @@ import {
   disconnectMp,
   exchangeAuthorizationCode,
   getConnectedMpIntegration,
+  saveMpTokens,
 } from "../../lib/mp/tokens";
 import { countFundadoresPaid } from "../../lib/acesso/activateMpPurchase";
 import { FUNDADORES_CAP } from "../../lib/acesso/periodo";
@@ -148,7 +149,6 @@ router.post("/public-key", requireAdmin, async (req: AuthRequest, res: Response)
     if (!integration) {
       return res.status(400).json({ error: "Conecte o Mercado Pago antes de salvar a public key." });
     }
-    const { saveMpTokens } = await import("../../lib/mp/tokens");
     await saveMpTokens({
       accessToken: integration.accessToken!,
       refreshToken: integration.refreshToken,
@@ -158,6 +158,54 @@ router.post("/public-key", requireAdmin, async (req: AuthRequest, res: Response)
     return res.json({ ok: true });
   } catch (error) {
     return res.status(500).json({ error: "Erro ao salvar public key" });
+  }
+});
+
+/**
+ * Conta própria: cola Access Token + Public Key de produção/teste
+ * (Credenciais de produção da app no Developers).
+ */
+router.post("/credentials", requireAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const accessToken = String(req.body?.accessToken ?? "").trim();
+    const publicKey = String(req.body?.publicKey ?? "").trim();
+    if (!accessToken || !publicKey) {
+      return res.status(400).json({ error: "accessToken e publicKey são obrigatórios" });
+    }
+    if (!accessToken.startsWith("APP_USR-") && !accessToken.startsWith("TEST-")) {
+      return res.status(400).json({ error: "Access Token inválido" });
+    }
+    if (!publicKey.startsWith("APP_USR-") && !publicKey.startsWith("TEST-")) {
+      return res.status(400).json({ error: "Public Key inválida" });
+    }
+
+    let mpUserId: string | null = null;
+    try {
+      const meRes = await fetch("https://api.mercadopago.com/users/me", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (meRes.ok) {
+        const me = (await meRes.json()) as { id?: number };
+        if (me.id != null) mpUserId = String(me.id);
+      } else {
+        return res.status(400).json({ error: "Access Token rejeitado pelo Mercado Pago" });
+      }
+    } catch {
+      return res.status(400).json({ error: "Não foi possível validar o Access Token" });
+    }
+
+    await saveMpTokens({
+      accessToken,
+      publicKey,
+      mpUserId,
+      refreshToken: null,
+      expiresIn: 180 * 24 * 60 * 60,
+    });
+
+    return res.json({ ok: true, mpUserId });
+  } catch (error) {
+    req.log?.error({ error }, "Erro ao salvar credenciais MP");
+    return res.status(500).json({ error: "Erro ao salvar credenciais" });
   }
 });
 

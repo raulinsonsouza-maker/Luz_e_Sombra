@@ -22,6 +22,7 @@ export function PagamentosTab({ showMsg }: { showMsg: ShowMsg }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [publicKey, setPublicKey] = useState("");
+  const [accessToken, setAccessToken] = useState("");
 
   async function load() {
     setLoading(true);
@@ -72,21 +73,22 @@ export function PagamentosTab({ showMsg }: { showMsg: ShowMsg }) {
     }
   }
 
-  async function salvarPublicKey() {
+  async function salvarCredenciais() {
     setBusy(true);
     try {
-      const res = await apiFetch("/admin/mercadopago/public-key", {
+      const res = await apiFetch("/admin/mercadopago/credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ publicKey }),
+        body: JSON.stringify({ accessToken, publicKey }),
       });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
-        showMsg("sucesso", "Public key salva.");
+        showMsg("sucesso", "Credenciais salvas. Checkout liberado.");
+        setAccessToken("");
         setPublicKey("");
         await load();
       } else {
-        const data = await res.json().catch(() => ({}));
-        showMsg("erro", data.error || "Falha ao salvar public key.");
+        showMsg("erro", data.error || "Falha ao salvar credenciais.");
       }
     } finally {
       setBusy(false);
@@ -109,7 +111,7 @@ export function PagamentosTab({ showMsg }: { showMsg: ShowMsg }) {
             Pagamentos
           </h2>
           <p className="text-sm mt-1" style={{ color: "rgba(247,242,236,0.5)" }}>
-            Conecte a conta Mercado Pago para o checkout transparente da landing.
+            Portal-Iluminando · cole as credenciais de produção ou conecte via OAuth.
           </p>
         </div>
         <button
@@ -132,32 +134,56 @@ export function PagamentosTab({ showMsg }: { showMsg: ShowMsg }) {
             <p className="text-xs" style={{ color: "rgba(247,242,236,0.45)" }}>
               {status?.connected ? "Conectado" : "Desconectado"}
               {status?.mpUserId ? ` · user ${status.mpUserId}` : ""}
+              {status?.publicKeyConfigured ? " · public key ok" : ""}
             </p>
           </div>
         </div>
 
-        {!status?.appConfigured && (
-          <p className="text-sm rounded-xl px-3 py-2" style={{ background: "rgba(248,113,113,0.12)", color: "#f87171" }}>
-            Configure MP_CLIENT_ID e MP_CLIENT_SECRET no servidor.
+        <div className="space-y-3 pt-1">
+          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(200,165,107,0.7)" }}>
+            Credenciais da aplicação
           </p>
-        )}
+          <input
+            value={publicKey}
+            onChange={(e) => setPublicKey(e.target.value)}
+            placeholder="Public Key (APP_USR-...)"
+            className="w-full rounded-xl px-3 py-2.5 text-sm bg-transparent outline-none"
+            style={{ border: `1px solid ${C.border}`, color: C.cream }}
+            autoComplete="off"
+          />
+          <input
+            value={accessToken}
+            onChange={(e) => setAccessToken(e.target.value)}
+            placeholder="Access Token (APP_USR-...)"
+            className="w-full rounded-xl px-3 py-2.5 text-sm bg-transparent outline-none"
+            style={{ border: `1px solid ${C.border}`, color: C.cream }}
+            autoComplete="off"
+            type="password"
+          />
+          <button
+            type="button"
+            disabled={busy || !publicKey.trim() || !accessToken.trim()}
+            onClick={salvarCredenciais}
+            className="px-4 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50"
+            style={{ background: "linear-gradient(135deg,#9c7742,#c8a56b)", color: "#fff" }}
+          >
+            {busy ? "Salvando..." : "Salvar e ativar checkout"}
+          </button>
+        </div>
 
-        <p className="text-xs break-all" style={{ color: "rgba(247,242,236,0.4)" }}>
-          Redirect URI: {status?.redirectUri}
-        </p>
-
-        <div className="flex flex-wrap gap-2">
-          {!status?.connected ? (
+        <div className="flex flex-wrap gap-2 pt-2" style={{ borderTop: `1px solid ${C.border}` }}>
+          {status?.appConfigured && (
             <button
               type="button"
-              disabled={busy || !status?.appConfigured}
+              disabled={busy}
               onClick={conectar}
               className="px-4 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg,#9c7742,#c8a56b)", color: "#fff" }}
+              style={{ border: `1px solid ${C.border}`, color: C.gold }}
             >
-              {busy ? "Abrindo..." : "Conectar Mercado Pago"}
+              Ou conectar via OAuth
             </button>
-          ) : (
+          )}
+          {status?.connected && (
             <button
               type="button"
               disabled={busy}
@@ -171,31 +197,9 @@ export function PagamentosTab({ showMsg }: { showMsg: ShowMsg }) {
           )}
         </div>
 
-        {status?.connected && (
-          <div className="space-y-2 pt-2">
-            <p className="text-xs" style={{ color: "rgba(247,242,236,0.45)" }}>
-              Public key {status.publicKeyConfigured ? "configurada" : "pendente (cole abaixo)"}
-            </p>
-            <div className="flex gap-2">
-              <input
-                value={publicKey}
-                onChange={(e) => setPublicKey(e.target.value)}
-                placeholder="APP_USR-... ou TEST-..."
-                className="flex-1 rounded-xl px-3 py-2 text-sm bg-transparent outline-none"
-                style={{ border: `1px solid ${C.border}`, color: C.cream }}
-              />
-              <button
-                type="button"
-                disabled={busy || !publicKey.trim()}
-                onClick={salvarPublicKey}
-                className="px-3 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
-                style={{ background: "rgba(200,165,107,0.15)", color: C.gold }}
-              >
-                Salvar
-              </button>
-            </div>
-          </div>
-        )}
+        <p className="text-xs break-all" style={{ color: "rgba(247,242,236,0.35)" }}>
+          OAuth redirect: {status?.redirectUri}
+        </p>
       </div>
 
       <div className="rounded-2xl p-5" style={CARD}>
