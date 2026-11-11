@@ -14,15 +14,13 @@ import LpHeroVideo from "@/components/lp/LpHeroVideo";
 import LogoPortal from "@/components/LogoPortal";
 import { captureUtmsFromUrl } from "@/lib/utm";
 import { trackLpEvent } from "@/lib/lpAnalytics";
+import { trackMetaViewContent } from "@/lib/metaPixel";
 import { safeSessionStorage } from "@/lib/safeStorage";
 import {
   LP_PORTAL_NAME,
-  LP_JOURNEY_NAME,
   LP_CTA_PRIMARY,
   LP_CTA_LOGIN,
   LP_HERO,
-  formatLpPrice,
-  LP_PRICE,
 } from "@/lib/lpConfig";
 
 export default function LandingPage() {
@@ -41,6 +39,7 @@ export default function LandingPage() {
     if (trackedView.current) return;
     trackedView.current = true;
     trackLpEvent("lp_view", "control");
+    trackMetaViewContent();
     try {
       const params = new URLSearchParams(window.location.search);
       const token = params.get("checkout") || params.get("token");
@@ -222,7 +221,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Visual card — desktop only */}
+            {/* Vídeo hero — desktop only */}
             <div className="relative max-w-md mx-auto lg:max-w-none w-full hidden lg:block">
               <div
                 className="absolute -inset-4 rounded-3xl blur-2xl opacity-40 pointer-events-none"
@@ -231,58 +230,11 @@ export default function LandingPage() {
               <div
                 className="relative rounded-2xl overflow-hidden"
                 style={{
-                  background: "linear-gradient(145deg, rgba(30,24,18,0.95) 0%, rgba(18,14,10,0.98) 100%)",
                   border: "1px solid rgba(200,165,107,0.22)",
-                  boxShadow: "0 32px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
+                  boxShadow: "0 32px 80px rgba(0,0,0,0.5)",
                 }}
               >
-                <div
-                  className="px-6 py-4 flex items-center justify-between"
-                  style={{ borderBottom: "1px solid rgba(200,165,107,0.1)", background: "rgba(200,165,107,0.04)" }}
-                >
-                  <div>
-                    <p className="text-[10px] font-bold tracking-[0.25em] uppercase mb-0.5" style={{ color: "rgba(200,165,107,0.55)" }}>
-                      O que você compra
-                    </p>
-                    <p className="font-tan-mon-cheri text-lg" style={{ color: "#f7f2ec" }}>
-                      {LP_JOURNEY_NAME}
-                    </p>
-                  </div>
-                  <div
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold"
-                    style={{ background: "rgba(200,165,107,0.12)", color: "#c8a56b", border: "1px solid rgba(200,165,107,0.2)" }}
-                  >
-                    9 análises
-                  </div>
-                </div>
-
-                <LpHeroVideo aspectClassName="aspect-[4/5] max-h-[420px]" />
-
-                <div
-                  className="px-6 py-5 flex items-center justify-between gap-4"
-                  style={{ borderTop: "1px solid rgba(200,165,107,0.1)", background: "rgba(0,0,0,0.2)" }}
-                >
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider mb-0.5" style={{ color: "rgba(247,242,236,0.35)" }}>
-                      Investimento único
-                    </p>
-                    <p className="font-tan-mon-cheri text-2xl" style={{ color: "#c8a56b" }}>
-                      {formatLpPrice(LP_PRICE)}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={goCheckout}
-                    className="px-5 py-3 rounded-xl text-sm font-bold shrink-0 transition-all hover:scale-[1.02]"
-                    style={{
-                      background: "linear-gradient(135deg, #9c7742, #c8a56b)",
-                      color: "#fff",
-                      boxShadow: "0 6px 20px rgba(200,165,107,0.3)",
-                    }}
-                  >
-                    Garantir acesso
-                  </button>
-                </div>
+                <LpHeroVideo aspectClassName="aspect-[4/5] max-h-[560px]" />
               </div>
             </div>
           </div>

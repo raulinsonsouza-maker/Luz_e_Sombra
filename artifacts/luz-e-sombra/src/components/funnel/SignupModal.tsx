@@ -4,6 +4,7 @@ import { Eye, EyeOff, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { getStoredUtms } from "@/lib/utm";
 import { trackLpEvent, type LpVariant } from "@/lib/lpAnalytics";
+import { trackMetaInitiateCheckout, trackMetaLead } from "@/lib/metaPixel";
 import { toastApiError } from "@/lib/apiError";
 import { digitsOnlyPhone, formatBrazilPhone, isValidBrazilPhone } from "@/lib/phoneMask";
 import { PASSWORD_HINT, validatePassword } from "@/lib/passwordPolicy";
@@ -286,6 +287,8 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
       }
 
       trackLpEvent("signup_complete", variant);
+      trackMetaLead();
+      trackMetaInitiateCheckout();
       try {
         safeSessionStorage().setItem("pending_checkout_token", data.checkoutToken);
       } catch {

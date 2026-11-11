@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { formatLpPrice, LP_PRICE_INSTALLMENTS } from "@/lib/lpConfig";
+import { trackMetaAddPaymentInfo } from "@/lib/metaPixel";
 
 declare global {
   interface Window {
@@ -215,6 +216,7 @@ export default function MpPaymentBrick({
         }
       }
 
+      trackMetaAddPaymentInfo(method);
       const res = await fetch("/api/payments/mp/process", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

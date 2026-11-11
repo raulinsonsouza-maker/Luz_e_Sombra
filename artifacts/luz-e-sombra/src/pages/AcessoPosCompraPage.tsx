@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { setAuth } from "@/lib/auth";
+import { LP_PRICE } from "@/lib/lpConfig";
+import { trackMetaPurchase } from "@/lib/metaPixel";
 
 const POLL_INTERVAL_MS = 3000;
 const POLL_TIMEOUT_MS = 120000;
@@ -55,6 +57,11 @@ export default function AcessoPosCompraPage() {
               if (completeRes.ok) {
                 const authData = await completeRes.json();
                 setAuth(authData.token, authData.user);
+                trackMetaPurchase({
+                  checkoutToken: token,
+                  value: LP_PRICE,
+                  orderId: token,
+                });
                 setStatus("success");
                 setMensagem("Pagamento confirmado! Entrando na plataforma...");
                 setTimeout(() => navigate("/dashboard"), 800);
