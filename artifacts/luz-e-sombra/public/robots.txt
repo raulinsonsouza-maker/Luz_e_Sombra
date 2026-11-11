@@ -1,0 +1,57 @@
+# Portal Iluminando — https://portaliluminando.com.br
+# Política: permitir busca e treinamento em conteúdo público.
+# Bloquear apenas área logada, APIs e funil sensível.
+
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /jornada
+Disallow: /jornada/
+Disallow: /reflexao
+Disallow: /frases-guardadas
+Disallow: /acompanhamento
+Disallow: /linguagens-amor
+Disallow: /missoes
+Disallow: /avaliacao
+Disallow: /resultado
+Disallow: /historico
+Disallow: /numerologia
+Disallow: /perfil
+Disallow: /quem-sou-eu
+Disallow: /diagnostico-emocional
+Disallow: /traco-de-carater
+Disallow: /temperamento
+Disallow: /comunidade
+Disallow: /cursos
+Disallow: /notificacoes
+Disallow: /admin
+Disallow: /api
+Disallow: /checkout
+Disallow: /acesso-pos-compra
+Disallow: /login
+Disallow: /esqueci-senha
+Disallow: /redefinir-senha
+Disallow: /dev
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://portaliluminando.com.br/sitemap.xml

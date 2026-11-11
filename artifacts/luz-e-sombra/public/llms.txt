@@ -1,0 +1,24 @@
+# Portal Iluminando
+
+> Plataforma digital de autoconhecimento e desenvolvimento pessoal. Produto principal: Jornada Da Sombra à Luz — análises integradas, reflexão diária e Dossiê de Vida.
+
+O Portal Iluminando ajuda pessoas a compreender características pessoais, reconhecer padrões de comportamento, refletir sobre ciclos e desenvolver uma relação mais consciente consigo mesmas. Análises são ferramentas interpretativas — não diagnósticos clínicos. Numerologia é abordada como leitura simbólica, não ciência comprovada.
+
+## Principais páginas
+
+- [Início](https://portaliluminando.com.br/): landing da jornada
+- [Sobre o Portal](https://portaliluminando.com.br/sobre-o-portal): identidade institucional
+- [Metodologia](https://portaliluminando.com.br/metodologia): lentes e limites
+- [Jornada Da Sombra à Luz](https://portaliluminando.com.br/jornada-da-sombra-a-luz): produto
+- [Como funciona](https://portaliluminando.com.br/como-funciona): passos do acesso ao dossiê
+- [Planos](https://portaliluminando.com.br/planos): condições comerciais vigentes
+- [Análises](https://portaliluminando.com.br/analises): índice das nove análises
+- [Biblioteca](https://portaliluminando.com.br/blog): artigos educativos
+- [Glossário](https://portaliluminando.com.br/glossario): termos
+- [FAQ](https://portaliluminando.com.br/perguntas-frequentes): perguntas frequentes
+- [Contato](https://portaliluminando.com.br/contato): contato@portaliluminando.com.br
+
+## Documentação completa para LLMs
+
+- [llms-full.txt](https://portaliluminando.com.br/llms-full.txt): definições expandidas das análises e guias
+- [sitemap.xml](https://portaliluminando.com.br/sitemap.xml): URLs públicas canônicas

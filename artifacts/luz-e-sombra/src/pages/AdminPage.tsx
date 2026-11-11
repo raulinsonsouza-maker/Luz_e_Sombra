@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import {
   Users, MessageSquare, GraduationCap, LayoutDashboard, Shield, Layers, Bell, Loader2, CheckCircle, AlertCircle,
-  CreditCard, Webhook, Mail, CalendarDays, Menu, X, Settings, PanelLeftClose, PanelLeft, Images, UserCircle, LogOut, type LucideIcon,
+  CreditCard, Webhook, Mail, CalendarDays, Menu, X, Settings, PanelLeftClose, PanelLeft, Images, UserCircle, LogOut, Radar, type LucideIcon,
 } from "lucide-react";
 import { LOGO_CLARO } from "@/lib/marca";
 import { BG, C, type Tab } from "./admin/shared";
@@ -20,6 +20,7 @@ import { PagamentosTab } from "./admin/PagamentosTab";
 import { ConteudoDiaTab } from "./admin/ConteudoDiaTab";
 import { GaleriaTab } from "./admin/GaleriaTab";
 import { PerfilAdminTab } from "./admin/PerfilAdminTab";
+import { GeoIntelligenceTab } from "./admin/GeoIntelligenceTab";
 
 type NavItem = { key: Tab; label: string; icon: LucideIcon };
 type NavGroup = { titulo: string; itens: NavItem[] };
@@ -48,6 +49,7 @@ const NAV_OPERACIONAL: NavGroup[] = [
       { key: "engajamento", label: "Engajamento", icon: Bell },
       { key: "modulosJornada", label: "Módulos", icon: Layers },
       { key: "cursos", label: "Cursos", icon: GraduationCap },
+      { key: "geo", label: "GEO Intelligence", icon: Radar },
     ],
   },
 ];
@@ -361,6 +363,7 @@ export default function AdminPage() {
           {aba === "cursos" && <CursosTab showMsg={showMsg} />}
           {aba === "conteudoDia" && <ConteudoDiaTab showMsg={showMsg} />}
           {aba === "galeria" && <GaleriaTab showMsg={showMsg} />}
+          {aba === "geo" && <GeoIntelligenceTab showMsg={showMsg} />}
           {aba === "perfil" && <PerfilAdminTab showMsg={showMsg} />}
         </main>
       </div>

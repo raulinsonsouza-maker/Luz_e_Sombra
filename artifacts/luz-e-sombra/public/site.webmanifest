@@ -1,0 +1,21 @@
+{
+  "name": "Portal Iluminando",
+  "short_name": "Iluminando",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1812",
+  "theme_color": "#1e1812",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/marca/arco.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

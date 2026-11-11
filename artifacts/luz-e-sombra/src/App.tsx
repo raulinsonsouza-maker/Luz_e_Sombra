@@ -5,6 +5,7 @@ import AppErrorBoundary from "@/components/AppErrorBoundary";
 import MotionIntro from "@/components/MotionIntro";
 import SiteHeader from "@/components/SiteHeader";
 import BottomNav from "@/components/BottomNav";
+import SeoHead from "@/components/SeoHead";
 import LandingPage from "@/pages/LandingPage";
 import VslLandingPage from "@/pages/VslLandingPage";
 import CheckoutPage from "@/pages/CheckoutPage";
@@ -36,6 +37,21 @@ import ReflexaoPage from "@/pages/ReflexaoPage";
 import FrasesGuardadasPage from "@/pages/FrasesGuardadasPage";
 import AcompanhamentoPage from "@/pages/AcompanhamentoPage";
 import TracoPreviewPage from "@/pages/dev/TracoPreviewPage";
+import NotFoundPage from "@/pages/NotFoundPage";
+import SobrePortalPage from "@/pages/public/SobrePortalPage";
+import MetodologiaPage from "@/pages/public/MetodologiaPage";
+import JornadaPublicPage from "@/pages/public/JornadaPublicPage";
+import ComoFuncionaPage from "@/pages/public/ComoFuncionaPage";
+import ContatoPage from "@/pages/public/ContatoPage";
+import PlanosPage from "@/pages/public/PlanosPage";
+import AnalisesIndexPage from "@/pages/public/AnalisesIndexPage";
+import AnalisePage from "@/pages/public/AnalisePage";
+import BlogIndexPage from "@/pages/public/BlogIndexPage";
+import BlogPostPage from "@/pages/public/BlogPostPage";
+import HubConhecimentoPage from "@/pages/public/HubConhecimentoPage";
+import GuiaPage from "@/pages/public/GuiaPage";
+import GlossarioPage from "@/pages/public/GlossarioPage";
+import FaqPage from "@/pages/public/FaqPage";
 
 function ProtectedRoute({ component: Component, adminOnly = false }: { component: React.ComponentType; adminOnly?: boolean }) {
   const { user, status } = useAuth();
@@ -57,6 +73,7 @@ function ProtectedRoute({ component: Component, adminOnly = false }: { component
 function Router() {
   return (
     <>
+      <SeoHead />
       <SiteHeader />
       <Switch>
         <Route path="/" component={LandingPage} />
@@ -67,6 +84,26 @@ function Router() {
         <Route path="/esqueci-senha" component={EsqueciSenhaPage} />
         <Route path="/redefinir-senha" component={RedefinirSenhaPage} />
         <Route path="/admin/login" component={AdminLoginPage} />
+
+        <Route path="/sobre-o-portal" component={SobrePortalPage} />
+        <Route path="/metodologia" component={MetodologiaPage} />
+        <Route path="/jornada-da-sombra-a-luz" component={JornadaPublicPage} />
+        <Route path="/como-funciona" component={ComoFuncionaPage} />
+        <Route path="/contato" component={ContatoPage} />
+        <Route path="/planos" component={PlanosPage} />
+        <Route path="/analises/:slug" component={AnalisePage} />
+        <Route path="/analises" component={AnalisesIndexPage} />
+        <Route path="/blog/:slug" component={BlogPostPage} />
+        <Route path="/blog" component={BlogIndexPage} />
+        <Route path="/autoconhecimento" component={HubConhecimentoPage} />
+        <Route path="/padroes-de-comportamento" component={HubConhecimentoPage} />
+        <Route path="/desenvolvimento-pessoal" component={HubConhecimentoPage} />
+        <Route path="/inteligencia-emocional" component={HubConhecimentoPage} />
+        <Route path="/autoconhecimento-e-relacionamentos" component={HubConhecimentoPage} />
+        <Route path="/guia" component={GuiaPage} />
+        <Route path="/glossario" component={GlossarioPage} />
+        <Route path="/perguntas-frequentes" component={FaqPage} />
+
         {import.meta.env.DEV ? <Route path="/dev/traco" component={TracoPreviewPage} /> : null}
         <Route path="/dashboard">
           <ProtectedRoute component={HomePage} />
@@ -135,7 +172,7 @@ function Router() {
           <ProtectedRoute component={AdminPage} adminOnly />
         </Route>
         <Route>
-          <Redirect to="/" />
+          <NotFoundPage />
         </Route>
       </Switch>
       <BottomNav />

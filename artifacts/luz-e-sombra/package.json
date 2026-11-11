@@ -5,10 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
-    "build": "vite build --config vite.config.ts",
+    "seo:static": "node scripts/generate-seo-static.mjs",
+    "prebuild": "node scripts/generate-seo-static.mjs",
+    "build": "vite build --config vite.config.ts && node scripts/prerender.mjs",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --test src/lib/__tests__/*.test.ts"
+    "test": "node --import tsx --test src/lib/__tests__/*.test.ts",
+    "indexnow": "node scripts/indexnow.mjs"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#130f09"/>
+      <stop offset="50%" stop-color="#1e1812"/>
+      <stop offset="100%" stop-color="#2f251b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="980" cy="120" r="180" fill="#c8a56b" fill-opacity="0.08"/>
+  <circle cx="200" cy="520" r="140" fill="#c8a56b" fill-opacity="0.06"/>
+  <text x="80" y="280" fill="#c8a56b" font-family="Georgia, serif" font-size="64" font-weight="600">Portal Iluminando</text>
+  <text x="80" y="360" fill="#f7f2ec" font-family="Georgia, serif" font-size="36">Jornada Da Sombra à Luz</text>
+  <text x="80" y="430" fill="#f7f2ec" fill-opacity="0.7" font-family="system-ui, sans-serif" font-size="24">Autoconhecimento · Consciência · Transformação</text>
+</svg>

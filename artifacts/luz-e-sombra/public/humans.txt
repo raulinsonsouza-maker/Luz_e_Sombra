@@ -1,0 +1,8 @@
+/* TEAM */
+Contact: contato@portaliluminando.com.br
+
+/* SITE */
+Standards: HTML5, JSON-LD, llms.txt
+Language: pt-BR
+Doctype: HTML5
+Purpose: Autoconhecimento e desenvolvimento pessoal — Jornada Da Sombra à Luz

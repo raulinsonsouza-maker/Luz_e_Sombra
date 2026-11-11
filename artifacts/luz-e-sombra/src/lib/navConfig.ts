@@ -44,8 +44,27 @@ export function isToolsGroupActive(location: string): boolean {
   return NAV_TOOLS.some((item) => isNavActive(location, item.href));
 }
 
+const PUBLIC_CONTENT_PREFIXES = [
+  "/sobre-o-portal",
+  "/metodologia",
+  "/jornada-da-sombra-a-luz",
+  "/como-funciona",
+  "/contato",
+  "/planos",
+  "/analises",
+  "/blog",
+  "/autoconhecimento",
+  "/padroes-de-comportamento",
+  "/desenvolvimento-pessoal",
+  "/inteligencia-emocional",
+  "/autoconhecimento-e-relacionamentos",
+  "/guia",
+  "/glossario",
+  "/perguntas-frequentes",
+];
+
 export function isChromelessRoute(location: string): boolean {
-  return (
+  if (
     location === "/" ||
     location === "/vsl" ||
     location === "/checkout" ||
@@ -55,5 +74,8 @@ export function isChromelessRoute(location: string): boolean {
     location === "/redefinir-senha" ||
     location === "/admin/login" ||
     location.startsWith("/admin")
-  );
+  ) {
+    return true;
+  }
+  return PUBLIC_CONTENT_PREFIXES.some((p) => location === p || location.startsWith(`${p}/`));
 }
