@@ -437,8 +437,10 @@ export default function QuemSouEuPage() {
       almaNum = a?.valor ?? null;
       personalidadeNum = p?.valor ?? null;
       anoPessoalNum = ap?.reduzido ?? null;
-      if (vidaNum && NUMEROS_DE_VIDA[vidaNum]) vidaInfo = NUMEROS_DE_VIDA[vidaNum];
-      if (anoPessoalNum && ANOS_PESSOAIS[anoPessoalNum]) anoPessoalInfo = ANOS_PESSOAIS[anoPessoalNum];
+      if (vidaNum && NUMEROS_DE_VIDA[vidaNum]) vidaInfo = normalizarObjetoTextos(NUMEROS_DE_VIDA[vidaNum]);
+      if (anoPessoalNum && ANOS_PESSOAIS[anoPessoalNum]) {
+        anoPessoalInfo = normalizarObjetoTextos(ANOS_PESSOAIS[anoPessoalNum]);
+      }
     } catch { /* ignore */ }
   }
 
@@ -449,8 +451,8 @@ export default function QuemSouEuPage() {
         .sort((a, b) => b.val - a.val)
     : [];
 
-  const areasFortes = areasSorted.filter(a => a.val >= 7);
-  const areasAtencao = areasSorted.filter(a => a.val >= 4 && a.val < 7);
+  const areasFortes = areasSorted.filter(a => a.val >= 8);
+  const areasAtencao = areasSorted.filter(a => a.val >= 4 && a.val < 8);
   const areasUrgentes = areasSorted.filter(a => a.val < 4);
   const bottomAreas = areasSorted.slice(-3);
   const topAreas = areasSorted.slice(0, 3);

@@ -345,7 +345,7 @@ function pushCruzamento(
 // ── Diagnóstico emocional ──────────────────────────────────────────────────────
 
 function montarDiagnostico(input: DossieInput): DiagnosticoEmocionalFase1 | null {
-  const { idade, traco, avaliacao, diagnosticoEmocional, temperamento, linguagens } = input;
+  const { idade, traco, avaliacao, diagnosticoEmocional, linguagens } = input;
   if (!idade) return null;
 
   const faixaEtaria: DiagnosticoEmocionalFase1["faixaEtaria"] =
@@ -405,16 +405,14 @@ function montarDiagnostico(input: DossieInput): DiagnosticoEmocionalFase1 | null
     }
 
     const passos: string[] = [];
-    if (traco?.perguntaTransformacao) passos.push(traco.perguntaTransformacao.replace(/\?$/, "") + "?");
-    if (temperamento?.perguntaCrescimento) passos.push(temperamento.perguntaCrescimento);
-    if (linguagens?.desalinhamento?.ativo) passos.push("Alinhar como você pede apoio com como você o expressa, converse sobre isso com quem importa.");
-    if (passos.length < 3) {
-      passos.push(
-        "Registrar gatilhos emocionais por 7 dias e observar repetição de padrão",
-        "Praticar expressão emocional segura em 1 conversa importante por semana",
-        "Reavaliar após 30 dias para medir deslocamento de presente e consciência",
-      );
+    if (linguagens?.desalinhamento?.ativo) {
+      passos.push("Alinhar como você pede apoio com como você o expressa, em uma conversa com quem importa.");
     }
+    passos.push(
+      "Registrar gatilhos emocionais por 7 dias e observar o que se repete.",
+      "Praticar expressão emocional segura em uma conversa importante por semana.",
+      "Reavaliar após 30 dias para medir deslocamento de presente e consciência.",
+    );
 
     return {
       faixaEtaria,
@@ -725,35 +723,47 @@ function gerarCruzamentos(input: DossieInput): CruzamentoDossie[] {
 
 // ── Síntese e ações ────────────────────────────────────────────────────────────
 
+function primeiraFraseLimpa(texto: string | undefined | null): string {
+  const t = (texto ?? "").trim();
+  if (!t) return "";
+  const corte = t.match(/^(.+?[.!?])(?:\s|$)/);
+  return (corte?.[1] ?? t).replace(/\.$/, "").trim();
+}
+
 function montarSinteseIdentidade(input: DossieInput): string | null {
   const { primeiroNome, vidaNum, traco, temperamento, linguagens } = input;
-  if (!vidaNum && !traco) return null;
+  if (!vidaNum && !traco && !temperamento) return null;
 
-  if (traco?.sinteseHumana) {
-    return traco.sinteseHumana.replace(/\bVocê\b/g, primeiroNome).replace(/\bvocê\b/g, primeiroNome.toLowerCase());
-  }
+  const frases: string[] = [];
 
-  const partes: string[] = [];
   if (vidaNum && NUMEROS_DE_VIDA[vidaNum]) {
     const v = NUMEROS_DE_VIDA[vidaNum];
-    partes.push(
-      `${primeiroNome} é ${v.arquetipo} (Caminho ${vidaNum}), ${v.essencia?.toLowerCase().replace(/^você /, "alguém que ") ?? ""}`,
-    );
+    const ess = primeiraFraseLimpa(v.essencia)
+      .replace(/^Você /i, "")
+      .replace(/^você /i, "");
+    if (ess) {
+      frases.push(
+        `${primeiroNome} é ${v.arquetipo} (Caminho ${vidaNum}): ${ess.charAt(0).toLowerCase()}${ess.slice(1)}.`,
+      );
+    } else {
+      frases.push(`${primeiroNome} caminha pelo Caminho ${vidaNum}, ${v.arquetipo}.`);
+    }
   }
+
   if (traco?.estruturaPrincipal) {
-    partes.push(
-      `na leitura corporal, opera como ${NOME_ESTRUTURA[traco.estruturaPrincipal] ?? traco.estruturaPrincipal}`,
-    );
+    const nome = NOME_ESTRUTURA[traco.estruturaPrincipal] ?? traco.estruturaPrincipal;
+    const temp = temperamento?.arquetipo ? `, com temperamento ${temperamento.arquetipo}` : "";
+    frases.push(`Na leitura corporal, opera como ${nome}${temp}.`);
+  } else if (temperamento?.arquetipo) {
+    frases.push(`O temperamento ${temperamento.arquetipo} marca o ritmo, a decisão e o estilo de vínculo.`);
   }
-  if (temperamento?.arquetipo) {
-    partes.push(`com temperamento ${temperamento.arquetipo}`);
-  }
+
   if (linguagens?.receberPrincipal) {
-    partes.push(
-      `e pede vínculo principalmente por ${LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal}`,
-    );
+    const canal = LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal;
+    frases.push(`Nas relações, pede vínculo principalmente por ${canal}.`);
   }
-  return partes.length ? partes.join(", ").replace(/, ([^,]*)$/, " e $1") + "." : null;
+
+  return frases.length ? frases.join(" ") : null;
 }
 
 function montarAssinatura(input: DossieInput): string | null {
@@ -784,9 +794,7 @@ function gerarAcoes(input: DossieInput, cruzamentos: CruzamentoDossie[]): string
     }
   }
 
-  if (temperamento?.perguntaCrescimento) {
-    acoes.push(temperamento.perguntaCrescimento);
-  } else if (traco?.estruturaPrincipal) {
+  if (traco?.estruturaPrincipal) {
     const sombras: Record<string, string> = {
       psicopata: "Observar onde contenção e vigilância substituem vulnerabilidade.",
       oral: "Praticar receber cuidado sem precisar merecer com utilidade.",
@@ -795,31 +803,27 @@ function gerarAcoes(input: DossieInput, cruzamentos: CruzamentoDossie[]): string
       esquizoide: "Uma conversa de presença plena por semana, corpo na sala, mente no agora.",
     };
     const s = sombras[traco.estruturaPrincipal];
-    if (s) acoes.push(`Sombra da estrutura ${NOME_ESTRUTURA[traco.estruturaPrincipal]}: ${s}`);
+    if (s) acoes.push(s);
   }
 
   if (linguagens?.desalinhamento?.ativo) {
     acoes.push("Conversar com alguém próximo sobre como você pede apoio versus como você o demonstra.");
   }
 
-  if (traco?.perguntaTransformacao) {
-    acoes.push(traco.perguntaTransformacao.endsWith("?") ? traco.perguntaTransformacao : `${traco.perguntaTransformacao}?`);
-  }
-
-  if (input.vidaNum && NUMEROS_DE_VIDA[input.vidaNum]?.desafios?.[0]) {
-    acoes.push(`Desafio do Caminho ${input.vidaNum}: ${NUMEROS_DE_VIDA[input.vidaNum].desafios[0].toLowerCase()}.`);
-  }
-
-  if (acoes.length < 2 && cruzamentos[0]) {
-    acoes.push(`Refletir sobre: ${cruzamentos[0].corpo.split(".")[0]}.`);
+  if (acoes.length < 2 && cruzamentos[0]?.corpo) {
+    const trecho = primeiraFraseLimpa(cruzamentos[0].corpo);
+    if (trecho) acoes.push(`Esta semana, observar na prática: ${trecho.charAt(0).toLowerCase()}${trecho.slice(1)}.`);
   }
 
   const vistos = new Set<string>();
   return acoes.filter((a) => {
-    if (vistos.has(a)) return false;
-    vistos.add(a);
+    const chave = a.trim().toLowerCase();
+    if (!chave || vistos.has(chave)) return false;
+    // Não misturar pergunta com passo concreto
+    if (chave.endsWith("?")) return false;
+    vistos.add(chave);
     return true;
-  }).slice(0, 5);
+  }).slice(0, 4);
 }
 
 function montarMatriz(input: DossieInput): MatrizFonte[] {
@@ -922,7 +926,8 @@ function montarPanoramaFuncional(input: DossieInput, cruzamentos: CruzamentoDoss
   return partes.length ? partes.join(" ") : null;
 }
 
-function montarPontosChave(input: DossieInput, cruzamentos: CruzamentoDossie[]): string[] {
+function montarPontosChave(input: DossieInput, _cruzamentos: CruzamentoDossie[]): string[] {
+  void _cruzamentos;
   const { traco, temperamento, linguagens, avaliacao, vidaNum } = input;
   const pontos: string[] = [];
 
@@ -940,20 +945,20 @@ function montarPontosChave(input: DossieInput, cruzamentos: CruzamentoDossie[]):
     pontos.push(
       `Temperamento ${temperamento.arquetipo}: orienta velocidade de decisão, estilo de comunicação e como você reage sob pressão.`,
     );
-    if (temperamento.pontoCego) pontos.push(`Ponto cego: ${temperamento.pontoCego}`);
   }
 
   if (vidaNum && NUMEROS_DE_VIDA[vidaNum]) {
     const v = NUMEROS_DE_VIDA[vidaNum];
-    pontos.push(`Caminho de Vida ${vidaNum} (${v.arquetipo}): ${v.essencia?.split(".")[0] ?? v.missao?.split(".")[0] ?? "missão central da sua trajetória"}.`);
+    const ess = primeiraFraseLimpa(v.essencia) || primeiraFraseLimpa(v.missao) || "missão central da sua trajetória";
+    pontos.push(`Caminho de Vida ${vidaNum} (${v.arquetipo}): ${ess.charAt(0).toLowerCase()}${ess.slice(1)}.`);
   }
 
   if (linguagens?.receberPrincipal) {
     pontos.push(
-      `Para se sentir sustentado(a) nas relações, você precisa de ${LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal}.`,
+      `Para se sentir cuidado nas relações, você precisa de ${LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal}.`,
     );
     if (linguagens.desalinhamento?.ativo) {
-      pontos.push("Há desalinhamento entre como você pede e como você expressa vínculo, isso precisa ser conversado, não apenas sentido.");
+      pontos.push("Há desalinhamento entre como você pede e como você expressa vínculo. Isso precisa ser conversado, não apenas sentido.");
     }
   }
 
@@ -962,12 +967,6 @@ function montarPontosChave(input: DossieInput, cruzamentos: CruzamentoDossie[]):
     if (menor && menor.val < 7) {
       pontos.push(`Prioridade de vida agora: ${AREAS_LABELS[menor.key]} (${menor.val}/10), área com maior gap entre desejo e realidade.`);
     }
-  }
-
-  if (traco?.perguntaTransformacao) {
-    pontos.push(`Pergunta de integração: ${traco.perguntaTransformacao}`);
-  } else if (cruzamentos[0]) {
-    pontos.push(`Foco de reflexão: ${cruzamentos[0].titulo}.`);
   }
 
   const vistos = new Set<string>();
@@ -994,10 +993,13 @@ function montarMapaEntendimento(input: DossieInput): { titulo: string; texto: st
     });
   }
 
-  if (temperamento?.sinteseHumana) {
+  if (temperamento?.arquetipo) {
+    const trecho = primeiraFraseLimpa(temperamento.trechoRelacoes);
     mapa.push({
       titulo: "Como você decide e se relaciona",
-      texto: temperamento.sinteseHumana,
+      texto: trecho
+        ? `Temperamento ${temperamento.arquetipo}: ${trecho.charAt(0).toLowerCase()}${trecho.slice(1)}.`
+        : `O temperamento ${temperamento.arquetipo} orienta seu ritmo, sua forma de decidir e o jeito como você se aproxima das pessoas.`,
     });
   }
 
@@ -1006,24 +1008,42 @@ function montarMapaEntendimento(input: DossieInput): { titulo: string; texto: st
       titulo: "Como você pede e oferece vínculo",
       texto: linguagens.sinteseHumana ?? linguagens.combinacao ?? "",
     });
+  } else if (linguagens?.receberPrincipal) {
+    const canal = LINGUAGEM_LABEL[linguagens.receberPrincipal] ?? linguagens.receberPrincipal;
+    mapa.push({
+      titulo: "Como você pede e oferece vínculo",
+      texto: `Você se sente mais cuidado quando recebe ${canal.toLowerCase()}.`,
+    });
   }
 
   if (avaliacao) {
-    const urgente = areasOrdenadas(avaliacao).slice(0, 2);
+    const urgente = areasOrdenadas(avaliacao).filter((a) => a.val <= 5).slice(0, 2);
+    const foco = urgente.length ? urgente : areasOrdenadas(avaliacao).slice(0, 2);
     mapa.push({
       titulo: "Onde sua vida pede atenção",
-      texto: urgente
+      texto: foco
         .map((a) => `${AREAS_LABELS[a.key]}: ${a.val}/10`)
-        .join(" · ") + ". Áreas com nota mais baixa indicam onde energia está drenando ou parada.",
+        .join(" · ") + ". É aí que a energia está mais fina ou parada.",
     });
   }
 
   if (diagnosticoEmocional?.padroesPct) {
     const dom = Object.entries(diagnosticoEmocional.padroesPct).sort((a, b) => b[1] - a[1])[0];
     if (dom) {
+      const pct = dom[1] <= 1 ? Math.round(dom[1] * 100) : Math.round(dom[1]);
+      const nomePadrao =
+        dom[0] === "vinculo"
+          ? "vínculo e pertencimento"
+          : dom[0] === "controle"
+            ? "controle emocional"
+            : dom[0] === "estrategia"
+              ? "estratégia e defesa"
+              : dom[0] === "retencao"
+                ? "retenção e acúmulo"
+                : "desconexão e proteção";
       mapa.push({
         titulo: "Padrão emocional dominante",
-        texto: `Maior ativação em ${dom[0]} (${Math.round(dom[1] * 100)}%). Isso cruza com a leitura corporal e explica reações automáticas em vínculo, controle ou proteção.`,
+        texto: `Maior ativação em ${nomePadrao} (${pct}%). Isso cruza com a leitura corporal e explica reações automáticas sob pressão.`,
       });
     }
   }

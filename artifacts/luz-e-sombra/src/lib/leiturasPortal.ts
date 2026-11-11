@@ -581,17 +581,22 @@ export function leituraDossie(dossie: {
   perguntaCentral?: string | null;
 } | null): LeituraPortal | null {
   if (!dossie?.sinteseIdentidade && !dossie?.panoramaFuncional) return null;
-  const quem = lista(item("A síntese", dossie.sinteseIdentidade), item("A assinatura", dossie.assinaturaIntegrada));
+  const quem = lista(item("A síntese", dossie.sinteseIdentidade));
+  const destaques = (dossie.pontosChave ?? []).filter((p) => {
+    const t = p.toLowerCase();
+    return !t.startsWith("ponto cego") && !t.startsWith("pergunta de integração");
+  });
+  const acoes = (dossie.acoesPrioritarias ?? []).filter((a) => !a.trim().endsWith("?"));
   return comporLeitura({
     quemVoceE: quem.length ? quem : (dossie.panoramaFuncional || "Este retrato junta o que os seus testes mostram."),
     noDiaADia: ou(
-      lista(item("O panorama", dossie.panoramaFuncional), comTitulo("O que se destaca", dossie.pontosChave ?? [])),
+      lista(item("O panorama", dossie.panoramaFuncional), comTitulo("O que se destaca", destaques)),
       "Olhe para esta semana e veja em qual área da vida esse retrato apareceu de verdade.",
     ),
     sombra: dossie.perguntaCentral
       || "A sombra do dossiê é usar o mapa para se cobrar, em vez de se entender.",
     oQueFazer: ou(
-      lista(dossie.acoesPrioritarias),
+      lista(acoes),
       "Escolha uma ação desta leitura e coloque na agenda de amanhã.",
     ),
   });
