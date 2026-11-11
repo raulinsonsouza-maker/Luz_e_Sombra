@@ -59,9 +59,9 @@ const PROTOCOLO: Record<TemperamentoCodigo, string[]> = {
 function mapaTemperamental(opts: EntradaAnaliseAprofundada): string[] {
   const np = NOME_TEMPERAMENTO[opts.primario];
   return [
-    `Isto descreve o jeito mais constante de você reagir. Não é uma caixa fechada. O que mais aparece é o jeito ${np}.`,
-    "O questionário separa quatro jeitos: animar as pessoas, resolver e cobrar, pensar fundo antes de agir, e manter a calma.",
-    "Se um segundo jeito aparece perto do primeiro, os dois são seus. Um manda quando você está com pressa. O outro aparece quando você relaxa.",
+    `Isto descreve tendências do seu comportamento: como você costuma reagir, expressar emoções e tomar decisões. O temperamento que mais aparece nas suas respostas é o ${np}.`,
+    "Existem quatro temperamentos clássicos: Colérico, Sanguíneo, Melancólico e Fleumático. Cada um representa um conjunto de características e maneiras de funcionar.",
+    "Uma pessoa pode apresentar características de mais de um temperamento, em diferentes intensidades. Se um segundo temperamento aparece perto do primeiro, os dois fazem parte do seu perfil.",
   ];
 }
 
@@ -123,8 +123,8 @@ function sombraComExemplo(primario: TemperamentoCodigo): string[] {
 
 function leituraEixosPedagogica(): string[] {
   return [
-    "Leia isto como um espelho do seu jeito, não como uma nota. O que combina com a sua semana, fique. O que não combina, solte.",
-    "Nenhum jeito é melhor do que o outro. Cada um tem um dom e um exagero.",
+    "Leia isto como um espelho das suas tendências, não como uma nota. O que combina com a sua semana, fique. O que não combina, solte.",
+    "Nenhum temperamento é melhor do que o outro. Cada um tem um dom e um exagero.",
     "Se o texto não parecer você, refaça o questionário com calma. Responda pelo que acontece na maior parte do tempo, não pelo dia de hoje.",
   ];
 }
@@ -132,16 +132,16 @@ function leituraEixosPedagogica(): string[] {
 export function montarAnaliseAprofundada(opts: EntradaAnaliseAprofundada): RelatorioSecao[] {
   const { primario, secundario, tipo, empateProximo } = opts;
   const secoes: RelatorioSecao[] = [
-    { id: "mapa", titulo: "O seu jeito", paragrafos: mapaTemperamental(opts) },
+    { id: "mapa", titulo: "Seu temperamento", paragrafos: mapaTemperamental(opts) },
     { id: "motor", titulo: "O que te move", paragrafos: [paragrafoUnicoMotor(primario)] },
     { id: "decisao", titulo: "Como você decide", paragrafos: [paragrafoDecisao(primario)] },
     { id: "reacao", titulo: "No dia a dia", paragrafos: [paragrafoReacao(primario)] },
-    { id: "relacoes", titulo: "Com as pessoas", paragrafos: [RELACOES[primario]] },
+    { id: "relacoes", titulo: "Nos relacionamentos", paragrafos: [RELACOES[primario]] },
     { id: "trabalho", titulo: "No trabalho", paragrafos: [TRABALHO[primario]] },
-    { id: "sombra", titulo: "Quando passa do ponto", paragrafos: sombraComExemplo(primario) },
+    { id: "sombra", titulo: "Quando essas tendências atrapalham", paragrafos: sombraComExemplo(primario) },
     {
       id: "crescimento",
-      titulo: "O que fazer agora",
+      titulo: "O que observar agora",
       paragrafos: [
         "Três passos para as próximas semanas. Faça um de cada vez, sem esperar o dia perfeito:",
         ...PROTOCOLO[primario].map((p, i) => `${i + 1}. ${p}`),
@@ -153,12 +153,12 @@ export function montarAnaliseAprofundada(opts: EntradaAnaliseAprofundada): Relat
   if ((tipo === "DUPLO" || tipo === "MISTO" || empateProximo) && primario !== secundario) {
     secoes.splice(1, 0, {
       id: "dinamica",
-      titulo: "A dinâmica interna do seu perfil",
+      titulo: "Predominante e secundário",
       paragrafos: [
-        `O que mais aparece é o jeito ${NOME_TEMPERAMENTO[primario]}, com um traço de ${NOME_TEMPERAMENTO[secundario]}. Uma parte puxa para um lado. A outra ajusta o resultado.`,
+        `O temperamento predominante é o ${NOME_TEMPERAMENTO[primario]}, com características secundárias de ${NOME_TEMPERAMENTO[secundario]}. Uma parte puxa para um lado. A outra ajusta o resultado.`,
         empateProximo
-          ? "Os dois jeitos estão perto. Por isso, em dias diferentes, você pode parecer outra pessoa."
-          : "O segundo jeito não apaga o primeiro. Ele aparece nas decisões, nas conversas e quando a pressão sobe.",
+          ? "Os dois temperamentos aparecem com intensidades próximas. Por isso, em dias diferentes, você pode parecer outra pessoa."
+          : "As características secundárias não apagam o temperamento predominante. Elas aparecem nas decisões, nas conversas e quando a pressão sobe.",
       ],
     });
   }

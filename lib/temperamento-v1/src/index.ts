@@ -4,6 +4,8 @@ export {
   VERSAO_TEMPERAMENTO_V3,
   VERSAO_TEMPERAMENTO_ATUAL,
   VERSAO_NARRATIVA_V4,
+  VERSAO_NARRATIVA_V5,
+  VERSAO_NARRATIVA_ATUAL,
 } from "./constants";
 export * from "./types";
 export { PERGUNTAS, CODIGOS_PERGUNTA, CODIGOS_SET, perguntasPorDimensao, type ItemPergunta } from "./perguntas";

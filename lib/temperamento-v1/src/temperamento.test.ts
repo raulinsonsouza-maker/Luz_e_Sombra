@@ -79,7 +79,7 @@ describe("temperamento-v3 Eysenck-lite", () => {
       metadata: { tempo_total_segundos: 180 },
     });
     const r = computarTemperamento(raw);
-    assert.equal(r.versaoNarrativa, "temperamento_v4");
+    assert.equal(r.versaoNarrativa, "temperamento_v5");
     assert.equal(r.perfil.primario, "SANGUINEO");
     assert.ok(r.analiseAprofundada.length >= 8);
     assert.ok(r.sinteseHumana.length > 40);

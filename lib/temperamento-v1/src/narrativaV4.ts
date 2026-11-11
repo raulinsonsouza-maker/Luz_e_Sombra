@@ -1,4 +1,5 @@
 import { normalizarObjetoTextos } from "@workspace/copy-voz";
+import { VERSAO_NARRATIVA_ATUAL } from "./constants";
 import type { Dimensao, TemperamentoCodigo, TipoPerfil } from "./types";
 import {
   comboNarrativaParaPar,
@@ -46,7 +47,7 @@ function tracosUnicos(norm: Record<Dimensao, number>, primario: TemperamentoCodi
 }
 
 export interface NarrativaTemperamentoV4 {
-  versaoNarrativa: "temperamento_v4";
+  versaoNarrativa: typeof VERSAO_NARRATIVA_ATUAL;
   sinteseHumana: string;
   portraitIdentidade: string;
   seuDom: string;
@@ -128,7 +129,7 @@ export function montarNarrativaV4(opts: {
   semParagrafosDuplicados(todosTextos);
 
   return normalizarObjetoTextos({
-    versaoNarrativa: "temperamento_v4",
+    versaoNarrativa: VERSAO_NARRATIVA_ATUAL,
     sinteseHumana,
     portraitIdentidade: d.motorInterno,
     seuDom: resumoDom(d.pontoForte),

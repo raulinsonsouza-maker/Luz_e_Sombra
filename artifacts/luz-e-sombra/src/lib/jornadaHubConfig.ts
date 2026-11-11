@@ -45,14 +45,16 @@ export const JORNADA_HUB_COPY: Record<
     introFallback:
       "Descubra como você pensa, age e se relaciona. Colérico, Sanguíneo, Melancólico e Fleumático em um mapa claro sobre quem você é.",
     introTexto: [
-      "O temperamento é a base de como você reage ao mundo: velocidade de decisão, intensidade emocional, necessidade de rotina ou de novidade. Colérico, Sanguíneo, Melancólico e Fleumático não são rótulos, são lentes para entender seus padrões naturais.",
-      "O questionário tem 16 afirmações Sim/Não. Responda pelo que é mais verdadeiro na maior parte do tempo, não só hoje. O resultado mostra seu perfil dominante, traço secundário e uma análise aprofundada para relações, trabalho e crescimento.",
-      "Leva cerca de 3 minutos. Não existe temperamento melhor, existe o seu mapa real.",
+      "Os temperamentos são uma forma de compreender diferentes tendências do nosso comportamento. Eles ajudam a observar como costumamos reagir às situações, expressar emoções, tomar decisões, lidar com mudanças e nos relacionar com outras pessoas.",
+      "Existem quatro temperamentos clássicos: Colérico, Sanguíneo, Melancólico e Fleumático. Cada um representa um conjunto de características e maneiras de funcionar. Uma pessoa pode apresentar características de mais de um temperamento, em diferentes intensidades.",
+      "Nesta análise, você responderá a um questionário com 16 afirmações, escolhendo Sim ou Não de acordo com o que melhor representa seu comportamento na maior parte do tempo, e não apenas o que sente no momento.",
+      "A partir das suas respostas, você conhecerá seu temperamento predominante, as características secundárias e como essas tendências podem aparecer em diferentes áreas da sua vida.",
+      "Reserve cerca de 3 minutos para responder com sinceridade. Não existem respostas certas ou erradas: o objetivo é ampliar sua compreensão sobre si mesmo.",
     ],
     introBullets: [
-      "Perfil dominante e secundário entre os 4 temperamentos",
-      "Eixos de energia social e estabilidade emocional",
-      "Análise aprofundada para relações, trabalho e autoconhecimento",
+      "Seu perfil predominante e secundário: conheça quais dos quatro temperamentos aparecem com maior intensidade nas suas respostas.",
+      "Suas tendências comportamentais: compreenda aspectos relacionados à sua energia social, expressão emocional, estabilidade e maneira de reagir às situações.",
+      "Uma análise para o dia a dia: explore como essas características podem se manifestar nos seus relacionamentos, no trabalho e no seu processo de autoconhecimento.",
     ],
     analiseTitulo: "Questionário de Temperamento",
     analiseDescricaoSem: "16 afirmações Sim/Não, cerca de 3 minutos. Responda com sinceridade.",

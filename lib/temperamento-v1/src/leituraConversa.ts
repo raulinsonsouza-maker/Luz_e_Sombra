@@ -47,10 +47,14 @@ const NOME: Record<TemperamentoCodigo, string> = {
 };
 
 const EXPLICACAO: Record<TemperamentoCodigo, string> = {
-  SANGUINEO: "Sanguíneo: você se anima com gente, conversa e novidade. Muitas vezes você descobre o que pensa enquanto fala.",
-  COLERICO: "Colérico: você olha para o que precisa ser feito e começa. O caminho se ajusta no meio.",
-  MELANCOLICO: "Melancólico: você quer entender antes de escolher e repara no que os outros deixam passar.",
-  FLEUMATICO: "Fleumático: você observa antes de entrar e prefere um ambiente em paz.",
+  SANGUINEO:
+    "Sanguíneo: tendência a se animar com gente, conversa e novidade. Muitas vezes você descobre o que pensa enquanto fala.",
+  COLERICO:
+    "Colérico: tendência a olhar para o que precisa ser feito e começar. O caminho se ajusta no meio.",
+  MELANCOLICO:
+    "Melancólico: tendência a entender antes de escolher e reparar no que os outros deixam passar.",
+  FLEUMATICO:
+    "Fleumático: tendência a observar antes de entrar e preferir um ambiente em paz.",
 };
 
 const INTRO: Record<TemperamentoCodigo, string> = {
@@ -65,7 +69,7 @@ const INTRO: Record<TemperamentoCodigo, string> = {
 };
 
 const AVISO_ANTIGO =
-  "O desenho abaixo vem da proporção das suas respostas antigas. O que nenhuma pergunta nova cobriu fica como possibilidade: diz o que pode acontecer, não uma cena que você marcou.";
+  "Este desenho vem da proporção das suas respostas anteriores. O que nenhuma pergunta nova cobriu fica como possibilidade: indica o que pode aparecer, não uma cena que você marcou.";
 
 const FACILIDADE: Record<TemperamentoCodigo, string> = {
   SANGUINEO: "Você começa uma conversa e as pessoas ficam mais à vontade.",
@@ -483,12 +487,12 @@ const ORDEM: Record<string, FatoOrdem> = {
 };
 
 const ABERTURA = [
-  "Você não precisa estudar temperamento para se reconhecer aqui.",
-  "O texto fala do que as suas respostas mostraram, na conversa, em casa e no trabalho.",
+  "Os temperamentos são uma forma de compreender diferentes tendências do nosso comportamento: como costumamos reagir às situações, expressar emoções, tomar decisões, lidar com mudanças e nos relacionar.",
+  "A partir das suas respostas, você conhece o temperamento predominante, as características secundárias e como essas tendências podem aparecer nas relações, no trabalho e no seu processo de autoconhecimento.",
 ];
 
 const FECHO_COMUM =
-  "Conhecer o seu jeito é o começo. A partir daqui, o convite é perceber como as suas escolhas participam do que acontece no seu dia.";
+  "Conhecer o seu temperamento é o começo. A partir daqui, o convite é observar como essas tendências aparecem no seu dia a dia e ampliar a compreensão sobre si mesmo.";
 
 function chave(a: TemperamentoCodigo, b: TemperamentoCodigo): string {
   return `${a}_${b}`;
@@ -522,9 +526,9 @@ function textos(cenas: CenaItem[], campo: keyof CenaItem, max: number): string[]
 
 function quaseNao(codigo: TemperamentoCodigo): string {
   if (codigo === "FLEUMATICO") {
-    return "Este jeito quase não apareceu nas suas respostas. Não quer dizer que você não possa usá-lo. Uma pausa, por exemplo, pode ser algo para experimentar, não algo que você já faz.";
+    return "Este temperamento quase não apareceu nas suas respostas. Não quer dizer que você não possa usá-lo. Uma pausa, por exemplo, pode ser algo para experimentar, não algo que você já faz.";
   }
-  return "Este jeito quase não apareceu nas suas respostas. Pode ser algo para experimentar, não uma cena que você marcou.";
+  return "Este temperamento quase não apareceu nas suas respostas. Pode ser algo para experimentar, não uma cena que você marcou.";
 }
 
 function blocoMenor(
@@ -534,12 +538,12 @@ function blocoMenor(
 ): string[] {
   const nome = NOME[codigo];
   if (!usar) {
-    return [`O jeito ${nome} apareceu menos. Você pode reconhecê-lo em algum dia, sem uma cena marcada.`];
+    return [`O temperamento ${nome} apareceu com menor intensidade. Você pode reconhecê-lo em algum dia, sem uma cena marcada.`];
   }
   const cenas = cenasDe([codigo], respostas, true);
   const reconhecidos = textos(cenas, "reconhecer", 3);
-  if (reconhecidos.length === 0) return [`O jeito ${nome} ficou baixo. ${quaseNao(codigo)}`];
-  return [`O jeito ${nome} também aparece, em menor proporção.`, ...reconhecidos];
+  if (reconhecidos.length === 0) return [`O temperamento ${nome} ficou baixo. ${quaseNao(codigo)}`];
+  return [`O temperamento ${nome} também aparece, em menor intensidade.`, ...reconhecidos];
 }
 
 function unicos(textosLista: Array<string | undefined>, max: number): string[] {
@@ -592,7 +596,9 @@ function montarSanguineoColerico(opts: {
     const cenas = doAlvo(codigo);
     const titulo = `O ${nome} aparece como uma ${lugar} tendência nas suas respostas.`;
     if (!usar) return [titulo];
-    if (cenas.length === 0) return [titulo, "Nas perguntas desse jeito, você não marcou um comportamento para destacar."];
+    if (cenas.length === 0) {
+      return [titulo, "Nas perguntas desse temperamento, você não marcou um comportamento para destacar."];
+    }
     return [titulo, ...cenas];
   };
 
@@ -615,12 +621,12 @@ function montarSanguineoColerico(opts: {
   if (usar && atrapalhos.length === 0) atrapalhos.push("Nenhuma cena de aperto ficou marcada nas suas respostas.");
 
   return [
-    { id: "antes", titulo: "Antes de olhar os números", paragrafos: ABERTURA, perguntas: [], passos: [] },
+    { id: "antes", titulo: "Sobre o seu resultado", paragrafos: ABERTURA, perguntas: [], passos: [] },
     {
       id: "jeitos",
-      titulo: "O que cada jeito quer dizer",
+      titulo: "Os quatro temperamentos",
       paragrafos: [
-        "Estes quatro nomes só organizam jeitos diferentes de reagir. Todos podem estar em você. Muda o quanto cada um apareceu.",
+        "Existem quatro temperamentos clássicos. Cada um representa um conjunto de características e maneiras de funcionar. Uma pessoa pode apresentar características de mais de um, em diferentes intensidades.",
         EXPLICACAO.SANGUINEO,
         EXPLICACAO.COLERICO,
         EXPLICACAO.MELANCOLICO,
@@ -631,48 +637,48 @@ function montarSanguineoColerico(opts: {
     },
     {
       id: "primeiro",
-      titulo: "O que aparece primeiro",
+      titulo: "Seu temperamento predominante",
       paragrafos: primeiro,
       perguntas: [PERGUNTA_JEITO.SANGUINEO],
       passos: [],
     },
-    { id: "depois", titulo: "O que entra logo depois", paragrafos: [fato.depois], perguntas: [], passos: [] },
+    { id: "depois", titulo: "Características secundárias", paragrafos: [fato.depois], perguntas: [], passos: [] },
     {
       id: "encontro",
-      titulo: "Quando os dois se encontram",
+      titulo: "Como essas tendências se combinam",
       paragrafos: [fato.encontro, fato.descoberta],
       perguntas: [fato.pergunta],
       passos: [],
     },
     {
       id: "tambem",
-      titulo: "O que também está em você",
+      titulo: "O que também aparece em você",
       paragrafos: [...menor(terceiro, "terceira"), ...menor(quarto, "quarta")],
       perguntas: [],
       passos: [],
     },
     {
       id: "aproveitar",
-      titulo: "O que você pode aproveitar",
+      titulo: "Suas tendências comportamentais",
       paragrafos: [
         "A força desta combinação é esta: você junta as pessoas e, logo depois, coloca a ideia para andar. Você não fica só na conversa, e também não chega só cobrando.",
       ],
       perguntas: [],
       passos: [],
     },
-    { id: "relacoes", titulo: "Nas relações", paragrafos: relacoes, perguntas: [], passos: [] },
+    { id: "relacoes", titulo: "Nos relacionamentos", paragrafos: relacoes, perguntas: [], passos: [] },
     { id: "trabalho", titulo: "No trabalho", paragrafos: [fato.trabalho], perguntas: [], passos: [] },
-    { id: "atrapalha", titulo: "Quando o seu jeito atrapalha", paragrafos: atrapalhos, perguntas: [], passos: [] },
+    { id: "atrapalha", titulo: "Quando essas tendências atrapalham", paragrafos: atrapalhos, perguntas: [], passos: [] },
     {
       id: "semana",
-      titulo: "Para experimentar nesta semana",
+      titulo: "Para observar nesta semana",
       paragrafos: ["Nesta semana, observe como você reage e experimente uma atitude diferente."],
       perguntas: [],
       passos: [...fato.passos],
     },
     {
       id: "fica",
-      titulo: "O que fica com você",
+      titulo: "Para o seu autoconhecimento",
       paragrafos: [fato.fechamento],
       perguntas: [PERGUNTA_FECHO.SANGUINEO_COLERICO],
       passos: [],
@@ -718,12 +724,12 @@ export function montarLeituraConversa(opts: {
   const fecho = PERGUNTA_FECHO[chave(primario, secundario)] ?? PERGUNTA_FECHO.SANGUINEO_FLEUMATICO;
 
   return [
-    { id: "antes", titulo: "Antes de olhar os números", paragrafos: ABERTURA, perguntas: [], passos: [] },
+    { id: "antes", titulo: "Sobre o seu resultado", paragrafos: ABERTURA, perguntas: [], passos: [] },
     {
       id: "jeitos",
-      titulo: "O que cada jeito quer dizer",
+      titulo: "Os quatro temperamentos",
       paragrafos: [
-        "Os quatro nomes abaixo são só um jeito antigo de falar dessas diferenças. Todos podem existir na mesma pessoa. O que muda é o quanto cada um apareceu nas suas respostas.",
+        "Existem quatro temperamentos clássicos. Cada um representa um conjunto de características e maneiras de funcionar. Uma pessoa pode apresentar características de mais de um, em diferentes intensidades.",
         EXPLICACAO.SANGUINEO,
         EXPLICACAO.COLERICO,
         EXPLICACAO.MELANCOLICO,
@@ -734,45 +740,51 @@ export function montarLeituraConversa(opts: {
     },
     {
       id: "primeiro",
-      titulo: "O que aparece primeiro",
-      paragrafos: [`O jeito que mais apareceu é o ${NOME[primario]}. ${INTRO[primario]}`, ...aviso, ...textos(doPrimeiro, "reconhecer", 3)],
+      titulo: "Seu temperamento predominante",
+      paragrafos: [
+        `O temperamento que mais apareceu nas suas respostas é o ${NOME[primario]}. ${INTRO[primario]}`,
+        ...aviso,
+        ...textos(doPrimeiro, "reconhecer", 3),
+      ],
       perguntas: [PERGUNTA_JEITO[primario]],
       passos: [],
     },
     {
       id: "depois",
-      titulo: "O que entra logo depois",
+      titulo: "Características secundárias",
       paragrafos: [fato.depois],
       perguntas: [],
       passos: [],
     },
     {
       id: "encontro",
-      titulo: "Quando os dois se encontram",
+      titulo: "Como essas tendências se combinam",
       paragrafos: [fato.encontro, fato.descoberta],
       perguntas: [fato.pergunta],
       passos: [],
     },
     {
       id: "tambem",
-      titulo: "O que também está em você",
+      titulo: "O que também aparece em você",
       paragrafos: [...blocoMenor(terceiro, respostas, usar), ...blocoMenor(quarto, respostas, usar)],
       perguntas: [],
       passos: [],
     },
     {
       id: "aproveitar",
-      titulo: "O que você pode aproveitar",
-      paragrafos: facilidades.length ? facilidades : ["As suas respostas não marcaram uma força específica para destacar nesta semana."],
+      titulo: "Suas tendências comportamentais",
+      paragrafos: facilidades.length
+        ? facilidades
+        : ["As suas respostas não marcaram uma tendência específica para destacar nesta semana."],
       perguntas: [],
       passos: [],
     },
     {
       id: "relacoes",
-      titulo: "Nas relações",
+      titulo: "Nos relacionamentos",
       paragrafos: relacoes.length
         ? relacoes
-        : ["Nas suas respostas, não apareceu uma cena de relação para destacar."],
+        : ["Nas suas respostas, não apareceu uma cena de relacionamento para destacar."],
       perguntas: [],
       passos: [],
     },
@@ -785,7 +797,7 @@ export function montarLeituraConversa(opts: {
     },
     {
       id: "atrapalha",
-      titulo: "Quando o seu jeito atrapalha",
+      titulo: "Quando essas tendências atrapalham",
       paragrafos: atrapalhos.length
         ? atrapalhos
         : ["Nenhuma cena de aperto ficou marcada nas suas respostas."],
@@ -794,14 +806,16 @@ export function montarLeituraConversa(opts: {
     },
     {
       id: "semana",
-      titulo: "Para experimentar nesta semana",
-      paragrafos: ["Não é preciso acertar sempre. O convite é perceber o que acontece e experimentar outro caminho, uma vez."],
+      titulo: "Para observar nesta semana",
+      paragrafos: [
+        "Não é preciso acertar sempre. O convite é observar o que acontece e experimentar outro caminho, uma vez.",
+      ],
       perguntas: [],
       passos: experimentos,
     },
     {
       id: "fica",
-      titulo: "O que fica com você",
+      titulo: "Para o seu autoconhecimento",
       paragrafos: [fato.fechamento, FECHO_COMUM],
       perguntas: [fecho],
       passos: [],

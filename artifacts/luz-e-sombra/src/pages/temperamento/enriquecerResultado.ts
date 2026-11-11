@@ -92,5 +92,7 @@ export function textoSecao(raw: ResultadoTemperamentoUi, id: string): string | u
 }
 
 export function isResultadoLegado(raw: ResultadoTemperamentoUi): boolean {
-  return raw.versaoNarrativa !== "temperamento_v4" && !raw.analiseAprofundada?.length;
+  const versao = raw.versaoNarrativa;
+  const narrativaAtual = versao === "temperamento_v5" || versao === "temperamento_v4";
+  return !narrativaAtual && !raw.analiseAprofundada?.length;
 }

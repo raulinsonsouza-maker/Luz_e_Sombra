@@ -50,7 +50,7 @@ export default function TemperamentoPainelResultado({
       <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,165,107,0.14)" }}>
         <div className="px-5 py-4" style={{ background: "rgba(30,24,18,0.55)" }}>
           <h2 className="font-tan-mon-cheri text-base" style={{ color: GOLD }}>
-            Seu jeito
+            Seu temperamento
           </h2>
         </div>
         <div
@@ -84,7 +84,7 @@ export default function TemperamentoPainelResultado({
                     className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full"
                     style={{ background: "rgba(200,165,107,0.12)", color: "rgba(200,165,107,0.85)" }}
                   >
-                    com traço {NOME_TEMPERAMENTO[secundario]}
+                    com características de {NOME_TEMPERAMENTO[secundario]}
                   </span>
                 )}
               </div>
@@ -95,7 +95,7 @@ export default function TemperamentoPainelResultado({
         {pct && primario && (
           <div className="space-y-3 pt-2">
             <p className="text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>
-              O quanto cada jeito aparece em você.
+              A intensidade de cada temperamento nas suas respostas.
             </p>
             {(Object.entries(pct) as [TemperamentoCodigo, number][])
               .sort((a, b) => b[1] - a[1])

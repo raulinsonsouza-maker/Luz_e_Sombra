@@ -1,4 +1,5 @@
 import { TOTAL_ITENS } from "./itens";
+import { VERSAO_NARRATIVA_ATUAL } from "./constants";
 import type { Dimensao, TemperamentoCodigo, TipoPerfil, QualityFlag, StatusResultado } from "./types";
 import type { AlertaQualidade } from "./qualidade";
 import { calcularAlertasV3, calcularConfiabilidadeV3 } from "./qualidadeV3";
@@ -41,7 +42,7 @@ export interface ResultadoTemperamentoComputado {
   };
   relatorio_vars: Record<string, string | number>;
   relatorioInterno: RelatorioInterno;
-  versaoNarrativa: "temperamento_v4";
+  versaoNarrativa: typeof VERSAO_NARRATIVA_ATUAL;
   questionario: "claro";
   sinteseHumana: string;
   portraitIdentidade: string;

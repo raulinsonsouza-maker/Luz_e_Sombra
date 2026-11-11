@@ -295,10 +295,10 @@ export function leituraTemperamento(r: TemperamentoUi | null | undefined): Leitu
       ),
     },
     {
-      quemVoceE: "O seu jeito",
+      quemVoceE: "Seu temperamento",
       noDiaADia: "No dia a dia",
-      sombra: "Quando passa do ponto",
-      oQueFazer: "O que fazer",
+      sombra: "Quando essas tendências atrapalham",
+      oQueFazer: "O que observar",
     },
   );
 }
