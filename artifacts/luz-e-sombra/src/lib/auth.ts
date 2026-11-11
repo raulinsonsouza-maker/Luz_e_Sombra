@@ -1,3 +1,5 @@
+import { safeLocalStorage } from "@/lib/safeStorage";
+
 export interface User {
   id: number;
   username: string;
@@ -18,23 +20,41 @@ const TOKEN_KEY = "luz_e_sombra_token";
 const USER_KEY = "luz_e_sombra_user";
 
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  try {
+    return safeLocalStorage().getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
 }
 
 export function getStoredUser(): User | null {
-  const s = localStorage.getItem(USER_KEY);
-  if (!s) return null;
-  try { return JSON.parse(s); } catch { return null; }
+  try {
+    const s = safeLocalStorage().getItem(USER_KEY);
+    if (!s) return null;
+    return JSON.parse(s) as User;
+  } catch {
+    return null;
+  }
 }
 
 export function setAuth(token: string, user: User) {
-  localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  try {
+    const store = safeLocalStorage();
+    store.setItem(TOKEN_KEY, token);
+    store.setItem(USER_KEY, JSON.stringify(user));
+  } catch {
+    /* WebView sem storage */
+  }
 }
 
 export function clearAuth() {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
+  try {
+    const store = safeLocalStorage();
+    store.removeItem(TOKEN_KEY);
+    store.removeItem(USER_KEY);
+  } catch {
+    /* ignore */
+  }
 }
 
 export function authHeaders(): HeadersInit {

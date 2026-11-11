@@ -1,3 +1,5 @@
+import { safeSessionStorage } from "@/lib/safeStorage";
+
 const UTM_STORAGE_KEY = "lp_utm_params";
 
 export interface UtmParams {
@@ -24,7 +26,7 @@ export function captureUtmsFromUrl(): void {
   if (term) utm.term = term;
   if (Object.keys(utm).length === 0) return;
   try {
-    sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(utm));
+    safeSessionStorage().setItem(UTM_STORAGE_KEY, JSON.stringify(utm));
   } catch {
     /* ignore */
   }
@@ -32,7 +34,7 @@ export function captureUtmsFromUrl(): void {
 
 export function getStoredUtms(): UtmParams | undefined {
   try {
-    const raw = sessionStorage.getItem(UTM_STORAGE_KEY);
+    const raw = safeSessionStorage().getItem(UTM_STORAGE_KEY);
     if (!raw) return undefined;
     return JSON.parse(raw) as UtmParams;
   } catch {

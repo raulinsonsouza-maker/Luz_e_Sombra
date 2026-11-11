@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { isInAppBrowser, safeSessionStorage } from "@/lib/safeStorage";
 
 const MOTION_SRC = "/motion/Motion.mp4";
 const STORAGE_KEY = "luz_motion_intro_v3";
@@ -15,7 +16,25 @@ const ROTAS_PUBLICAS = [
   "/esqueci-senha",
   "/redefinir-senha",
   "/admin/login",
+  "/sobre-o-portal",
+  "/metodologia",
+  "/jornada-da-sombra-a-luz",
+  "/como-funciona",
+  "/contato",
+  "/planos",
+  "/analises",
+  "/blog",
+  "/autoconhecimento",
+  "/padroes-de-comportamento",
+  "/desenvolvimento-pessoal",
+  "/inteligencia-emocional",
+  "/autoconhecimento-e-relacionamentos",
+  "/guia",
+  "/glossario",
+  "/perguntas-frequentes",
 ];
+
+const ROTAS_PUBLICAS_PREFIX = ["/analises/", "/blog/", "/esqueci-senha", "/redefinir-senha"];
 
 function pathAtual(): string {
   try {
@@ -32,13 +51,12 @@ function pathAtual(): string {
 
 function isRotaPublica(path: string): boolean {
   if (ROTAS_PUBLICAS.includes(path)) return true;
-  if (path.startsWith("/esqueci-senha") || path.startsWith("/redefinir-senha")) return true;
-  return false;
+  return ROTAS_PUBLICAS_PREFIX.some((p) => path.startsWith(p));
 }
 
 function jaExibidoNestaSessao(): boolean {
   try {
-    return sessionStorage.getItem(STORAGE_KEY) === "1";
+    return safeSessionStorage().getItem(STORAGE_KEY) === "1";
   } catch {
     return false;
   }
@@ -46,9 +64,9 @@ function jaExibidoNestaSessao(): boolean {
 
 function marcarExibido() {
   try {
-    sessionStorage.setItem(STORAGE_KEY, "1");
+    safeSessionStorage().setItem(STORAGE_KEY, "1");
   } catch {
-    /* private mode */
+    /* private mode / Instagram WebView */
   }
 }
 
@@ -63,20 +81,38 @@ export default function MotionIntro({ children }: { children: ReactNode }) {
   useEffect(() => {
     const sync = () => setPath(pathAtual());
     window.addEventListener("popstate", sync);
-    const origPush = history.pushState.bind(history);
-    const origReplace = history.replaceState.bind(history);
-    history.pushState = (...args) => {
-      origPush(...args);
-      sync();
-    };
-    history.replaceState = (...args) => {
-      origReplace(...args);
-      sync();
-    };
+
+    // WebViews (Instagram) às vezes travam history.* como read-only.
+    if (isInAppBrowser()) {
+      return () => window.removeEventListener("popstate", sync);
+    }
+
+    let origPush: History["pushState"] | null = null;
+    let origReplace: History["replaceState"] | null = null;
+    try {
+      origPush = history.pushState.bind(history);
+      origReplace = history.replaceState.bind(history);
+      history.pushState = (...args) => {
+        origPush!(...args);
+        sync();
+      };
+      history.replaceState = (...args) => {
+        origReplace!(...args);
+        sync();
+      };
+    } catch {
+      origPush = null;
+      origReplace = null;
+    }
+
     return () => {
       window.removeEventListener("popstate", sync);
-      history.pushState = origPush;
-      history.replaceState = origReplace;
+      try {
+        if (origPush) history.pushState = origPush;
+        if (origReplace) history.replaceState = origReplace;
+      } catch {
+        /* ignore */
+      }
     };
   }, []);
 

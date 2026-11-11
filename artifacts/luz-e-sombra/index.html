@@ -85,6 +85,41 @@
         color: #f7f2ec;
       }
     </style>
+    <script>
+      /* Instagram/FB WebView: acesso a localStorage/sessionStorage pode lançar SecurityError. */
+      (function () {
+        function memoryStorage() {
+          var map = {};
+          return {
+            get length() { return Object.keys(map).length; },
+            clear: function () { map = {}; },
+            getItem: function (k) { return Object.prototype.hasOwnProperty.call(map, k) ? map[k] : null; },
+            key: function (i) { return Object.keys(map)[i] || null; },
+            removeItem: function (k) { delete map[k]; },
+            setItem: function (k, v) { map[k] = String(v); }
+          };
+        }
+        function ensure(name) {
+          try {
+            var s = window[name];
+            var probe = "__luz_probe__";
+            s.setItem(probe, "1");
+            s.removeItem(probe);
+          } catch (e) {
+            try {
+              Object.defineProperty(window, name, {
+                configurable: true,
+                enumerable: true,
+                writable: true,
+                value: memoryStorage()
+              });
+            } catch (e2) { /* ignore */ }
+          }
+        }
+        ensure("localStorage");
+        ensure("sessionStorage");
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

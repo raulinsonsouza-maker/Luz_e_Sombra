@@ -20,6 +20,7 @@ import LpCheckoutSection from "@/components/checkout/LpCheckoutSection";
 import LogoPortal from "@/components/LogoPortal";
 import { captureUtmsFromUrl } from "@/lib/utm";
 import { trackLpEvent } from "@/lib/lpAnalytics";
+import { safeSessionStorage } from "@/lib/safeStorage";
 import {
   LP_PORTAL_NAME,
   LP_JOURNEY_NAME,
@@ -58,14 +59,14 @@ export default function LandingPage() {
       const token = params.get("checkout") || params.get("token");
       if (token) {
         setCheckoutToken(token);
-        sessionStorage.setItem("pending_checkout_token", token);
+        safeSessionStorage().setItem("pending_checkout_token", token);
         // Consome o deep link e remove o token da barra de endereço.
         params.delete("checkout");
         params.delete("token");
         const qs = params.toString();
         window.history.replaceState({}, "", `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash || "#checkout"}`);
       } else {
-        const pending = sessionStorage.getItem("pending_checkout_token");
+        const pending = safeSessionStorage().getItem("pending_checkout_token");
         if (pending) setCheckoutToken(pending);
       }
     } catch {

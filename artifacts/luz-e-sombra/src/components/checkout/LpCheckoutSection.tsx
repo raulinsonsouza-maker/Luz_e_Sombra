@@ -9,6 +9,7 @@ import {
   LP_PRICE,
   LP_ACCESS_MONTHS,
 } from "@/lib/lpConfig";
+import { safeSessionStorage } from "@/lib/safeStorage";
 
 type MpConfig = {
   connected: boolean;
@@ -111,7 +112,7 @@ export default function LpCheckoutSection({ checkoutToken: tokenProp, onTokenCha
     setToken(checkoutToken);
     onTokenChange?.(checkoutToken);
     try {
-      sessionStorage.setItem("pending_checkout_token", checkoutToken);
+      safeSessionStorage().setItem("pending_checkout_token", checkoutToken);
       // Não persiste o token na URL (Referer/histórico) — só #checkout.
       const url = new URL(window.location.href);
       url.searchParams.delete("checkout");

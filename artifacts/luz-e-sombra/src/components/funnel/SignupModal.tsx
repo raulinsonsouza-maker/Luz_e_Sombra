@@ -8,6 +8,7 @@ import { toastApiError } from "@/lib/apiError";
 import { digitsOnlyPhone, formatBrazilPhone, isValidBrazilPhone } from "@/lib/phoneMask";
 import { PASSWORD_HINT, validatePassword } from "@/lib/passwordPolicy";
 import { LP_JOURNEY_NAME, LP_PORTAL_NAME } from "@/lib/lpConfig";
+import { safeSessionStorage } from "@/lib/safeStorage";
 
 interface Props {
   open: boolean;
@@ -286,7 +287,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
 
       trackLpEvent("signup_complete", variant);
       try {
-        sessionStorage.setItem("pending_checkout_token", data.checkoutToken);
+        safeSessionStorage().setItem("pending_checkout_token", data.checkoutToken);
       } catch {
         /* ignore */
       }

@@ -65,7 +65,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
     imagensDoDiaPlugin(),
-    runtimeErrorOverlay(),
+    // Overlay de erro só em dev — em produção atrapalha WebViews (Instagram/FB).
+    ...(process.env.NODE_ENV !== "production" ? [runtimeErrorOverlay()] : []),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [

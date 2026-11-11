@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Play, Lock } from "lucide-react";
 import { LP_GATE_SECONDS, LP_GATE_PERCENT, LP_VIDEO_ID, VSL_UNLOCK_KEY } from "@/lib/lpConfig";
+import { safeSessionStorage } from "@/lib/safeStorage";
 
 declare global {
   interface Window {
@@ -63,7 +64,7 @@ function loadYouTubeApi(): Promise<void> {
 
 function isUnlockedStored(): boolean {
   try {
-    return sessionStorage.getItem(VSL_UNLOCK_KEY) === "1";
+    return safeSessionStorage().getItem(VSL_UNLOCK_KEY) === "1";
   } catch {
     return false;
   }
@@ -71,7 +72,7 @@ function isUnlockedStored(): boolean {
 
 function persistUnlock() {
   try {
-    sessionStorage.setItem(VSL_UNLOCK_KEY, "1");
+    safeSessionStorage().setItem(VSL_UNLOCK_KEY, "1");
   } catch {
     /* ignore */
   }

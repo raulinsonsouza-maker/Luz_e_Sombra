@@ -15,10 +15,11 @@ import { VSL_UNLOCK_KEY, VSL_COPY, LP_GATE_PERCENT, formatLpPriceLabel, LP_PORTA
 import { trackLpEvent } from "@/lib/lpAnalytics";
 import LogoPortal from "@/components/LogoPortal";
 import { captureUtmsFromUrl } from "@/lib/utm";
+import { safeSessionStorage } from "@/lib/safeStorage";
 
 function readUnlocked(): boolean {
   try {
-    return sessionStorage.getItem(VSL_UNLOCK_KEY) === "1";
+    return safeSessionStorage().getItem(VSL_UNLOCK_KEY) === "1";
   } catch {
     return false;
   }

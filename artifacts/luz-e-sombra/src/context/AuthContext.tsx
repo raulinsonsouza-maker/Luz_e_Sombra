@@ -25,13 +25,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<"loading" | "authenticated" | "unauthenticated">("loading");
 
   const refreshUser = useCallback(async () => {
-    const token = getToken();
-    if (!token) {
-      setUser(null);
-      setStatus("unauthenticated");
-      return;
-    }
     try {
+      const token = getToken();
+      if (!token) {
+        setUser(null);
+        setStatus("unauthenticated");
+        return;
+      }
       const res = await apiFetch("/auth/session");
       if (res.ok) {
         const data = await res.json();
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setStatus("unauthenticated");
       }
     } catch {
-      // Sem rede: não confiar em localStorage como sessão válida (evita "logado fantasma").
+      // Sem rede / WebView sem storage: não confiar em sessão fantasma.
       setUser(null);
       setStatus("unauthenticated");
     }
