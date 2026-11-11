@@ -19,7 +19,7 @@ import {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
 const requireFromDb = createRequire(resolve(root, "lib/db/package.json"));
-const { default: pg } = requireFromDb("pg");
+const pg = requireFromDb("pg");
 
 for (const envPath of [resolve(root, ".env"), "/opt/luzesombra/.env"]) {
   if (!existsSync(envPath)) continue;
