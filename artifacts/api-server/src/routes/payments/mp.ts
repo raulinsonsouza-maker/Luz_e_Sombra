@@ -169,11 +169,19 @@ router.post("/process", async (req: Request, res: Response) => {
           req.log,
         );
       }
+      const poi = (payment.point_of_interaction ?? null) as
+        | { transaction_data?: { qr_code?: string; qr_code_base64?: string } }
+        | null;
+      const tx = poi?.transaction_data ?? {};
       return res.json({
         status: "pending",
         paymentId,
         statusDetail: payment.status_detail ?? null,
         pointOfInteraction: payment.point_of_interaction ?? null,
+        pix: {
+          qr_code: typeof tx.qr_code === "string" ? tx.qr_code : null,
+          qr_code_base64: typeof tx.qr_code_base64 === "string" ? tx.qr_code_base64 : null,
+        },
       });
     }
 

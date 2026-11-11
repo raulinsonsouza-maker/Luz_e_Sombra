@@ -68,7 +68,7 @@ export const CASCA = {
         title: MARCA.jornada,
         titleAccent: "no Portal Iluminando",
         subtitle: "À vista ou até 6x no cartão · 6 meses de acesso.",
-        footnote: "PIX ou cartão em até 6x · Acesso após confirmação",
+        footnote: "",
       },
       finalCta: {
         title: "Da próxima vez que você se perguntar",
@@ -123,7 +123,7 @@ export const CASCA = {
         title: "111 Membros Fundadores",
         titleAccent: "",
         subtitle: "R$ 111,11 à vista ou até 6x no cartão · 6 meses de acesso.",
-        footnote: "PIX ou cartão em até 6x · Sem renovação automática · Venda continua após os 111",
+        footnote: "",
       },
       finalCta: {
         title: "O primeiro passo não é mudar quem você é.",

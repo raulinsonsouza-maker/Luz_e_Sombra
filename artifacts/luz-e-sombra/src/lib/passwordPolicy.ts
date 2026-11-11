@@ -7,10 +7,9 @@ export function validatePassword(senha: string): string | null {
     return `A senha deve ter pelo menos ${PASSWORD_MIN_LENGTH} caracteres.`;
   }
   if (!SPECIAL_CHAR_REGEX.test(senha)) {
-    return "A senha deve conter pelo menos 1 caractere especial (!@#$%&*...).";
+    return "Inclua pelo menos 1 caractere especial.";
   }
   return null;
 }
 
-export const PASSWORD_HINT =
-  "Mínimo 8 caracteres, incluindo 1 caractere especial (!@#$%&*...).";
+export const PASSWORD_HINT = "Mínimo 8 caracteres, com 1 especial.";

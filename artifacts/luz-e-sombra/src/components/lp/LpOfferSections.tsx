@@ -291,9 +291,11 @@ export function LpOfferSection({ onCheckout, variant = "control" }: SectionProps
         </div>
 
         <LpCtaButton onCheckout={onCheckout} fullWidth />
-        <p className="text-xs mt-4" style={{ color: "rgba(247,242,236,0.25)", letterSpacing: "0.06em" }}>
-          {copy.footnote}
-        </p>
+        {copy.footnote ? (
+          <p className="text-xs mt-4" style={{ color: "rgba(247,242,236,0.25)", letterSpacing: "0.06em" }}>
+            {copy.footnote}
+          </p>
+        ) : null}
       </div>
     </section>
   );
