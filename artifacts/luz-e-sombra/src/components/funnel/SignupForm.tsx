@@ -334,13 +334,9 @@ export default function SignupForm({ variant, onRegistered }: Props) {
               );
             })}
           </div>
-          {sexoErro ? (
+          {sexoErro && (
             <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
               {sexoErro}
-            </p>
-          ) : (
-            <p className="text-xs mt-1.5" style={{ color: "rgba(247,242,236,0.32)" }}>
-              Usamos só para nos dirigir a você com a linguagem certa.
             </p>
           )}
         </div>
@@ -417,13 +413,9 @@ export default function SignupForm({ variant, onRegistered }: Props) {
             style={{ ...inputStyle, border: borderForError(!!telefoneErro) }}
             placeholder="(00) 00000-0000"
           />
-          {telefoneErro ? (
+          {telefoneErro && (
             <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
               {telefoneErro}
-            </p>
-          ) : (
-            <p className="text-xs mt-1.5" style={{ color: "rgba(247,242,236,0.32)" }}>
-              Usamos para enviar o link de pagamento e atualizações da jornada.
             </p>
           )}
         </div>
@@ -451,13 +443,9 @@ export default function SignupForm({ variant, onRegistered }: Props) {
               colorScheme: "dark",
             }}
           />
-          {dataNascimentoErro ? (
+          {dataNascimentoErro && (
             <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
               {dataNascimentoErro}
-            </p>
-          ) : (
-            <p className="text-xs mt-1.5" style={{ color: "rgba(247,242,236,0.32)" }}>
-              Usamos na análise de numerologia da jornada.
             </p>
           )}
         </div>
