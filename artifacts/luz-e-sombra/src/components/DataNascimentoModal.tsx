@@ -3,6 +3,12 @@ import { X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/auth";
+import {
+  brazilDateToIso,
+  formatBrazilDate,
+  isValidBrazilDate,
+  isoToBrazilDate,
+} from "@/lib/dataNascimento";
 
 type Props = {
   open: boolean;
@@ -12,12 +18,12 @@ type Props = {
 
 export function DataNascimentoModal({ open, onClose, onSaved }: Props) {
   const { user, updateUser } = useAuth();
-  const [data, setData] = useState(user?.dataNascimento ?? "");
+  const [data, setData] = useState(isoToBrazilDate(user?.dataNascimento));
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
-    setData(user?.dataNascimento ?? "");
+    setData(isoToBrazilDate(user?.dataNascimento));
   }, [open, user?.dataNascimento]);
 
   useEffect(() => {
@@ -36,7 +42,12 @@ export function DataNascimentoModal({ open, onClose, onSaved }: Props) {
       toast.error("Informe a data de nascimento.");
       return;
     }
-    if (data === (user?.dataNascimento ?? "")) {
+    if (!isValidBrazilDate(data)) {
+      toast.error("Data inválida. Use DD/MM/AAAA.");
+      return;
+    }
+    const iso = brazilDateToIso(data);
+    if (iso === (user?.dataNascimento ?? "")) {
       onClose();
       return;
     }
@@ -46,7 +57,7 @@ export function DataNascimentoModal({ open, onClose, onSaved }: Props) {
       const res = await apiFetch("/usuarios/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dataNascimento: data }),
+        body: JSON.stringify({ dataNascimento: iso }),
       });
       const body = await res.json();
       if (!res.ok) {
@@ -55,7 +66,7 @@ export function DataNascimentoModal({ open, onClose, onSaved }: Props) {
       }
       updateUser(body);
       toast.success("Data atualizada. A análise usa o novo valor.");
-      onSaved?.(data);
+      onSaved?.(iso);
       onClose();
     } catch {
       toast.error("Erro de conexão. Tente novamente.");
@@ -119,15 +130,17 @@ export function DataNascimentoModal({ open, onClose, onSaved }: Props) {
             Nova data
           </span>
           <input
-            type="date"
+            type="text"
+            inputMode="numeric"
             value={data}
-            onChange={(e) => setData(e.target.value)}
+            onChange={(e) => setData(formatBrazilDate(e.target.value))}
+            maxLength={10}
+            placeholder="DD/MM/AAAA"
             className="w-full rounded-xl px-3.5 py-3 text-sm outline-none"
             style={{
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(200,165,107,0.22)",
               color: "#f7f2ec",
-              colorScheme: "dark",
             }}
           />
         </label>

@@ -14,6 +14,12 @@ import { listarFrasesGuardadas } from "@/lib/frasesGuardadas";
 import { listarPercepcoes } from "@/lib/percepcoes";
 import { LuzIcon } from "@/components/LuzIcon";
 import type { SexoCliente } from "@workspace/copy-voz";
+import {
+  brazilDateToIso,
+  formatBrazilDate,
+  isValidBrazilDate,
+  isoToBrazilDate,
+} from "@/lib/dataNascimento";
 
 interface Progresso {
   xp: number;
@@ -47,7 +53,7 @@ export default function MeuPerfilPage() {
 
   // ── Form state (only mutated in edit mode) ─────────────────────────────────
   const [nome, setNome] = useState(user?.nome ?? "");
-  const [dataNascimento, setDataNascimento] = useState(user?.dataNascimento ?? "");
+  const [dataNascimento, setDataNascimento] = useState(isoToBrazilDate(user?.dataNascimento));
   const [sexo, setSexo] = useState<SexoCliente | "">((user?.sexo as SexoCliente | null) ?? "");
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
@@ -87,7 +93,7 @@ export default function MeuPerfilPage() {
   useEffect(() => {
     if (!editando) {
       setNome(user?.nome ?? "");
-      setDataNascimento(user?.dataNascimento ?? "");
+      setDataNascimento(isoToBrazilDate(user?.dataNascimento));
       setSexo((user?.sexo as SexoCliente | null) ?? "");
     }
   }, [user, editando]);
@@ -147,7 +153,7 @@ export default function MeuPerfilPage() {
 
   function iniciarEdicao() {
     setNome(user?.nome ?? "");
-    setDataNascimento(user?.dataNascimento ?? "");
+    setDataNascimento(isoToBrazilDate(user?.dataNascimento));
     setSexo((user?.sexo as SexoCliente | null) ?? "");
     setSenhaAtual(""); setNovaSenha(""); setConfirmarSenha("");
     setErrorMsg(null); setSuccessMsg(null);
@@ -156,7 +162,7 @@ export default function MeuPerfilPage() {
 
   function cancelarEdicao() {
     setNome(user?.nome ?? "");
-    setDataNascimento(user?.dataNascimento ?? "");
+    setDataNascimento(isoToBrazilDate(user?.dataNascimento));
     setSexo((user?.sexo as SexoCliente | null) ?? "");
     setSenhaAtual(""); setNovaSenha(""); setConfirmarSenha("");
     setErrorMsg(null);
@@ -174,7 +180,16 @@ export default function MeuPerfilPage() {
 
     const body: Record<string, string> = {};
     if (nome.trim() !== (user?.nome ?? "").trim()) body.nome = nome.trim();
-    if (dataNascimento !== (user?.dataNascimento ?? "")) body.dataNascimento = dataNascimento;
+    if (dataNascimento.trim()) {
+      if (!isValidBrazilDate(dataNascimento)) {
+        setErrorMsg("Data de nascimento inválida. Use DD/MM/AAAA.");
+        return;
+      }
+      const iso = brazilDateToIso(dataNascimento);
+      if (iso !== (user?.dataNascimento ?? "")) body.dataNascimento = iso;
+    } else if (user?.dataNascimento) {
+      body.dataNascimento = "";
+    }
     if (sexo && sexo !== (user?.sexo ?? "")) body.sexo = sexo;
     if (novaSenha) { body.senhaAtual = senhaAtual; body.novaSenha = novaSenha; }
 
@@ -601,11 +616,15 @@ export default function MeuPerfilPage() {
                   </span>
                 </label>
                 <input
-                  type="date" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)}
+                  type="text"
+                  inputMode="numeric"
+                  value={dataNascimento}
+                  onChange={(e) => setDataNascimento(formatBrazilDate(e.target.value))}
+                  maxLength={10}
+                  placeholder="DD/MM/AAAA"
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                  style={{ ...inputSt, colorScheme: "dark" }}
+                  style={inputSt}
                 />
-                <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>Usada para cálculos de numerologia.</p>
               </div>
 
               <div className="space-y-1">

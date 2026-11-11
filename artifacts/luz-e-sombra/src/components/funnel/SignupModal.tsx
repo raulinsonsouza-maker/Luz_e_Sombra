@@ -8,7 +8,11 @@ import { trackMetaInitiateCheckout, trackMetaLead } from "@/lib/metaPixel";
 import { toastApiError } from "@/lib/apiError";
 import { digitsOnlyPhone, formatBrazilPhone, isValidBrazilPhone } from "@/lib/phoneMask";
 import { PASSWORD_HINT, validatePassword } from "@/lib/passwordPolicy";
-import { isValidDataNascimento } from "@/lib/dataNascimento";
+import {
+  brazilDateToIso,
+  formatBrazilDate,
+  isValidBrazilDate,
+} from "@/lib/dataNascimento";
 import { LP_JOURNEY_NAME, LP_PORTAL_NAME } from "@/lib/lpConfig";
 import { safeSessionStorage } from "@/lib/safeStorage";
 import { TRATAMENTO, type SexoCliente } from "@workspace/copy-voz";
@@ -271,12 +275,13 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
       toast.error("Informe sua data de nascimento.");
       return;
     }
-    if (!isValidDataNascimento(dataNascimento)) {
-      setDataNascimentoErro("Data de nascimento inválida.");
-      toast.error("Data de nascimento inválida.");
+    if (!isValidBrazilDate(dataNascimento)) {
+      setDataNascimentoErro("Use o formato DD/MM/AAAA com uma data válida.");
+      toast.error("Data de nascimento inválida. Use DD/MM/AAAA.");
       return;
     }
     setDataNascimentoErro(null);
+    const dataNascimentoIso = brazilDateToIso(dataNascimento);
 
     if (sexo !== "feminino" && sexo !== "masculino") {
       setSexoErro("Selecione Mulher ou Homem.");
@@ -307,7 +312,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
           nome: nome.trim(),
           email: email.trim().toLowerCase(),
           telefone: digitsOnlyPhone(telefone),
-          dataNascimento,
+          dataNascimento: dataNascimentoIso,
           sexo,
           senha,
           variant,
@@ -518,21 +523,21 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
             </label>
             <input
               id="data-nascimento"
-              type="date"
+              type="text"
+              inputMode="numeric"
               value={dataNascimento}
               onChange={(e) => {
-                setDataNascimento(e.target.value);
+                setDataNascimento(formatBrazilDate(e.target.value));
                 setDataNascimentoErro(null);
               }}
               required
               autoComplete="bday"
-              max={new Date().toISOString().slice(0, 10)}
-              min="1900-01-01"
+              maxLength={10}
+              placeholder="DD/MM/AAAA"
               className={inputClass}
               style={{
                 ...inputStyle,
                 border: borderForError(!!dataNascimentoErro),
-                colorScheme: "dark",
               }}
             />
             {dataNascimentoErro && (
