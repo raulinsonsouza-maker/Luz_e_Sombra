@@ -5,7 +5,6 @@ import { pontuar } from "@/lib/formatarLeitura";
 const OURO = "#c8a56b";
 const TEXTO = "rgba(247,242,236,0.78)";
 const FORTE = "rgba(247,242,236,0.94)";
-const MUTED = "rgba(200,165,107,0.5)";
 
 export default function JornadaTracoResultado({
   jornada,
@@ -21,13 +20,13 @@ export default function JornadaTracoResultado({
     : jornada.etapas;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {mostrarAviso && (
         <div
           className="rounded-2xl px-5 py-4"
           style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.2)" }}
         >
-          <p className="text-sm leading-relaxed" style={{ color: FORTE, lineHeight: 1.7 }}>
+          <p className="text-sm leading-relaxed" style={{ color: FORTE, lineHeight: 1.75 }}>
             {jornada.aviso}
           </p>
         </div>
@@ -57,7 +56,7 @@ function EtapaCard({ etapa }: { etapa: EtapaJornada }) {
           {etapa.subtitulo}
         </p>
       </div>
-      <div className="px-5 py-5 space-y-5">
+      <div className="px-5 py-6 space-y-7">
         {etapa.blocos.map((bloco, i) => (
           <Bloco key={i} bloco={bloco} />
         ))}
@@ -68,15 +67,7 @@ function EtapaCard({ etapa }: { etapa: EtapaJornada }) {
 
 function Rotulo({ children }: { children: string }) {
   return (
-    <p className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: OURO }}>
-      {children}
-    </p>
-  );
-}
-
-function MicroRotulo({ children, cor = MUTED }: { children: string; cor?: string }) {
-  return (
-    <p className="text-[10px] tracking-wider uppercase mb-0.5" style={{ color: cor }}>
+    <p className="text-[11px] font-semibold tracking-[0.14em] uppercase mb-2" style={{ color: OURO }}>
       {children}
     </p>
   );
@@ -85,7 +76,7 @@ function MicroRotulo({ children, cor = MUTED }: { children: string; cor?: string
 function Bloco({ bloco }: { bloco: BlocoJornada }) {
   if (bloco.tipo === "texto") {
     return (
-      <div className="space-y-2">
+      <div>
         {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
         <TextoFormatado texto={bloco.texto} fluido />
       </div>
@@ -103,7 +94,7 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
             {bloco.rotulo}
           </p>
         )}
-        <p className="text-sm leading-relaxed font-medium" style={{ color: FORTE, lineHeight: 1.7 }}>
+        <p className="text-sm leading-relaxed font-medium" style={{ color: FORTE, lineHeight: 1.75 }}>
           {bloco.texto}
         </p>
       </div>
@@ -112,11 +103,11 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
 
   if (bloco.tipo === "lista") {
     return (
-      <div className="space-y-2">
+      <div>
         {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
         <ul className="space-y-2">
           {bloco.itens.map((item, i) => (
-            <li key={i} className="flex gap-2 text-sm" style={{ color: TEXTO, lineHeight: 1.6 }}>
+            <li key={i} className="flex gap-2 text-sm" style={{ color: TEXTO, lineHeight: 1.65 }}>
               <span style={{ color: OURO }}>·</span>
               <span>{pontuar(item)}</span>
             </li>
@@ -128,7 +119,7 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
 
   if (bloco.tipo === "passos") {
     return (
-      <div className="space-y-3">
+      <div>
         {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
         <ol className="space-y-3">
           {bloco.itens.map((item, i) => (
@@ -149,6 +140,7 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
     );
   }
 
+  // Cena: prosa aberta no card da etapa — sem caixinha interna.
   if (bloco.tipo === "cena") {
     const linhas = [
       { rotulo: "O que acontece", texto: bloco.oQue },
@@ -157,19 +149,16 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
       { rotulo: "Possível consequência", texto: bloco.consequencia },
     ];
     return (
-      <div className="space-y-3">
+      <div>
         {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
-        <div
-          className="rounded-xl px-4 py-3.5 space-y-3"
-          style={{ border: "1px solid rgba(200,165,107,0.14)", background: "rgba(255,255,255,0.02)" }}
-        >
+        <div className="space-y-2.5">
           {linhas.map((l) => (
-            <div key={l.rotulo}>
-              <MicroRotulo>{l.rotulo}</MicroRotulo>
-              <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.65 }}>
-                {l.texto}
-              </p>
-            </div>
+            <p key={l.rotulo} className="text-[15px] leading-relaxed" style={{ color: TEXTO, lineHeight: 1.8 }}>
+              <span className="font-medium" style={{ color: "rgba(232,213,176,0.85)" }}>
+                {l.rotulo}.{" "}
+              </span>
+              {l.texto}
+            </p>
           ))}
         </div>
       </div>
@@ -180,45 +169,38 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
 
   const cols = bloco.cabecalhos.length;
 
-  // 4 colunas: recurso / equilíbrio / excesso / potencial
-  if (cols >= 4) {
+  // Tabela de recursos: um painel só, linhas com respiro (sem grade apertada em 3 colunas no mobile).
+  if (cols >= 3) {
     return (
-      <div className="space-y-3">
+      <div>
         {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
-        <div
-          className="rounded-xl overflow-hidden"
-          style={{ border: "1px solid rgba(200,165,107,0.14)", background: "rgba(255,255,255,0.02)" }}
-        >
+        <div className="space-y-5">
           {bloco.linhas.map((linha, i) => {
             const [recurso, equilibrio, excesso, expansao] = linha;
             return (
               <div
                 key={i}
-                className="px-4 py-3.5 space-y-2.5"
-                style={{ borderTop: i === 0 ? undefined : "1px solid rgba(200,165,107,0.1)" }}
+                className="pt-4 first:pt-0"
+                style={{ borderTop: i === 0 ? undefined : "1px solid rgba(200,165,107,0.12)" }}
               >
-                <p className="text-sm font-medium" style={{ color: FORTE }}>
+                <p className="text-sm font-medium mb-2" style={{ color: FORTE }}>
                   {recurso}
                 </p>
-                <div className="grid sm:grid-cols-3 gap-2.5">
-                  <div>
-                    <MicroRotulo cor="rgba(109,185,109,0.75)">{bloco.cabecalhos[1] ?? "Em equilíbrio"}</MicroRotulo>
-                    <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
-                      {equilibrio}
-                    </p>
-                  </div>
-                  <div>
-                    <MicroRotulo cor="rgba(224,123,57,0.8)">{bloco.cabecalhos[2] ?? "Em excesso"}</MicroRotulo>
-                    <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
-                      {excesso}
-                    </p>
-                  </div>
-                  <div>
-                    <MicroRotulo cor="rgba(200,165,107,0.75)">{bloco.cabecalhos[3] ?? "Potencial"}</MicroRotulo>
-                    <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
+                <div className="space-y-1.5 text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.65 }}>
+                  <p>
+                    <span style={{ color: "rgba(109,185,109,0.85)" }}>Em equilíbrio: </span>
+                    {equilibrio}
+                  </p>
+                  <p>
+                    <span style={{ color: "rgba(224,123,57,0.9)" }}>Em excesso: </span>
+                    {excesso}
+                  </p>
+                  {cols >= 4 && expansao ? (
+                    <p>
+                      <span style={{ color: "rgba(200,165,107,0.85)" }}>Potencial: </span>
                       {expansao}
                     </p>
-                  </div>
+                  ) : null}
                 </div>
               </div>
             );
@@ -228,84 +210,34 @@ function Bloco({ bloco }: { bloco: BlocoJornada }) {
     );
   }
 
-  // 3 colunas: recurso / equilíbrio / excesso
-  if (cols >= 3) {
-    return (
-      <div className="space-y-3">
-        {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
-        <div
-          className="rounded-xl overflow-hidden"
-          style={{ border: "1px solid rgba(200,165,107,0.14)", background: "rgba(255,255,255,0.02)" }}
-        >
-          {bloco.linhas.map((linha, i) => {
-            const [recurso, equilibrio, excesso] = linha;
-            return (
-              <div
-                key={i}
-                className="px-4 py-3.5 space-y-2"
-                style={{ borderTop: i === 0 ? undefined : "1px solid rgba(200,165,107,0.1)" }}
-              >
-                <p className="text-sm font-medium" style={{ color: FORTE }}>
-                  {recurso}
-                </p>
-                <div className="grid sm:grid-cols-2 gap-2.5">
-                  <div>
-                    <MicroRotulo cor="rgba(109,185,109,0.75)">{bloco.cabecalhos[1] ?? "Em equilíbrio"}</MicroRotulo>
-                    <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
-                      {equilibrio}
-                    </p>
-                  </div>
-                  <div>
-                    <MicroRotulo cor="rgba(224,123,57,0.8)">{bloco.cabecalhos[2] ?? "Em excesso"}</MicroRotulo>
-                    <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
-                      {excesso}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  // 2 colunas
+  // 2 colunas: contraste lado a lado sem caixa extra por linha
   return (
-    <div className="space-y-3">
+    <div>
       {bloco.rotulo && <Rotulo>{bloco.rotulo}</Rotulo>}
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{ border: "1px solid rgba(200,165,107,0.14)", background: "rgba(255,255,255,0.02)" }}
-      >
+      <div className="space-y-4">
         {bloco.linhas.map((linha, i) => {
           const [esquerda, direita] = linha;
           return (
             <div
               key={i}
-              className="px-4 py-3.5"
-              style={{ borderTop: i === 0 ? undefined : "1px solid rgba(200,165,107,0.1)" }}
+              className="grid sm:grid-cols-2 gap-3 pt-4 first:pt-0"
+              style={{ borderTop: i === 0 ? undefined : "1px solid rgba(200,165,107,0.12)" }}
             >
-              <div className="grid sm:grid-cols-[1fr_auto_1fr] gap-2 sm:gap-3 items-start">
-                <div>
-                  <MicroRotulo>{bloco.cabecalhos[0] ?? ""}</MicroRotulo>
-                  <p className="text-sm leading-relaxed" style={{ color: FORTE, lineHeight: 1.55 }}>
-                    {esquerda}
-                  </p>
-                </div>
-                <span
-                  className="hidden sm:flex items-center justify-center text-xs mt-5"
-                  style={{ color: "rgba(200,165,107,0.45)" }}
-                  aria-hidden
-                >
-                  →
-                </span>
-                <div>
-                  <MicroRotulo>{bloco.cabecalhos[1] ?? ""}</MicroRotulo>
-                  <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.55 }}>
-                    {direita}
-                  </p>
-                </div>
+              <div>
+                <p className="text-[10px] tracking-wider uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
+                  {bloco.cabecalhos[0] ?? ""}
+                </p>
+                <p className="text-sm leading-relaxed" style={{ color: FORTE, lineHeight: 1.6 }}>
+                  {esquerda}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] tracking-wider uppercase mb-1" style={{ color: "rgba(200,165,107,0.5)" }}>
+                  {bloco.cabecalhos[1] ?? ""}
+                </p>
+                <p className="text-sm leading-relaxed" style={{ color: TEXTO, lineHeight: 1.6 }}>
+                  {direita}
+                </p>
               </div>
             </div>
           );
