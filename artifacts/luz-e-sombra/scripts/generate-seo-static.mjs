@@ -204,8 +204,10 @@ fs.writeFileSync(
       background_color: "#1e1812",
       theme_color: "#1e1812",
       icons: [
+        { src: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+        { src: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+        { src: "/favicon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
         { src: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
-        { src: "/marca/arco.png", sizes: "512x512", type: "image/png" },
       ],
     },
     null,
