@@ -67,7 +67,7 @@ export const CONTROL_SECTIONS = {
   ...CATALOGO.lp.controle,
   offer: {
     ...CATALOGO.lp.controle.offer,
-    subtitle: `${LP_BILLING_LABEL} · ${LP_ACCESS_MONTHS} meses de acesso · Garantia de ${LP_GUARANTEE_DAYS} dias.`,
+    subtitle: `${LP_BILLING_LABEL} · ${LP_ACCESS_MONTHS} meses de acesso.`,
   },
 };
 

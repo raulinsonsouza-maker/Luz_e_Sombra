@@ -16,7 +16,7 @@ export const CASCA = {
         "Compreenda padrões, ciclos e o passo que cabe agora",
         "Você não precisa ter todas as respostas. Precisa começar a se conhecer",
       ],
-      priceTeaser: "Acesso por 6 meses · À vista ou até 6x no cartão · Garantia de 7 dias",
+      priceTeaser: "Acesso por 6 meses · À vista ou até 6x no cartão",
     },
     vslCopy: {
       navCta: "Começar jornada",
@@ -67,8 +67,8 @@ export const CASCA = {
         eyebrow: "Para quem assistiu até aqui",
         title: MARCA.jornada,
         titleAccent: "no Portal Iluminando",
-        subtitle: "À vista ou até 6x no cartão. 7 dias de garantia total.",
-        footnote: "PIX ou cartão em até 6x · Acesso após confirmação · Garantia de 7 dias",
+        subtitle: "À vista ou até 6x no cartão · 6 meses de acesso.",
+        footnote: "PIX ou cartão em até 6x · Acesso após confirmação",
       },
       finalCta: {
         title: "Da próxima vez que você se perguntar",
@@ -122,7 +122,7 @@ export const CASCA = {
         eyebrow: "Edição especial de lançamento",
         title: "111 Membros Fundadores",
         titleAccent: "",
-        subtitle: "R$ 111,11 à vista ou até 6x no cartão · 6 meses de acesso · Garantia de 7 dias.",
+        subtitle: "R$ 111,11 à vista ou até 6x no cartão · 6 meses de acesso.",
         footnote: "PIX ou cartão em até 6x · Sem renovação automática · Venda continua após os 111",
       },
       finalCta: {
@@ -218,10 +218,6 @@ export const CASCA = {
       {
         q: "Como recebo meu acesso?",
         a: "Após a confirmação do pagamento, você entra na plataforma com o e-mail e a senha do cadastro.",
-      },
-      {
-        q: "E se eu não gostar?",
-        a: "Você tem {garantia} dias de garantia. Se não quiser continuar, poderá solicitar o reembolso integral dentro desse período.",
       },
       {
         q: "Meus dados e resultados são privados?",

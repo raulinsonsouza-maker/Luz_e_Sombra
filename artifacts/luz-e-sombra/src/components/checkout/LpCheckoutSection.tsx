@@ -2,16 +2,12 @@ import { useEffect, useState } from "react";
 import { Loader2, Shield } from "lucide-react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
-import SignupModal from "@/components/funnel/SignupModal";
+import SignupForm from "@/components/funnel/SignupForm";
 import MpPaymentBrick from "@/components/checkout/MpPaymentBrick";
 import {
   formatLpPrice,
-  LP_BILLING_LABEL,
-  LP_FOUNDERS_CAP,
-  LP_GUARANTEE_DAYS,
   LP_PRICE,
   LP_ACCESS_MONTHS,
-  LP_CTA_FOUNDER,
 } from "@/lib/lpConfig";
 
 type MpConfig = {
@@ -32,7 +28,6 @@ export default function LpCheckoutSection({ checkoutToken: tokenProp, onTokenCha
   const [, navigate] = useLocation();
   const [config, setConfig] = useState<MpConfig | null>(null);
   const [loadingConfig, setLoadingConfig] = useState(true);
-  const [signupOpen, setSignupOpen] = useState(false);
   const [token, setToken] = useState(tokenProp ?? "");
   const [payerEmail, setPayerEmail] = useState<string | null>(null);
   const [pendingPix, setPendingPix] = useState(false);
@@ -130,13 +125,8 @@ export default function LpCheckoutSection({ checkoutToken: tokenProp, onTokenCha
             {edicaoAtiva ? "Quero ser um membro fundador" : "Começar minha jornada"}
           </h2>
           <p className="text-sm mt-3 leading-relaxed" style={{ color: "rgba(247,242,236,0.5)" }}>
-            {formatLpPrice(LP_PRICE)} ou até 6x no cartão · {LP_ACCESS_MONTHS} meses de acesso · Garantia de {LP_GUARANTEE_DAYS} dias
+            {formatLpPrice(LP_PRICE)} ou até 6x no cartão · {LP_ACCESS_MONTHS} meses de acesso
           </p>
-          {edicaoAtiva && (
-            <p className="text-xs mt-2" style={{ color: "rgba(200,165,107,0.7)" }}>
-              {config?.fundadoresRestantes ?? LP_FOUNDERS_CAP} badges de Membros Fundadores ainda disponíveis (de {LP_FOUNDERS_CAP})
-            </p>
-          )}
         </div>
 
         <div
@@ -160,22 +150,8 @@ export default function LpCheckoutSection({ checkoutToken: tokenProp, onTokenCha
               </p>
             </div>
           ) : !token ? (
-            <div className="text-center space-y-5 py-4">
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(247,242,236,0.55)" }}>
-                Crie seu cadastro e conclua o pagamento nesta mesma página. PIX ou cartão, com segurança do Mercado Pago.
-              </p>
-              <button
-                type="button"
-                onClick={() => setSignupOpen(true)}
-                className="inline-flex items-center justify-center px-8 py-4 rounded-2xl font-bold text-sm tracking-wide"
-                style={{
-                  background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)",
-                  color: "#fff",
-                  boxShadow: "0 12px 40px rgba(200,165,107,0.3)",
-                }}
-              >
-                {edicaoAtiva ? LP_CTA_FOUNDER : "Começar minha jornada"}
-              </button>
+            <div className="space-y-5">
+              <SignupForm variant="control" onRegistered={handleRegistered} />
               <div className="flex items-center justify-center gap-2 text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>
                 <Shield size={14} />
                 Pagamento seguro · Sem renovação automática
@@ -214,13 +190,6 @@ export default function LpCheckoutSection({ checkoutToken: tokenProp, onTokenCha
           )}
         </div>
       </div>
-
-      <SignupModal
-        open={signupOpen}
-        onClose={() => setSignupOpen(false)}
-        variant="control"
-        onRegistered={handleRegistered}
-      />
     </section>
   );
 }

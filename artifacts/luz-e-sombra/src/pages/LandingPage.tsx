@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Check,
-  Shield,
-  Sparkles,
   Layers,
   Target,
   Heart,
@@ -25,12 +23,9 @@ import { trackLpEvent } from "@/lib/lpAnalytics";
 import {
   LP_PORTAL_NAME,
   LP_JOURNEY_NAME,
-  LP_CTA_NAV,
   LP_CTA_PRIMARY,
   LP_CTA_LOGIN,
   LP_HERO,
-  LP_GUARANTEE_DAYS,
-  LP_ACCESS_MONTHS,
   formatLpPrice,
   LP_PRICE,
 } from "@/lib/lpConfig";
@@ -101,22 +96,6 @@ export default function LandingPage() {
             <LogoPortal className="h-10 sm:h-11 w-auto" />
           </button>
 
-          <nav className="hidden md:flex items-center gap-1">
-            {[
-              { href: "#jornada", label: "A jornada" },
-              { href: "#como-funciona", label: "Como funciona" },
-            ].map(({ href, label }) => (
-              <a
-                key={href}
-                href={href}
-                className="px-4 py-2 rounded-lg text-xs font-medium transition-colors hover:bg-white/5"
-                style={{ color: "rgba(247,242,236,0.55)", textDecoration: "none" }}
-              >
-                {label}
-              </a>
-            ))}
-          </nav>
-
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
@@ -128,20 +107,6 @@ export default function LandingPage() {
               }}
             >
               {LP_CTA_LOGIN}
-            </button>
-            <button
-              type="button"
-              onClick={goCheckout}
-              className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all hover:-translate-y-0.5"
-              style={{
-                background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)",
-                color: "#fff",
-                boxShadow: "0 6px 24px rgba(200,165,107,0.35)",
-              }}
-            >
-              <span className="hidden sm:inline">{LP_CTA_NAV}</span>
-              <span className="sm:hidden">Começar</span>
-              <ArrowRight size={14} />
             </button>
           </div>
         </div>
@@ -191,23 +156,6 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Copy */}
             <div className="text-center lg:text-left">
-              <div
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6"
-                style={{
-                  background: "rgba(200,165,107,0.08)",
-                  border: "1px solid rgba(200,165,107,0.22)",
-                }}
-              >
-                <Sparkles size={12} style={{ color: "#c8a56b" }} />
-                <span className="text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase" style={{ color: "#c8a56b" }}>
-                  {LP_PORTAL_NAME}
-                </span>
-                <span className="w-1 h-1 rounded-full" style={{ background: "rgba(200,165,107,0.4)" }} />
-                <span className="text-[10px] sm:text-xs" style={{ color: "rgba(247,242,236,0.45)" }}>
-                  {LP_HERO.badge}
-                </span>
-              </div>
-
               <h1
                 className="font-tan-mon-cheri mb-5"
                 style={{ fontSize: "clamp(2.75rem, 7vw, 4.5rem)", lineHeight: 1.05, color: "#f7f2ec" }}
@@ -248,7 +196,7 @@ export default function LandingPage() {
                 ))}
               </ul>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-6">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <button
                   type="button"
                   onClick={goCheckout}
@@ -275,19 +223,10 @@ export default function LandingPage() {
                   Ver as 9 análises
                 </a>
               </div>
-
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-[11px]" style={{ color: "rgba(247,242,236,0.35)" }}>
-                <span className="flex items-center gap-1.5">
-                  <Shield size={12} style={{ color: "rgba(200,165,107,0.5)" }} />
-                  Garantia de {LP_GUARANTEE_DAYS} dias
-                </span>
-                <span className="hidden sm:inline w-1 h-1 rounded-full bg-white/20" />
-                <span>{LP_HERO.priceTeaser}</span>
-              </div>
             </div>
 
-            {/* Visual card */}
-            <div className="relative max-w-md mx-auto lg:max-w-none w-full">
+            {/* Visual card — desktop only */}
+            <div className="relative max-w-md mx-auto lg:max-w-none w-full hidden lg:block">
               <div
                 className="absolute -inset-4 rounded-3xl blur-2xl opacity-40 pointer-events-none"
                 style={{ background: "linear-gradient(135deg, rgba(200,165,107,0.25), transparent)" }}
@@ -450,10 +389,7 @@ export default function LandingPage() {
         className="py-8 px-5 text-center"
         style={{ background: "#0a0805", borderTop: "1px solid rgba(200,165,107,0.08)" }}
       >
-        <LogoPortal className="h-10 w-auto mx-auto mb-3" />
-        <p className="text-xs tracking-wide" style={{ color: "rgba(247,242,236,0.25)" }}>
-          {LP_JOURNEY_NAME} · {LP_ACCESS_MONTHS} meses · {formatLpPrice(LP_PRICE)}
-        </p>
+        <LogoPortal className="h-10 w-auto mx-auto" />
       </footer>
     </div>
   );

@@ -1,18 +1,15 @@
-import { ArrowRight, Check, Shield } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Check, ChevronDown } from "lucide-react";
 import {
   LP_MODULES,
   LP_TESTIMONIALS,
   LP_FAQ,
   LP_INCLUDED_ITEMS,
-  LP_GUARANTEE_DAYS,
   LP_CTA_PRIMARY,
   formatLpPrice,
   LP_PRICE,
   LP_PRICE_INSTALLMENTS,
   LP_PRICE_INSTALLMENT_VALUE,
-  LP_PRICE_ORIGINAL,
-  LP_PRICE_PERIOD,
-  formatLpPriceLabel,
   getLpSections,
   type LpSectionVariant,
 } from "@/lib/lpConfig";
@@ -281,7 +278,7 @@ export function LpOfferSection({ onCheckout, variant = "control" }: SectionProps
               ou {LP_PRICE_INSTALLMENTS}x de {formatLpPrice(LP_PRICE_INSTALLMENT_VALUE)} no cartão
             </span>
           </div>
-          <ul className="space-y-3 mb-6">
+          <ul className="space-y-3">
             {LP_INCLUDED_ITEMS.map((item) => (
               <li key={item} className="flex items-start gap-2.5">
                 <Check size={15} className="shrink-0 mt-0.5" style={{ color: "#c8a56b" }} />
@@ -291,15 +288,6 @@ export function LpOfferSection({ onCheckout, variant = "control" }: SectionProps
               </li>
             ))}
           </ul>
-          <div
-            className="flex items-center gap-2.5 px-4 py-3 rounded-xl"
-            style={{ background: "rgba(200,165,107,0.08)", border: "1px solid rgba(200,165,107,0.15)" }}
-          >
-            <Shield size={16} style={{ color: "#c8a56b", flexShrink: 0 }} />
-            <p className="text-xs" style={{ color: "rgba(247,242,236,0.55)" }}>
-              {LP_GUARANTEE_DAYS} dias de garantia incondicional. Não gostou? Devolvemos 100%.
-            </p>
-          </div>
         </div>
 
         <LpCtaButton onCheckout={onCheckout} fullWidth />
@@ -313,6 +301,7 @@ export function LpOfferSection({ onCheckout, variant = "control" }: SectionProps
 
 export function LpFaqSection({ variant = "control" }: SectionProps) {
   const copy = getLpSections(variant).faq;
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section className="py-16 sm:py-20 px-5" style={{ background: "#fff" }}>
@@ -328,21 +317,43 @@ export function LpFaqSection({ variant = "control" }: SectionProps) {
             {copy.title}
           </h2>
         </div>
-        <div className="space-y-4">
-          {LP_FAQ.map(({ q, a }) => (
-            <div
-              key={q}
-              className="p-5 rounded-xl"
-              style={{ background: "#faf8f4", border: "1px solid rgba(200,165,107,0.18)" }}
-            >
-              <h3 className="font-semibold text-sm mb-2" style={{ color: "#2f251b" }}>
-                {q}
-              </h3>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(47,37,27,0.6)" }}>
-                {a}
-              </p>
-            </div>
-          ))}
+        <div className="space-y-2">
+          {LP_FAQ.map(({ q, a }, index) => {
+            const open = openIndex === index;
+            return (
+              <div
+                key={q}
+                className="rounded-xl overflow-hidden"
+                style={{ background: "#faf8f4", border: "1px solid rgba(200,165,107,0.18)" }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenIndex(open ? null : index)}
+                  className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left"
+                  aria-expanded={open}
+                >
+                  <span className="font-semibold text-sm" style={{ color: "#2f251b" }}>
+                    {q}
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className="shrink-0 transition-transform duration-200"
+                    style={{
+                      color: "rgba(156,119,66,0.8)",
+                      transform: open ? "rotate(180deg)" : "rotate(0deg)",
+                    }}
+                  />
+                </button>
+                {open && (
+                  <div className="px-5 pb-4">
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(47,37,27,0.6)" }}>
+                      {a}
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
