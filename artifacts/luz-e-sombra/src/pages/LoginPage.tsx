@@ -28,10 +28,15 @@ export default function LoginPage() {
       return;
     }
     if (result.code === "pagamento_pendente") {
-      setPagamentoPendente(true);
       const token = result.checkoutToken ?? null;
+      setPagamentoPendente(true);
       setCheckoutToken(token);
       setErro("Seu pagamento ainda não foi confirmado. Continue o checkout para liberar o acesso.");
+      setCarregando(false);
+      if (token) {
+        navigate(`/?checkout=${encodeURIComponent(token)}#checkout`);
+        return;
+      }
     } else if (result.code === "acesso_revogado") {
       setErro(
         result.error ||

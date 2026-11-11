@@ -1,14 +1,7 @@
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useRef, useState } from "react";
-import {
-  ArrowRight,
-  Check,
-  Layers,
-  Target,
-  Heart,
-  FlaskConical,
-} from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import {
   LpModulesSection,
   LpHowItWorksSection,
@@ -17,6 +10,7 @@ import {
   LpFinalCtaSection,
 } from "@/components/lp/LpOfferSections";
 import LpCheckoutSection from "@/components/checkout/LpCheckoutSection";
+import LpHeroVideo from "@/components/lp/LpHeroVideo";
 import LogoPortal from "@/components/LogoPortal";
 import { captureUtmsFromUrl } from "@/lib/utm";
 import { trackLpEvent } from "@/lib/lpAnalytics";
@@ -30,13 +24,6 @@ import {
   formatLpPrice,
   LP_PRICE,
 } from "@/lib/lpConfig";
-
-const HERO_ANALYSES = [
-  { icon: Layers, label: "Traço de Caráter" },
-  { icon: FlaskConical, label: "Temperamento" },
-  { icon: Heart, label: "Linguagens do Amor" },
-  { icon: Target, label: "Roda da Vida" },
-];
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
@@ -269,32 +256,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div className="p-6 space-y-3">
-                  {HERO_ANALYSES.map(({ icon: Icon, label }, i) => (
-                    <div
-                      key={label}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl"
-                      style={{
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(200,165,107,0.08)",
-                      }}
-                    >
-                      <div
-                        className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold"
-                        style={{ background: "rgba(200,165,107,0.12)", color: "#c8a56b" }}
-                      >
-                        {String(i + 1).padStart(2, "0")}
-                      </div>
-                      <Icon size={16} style={{ color: "rgba(200,165,107,0.6)" }} />
-                      <span className="text-sm font-medium" style={{ color: "rgba(247,242,236,0.8)" }}>
-                        {label}
-                      </span>
-                    </div>
-                  ))}
-                  <p className="text-center text-xs pt-1" style={{ color: "rgba(247,242,236,0.3)" }}>
-                    + numerologia, trilha gamificada, comunidade e síntese final
-                  </p>
-                </div>
+                <LpHeroVideo aspectClassName="aspect-[4/5] max-h-[420px]" />
 
                 <div
                   className="px-6 py-5 flex items-center justify-between gap-4"
@@ -323,6 +285,18 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2ª dobra mobile: vídeo hero */}
+      <section className="lg:hidden px-5 py-10" style={{ background: "#120e0a" }}>
+        <div className="max-w-md mx-auto">
+          <div
+            className="rounded-2xl overflow-hidden"
+            style={{ border: "1px solid rgba(200,165,107,0.2)", boxShadow: "0 20px 48px rgba(0,0,0,0.4)" }}
+          >
+            <LpHeroVideo aspectClassName="aspect-[9/16]" />
           </div>
         </div>
       </section>

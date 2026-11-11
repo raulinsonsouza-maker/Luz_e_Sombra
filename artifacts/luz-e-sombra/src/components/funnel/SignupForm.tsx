@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { getStoredUtms } from "@/lib/utm";
@@ -102,6 +103,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
   const [enviando, setEnviando] = useState(false);
   const [emailStatus, setEmailStatus] = useState<EmailStatus>("idle");
   const [emailErro, setEmailErro] = useState<string | null>(null);
+  const [emailPending, setEmailPending] = useState(false);
   const [telefoneErro, setTelefoneErro] = useState<string | null>(null);
 
   const senhasDiferentes = confirmarSenha.length > 0 && senha !== confirmarSenha;
@@ -115,11 +117,13 @@ export default function SignupForm({ variant, onRegistered }: Props) {
     if (!emailNorm || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNorm)) {
       setEmailStatus("idle");
       setEmailErro(null);
+      setEmailPending(false);
       return { available: false, message: "Informe um e-mail válido." };
     }
 
     setEmailStatus("checking");
     setEmailErro(null);
+    setEmailPending(false);
 
     try {
       const res = await fetch(`/api/funnel/check-email?email=${encodeURIComponent(emailNorm)}`);
@@ -133,7 +137,13 @@ export default function SignupForm({ variant, onRegistered }: Props) {
         return { available: true };
       }
       setEmailStatus("unavailable");
-      const message = data.message || "Este e-mail já está cadastrado. Faça login.";
+      const pending = data.status === "pending";
+      setEmailPending(pending);
+      const message =
+        data.message ||
+        (pending
+          ? "Este e-mail já está cadastrado. Entre para continuar o pagamento."
+          : "Este e-mail já está cadastrado. Faça login.");
       setEmailErro(message);
       return { available: false, message };
     } catch {
@@ -269,6 +279,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
               setEmail(e.target.value);
               setEmailStatus("idle");
               setEmailErro(null);
+              setEmailPending(false);
             }}
             onBlur={verificarEmail}
             required
@@ -285,9 +296,20 @@ export default function SignupForm({ variant, onRegistered }: Props) {
             </p>
           )}
           {emailErro && (
-            <p className="text-xs mt-1.5 leading-relaxed" style={{ color: "#e88" }} role="alert">
-              {emailErro}
-            </p>
+            <div className="mt-1.5 space-y-2" role="alert">
+              <p className="text-xs leading-relaxed" style={{ color: "#e88" }}>
+                {emailErro}
+              </p>
+              {emailPending && (
+                <Link
+                  href="/login"
+                  className="inline-flex text-xs font-semibold underline-offset-2 hover:underline"
+                  style={{ color: "#c8a56b" }}
+                >
+                  Entrar para continuar o pagamento
+                </Link>
+              )}
+            </div>
           )}
           {emailStatus === "available" && (
             <p className="text-xs mt-1.5" style={{ color: "#8c8" }}>

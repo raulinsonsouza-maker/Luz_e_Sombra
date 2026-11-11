@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, RefreshCw, Mail } from "lucide-react";
 import { apiFetch } from "@/lib/auth";
 import { CARD, C, timeAgo, type ShowMsg } from "./shared";
 
@@ -64,6 +64,22 @@ export function ComprasTab({ showMsg }: { showMsg: ShowMsg }) {
     setAcaoId(null);
   }
 
+  async function reenviarCheckout(usuarioId: number) {
+    setAcaoId(usuarioId);
+    try {
+      const res = await apiFetch(`/admin/emails/pix-reminder/${usuarioId}`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        showMsg("sucesso", "Link de pagamento reenviado por e-mail");
+      } else {
+        showMsg("erro", data.error || "Não foi possível reenviar");
+      }
+    } catch {
+      showMsg("erro", "Erro de conexão");
+    }
+    setAcaoId(null);
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center py-16">
@@ -113,7 +129,18 @@ export function ComprasTab({ showMsg }: { showMsg: ShowMsg }) {
                     {timeAgo(r.criadoEm)}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      {r.status === "pending" && (
+                        <button
+                          type="button"
+                          disabled={acaoId === r.usuarioId}
+                          onClick={() => reenviarCheckout(r.usuarioId)}
+                          className="text-xs px-2 py-1 rounded-lg flex items-center gap-1"
+                          style={{ background: "rgba(200,165,107,0.12)", color: "#c8a56b" }}
+                        >
+                          <Mail className="w-3 h-3" /> Reenviar link
+                        </button>
+                      )}
                       {!r.ativo && (
                         <button
                           type="button"
