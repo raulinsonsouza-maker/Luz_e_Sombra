@@ -357,103 +357,178 @@ export function leituraLinguagens(narr: NarrativaAmor | null | undefined): Leitu
   );
 }
 
-function primeiraFrase(texto: string): string {
-  const corte = texto.match(/^(.+?[.!?])(?:\s|$)/);
-  return (corte?.[1] ?? texto).trim();
-}
+type AreaRoda = { titulo: string; interpretacao: string; acao: string; valor: number };
 
-function ligarFrase(texto: string): string {
-  const t = texto.trim();
-  if (!t) return t;
-  return t.charAt(0).toLowerCase() + t.slice(1);
-}
-
-function nomeAreaBaixa(titulo: string): string {
-  return titulo.trim().replace(/^\w/, (letra) => letra.toLowerCase());
+function prosa(titulo: string): string {
+  return titulo.trim().toLowerCase();
 }
 
 function juntaTitulos(itens: Array<{ titulo: string }>): string {
-  return listaNatural(itens.map((a) => nomeAreaBaixa(a.titulo)));
+  return listaNatural(itens.map((a) => prosa(a.titulo)));
 }
 
-function textoAreas(chave: string): boolean {
+function chaveDe(itens: Array<{ titulo: string }>): string {
+  return itens.map((a) => a.titulo.toLowerCase()).join(" ");
+}
+
+function ehAlegria(chave: string): boolean {
   return /plenitude|criatividade|diversão|hobby|alegria/.test(chave);
 }
 
-function vinculoAreas(chave: string): boolean {
+function ehVinculo(chave: string): boolean {
   return /social|amoroso|família|familia/.test(chave);
 }
 
-function menteAreas(chave: string): boolean {
+function ehMente(chave: string): boolean {
   return /intelectual|emocional|espiritualidade/.test(chave);
 }
 
-/** Nomeia o padrão da roda sem repetir a lista de notas. */
-function padraoDaRoda(
-  foco: Array<{ titulo: string; valor: number }>,
-  apoios: Array<{ titulo: string; valor: number }>,
-  amplitude: number,
-): string {
-  const chaveFoco = foco.map((a) => a.titulo.toLowerCase()).join(" ");
-  const chaveApoio = apoios.map((a) => a.titulo.toLowerCase()).join(" ");
-  const alegriaFina = textoAreas(chaveFoco);
-  const vinculoForte = vinculoAreas(chaveApoio);
-  const menteForte = menteAreas(chaveApoio);
+/** Abertura humana: o que a roda está dizendo, sem relatório de notas. */
+function aberturaDaRoda(foco: AreaRoda[], apoios: AreaRoda[], amplitude: number): string {
+  const focoChave = chaveDe(foco);
+  const apoioChave = chaveDe(apoios);
 
-  if (alegriaFina && vinculoForte && menteForte) {
-    return "Há um contraste claro: vínculo, mente e sentido estão cheios, mas a alegria simples e o jogo ainda pedem lugar. Não é falta de conquista. É falta de leveza.";
+  if (ehAlegria(focoChave) && ehVinculo(apoioChave) && ehMente(apoioChave)) {
+    return "Você tem gente, amor e uma mente viva. O que ainda falta não é conquista. É alegria simples: o tipo que não espera a vida ficar pronta para aparecer.";
   }
-  if (alegriaFina && vinculoForte) {
-    return "Você tem gente perto, e mesmo assim a plenitude ainda parece distante. Relação forte não substitui alegria própria.";
+  if (ehAlegria(focoChave) && ehVinculo(apoioChave)) {
+    return "Tem gente perto, e mesmo assim a leveza ainda parece distante. Relação boa não substitui o prazer de estar vivo no próprio dia.";
   }
-  if (alegriaFina && menteForte) {
-    return "Sua mente e sua busca interior avançam, mas o prazer de viver ainda fica em segundo plano. Entender a vida não é o mesmo que senti-la.";
+  if (ehAlegria(focoChave) && ehMente(apoioChave)) {
+    return "Sua cabeça anda longe, e o prazer de viver ainda fica para depois. Entender a vida não é o mesmo que senti-la.";
   }
-  if (vinculoAreas(chaveFoco) && menteForte) {
-    return "Há força interior e direção, mas os vínculos pedem cuidado agora. Sozinho, o crescimento fica incompleto.";
+  if (ehVinculo(focoChave) && ehMente(apoioChave)) {
+    return "Por dentro você se segura, mas os vínculos pedem presença agora. Crescer sozinho deixa um buraco que nenhuma conquista fecha.";
   }
   if (amplitude >= 5) {
-    return `A amplitude de ${amplitude} pontos mostra uma roda que não gira redonda: uma parte puxa a vida para frente enquanto outra segura o freio.`;
+    return "Uma parte da sua vida puxa para frente. Outra ainda segura o freio. O número do meio não conta essa história.";
   }
   if (amplitude <= 2) {
-    return "Sua roda está relativamente nivelada. O trabalho agora não é apagar um incêndio, é escolher com intenção onde aprofundar.";
+    return "Sua roda está mais parecida consigo mesma. Agora o trabalho não é apagar fogo. É escolher, com carinho, onde aprofundar.";
   }
-  return "Sua roda pede olhar no contraste, não só na média. O que está alto sustenta. O que está baixo orienta o próximo passo.";
+  return "O que está alto te sustenta. O que está baixo mostra o próximo cuidado. Olhe os dois sem apagar nenhum.";
 }
 
-function sombraDaRoda(
-  foco: Array<{ titulo: string }>,
-  apoios: Array<{ titulo: string }>,
-): string {
-  const chaveFoco = foco.map((a) => a.titulo.toLowerCase()).join(" ");
-  const chaveApoio = apoios.map((a) => a.titulo.toLowerCase()).join(" ");
-  const nomesFoco = juntaTitulos(foco);
-  const nomesApoio = juntaTitulos(apoios);
+function cenaDaArea(area: AreaRoda): string {
+  const t = area.titulo.toLowerCase();
+  const baixa = area.valor <= 5;
 
-  if (textoAreas(chaveFoco) && (vinculoAreas(chaveApoio) || menteAreas(chaveApoio))) {
-    return `A sombra desta roda é deixar ${nomesApoio} carregar o dia inteiro enquanto ${nomesFoco} espera a vida melhorar sozinha. Quando o resto parece bem, a falta de leveza vira detalhe. Não é. Sem ela, o que está forte começa a virar desempenho.`;
+  if (/plenitude|felicidade/.test(t)) {
+    return baixa
+      ? "A alegria ainda chega aos poucos. Tem dia em que a vida parece leve, e tem dia em que a satisfação só aparece se algo lá fora mudar primeiro. Esperar a vida ficar pronta para então ser feliz é uma espera que se alonga."
+      : "A plenitude já visita a sua casa. O convite agora é deixá-la ficar sem exigir motivo grande.";
   }
-  return `A sombra desta roda é medir a vida por ${nomesApoio} e adiar o cuidado com ${nomesFoco}. Tratar a média como resposta é a forma mais elegante de não mudar nada.`;
+  if (/criatividade|hobby|diversão/.test(t)) {
+    return baixa
+      ? "Brincar, criar e descansar ainda entram como prêmio depois da obrigação. A parte sua que gosta de jogar e inventar fica esperando sobrar tempo, e tempo quase nunca sobra sozinho."
+      : "Você ainda guarda espaço para criar e se divertir. Isso alimenta o resto da vida de um jeito que trabalho sozinho não alcança.";
+  }
+  if (/social/.test(t)) {
+    return "Nas amizades e no pertencimento, você cultiva gente de verdade. Isso segura o coração nos dias difíceis.";
+  }
+  if (/amoroso/.test(t)) {
+    return "No amor, há parceria e crescimento. Esse vínculo é chão, não enfeite.";
+  }
+  if (/intelectual/.test(t)) {
+    return "Sua mente está viva, curiosa, em movimento. Aprender ainda te anima.";
+  }
+  if (/emocional/.test(t)) {
+    return "Você sente com profundidade e ainda consegue voltar ao centro. Isso é maturidade rara.";
+  }
+  if (/espiritualidade/.test(t)) {
+    return "Há uma âncora interior que te liga a algo maior. Nos dias apertados, isso importa.";
+  }
+  if (/saúde|disposição/.test(t)) {
+    return baixa
+      ? "O corpo pede mais cuidado do que tem recebido. Energia, sono e movimento não são detalhe."
+      : "O corpo anda razoável. Ainda dá para tratá-lo com mais carinho, sem drama.";
+  }
+  if (/família/.test(t)) {
+    return baixa
+      ? "A família pesa. Há distância ou ferida pedindo conversa honesta, no seu tempo."
+      : "A família segura, mesmo quando pede mais proximidade e verdade.";
+  }
+  if (/propósito|realização/.test(t)) {
+    return baixa
+      ? "A direção da vida ainda parece nublada. Falta um fio que una o que você faz com o que importa de verdade."
+      : "Há sentido na maior parte dos dias. Ainda existe uma expressão mais sua esperando coragem.";
+  }
+  if (/financeiros|financeiro/.test(t)) {
+    return baixa
+      ? "O dinheiro ainda gera ruído. Clareza e um plano simples já aliviam mais do que parecer forte."
+      : "Financeiramente você se segura. O próximo passo é construir com mais intenção, não só administrar.";
+  }
+  if (/contribuição/.test(t)) {
+    return baixa
+      ? "O mundo lá fora ainda espera um gesto seu com mais constância."
+      : "Você já contribui. Dá para alinhar melhor o que sabe fazer com o que o mundo precisa.";
+  }
+  return area.interpretacao;
 }
 
-/** Une frases de áreas num parágrafo contínuo, sem rótulos. */
-function paragrafoAreas(
-  itens: Array<{ titulo: string; interpretacao: string }>,
-  trecho: (interpretacao: string) => string = (t) => t,
-): string {
-  return itens
-    .map((a) => {
-      const corpo = trecho(a.interpretacao).trim();
-      if (!corpo) return "";
-      return `Em ${nomeAreaBaixa(a.titulo)}, ${ligarFrase(corpo)}`;
-    })
-    .filter(Boolean)
-    .join(" ");
+function passoDaArea(area: AreaRoda): string {
+  const t = area.titulo.toLowerCase();
+  if (/plenitude|felicidade/.test(t)) {
+    return "Antes de dormir, diga em voz alta uma coisa boa do dia que não dependeu de conquista. Só presença.";
+  }
+  if (/criatividade|hobby|diversão/.test(t)) {
+    return "Marque na agenda, como se fosse reunião, uma hora nesta semana só para brincar ou criar. Sem meta.";
+  }
+  if (/saúde|disposição/.test(t)) {
+    return "Escolha uma coisa só: dormir meia hora mais cedo ou caminhar vinte minutos. Repita por sete dias.";
+  }
+  if (/emocional/.test(t)) {
+    return "Quando sentir o corpo apertar, pare e nomeie: estou sentindo isto. Dê nome antes de reagir.";
+  }
+  if (/amoroso|família|social/.test(t)) {
+    return "Escolha uma pessoa importante e ofereça trinta minutos de presença real nesta semana. Sem celular.";
+  }
+  if (/financeiro/.test(t)) {
+    return "Anote hoje, num papel, o que entra e o que sai. Clareza já é o primeiro alívio.";
+  }
+  if (/propósito|realização/.test(t)) {
+    return "Reserve uma hora quieta e escreva: o que eu faria se soubesse que não posso fracassar?";
+  }
+  if (/intelectual/.test(t)) {
+    return "Troque vinte minutos de tela vazia por dez páginas de um livro que te desafie.";
+  }
+  if (/espiritualidade/.test(t)) {
+    return "Dez minutos de silêncio por dia, sem agenda. Só respirar e estar.";
+  }
+  if (/contribuição/.test(t)) {
+    return "Escolha uma causa que importa para você e dê um passo concreto nesta semana.";
+  }
+  return area.acao;
 }
 
-export function leituraRoda(
-  areas: Array<{ titulo: string; interpretacao: string; acao: string; valor: number }>,
-): LeituraPortal | null {
+function chaoDaRoda(apoios: AreaRoda[]): string {
+  const chave = chaveDe(apoios);
+  if (ehVinculo(chave) && ehMente(chave)) {
+    return "Ao mesmo tempo, relações e mente te sustentam. Isso é chão de verdade. Serve para cuidar da alegria com mais coragem, não para adiá-la.";
+  }
+  if (ehVinculo(chave)) {
+    return `Ao mesmo tempo, ${juntaTitulos(apoios)} te seguram. Gente boa ao redor é chão. Use esse chão para cuidar do que ainda dói, sem fingir que está tudo resolvido.`;
+  }
+  if (ehMente(chave)) {
+    return `Ao mesmo tempo, ${juntaTitulos(apoios)} estão vivos em você. Isso ajuda. Só não deixe a cabeça resolver sozinha o que o coração e o corpo ainda pedem.`;
+  }
+  return `Ao mesmo tempo, ${juntaTitulos(apoios)} já trabalham a seu favor. Apoie-se nisso para cuidar do que ainda está fino.`;
+}
+
+function sombraDaRoda(foco: AreaRoda[], apoios: AreaRoda[]): string {
+  const focoChave = chaveDe(foco);
+  const apoioChave = chaveDe(apoios);
+
+  if (ehAlegria(focoChave) && (ehVinculo(apoioChave) || ehMente(apoioChave))) {
+    return "O risco é viver bem por fora e por dentro da cabeça, e ir adiando a pergunta: eu estou aproveitando a vida que construí? Sem espaço para prazer, até o que está forte começa a parecer obrigação.";
+  }
+  if (foco.length > 1) {
+    return `O risco é olhar só para ${juntaTitulos(apoios)} e deixar ${juntaTitulos(foco)} esperando a vida melhorar sozinha. O que você evita cuidar hoje vira peso amanhã.`;
+  }
+  return `O risco é se orgulhar do que está bem e adiar o cuidado com ${prosa(foco[0]?.titulo ?? "o que pede atenção")}. A média alta não cura a área esquecida.`;
+}
+
+export function leituraRoda(areas: AreaRoda[]): LeituraPortal | null {
   if (areas.length === 0) return null;
   const ordenadas = [...areas].sort((a, b) => a.valor - b.valor);
   const fracas = ordenadas.filter((a) => a.valor <= 5);
@@ -461,42 +536,31 @@ export function leituraRoda(
   const foco = (fracas.length ? fracas : ordenadas).slice(0, 2);
   const apoios = (fortes.length ? fortes : [...ordenadas].reverse()).slice(0, 3);
   const meio = ordenadas.filter((a) => a.valor >= 6 && a.valor <= 7);
-  const maisAlta = ordenadas[ordenadas.length - 1];
-  const maisBaixa = ordenadas[0];
-  const amplitude = maisAlta.valor - maisBaixa.valor;
-  const media = areas.reduce((soma, a) => soma + a.valor, 0) / areas.length;
-
-  const mapaFoco = listaNatural(foco.map((a) => `${nomeAreaBaixa(a.titulo)} (${a.valor}/10)`));
-  const mapaApoio = listaNatural(apoios.map((a) => `${nomeAreaBaixa(a.titulo)} (${a.valor}/10)`));
+  const amplitude = ordenadas[ordenadas.length - 1].valor - ordenadas[0].valor;
 
   return comporLeitura(
     {
       quemVoceE: lista(
-        padraoDaRoda(foco, apoios, amplitude),
-        `A média marca ${media.toFixed(1)}, com ${amplitude} pontos entre ${nomeAreaBaixa(maisAlta.titulo)} e ${nomeAreaBaixa(maisBaixa.titulo)}. O cuidado começa em ${mapaFoco}. O chão está em ${mapaApoio}.`,
+        aberturaDaRoda(foco, apoios, amplitude),
+        `O pedido mais claro agora está em ${juntaTitulos(foco)}. O que já te segura bem está em ${juntaTitulos(apoios)}.`,
       ),
       noDiaADia: ou(
         lista(
-          ...foco.map((a) => a.interpretacao),
-          apoios.length
-            ? `Do outro lado, ${paragrafoAreas(apoios, primeiraFrase)} Isso é recurso real. Serve para sustentar o cuidado do que ainda está fino, sem virar desculpa para adiar.`
-            : null,
-          meio.length >= 3
-            ? `Entre o vazio e a força, ${juntaTitulos(meio.slice(0, 4))} estão estáveis o bastante para não pedir alarme, e ainda abertas o bastante para crescer com continuidade.`
+          ...foco.map((a) => cenaDaArea(a)),
+          apoios.length ? chaoDaRoda(apoios) : null,
+          meio.length >= 4
+            ? "O restante da roda não pede alarme. Pede continuidade: saúde, família, dinheiro e direção andam razoáveis, e isso já ajuda a cuidar do que falta."
             : null,
         ),
-        "Repare em qual área desta semana a roda apertou de verdade.",
+        "Repare em qual parte da sua semana esta roda apertou de verdade.",
       ),
-      sombra: ou(
-        lista(sombraDaRoda(foco, apoios)),
-        "A sombra da roda é tratar a média como resposta e deixar a área mais frágil no piloto automático.",
-      ),
+      sombra: sombraDaRoda(foco, apoios),
       oQueFazer: ou(
         lista(
-          ...foco.map((a) => a.acao),
-          `Se ${nomeAreaBaixa(foco[0].titulo)} subisse um ponto neste mês, o que mudaria na sua semana?`,
+          ...foco.map((a) => passoDaArea(a)),
+          `Se ${prosa(foco[0].titulo)} ganhasse um pouco mais de espaço neste mês, o que mudaria na sua semana?`,
         ),
-        "Escolha uma área desta leitura e faça um gesto concreto ainda hoje.",
+        "Escolha um gesto pequeno desta leitura e faça ainda hoje.",
       ),
     },
     {

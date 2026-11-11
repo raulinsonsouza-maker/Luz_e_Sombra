@@ -291,12 +291,16 @@ function getNivelInfo(areaId: string, valor: number): NivelInfo {
   return { nivel, ...configs[nivel], ...textos };
 }
 
-function getMediaLabel(media: number): { label: string; sublabel: string } {
-  if (media < 4) return { label: "Terreno a trabalhar", sublabel: "Sua jornada começa agora com coragem e honestidade" };
-  if (media < 5.5) return { label: "Atenção necessária", sublabel: "Várias áreas pedem cuidado, e você deu o primeiro passo" };
-  if (media < 7) return { label: "Equilíbrio emergente", sublabel: "Uma base sólida com espaço significativo para crescer" };
-  if (media < 8.5) return { label: "Vida rica", sublabel: "Você cultiva uma vida com profundidade e significado" };
-  return { label: "Plena realização", sublabel: "Raro nível de equilíbrio e florescimento em todas as áreas" };
+function getMediaLabel(media: number, amplitude: number): { label: string; sublabel: string } {
+  if (amplitude >= 4) {
+    if (media < 5.5) return { label: "Contraste forte", sublabel: "Tem área pedindo cuidado urgente, e a média sozinha não conta isso" };
+    return { label: "Contraste forte", sublabel: "Tem áreas cheias e áreas pedindo cuidado de verdade" };
+  }
+  if (media < 4) return { label: "Começo honesto", sublabel: "Aqui começa o cuidado, sem maquiagem" };
+  if (media < 5.5) return { label: "Pede cuidado", sublabel: "Várias áreas pedem atenção, e você já olhou para elas" };
+  if (media < 7) return { label: "Em construção", sublabel: "Há base, e ainda há espaço claro para crescer" };
+  if (media < 8.5) return { label: "Boa média", sublabel: "A vida tem chão. O detalhe agora importa mais que o número" };
+  return { label: "Roda plena", sublabel: "Equilíbrio raro, para cuidar com carinho e sem relaxar" };
 }
 
 function getMediaColor(media: number): string {
@@ -381,11 +385,12 @@ export default function ResultadoPage() {
 
   const chartData = { labels: AREAS_DA_VIDA.map(a => a.titulo), values: valores };
   const media = valores.reduce((a, b) => a + b, 0) / valores.length;
-  const { label: mediaLabel, sublabel: mediaSublabel } = getMediaLabel(media);
   const mediaColor = getMediaColor(media);
 
   const areasComValores = AREAS_DA_VIDA.map((area, i) => ({ area, valor: valores[i] }));
   const areasOrdenadas = [...areasComValores].sort((a, b) => a.valor - b.valor);
+  const amplitudeHero = areasOrdenadas[areasOrdenadas.length - 1].valor - areasOrdenadas[0].valor;
+  const { label: mediaLabel, sublabel: mediaSublabel } = getMediaLabel(media, amplitudeHero);
 
   const evolucaoData = todasAvaliacoes.length > 1 ? {
     labels: [...todasAvaliacoes].reverse().map(a => format(new Date(a.dataAvaliacao), "dd/MM", { locale: ptBR })),
@@ -491,11 +496,11 @@ export default function ResultadoPage() {
               </div>
               <div>
                 <p className="text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: "rgba(200,165,107,0.45)" }}>
-                  Desequilíbrio
+                  Contraste
                 </p>
-                <p className="font-tan-mon-cheri text-sm" style={{ color: "rgba(200,165,107,0.6)" }}>Amplitude</p>
+                <p className="font-tan-mon-cheri text-sm" style={{ color: "rgba(200,165,107,0.6)" }}>Entre os polos</p>
                 <p className="font-tan-mon-cheri text-2xl" style={{ color: "rgba(200,165,107,0.8)" }}>
-                  {areasOrdenadas[areasOrdenadas.length - 1].valor - areasOrdenadas[0].valor} pts
+                  {amplitudeHero}
                 </p>
               </div>
             </div>
@@ -507,10 +512,10 @@ export default function ResultadoPage() {
         {/* ── Radar ───────────────────────────────────────────────────────── */}
         <DarkCard className="p-6 md:p-8">
           <p className="text-xs font-semibold tracking-[0.25em] uppercase mb-2" style={{ color: "rgba(200,165,107,0.5)" }}>
-            Mapa das áreas
+            Sua roda
           </p>
           <p className="text-sm mb-5" style={{ color: "rgba(247,242,236,0.4)" }}>
-            O desenho da sua roda. A leitura abaixo interpreta o contraste.
+            O desenho completo. Em seguida, a leitura do que ele mostra.
           </p>
           <RadarChart data={chartData} />
         </DarkCard>
@@ -523,11 +528,11 @@ export default function ResultadoPage() {
             <div className="flex items-center gap-3 mb-1">
               <TrendingUp className="w-4 h-4" style={{ color: "#c8a56b" }} />
               <p className="text-xs font-semibold tracking-[0.25em] uppercase" style={{ color: "rgba(200,165,107,0.5)" }}>
-                Sua Jornada ao Longo do Tempo
+                Sua jornada
               </p>
             </div>
             <p className="text-sm mb-6" style={{ color: "rgba(247,242,236,0.4)" }}>
-              Você tem {todasAvaliacoes.length} avaliações registradas. Cada ponto é um retrato honesto de um momento da sua vida.
+              {todasAvaliacoes.length} retratos no tempo. O movimento importa mais que o número isolado.
             </p>
             <LineChart data={evolucaoData} />
 
