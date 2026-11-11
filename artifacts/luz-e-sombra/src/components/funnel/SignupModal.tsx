@@ -8,6 +8,7 @@ import { trackMetaInitiateCheckout, trackMetaLead } from "@/lib/metaPixel";
 import { toastApiError } from "@/lib/apiError";
 import { digitsOnlyPhone, formatBrazilPhone, isValidBrazilPhone } from "@/lib/phoneMask";
 import { PASSWORD_HINT, validatePassword } from "@/lib/passwordPolicy";
+import { isValidDataNascimento } from "@/lib/dataNascimento";
 import { LP_JOURNEY_NAME, LP_PORTAL_NAME } from "@/lib/lpConfig";
 import { safeSessionStorage } from "@/lib/safeStorage";
 
@@ -102,6 +103,7 @@ function resetFormState(setters: {
   setNome: (v: string) => void;
   setEmail: (v: string) => void;
   setTelefone: (v: string) => void;
+  setDataNascimento: (v: string) => void;
   setSenha: (v: string) => void;
   setConfirmarSenha: (v: string) => void;
   setEnviando: (v: boolean) => void;
@@ -112,6 +114,7 @@ function resetFormState(setters: {
   setters.setNome("");
   setters.setEmail("");
   setters.setTelefone("");
+  setters.setDataNascimento("");
   setters.setSenha("");
   setters.setConfirmarSenha("");
   setters.setEnviando(false);
@@ -125,6 +128,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -132,6 +136,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
   const [emailErro, setEmailErro] = useState<string | null>(null);
   const [pendingCheckoutToken, setPendingCheckoutToken] = useState<string | null>(null);
   const [telefoneErro, setTelefoneErro] = useState<string | null>(null);
+  const [dataNascimentoErro, setDataNascimentoErro] = useState<string | null>(null);
 
   const senhasDiferentes = confirmarSenha.length > 0 && senha !== confirmarSenha;
   const nomeInvalido = nome.trim().length > 0 && nome.trim().length < 2;
@@ -142,6 +147,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
         setNome,
         setEmail,
         setTelefone,
+        setDataNascimento,
         setSenha,
         setConfirmarSenha,
         setEnviando,
@@ -150,6 +156,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
         setPendingCheckoutToken,
       });
       setTelefoneErro(null);
+      setDataNascimentoErro(null);
       return;
     }
 
@@ -252,6 +259,18 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
       return;
     }
 
+    if (!dataNascimento.trim()) {
+      setDataNascimentoErro("Informe sua data de nascimento.");
+      toast.error("Informe sua data de nascimento.");
+      return;
+    }
+    if (!isValidDataNascimento(dataNascimento)) {
+      setDataNascimentoErro("Data de nascimento inválida.");
+      toast.error("Data de nascimento inválida.");
+      return;
+    }
+    setDataNascimentoErro(null);
+
     if (senha !== confirmarSenha) {
       toast.error("As senhas não coincidem.");
       return;
@@ -274,6 +293,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
           nome: nome.trim(),
           email: email.trim().toLowerCase(),
           telefone: digitsOnlyPhone(telefone),
+          dataNascimento,
           senha,
           variant,
           utm: getStoredUtms(),
@@ -435,6 +455,40 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
             ) : (
               <p className="text-xs mt-1.5" style={{ color: "rgba(247,242,236,0.32)" }}>
                 Usamos para enviar o link de pagamento e atualizações da jornada.
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="data-nascimento" className={labelClass} style={labelColor}>
+              Data de nascimento *
+            </label>
+            <input
+              id="data-nascimento"
+              type="date"
+              value={dataNascimento}
+              onChange={(e) => {
+                setDataNascimento(e.target.value);
+                setDataNascimentoErro(null);
+              }}
+              required
+              autoComplete="bday"
+              max={new Date().toISOString().slice(0, 10)}
+              min="1900-01-01"
+              className={inputClass}
+              style={{
+                ...inputStyle,
+                border: borderForError(!!dataNascimentoErro),
+                colorScheme: "dark",
+              }}
+            />
+            {dataNascimentoErro ? (
+              <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
+                {dataNascimentoErro}
+              </p>
+            ) : (
+              <p className="text-xs mt-1.5" style={{ color: "rgba(247,242,236,0.32)" }}>
+                Usamos na análise de numerologia da jornada.
               </p>
             )}
           </div>

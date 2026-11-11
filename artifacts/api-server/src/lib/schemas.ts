@@ -123,10 +123,33 @@ export const resetPasswordSchema = z.object({
   novaSenha: senhaForteSchema,
 });
 
+const dataNascimentoIsoSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Data de nascimento inválida")
+  .refine((v) => {
+    const [y, m, d] = v.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    if (
+      Number.isNaN(dt.getTime()) ||
+      dt.getUTCFullYear() !== y ||
+      dt.getUTCMonth() !== m - 1 ||
+      dt.getUTCDate() !== d
+    ) {
+      return false;
+    }
+    const today = new Date();
+    const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+    if (dt.getTime() > todayUtc) return false;
+    if (y < 1900) return false;
+    return true;
+  }, "Data de nascimento inválida");
+
 export const funnelRegisterSchema = z.object({
   nome: z.string().trim().min(2, "Nome é obrigatório"),
   email: emailRequiredSchema,
   telefone: z.string().trim().min(10, "Celular é obrigatório"),
+  dataNascimento: dataNascimentoIsoSchema,
   senha: senhaForteSchema,
   variant: z.enum(["control", "vsl"]).default("control"),
   utm: z

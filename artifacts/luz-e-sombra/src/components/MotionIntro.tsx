@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { isInAppBrowser, safeSessionStorage } from "@/lib/safeStorage";
 
 const MOTION_SRC = "/motion/Motion.mp4";
@@ -6,36 +7,10 @@ const STORAGE_KEY = "luz_motion_intro_v3";
 const FADE_MS = 520;
 const MAX_MS = 16000;
 
-/** Rotas públicas: sem vídeo de abertura. */
-const ROTAS_PUBLICAS = [
-  "/",
-  "/vsl",
-  "/checkout",
-  "/login",
-  "/acesso-pos-compra",
-  "/esqueci-senha",
-  "/redefinir-senha",
-  "/admin/login",
-  "/sobre-o-portal",
-  "/metodologia",
-  "/jornada-da-sombra-a-luz",
-  "/como-funciona",
-  "/contato",
-  "/planos",
-  "/analises",
-  "/blog",
-  "/autoconhecimento",
-  "/padroes-de-comportamento",
-  "/desenvolvimento-pessoal",
-  "/inteligencia-emocional",
-  "/autoconhecimento-e-relacionamentos",
-  "/guia",
-  "/glossario",
-  "/perguntas-frequentes",
-];
-
-const ROTAS_PUBLICAS_PREFIX = ["/analises/", "/blog/", "/esqueci-senha", "/redefinir-senha"];
-
+/**
+ * Motion de abertura: somente no portal autenticado (após login).
+ * LP, checkout, login, páginas públicas e admin NÃO usam.
+ */
 function pathAtual(): string {
   try {
     const base = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
@@ -49,9 +24,32 @@ function pathAtual(): string {
   }
 }
 
-function isRotaPublica(path: string): boolean {
-  if (ROTAS_PUBLICAS.includes(path)) return true;
-  return ROTAS_PUBLICAS_PREFIX.some((p) => path.startsWith(p));
+function isRotaPortalMembro(path: string): boolean {
+  if (path === "/admin" || path.startsWith("/admin/")) return false;
+  if (path === "/dev" || path.startsWith("/dev/")) return false;
+  // Rotas protegidas do membro (dashboard e módulos)
+  const prefixos = [
+    "/dashboard",
+    "/jornada",
+    "/avaliacao",
+    "/resultado",
+    "/historico",
+    "/numerologia",
+    "/perfil",
+    "/quem-sou-eu",
+    "/diagnostico-emocional",
+    "/traco-de-carater",
+    "/temperamento",
+    "/linguagens-amor",
+    "/missoes",
+    "/comunidade",
+    "/cursos",
+    "/notificacoes",
+    "/reflexao",
+    "/frases-guardadas",
+    "/acompanhamento",
+  ];
+  return prefixos.some((p) => path === p || path.startsWith(`${p}/`));
 }
 
 function jaExibidoNestaSessao(): boolean {
@@ -71,9 +69,11 @@ function marcarExibido() {
 }
 
 export default function MotionIntro({ children }: { children: ReactNode }) {
+  const { status } = useAuth();
   const [path, setPath] = useState(() => pathAtual());
-  const podeExibir = !isRotaPublica(path) && !jaExibidoNestaSessao();
-  const [ativo, setAtivo] = useState(podeExibir);
+  const autenticadoNoPortal =
+    status === "authenticated" && isRotaPortalMembro(path) && !jaExibidoNestaSessao();
+  const [ativo, setAtivo] = useState(autenticadoNoPortal);
   const [sumindo, setSumindo] = useState(false);
   const encerrado = useRef(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -82,7 +82,6 @@ export default function MotionIntro({ children }: { children: ReactNode }) {
     const sync = () => setPath(pathAtual());
     window.addEventListener("popstate", sync);
 
-    // WebViews (Instagram) às vezes travam history.* como read-only.
     if (isInAppBrowser()) {
       return () => window.removeEventListener("popstate", sync);
     }
@@ -117,16 +116,16 @@ export default function MotionIntro({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (isRotaPublica(path)) {
+    const pode =
+      status === "authenticated" && isRotaPortalMembro(path) && !jaExibidoNestaSessao();
+    if (!pode) {
       setAtivo(false);
       return;
     }
-    if (!jaExibidoNestaSessao()) {
-      encerrado.current = false;
-      setSumindo(false);
-      setAtivo(true);
-    }
-  }, [path]);
+    encerrado.current = false;
+    setSumindo(false);
+    setAtivo(true);
+  }, [status, path]);
 
   function encerrar() {
     if (encerrado.current) return;

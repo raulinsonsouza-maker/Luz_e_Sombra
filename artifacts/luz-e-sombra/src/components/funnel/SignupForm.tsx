@@ -8,6 +8,7 @@ import { trackMetaInitiateCheckout, trackMetaLead } from "@/lib/metaPixel";
 import { toastApiError } from "@/lib/apiError";
 import { digitsOnlyPhone, formatBrazilPhone, isValidBrazilPhone } from "@/lib/phoneMask";
 import { PASSWORD_HINT, validatePassword } from "@/lib/passwordPolicy";
+import { isValidDataNascimento } from "@/lib/dataNascimento";
 import { LP_JOURNEY_NAME, LP_PORTAL_NAME } from "@/lib/lpConfig";
 import { safeSessionStorage } from "@/lib/safeStorage";
 
@@ -99,6 +100,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -106,6 +108,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
   const [emailErro, setEmailErro] = useState<string | null>(null);
   const [emailPending, setEmailPending] = useState(false);
   const [telefoneErro, setTelefoneErro] = useState<string | null>(null);
+  const [dataNascimentoErro, setDataNascimentoErro] = useState<string | null>(null);
 
   const senhasDiferentes = confirmarSenha.length > 0 && senha !== confirmarSenha;
   const nomeInvalido = nome.trim().length > 0 && nome.trim().length < 2;
@@ -189,6 +192,18 @@ export default function SignupForm({ variant, onRegistered }: Props) {
       return;
     }
 
+    if (!dataNascimento.trim()) {
+      setDataNascimentoErro("Informe sua data de nascimento.");
+      toast.error("Informe sua data de nascimento.");
+      return;
+    }
+    if (!isValidDataNascimento(dataNascimento)) {
+      setDataNascimentoErro("Data de nascimento inválida.");
+      toast.error("Data de nascimento inválida.");
+      return;
+    }
+    setDataNascimentoErro(null);
+
     if (senha !== confirmarSenha) {
       toast.error("As senhas não coincidem.");
       return;
@@ -211,6 +226,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
           nome: nome.trim(),
           email: email.trim().toLowerCase(),
           telefone: digitsOnlyPhone(telefone),
+          dataNascimento,
           senha,
           variant,
           utm: getStoredUtms(),
@@ -349,6 +365,40 @@ export default function SignupForm({ variant, onRegistered }: Props) {
           ) : (
             <p className="text-xs mt-1.5" style={{ color: "rgba(247,242,236,0.32)" }}>
               Usamos para enviar o link de pagamento e atualizações da jornada.
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="signup-data-nascimento" className={labelClass} style={labelColor}>
+            Data de nascimento *
+          </label>
+          <input
+            id="signup-data-nascimento"
+            type="date"
+            value={dataNascimento}
+            onChange={(e) => {
+              setDataNascimento(e.target.value);
+              setDataNascimentoErro(null);
+            }}
+            required
+            autoComplete="bday"
+            max={new Date().toISOString().slice(0, 10)}
+            min="1900-01-01"
+            className={inputClass}
+            style={{
+              ...inputStyle,
+              border: borderForError(!!dataNascimentoErro),
+              colorScheme: "dark",
+            }}
+          />
+          {dataNascimentoErro ? (
+            <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
+              {dataNascimentoErro}
+            </p>
+          ) : (
+            <p className="text-xs mt-1.5" style={{ color: "rgba(247,242,236,0.32)" }}>
+              Usamos na análise de numerologia da jornada.
             </p>
           )}
         </div>
