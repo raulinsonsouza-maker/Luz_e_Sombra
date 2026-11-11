@@ -61,6 +61,7 @@ interface JwtPayload {
   primeiroAcesso: boolean;
   isAdmin: boolean;
   dataNascimento: string | null;
+  sexo: string | null;
   iat?: number;
   exp?: number;
 }
@@ -161,6 +162,7 @@ router.post(
       primeiroAcesso: usuario.primeiroAcesso,
       isAdmin: usuario.isAdmin,
       dataNascimento: usuario.dataNascimento,
+      sexo: usuario.sexo ?? null,
     });
 
     return res.json({
@@ -173,6 +175,7 @@ router.post(
         primeiroAcesso: usuario.primeiroAcesso,
         isAdmin: usuario.isAdmin,
         dataNascimento: usuario.dataNascimento,
+        sexo: usuario.sexo ?? null,
         fotoPerfil: usuario.fotoPerfil,
         ...accessFields,
       },
@@ -227,6 +230,7 @@ router.get("/session", async (req: Request, res: Response) => {
         primeiroAcesso: usuario.primeiroAcesso,
         isAdmin: usuario.isAdmin,
         dataNascimento: usuario.dataNascimento,
+        sexo: usuario.sexo ?? null,
         fotoPerfil: usuario.fotoPerfil,
         ...accessFieldsForClient(access),
       },

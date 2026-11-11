@@ -14,6 +14,7 @@ export interface AuthRequest extends Request {
     primeiroAcesso: boolean;
     isAdmin: boolean;
     dataNascimento: string | null;
+    sexo: string | null;
     acessoInicio?: string | null;
     acessoAte?: string | null;
     garantiaAte?: string | null;
@@ -64,6 +65,7 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
       primeiroAcesso: usuario.primeiroAcesso,
       isAdmin: usuario.isAdmin,
       dataNascimento: usuario.dataNascimento,
+      sexo: usuario.sexo ?? null,
       ...fields,
     };
     return next();

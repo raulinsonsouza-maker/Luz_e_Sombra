@@ -1,7 +1,13 @@
 import { CASCA } from "./casca.js";
+import { TRATAMENTO } from "./dirigir.js";
 import { MARCA } from "./marca.js";
 
 export { preencher } from "./casca.js";
+
+/** Assunto de boas-vindas com concordância por sexo (fallback feminino). */
+export function boasVindasAssunto(sexo?: string | null): string {
+  return `${TRATAMENTO.bemVindo(sexo)}. Falta só confirmar o acesso | ${MARCA.portal}`;
+}
 
 /** Textos de superfície. Telas e e-mails leem daqui, não guardam parágrafo próprio. */
 export const CATALOGO = {
@@ -44,6 +50,7 @@ export const CATALOGO = {
     subtitulo: "Antes da leitura do corpo, conte como você tem se sentido. Isso deixa a análise mais fiel a você.",
   },
   email: {
+    /** Preferir `boasVindasAssunto(sexo)` quando o sexo do cliente for conhecido. */
     boasVindasAssunto: `Bem-vinda. Falta só confirmar o acesso | ${MARCA.portal}`,
     acessoAssunto: `Seu acesso está liberado | ${MARCA.portal}`,
     acessoEncerradoAssunto: `Sobre o seu acesso | ${MARCA.portal}`,

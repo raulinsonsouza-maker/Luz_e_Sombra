@@ -18,6 +18,8 @@ export const usuariosTable = pgTable("usuarios", {
   /** Fim da janela de garantia (pagoEm + 7 dias). */
   garantiaAte: timestamp("garantia_ate"),
   dataNascimento: text("data_nascimento"),
+  /** feminino | masculino — só para linguagem de tratamento; não entra em motores. */
+  sexo: text("sexo"),
   fotoPerfil: text("foto_perfil"),
   primeiroAcesso: boolean("primeiro_acesso").notNull().default(true),
   ativo: boolean("ativo").notNull().default(true),

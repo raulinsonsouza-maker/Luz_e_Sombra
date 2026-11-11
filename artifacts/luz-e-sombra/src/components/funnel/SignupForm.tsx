@@ -11,6 +11,7 @@ import { PASSWORD_HINT, validatePassword } from "@/lib/passwordPolicy";
 import { isValidDataNascimento } from "@/lib/dataNascimento";
 import { LP_JOURNEY_NAME, LP_PORTAL_NAME } from "@/lib/lpConfig";
 import { safeSessionStorage } from "@/lib/safeStorage";
+import { TRATAMENTO, type SexoCliente } from "@workspace/copy-voz";
 
 interface Props {
   variant: LpVariant;
@@ -101,6 +102,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [dataNascimento, setDataNascimento] = useState("");
+  const [sexo, setSexo] = useState<SexoCliente | "">("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -109,6 +111,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
   const [emailPending, setEmailPending] = useState(false);
   const [telefoneErro, setTelefoneErro] = useState<string | null>(null);
   const [dataNascimentoErro, setDataNascimentoErro] = useState<string | null>(null);
+  const [sexoErro, setSexoErro] = useState<string | null>(null);
 
   const senhasDiferentes = confirmarSenha.length > 0 && senha !== confirmarSenha;
   const nomeInvalido = nome.trim().length > 0 && nome.trim().length < 2;
@@ -204,6 +207,13 @@ export default function SignupForm({ variant, onRegistered }: Props) {
     }
     setDataNascimentoErro(null);
 
+    if (sexo !== "feminino" && sexo !== "masculino") {
+      setSexoErro("Selecione Mulher ou Homem.");
+      toast.error("Selecione Mulher ou Homem.");
+      return;
+    }
+    setSexoErro(null);
+
     if (senha !== confirmarSenha) {
       toast.error("As senhas não coincidem.");
       return;
@@ -227,6 +237,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
           email: email.trim().toLowerCase(),
           telefone: digitsOnlyPhone(telefone),
           dataNascimento,
+          sexo,
           senha,
           variant,
           utm: getStoredUtms(),
@@ -254,6 +265,8 @@ export default function SignupForm({ variant, onRegistered }: Props) {
     }
   }
 
+  const nomePlaceholder = `Como você quer ser ${sexo ? TRATAMENTO.chamada(sexo) : "chamada"}`;
+
   return (
     <div>
       <h3 className="font-tan-mon-cheri text-xl mb-1" style={{ color: "#f7f2ec" }}>
@@ -277,11 +290,57 @@ export default function SignupForm({ variant, onRegistered }: Props) {
             autoComplete="name"
             className={inputClass}
             style={{ ...inputStyle, border: borderForError(nomeInvalido) }}
-            placeholder="Como você quer ser chamada"
+            placeholder={nomePlaceholder}
           />
           {nomeInvalido && (
             <p className="text-xs mt-1.5" style={{ color: "#e88" }}>
               Informe pelo menos 2 caracteres.
+            </p>
+          )}
+        </div>
+
+        <div>
+          <p className={labelClass} style={labelColor} id="signup-sexo-label">
+            Você é *
+          </p>
+          <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="signup-sexo-label">
+            {(
+              [
+                { value: "feminino" as const, label: "Mulher" },
+                { value: "masculino" as const, label: "Homem" },
+              ] as const
+            ).map((opt) => {
+              const selected = sexo === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    setSexo(opt.value);
+                    setSexoErro(null);
+                  }}
+                  className="px-4 py-3 rounded-xl text-sm font-semibold transition-all"
+                  style={{
+                    background: selected ? "rgba(200,165,107,0.18)" : inputStyle.background,
+                    border: selected
+                      ? "1px solid rgba(200,165,107,0.55)"
+                      : borderForError(!!sexoErro),
+                    color: selected ? "#e8d5b0" : "#f7f2ec",
+                  }}
+                  aria-pressed={selected}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          {sexoErro ? (
+            <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
+              {sexoErro}
+            </p>
+          ) : (
+            <p className="text-xs mt-1.5" style={{ color: "rgba(247,242,236,0.32)" }}>
+              Usamos só para nos dirigir a você com a linguagem certa.
             </p>
           )}
         </div>

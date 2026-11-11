@@ -13,6 +13,7 @@ import {
 import { listarFrasesGuardadas } from "@/lib/frasesGuardadas";
 import { listarPercepcoes } from "@/lib/percepcoes";
 import { LuzIcon } from "@/components/LuzIcon";
+import type { SexoCliente } from "@workspace/copy-voz";
 
 interface Progresso {
   xp: number;
@@ -47,6 +48,7 @@ export default function MeuPerfilPage() {
   // ── Form state (only mutated in edit mode) ─────────────────────────────────
   const [nome, setNome] = useState(user?.nome ?? "");
   const [dataNascimento, setDataNascimento] = useState(user?.dataNascimento ?? "");
+  const [sexo, setSexo] = useState<SexoCliente | "">((user?.sexo as SexoCliente | null) ?? "");
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
@@ -86,6 +88,7 @@ export default function MeuPerfilPage() {
     if (!editando) {
       setNome(user?.nome ?? "");
       setDataNascimento(user?.dataNascimento ?? "");
+      setSexo((user?.sexo as SexoCliente | null) ?? "");
     }
   }, [user, editando]);
 
@@ -145,6 +148,7 @@ export default function MeuPerfilPage() {
   function iniciarEdicao() {
     setNome(user?.nome ?? "");
     setDataNascimento(user?.dataNascimento ?? "");
+    setSexo((user?.sexo as SexoCliente | null) ?? "");
     setSenhaAtual(""); setNovaSenha(""); setConfirmarSenha("");
     setErrorMsg(null); setSuccessMsg(null);
     setEditando(true);
@@ -153,6 +157,7 @@ export default function MeuPerfilPage() {
   function cancelarEdicao() {
     setNome(user?.nome ?? "");
     setDataNascimento(user?.dataNascimento ?? "");
+    setSexo((user?.sexo as SexoCliente | null) ?? "");
     setSenhaAtual(""); setNovaSenha(""); setConfirmarSenha("");
     setErrorMsg(null);
     setEditando(false);
@@ -170,6 +175,7 @@ export default function MeuPerfilPage() {
     const body: Record<string, string> = {};
     if (nome.trim() !== (user?.nome ?? "").trim()) body.nome = nome.trim();
     if (dataNascimento !== (user?.dataNascimento ?? "")) body.dataNascimento = dataNascimento;
+    if (sexo && sexo !== (user?.sexo ?? "")) body.sexo = sexo;
     if (novaSenha) { body.senhaAtual = senhaAtual; body.novaSenha = novaSenha; }
 
     if (Object.keys(body).length === 0) {
@@ -483,13 +489,20 @@ export default function MeuPerfilPage() {
               </div>
 
               {/* Birth date row */}
-              <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: user?.acessoAte ? "1px solid rgba(200,165,107,0.06)" : undefined }}>
+              <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid rgba(200,165,107,0.06)" }}>
                 <div className="flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5" style={{ color: "rgba(200,165,107,0.4)" }} />
                   <p className="text-xs font-semibold" style={{ color: "rgba(247,242,236,0.35)" }}>Data de nascimento</p>
                 </div>
                 <p className="text-sm" style={{ color: user?.dataNascimento ? "#f7f2ec" : "rgba(247,242,236,0.25)" }}>
                   {user?.dataNascimento ? formatarData(user.dataNascimento) : "Não informada"}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: user?.acessoAte ? "1px solid rgba(200,165,107,0.06)" : undefined }}>
+                <p className="text-xs font-semibold" style={{ color: "rgba(247,242,236,0.35)" }}>Sexo</p>
+                <p className="text-sm" style={{ color: user?.sexo ? "#f7f2ec" : "rgba(247,242,236,0.25)" }}>
+                  {user?.sexo === "masculino" ? "Homem" : user?.sexo === "feminino" ? "Mulher" : "Não informado"}
                 </p>
               </div>
 
@@ -593,6 +606,43 @@ export default function MeuPerfilPage() {
                   style={{ ...inputSt, colorScheme: "dark" }}
                 />
                 <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>Usada para cálculos de numerologia.</p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-sm font-medium" style={{ color: "rgba(247,242,236,0.7)" }}>
+                  Sexo
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(
+                    [
+                      { value: "feminino" as const, label: "Mulher" },
+                      { value: "masculino" as const, label: "Homem" },
+                    ] as const
+                  ).map((opt) => {
+                    const selected = sexo === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setSexo(opt.value)}
+                        className="px-4 py-3 rounded-xl text-sm font-semibold transition-all"
+                        style={{
+                          background: selected ? "rgba(200,165,107,0.18)" : "rgba(15,12,9,0.8)",
+                          border: selected
+                            ? "1px solid rgba(200,165,107,0.55)"
+                            : "1px solid rgba(200,165,107,0.2)",
+                          color: selected ? "#e8d5b0" : "#f7f2ec",
+                        }}
+                        aria-pressed={selected}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-xs" style={{ color: "rgba(247,242,236,0.3)" }}>
+                  Só para nos dirigir a você com a linguagem certa.
+                </p>
               </div>
             </div>
 

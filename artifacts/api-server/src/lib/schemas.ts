@@ -40,10 +40,13 @@ const emailOptionalSchema = z
   .refine((v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), "Email inválido")
   .transform((v) => (v === "" ? null : v));
 
+const sexoClienteSchema = z.enum(["feminino", "masculino"]);
+
 export const updateMeSchema = z
   .object({
     nome: z.string().trim().min(1, "Nome não pode ser vazio").optional(),
     dataNascimento: z.string().nullable().optional(),
+    sexo: sexoClienteSchema.nullable().optional(),
     senhaAtual: z.string().optional(),
     novaSenha: z.string().optional(),
   })
@@ -150,6 +153,7 @@ export const funnelRegisterSchema = z.object({
   email: emailRequiredSchema,
   telefone: z.string().trim().min(10, "Celular é obrigatório"),
   dataNascimento: dataNascimentoIsoSchema,
+  sexo: sexoClienteSchema,
   senha: senhaForteSchema,
   variant: z.enum(["control", "vsl"]).default("control"),
   utm: z

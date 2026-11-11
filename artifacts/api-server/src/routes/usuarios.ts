@@ -106,7 +106,7 @@ router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
     }
-    const { nome, dataNascimento, senhaAtual, novaSenha } = parsed.data;
+    const { nome, dataNascimento, sexo, senhaAtual, novaSenha } = parsed.data;
     const updates: UsuarioUpdates = {};
 
     if (nome !== undefined) {
@@ -115,6 +115,10 @@ router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {
 
     if (dataNascimento !== undefined) {
       updates.dataNascimento = dataNascimento;
+    }
+
+    if (sexo !== undefined) {
+      updates.sexo = sexo;
     }
 
     if (novaSenha !== undefined && novaSenha !== "") {
@@ -144,6 +148,7 @@ router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {
         nome: usuariosTable.nome,
         email: usuariosTable.email,
         dataNascimento: usuariosTable.dataNascimento,
+        sexo: usuariosTable.sexo,
         fotoPerfil: usuariosTable.fotoPerfil,
         primeiroAcesso: usuariosTable.primeiroAcesso,
         ativo: usuariosTable.ativo,

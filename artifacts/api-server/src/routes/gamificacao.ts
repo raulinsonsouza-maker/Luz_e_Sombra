@@ -16,6 +16,7 @@ import { minicursoCompletoParaUsuario } from "./modulosJornada";
 import { temAnalise } from "../lib/temAnaliseJornada";
 import { awardXp, getOrCreateGamificacao } from "../lib/awardXp";
 import { awardLuzDiaria, temLuzEventoHoje, type TipoLuzEvento } from "../lib/awardLuz";
+import { nomeNivelComSexo } from "@workspace/copy-voz";
 
 const router = Router();
 
@@ -149,7 +150,7 @@ router.get("/progresso", requireAuth, async (req: AuthRequest, res: Response) =>
       momentoLuzHoje,
       pausaLuzHoje,
       nivel: nivelInfo.nivel,
-      nomeNivel: nivelInfo.nome,
+      nomeNivel: nomeNivelComSexo(nivelInfo.nome, req.user?.sexo),
       descNivel: nivelInfo.desc,
       xpNoNivel,
       xpParaProximo,
@@ -249,7 +250,7 @@ router.post("/missoes/:id/concluir", requireAuth, async (req: AuthRequest, res: 
       xpGanho: result.xpGanho,
       totalXp: result.xp,
       nivel: result.nivel,
-      nomeNivel: result.nomeNivel,
+      nomeNivel: nomeNivelComSexo(result.nomeNivel, req.user?.sexo),
       leveledUp: result.leveledUp,
     });
   } catch (err) {

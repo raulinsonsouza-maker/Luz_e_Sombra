@@ -110,7 +110,7 @@ export const CASCA = {
           {
             step: "04",
             title: "Continue sua jornada",
-            desc: "Volte diariamente, faça suas reflexões, registre suas emoções e desenvolva uma relação mais consciente consigo mesmo.",
+            desc: "Volte diariamente, faça suas reflexões, registre suas emoções e desenvolva uma relação mais consciente consigo.",
           },
         ],
       },
@@ -197,7 +197,7 @@ export const CASCA = {
       },
       {
         q: "O que é a Jornada Da Sombra à Luz?",
-        a: "É o percurso guiado dentro do Portal. Você passa por diferentes análises, conecta suas descobertas e desenvolve uma compreensão mais ampla sobre si mesmo.",
+        a: "É o percurso guiado dentro do Portal. Você passa por diferentes análises, conecta suas descobertas e desenvolva uma compreensão mais ampla sobre si.",
       },
       {
         q: "Preciso conhecer numerologia ou linguagem corporal?",

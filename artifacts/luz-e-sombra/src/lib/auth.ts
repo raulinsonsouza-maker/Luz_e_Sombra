@@ -8,6 +8,8 @@ export interface User {
   primeiroAcesso: boolean;
   isAdmin: boolean;
   dataNascimento: string | null;
+  /** feminino | masculino — linguagem de tratamento */
+  sexo: string | null;
   fotoPerfil: string | null;
   acessoInicio?: string | null;
   acessoAte?: string | null;

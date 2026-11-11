@@ -110,7 +110,7 @@ export default function LoginPage() {
 
           <div>
             <h2 className="font-tan-mon-cheri text-3xl text-brand-dark mb-2">
-              Bem-vindo(a)
+              Olá
             </h2>
             <p className="text-brand-medium mb-10 text-sm leading-relaxed">
               Acesse sua conta para continuar sua jornada.

@@ -10,7 +10,14 @@ export {
   type PecaLeitura,
 } from "./moldura.js";
 export { limparJargao, comporLeitura } from "./compor.js";
-export { CATALOGO, preencher } from "./catalogo.js";
+export { CATALOGO, preencher, boasVindasAssunto } from "./catalogo.js";
+export {
+  dirigir,
+  sexoOuPadrao,
+  TRATAMENTO,
+  nomeNivelComSexo,
+  type SexoCliente,
+} from "./dirigir.js";
 export {
   removerTravessoes,
   normalizarPontuacao,

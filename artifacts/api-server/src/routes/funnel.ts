@@ -138,7 +138,7 @@ router.post(
       return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
     }
 
-    const { nome, email, telefone, dataNascimento, senha, variant, utm } = parsed.data;
+    const { nome, email, telefone, dataNascimento, sexo, senha, variant, utm } = parsed.data;
     const emailNorm = email.trim().toLowerCase();
 
     const [emailExisting] = await db
@@ -183,6 +183,7 @@ router.post(
         email: emailNorm,
         telefone: telefone?.trim() || null,
         dataNascimento,
+        sexo,
         ativo: false,
         statusAcesso: "pending",
         primeiroAcesso: true,
@@ -225,6 +226,7 @@ router.post(
         nome: nome.trim(),
         email: emailNorm,
         checkoutToken,
+        sexo,
       },
       req.log,
     );
@@ -390,6 +392,7 @@ router.post("/complete-checkout", async (req: Request, res: Response) => {
       primeiroAcesso: usuario.primeiroAcesso,
       isAdmin: usuario.isAdmin,
       dataNascimento: usuario.dataNascimento,
+      sexo: usuario.sexo ?? null,
     });
 
     return res.json({
@@ -402,6 +405,7 @@ router.post("/complete-checkout", async (req: Request, res: Response) => {
         primeiroAcesso: usuario.primeiroAcesso,
         isAdmin: usuario.isAdmin,
         dataNascimento: usuario.dataNascimento,
+        sexo: usuario.sexo ?? null,
         fotoPerfil: usuario.fotoPerfil,
         acessoInicio: usuario.acessoInicio?.toISOString() ?? null,
         acessoAte: usuario.acessoAte?.toISOString() ?? null,

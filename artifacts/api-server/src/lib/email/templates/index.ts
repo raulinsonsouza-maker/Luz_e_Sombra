@@ -1,4 +1,4 @@
-import { CATALOGO, preencher } from "@workspace/copy-voz";
+import { boasVindasAssunto, CATALOGO, preencher } from "@workspace/copy-voz";
 import { EMAIL_JOURNEY_NAME, EMAIL_PORTAL_NAME, EMAIL_SUPPORT, primeiroNome } from "../branding";
 import { renderEmailLayout, p, strong, link } from "./layout";
 
@@ -6,6 +6,7 @@ export function checkoutWelcomeEmail(params: {
   nome: string;
   checkoutUrl: string;
   loginUrl: string;
+  sexo?: string | null;
 }): { subject: string; html: string } {
   const nome = primeiroNome(params.nome);
   const bodyHtml = [
@@ -18,7 +19,7 @@ export function checkoutWelcomeEmail(params: {
   ].join("");
 
   return {
-    subject: CATALOGO.email.boasVindasAssunto,
+    subject: boasVindasAssunto(params.sexo),
     html: renderEmailLayout({
       preheader: preencher(CATALOGO.email.preheaderPagamento, { jornada: EMAIL_JOURNEY_NAME }),
       title: CATALOGO.email.quaseLa,

@@ -7,7 +7,7 @@ import MobileTopBar from "@/components/MobileTopBar";
 import PageIntroHeader from "@/components/PageIntroHeader";
 import { buscarConteudoDia, type ConteudoDia } from "@/lib/conteudoDia";
 import { Flame, Trophy, Star, Zap, Sunrise, Crown, Target, Gem, Sparkles, Shield, Compass, Mountain, Award, Check, type LucideIcon } from "lucide-react";
-import { CATALOGO } from "@workspace/copy-voz";
+import { CATALOGO, TRATAMENTO } from "@workspace/copy-voz";
 
 interface Missao {
   id: number;
@@ -31,13 +31,15 @@ interface Progresso {
   };
 }
 
-const NIVEL_NOMES: Record<number, string> = {
-  1: "Iniciante",
-  2: "Observador",
-  3: "Explorador",
-  4: "Transformador",
-  5: "Iluminado",
-};
+function nivelNomes(sexo: string | null | undefined): Record<number, string> {
+  return {
+    1: "Iniciante",
+    2: "Observador",
+    3: "Explorador",
+    4: "Transformador",
+    5: TRATAMENTO.iluminado(sexo),
+  };
+}
 
 interface ConquistaItem {
   id: string;
@@ -133,9 +135,14 @@ export default function MissoesPage() {
     }
     setConcluindoConvite(false);
   }
+  const nomesNivel = nivelNomes(user?.sexo);
   const conquistasComputadas: ConquistaItem[] = CONQUISTAS.map((c) => {
+    const base =
+      c.id === "nivel-5"
+        ? { ...c, titulo: nomesNivel[5] }
+        : c;
     let desbloqueada = false;
-    if (!progresso) return { ...c, desbloqueada: false };
+    if (!progresso) return { ...base, desbloqueada: false };
     if (c.id === "primeiro-passo") desbloqueada = concluidasHoje >= 1 || progresso.xp > 0;
     else if (c.id === "ritmo-inicial") desbloqueada = concluidasHoje >= 2;
     else if (c.id === "dia-fechado") desbloqueada = totalHoje > 0 && concluidasHoje >= totalHoje;
@@ -155,7 +162,7 @@ export default function MissoesPage() {
     else if (c.id === "traco") desbloqueada = progresso.jornada?.traco === true;
     else if (c.id === "roda") desbloqueada = progresso.jornada?.roda === true;
     else if (c.id === "jornada-integrada") desbloqueada = progresso.jornada?.traco === true && progresso.jornada?.roda === true;
-    return { ...c, desbloqueada };
+    return { ...base, desbloqueada };
   });
 
   return (

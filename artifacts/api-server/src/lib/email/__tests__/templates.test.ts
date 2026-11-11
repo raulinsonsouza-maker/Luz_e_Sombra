@@ -19,6 +19,7 @@ describe("email templates", () => {
       nome: "Maria Silva",
       checkoutUrl: "https://portaliluminando.com.br/?checkout=abc#checkout",
       loginUrl: LOGIN,
+      sexo: "feminino",
     });
     assert.match(subject, /Bem-vinda/i);
     assert.match(subject, new RegExp(EMAIL_PORTAL_NAME));
@@ -26,6 +27,17 @@ describe("email templates", () => {
     assert.match(html, /\/login/);
     assert.match(html, /Maria/);
     assert.match(html, /Jornada Da Sombra à Luz/);
+  });
+
+  it("checkout_welcome masculino usa Bem-vindo", () => {
+    const { subject } = checkoutWelcomeEmail({
+      nome: "João",
+      checkoutUrl: "https://portaliluminando.com.br/?checkout=abc#checkout",
+      loginUrl: LOGIN,
+      sexo: "masculino",
+    });
+    assert.match(subject, /Bem-vindo\./i);
+    assert.doesNotMatch(subject, /Bem-vinda/i);
   });
 
   it("access_granted prioriza login e inclui jornada", () => {

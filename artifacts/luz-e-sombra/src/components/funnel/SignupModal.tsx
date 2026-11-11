@@ -11,6 +11,7 @@ import { PASSWORD_HINT, validatePassword } from "@/lib/passwordPolicy";
 import { isValidDataNascimento } from "@/lib/dataNascimento";
 import { LP_JOURNEY_NAME, LP_PORTAL_NAME } from "@/lib/lpConfig";
 import { safeSessionStorage } from "@/lib/safeStorage";
+import { TRATAMENTO, type SexoCliente } from "@workspace/copy-voz";
 
 interface Props {
   open: boolean;
@@ -104,6 +105,7 @@ function resetFormState(setters: {
   setEmail: (v: string) => void;
   setTelefone: (v: string) => void;
   setDataNascimento: (v: string) => void;
+  setSexo: (v: SexoCliente | "") => void;
   setSenha: (v: string) => void;
   setConfirmarSenha: (v: string) => void;
   setEnviando: (v: boolean) => void;
@@ -115,6 +117,7 @@ function resetFormState(setters: {
   setters.setEmail("");
   setters.setTelefone("");
   setters.setDataNascimento("");
+  setters.setSexo("");
   setters.setSenha("");
   setters.setConfirmarSenha("");
   setters.setEnviando(false);
@@ -129,6 +132,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [dataNascimento, setDataNascimento] = useState("");
+  const [sexo, setSexo] = useState<SexoCliente | "">("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -137,6 +141,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
   const [pendingCheckoutToken, setPendingCheckoutToken] = useState<string | null>(null);
   const [telefoneErro, setTelefoneErro] = useState<string | null>(null);
   const [dataNascimentoErro, setDataNascimentoErro] = useState<string | null>(null);
+  const [sexoErro, setSexoErro] = useState<string | null>(null);
 
   const senhasDiferentes = confirmarSenha.length > 0 && senha !== confirmarSenha;
   const nomeInvalido = nome.trim().length > 0 && nome.trim().length < 2;
@@ -148,6 +153,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
         setEmail,
         setTelefone,
         setDataNascimento,
+        setSexo,
         setSenha,
         setConfirmarSenha,
         setEnviando,
@@ -157,6 +163,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
       });
       setTelefoneErro(null);
       setDataNascimentoErro(null);
+      setSexoErro(null);
       return;
     }
 
@@ -271,6 +278,13 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
     }
     setDataNascimentoErro(null);
 
+    if (sexo !== "feminino" && sexo !== "masculino") {
+      setSexoErro("Selecione Mulher ou Homem.");
+      toast.error("Selecione Mulher ou Homem.");
+      return;
+    }
+    setSexoErro(null);
+
     if (senha !== confirmarSenha) {
       toast.error("As senhas não coincidem.");
       return;
@@ -294,6 +308,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
           email: email.trim().toLowerCase(),
           telefone: digitsOnlyPhone(telefone),
           dataNascimento,
+          sexo,
           senha,
           variant,
           utm: getStoredUtms(),
@@ -377,11 +392,57 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
               autoFocus
               className={inputClass}
               style={{ ...inputStyle, border: borderForError(nomeInvalido) }}
-              placeholder="Como você quer ser chamada"
+              placeholder={`Como você quer ser ${sexo ? TRATAMENTO.chamada(sexo) : "chamada"}`}
             />
             {nomeInvalido && (
               <p className="text-xs mt-1.5" style={{ color: "#e88" }}>
                 Informe pelo menos 2 caracteres.
+              </p>
+            )}
+          </div>
+
+          <div>
+            <p className={labelClass} style={labelColor} id="modal-sexo-label">
+              Você é *
+            </p>
+            <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="modal-sexo-label">
+              {(
+                [
+                  { value: "feminino" as const, label: "Mulher" },
+                  { value: "masculino" as const, label: "Homem" },
+                ] as const
+              ).map((opt) => {
+                const selected = sexo === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      setSexo(opt.value);
+                      setSexoErro(null);
+                    }}
+                    className="px-4 py-3 rounded-xl text-sm font-semibold transition-all"
+                    style={{
+                      background: selected ? "rgba(200,165,107,0.18)" : inputStyle.background,
+                      border: selected
+                        ? "1px solid rgba(200,165,107,0.55)"
+                        : borderForError(!!sexoErro),
+                      color: selected ? "#e8d5b0" : "#f7f2ec",
+                    }}
+                    aria-pressed={selected}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            {sexoErro ? (
+              <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
+                {sexoErro}
+              </p>
+            ) : (
+              <p className="text-xs mt-1.5" style={{ color: "rgba(247,242,236,0.32)" }}>
+                Usamos só para nos dirigir a você com a linguagem certa.
               </p>
             )}
           </div>

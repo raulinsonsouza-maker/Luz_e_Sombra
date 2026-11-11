@@ -106,13 +106,24 @@ export async function sendTransactionalEmail(
 }
 
 export function sendCheckoutWelcomeEmail(
-  params: { usuarioId: number; nome: string; email: string; checkoutToken: string },
+  params: {
+    usuarioId: number;
+    nome: string;
+    email: string;
+    checkoutToken: string;
+    sexo?: string | null;
+  },
   log?: Logger,
 ): void {
   const { publicUrl } = getEmailConfig();
   const checkoutUrl = `${publicUrl}/?checkout=${encodeURIComponent(params.checkoutToken)}#checkout`;
   const loginUrl = `${publicUrl}/login`;
-  const { subject, html } = checkoutWelcomeEmail({ nome: params.nome, checkoutUrl, loginUrl });
+  const { subject, html } = checkoutWelcomeEmail({
+    nome: params.nome,
+    checkoutUrl,
+    loginUrl,
+    sexo: params.sexo,
+  });
 
   void sendTransactionalEmail(
     {
