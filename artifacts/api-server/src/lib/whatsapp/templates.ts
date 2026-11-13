@@ -5,7 +5,7 @@ export const WA_TEMPLATES = {
   pixPendente: "portal_pix_pendente",
   lembrete2h: "portal_lembrete_2h",
   lembrete24h: "portal_lembrete_24h",
-  acessoLiberado: "portal_acesso_liberado",
+  acessoLiberado: "portal_pagamento_ok",
   avisoCurso: "portal_aviso_curso",
   avisoComunidade: "portal_aviso_comunidade",
   avisoDia: "portal_aviso_dia",

@@ -95,17 +95,12 @@ Oi, {{1}}!
 {{2}}
 ```
 
-### `portal_acesso_liberado`
+### `portal_pagamento_ok`
+
+Categoria: UTILITY (com `allow_category_change`). Variáveis no meio do texto (Meta não aceita var no início/fim).
 
 ```
-{{1}}, pagamento confirmado!
-
-Seu acesso ao Portal Iluminando está LIBERADO.
-
-Entre com o e-mail {{2}} e a senha que você criou.
-
-👇 Acessar:
-{{3}}
+Confirmamos o pagamento referente ao pedido de {{1}}. O acesso da conta {{2}} foi ativado. Consulte os detalhes em {{3}} se precisar.
 ```
 
 Variáveis: 1=nome, 2=email, 3=URL login
