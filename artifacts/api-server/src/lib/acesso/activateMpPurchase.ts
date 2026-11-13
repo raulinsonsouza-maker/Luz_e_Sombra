@@ -182,9 +182,10 @@ export async function activateMpPurchase(params: {
       {
         usuarioId: usuario.id,
         nome: usuario.nome,
-        email: usuario.email,
         telefone: usuario.telefone,
         checkoutToken: params.checkoutToken ?? undefined,
+        mpPaymentId: params.mpPaymentId ?? null,
+        compraId,
       },
       params.log,
     );

@@ -295,9 +295,9 @@ router.post("/cakto", async (req: Request, res: Response) => {
             {
               usuarioId: usuario.id,
               nome: usuario.nome,
-              email: usuario.email,
               telefone: usuario.telefone,
               checkoutToken: ref,
+              mpPaymentId: orderId,
             },
             req.log,
           );

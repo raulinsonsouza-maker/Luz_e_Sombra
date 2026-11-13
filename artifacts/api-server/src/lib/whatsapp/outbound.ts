@@ -2,56 +2,74 @@ import { db } from "@workspace/db";
 import { comprasMpTable, usuariosTable } from "@workspace/db/schema";
 import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
 import type { Logger } from "pino";
+import { PRECO_OFERTA_NUM } from "../acesso/periodo";
 import { getWhatsAppConfig, isWhatsAppConfigured } from "./config";
-import { sendWhatsAppTemplate } from "./client";
+import {
+  sendWhatsAppPixOrderDetails,
+  sendWhatsAppTemplate,
+  sendWhatsAppText,
+} from "./client";
 import { firstNameFromFullName, toWhatsAppRecipient } from "./phone";
 import { WA_TEMPLATES } from "./templates";
 
-function checkoutUrl(token: string): string {
-  const { publicUrl } = getWhatsAppConfig();
-  return `${publicUrl}/checkout?token=${encodeURIComponent(token)}`;
+function checkoutTokenSuffix(token: string): string {
+  return encodeURIComponent(token);
 }
 
-function loginUrl(): string {
-  return `${getWhatsAppConfig().publicUrl}/login`;
-}
-
-async function loadUserPhone(usuarioId: number): Promise<{
-  telefone: string | null;
-  nome: string;
-  email: string | null;
-  optOut: boolean;
-} | null> {
+async function loadUser(usuarioId: number) {
   const [row] = await db
     .select({
       telefone: usuariosTable.telefone,
       nome: usuariosTable.nome,
       email: usuariosTable.email,
       optOut: usuariosTable.whatsappOptOut,
+      comunidadeOptIn: usuariosTable.whatsappComunidadeOptIn,
     })
     .from(usuariosTable)
     .where(eq(usuariosTable.id, usuarioId))
     .limit(1);
-  if (!row) return null;
-  return {
-    telefone: row.telefone,
-    nome: row.nome,
-    email: row.email,
-    optOut: row.optOut,
-  };
+  return row ?? null;
 }
 
 async function markCompraFlag(
   checkoutToken: string,
-  flag: "waWelcomeSentAt" | "waPixPendingSentAt" | "waReminder2hSentAt" | "waReminder24hSentAt" | "waAccessGrantedSentAt",
+  flag:
+    | "waWelcomeSentAt"
+    | "waPixPendingSentAt"
+    | "waReminder2hSentAt"
+    | "waReminder24hSentAt"
+    | "waAccessGrantedSentAt",
+  extra?: Partial<{ pixCopiaECola: string | null; mpPaymentId: string | null }>,
 ): Promise<void> {
   await db
     .update(comprasMpTable)
-    .set({ [flag]: new Date(), atualizadoEm: new Date() })
+    .set({ [flag]: new Date(), atualizadoEm: new Date(), ...extra })
     .where(eq(comprasMpTable.checkoutToken, checkoutToken));
 }
 
-export async function sendWelcomeWhatsApp(
+export async function closeWhatsAppRemindersOnPaid(checkoutToken: string): Promise<void> {
+  const now = new Date();
+  const [row] = await db
+    .select({
+      wa2: comprasMpTable.waReminder2hSentAt,
+      wa24: comprasMpTable.waReminder24hSentAt,
+    })
+    .from(comprasMpTable)
+    .where(eq(comprasMpTable.checkoutToken, checkoutToken))
+    .limit(1);
+  if (!row) return;
+  await db
+    .update(comprasMpTable)
+    .set({
+      waReminder2hSentAt: row.wa2 ?? now,
+      waReminder24hSentAt: row.wa24 ?? now,
+      atualizadoEm: now,
+    })
+    .where(eq(comprasMpTable.checkoutToken, checkoutToken));
+}
+
+/** Cadastro iniciado (MARKETING) — nao e boas-vindas de membro. */
+export async function sendCadastroIniciadoWhatsApp(
   params: {
     usuarioId: number;
     nome: string;
@@ -61,18 +79,11 @@ export async function sendWelcomeWhatsApp(
   log?: Logger,
 ): Promise<boolean> {
   if (!isWhatsAppConfigured()) return false;
-
-  const user = await loadUserPhone(params.usuarioId);
-  if (user?.optOut) {
-    log?.debug({ usuarioId: params.usuarioId }, "WhatsApp opt-out — boas-vindas ignorada");
-    return false;
-  }
+  const user = await loadUser(params.usuarioId);
+  if (user?.optOut) return false;
 
   const to = toWhatsAppRecipient(params.telefone);
-  if (!to) {
-    log?.warn({ usuarioId: params.usuarioId }, "Telefone inválido para WhatsApp");
-    return false;
-  }
+  if (!to) return false;
 
   const [compra] = await db
     .select({ sent: comprasMpTable.waWelcomeSentAt })
@@ -83,8 +94,9 @@ export async function sendWelcomeWhatsApp(
 
   await sendWhatsAppTemplate({
     to,
-    template: WA_TEMPLATES.boasVindas,
-    bodyParams: [firstNameFromFullName(params.nome), checkoutUrl(params.checkoutToken)],
+    template: WA_TEMPLATES.cadastroIniciado,
+    bodyParams: [firstNameFromFullName(params.nome)],
+    urlButtons: [{ index: 0, suffix: checkoutTokenSuffix(params.checkoutToken) }],
     log,
   });
   await markCompraFlag(params.checkoutToken, "waWelcomeSentAt");
@@ -97,47 +109,81 @@ export async function sendPixPendingWhatsApp(
     nome: string;
     telefone?: string | null;
     checkoutToken: string;
+    mpPaymentId: string;
+    pixCopiaECola?: string | null;
+    valor?: string | null;
   },
   log?: Logger,
 ): Promise<boolean> {
   if (!isWhatsAppConfigured()) return false;
-
-  const user = await loadUserPhone(params.usuarioId);
+  const user = await loadUser(params.usuarioId);
   if (user?.optOut) return false;
 
   const to = toWhatsAppRecipient(params.telefone ?? user?.telefone);
   if (!to) return false;
 
   const [compra] = await db
-    .select({ sent: comprasMpTable.waPixPendingSentAt })
+    .select({
+      sent: comprasMpTable.waPixPendingSentAt,
+      pix: comprasMpTable.pixCopiaECola,
+      valor: comprasMpTable.valor,
+    })
     .from(comprasMpTable)
     .where(eq(comprasMpTable.checkoutToken, params.checkoutToken))
     .limit(1);
   if (compra?.sent) return false;
 
+  const pixCode = (params.pixCopiaECola || compra?.pix || "").trim();
+  const pedido = params.mpPaymentId || "pendente";
+  const amount = Number.parseFloat(params.valor || compra?.valor || String(PRECO_OFERTA_NUM));
+
+  // Template UTILITY com botao URL + QR Ja paguei (PAYMENT_REQUEST nao liberado nesta WABA)
   await sendWhatsAppTemplate({
     to,
     template: WA_TEMPLATES.pixPendente,
-    bodyParams: [firstNameFromFullName(params.nome), checkoutUrl(params.checkoutToken)],
+    bodyParams: [firstNameFromFullName(params.nome), pedido],
+    urlButtons: [{ index: 0, suffix: checkoutTokenSuffix(params.checkoutToken) }],
     log,
   });
-  await markCompraFlag(params.checkoutToken, "waPixPendingSentAt");
+
+  if (pixCode) {
+    const orderOk = await sendWhatsAppPixOrderDetails({
+      to,
+      referenceId: `mp-${params.mpPaymentId}`.slice(0, 60),
+      pixCode,
+      amountBrl: Number.isFinite(amount) ? amount : PRECO_OFERTA_NUM,
+      bodyText: `Pedido ${pedido} — Portal Iluminando. Use o botao para copiar o codigo Pix.`,
+      log,
+    });
+    if (!orderOk.ok) {
+      await sendWhatsAppText({
+        to,
+        text: `Codigo Pix copia e cola (pedido ${pedido}):\n\n${pixCode}\n\nOu abra o checkout no Portal Iluminando.`,
+        log,
+      }).catch(() => undefined);
+    }
+  }
+
+  await markCompraFlag(params.checkoutToken, "waPixPendingSentAt", {
+    pixCopiaECola: pixCode || null,
+    mpPaymentId: params.mpPaymentId,
+  });
   return true;
 }
 
-export async function sendAccessGrantedWhatsApp(
+export async function sendAcessoAtivadoWhatsApp(
   params: {
     usuarioId: number;
     nome: string;
-    email: string;
     telefone?: string | null;
     checkoutToken?: string;
+    mpPaymentId?: string | null;
+    compraId?: number | null;
   },
   log?: Logger,
 ): Promise<boolean> {
   if (!isWhatsAppConfigured()) return false;
-
-  const user = await loadUserPhone(params.usuarioId);
+  const user = await loadUser(params.usuarioId);
   if (user?.optOut) return false;
 
   const to = toWhatsAppRecipient(params.telefone ?? user?.telefone);
@@ -152,38 +198,29 @@ export async function sendAccessGrantedWhatsApp(
     if (compra?.sent) return false;
   }
 
+  const pedido =
+    params.mpPaymentId?.trim() ||
+    (params.compraId != null ? String(params.compraId) : "confirmado");
+
   await sendWhatsAppTemplate({
     to,
-    template: WA_TEMPLATES.acessoLiberado,
-    bodyParams: [firstNameFromFullName(params.nome), params.email, loginUrl()],
+    template: WA_TEMPLATES.acessoAtivado,
+    bodyParams: [firstNameFromFullName(params.nome), pedido],
+    // botao URL estatico /login — sem parametro dinamico no template
     log,
   });
 
   if (params.checkoutToken) {
     await markCompraFlag(params.checkoutToken, "waAccessGrantedSentAt");
+    await closeWhatsAppRemindersOnPaid(params.checkoutToken);
   }
   return true;
 }
 
-export type NotifyKind = "curso" | "comunidade" | "dia";
-
-const NOTIFY_TEMPLATE: Record<NotifyKind, (typeof WA_TEMPLATES)[keyof typeof WA_TEMPLATES]> = {
-  curso: WA_TEMPLATES.avisoCurso,
-  comunidade: WA_TEMPLATES.avisoComunidade,
-  dia: WA_TEMPLATES.avisoDia,
-};
-
-/**
- * Dispara template Marketing para assinantes ativos com telefone e sem opt-out.
- */
-export async function notifyActiveSubscribersWhatsApp(
+export async function notifyComunidadeNovaPostagemWhatsApp(
   params: {
-    kind: NotifyKind;
     titulo: string;
-    detalhe?: string;
-    link?: string;
-    /** Se definido, envia só para este usuário (ainda precisa estar active). */
-    usuarioId?: number;
+    postId: number;
   },
   log?: Logger,
 ): Promise<{ sent: number; skipped: number; errors: number }> {
@@ -191,23 +228,8 @@ export async function notifyActiveSubscribersWhatsApp(
     return { sent: 0, skipped: 0, errors: 0 };
   }
 
-  const { publicUrl } = getWhatsAppConfig();
-  const link = params.link?.trim() || publicUrl;
-  const detalhe = (params.detalhe?.trim() || params.titulo).slice(0, 200);
-  const template = NOTIFY_TEMPLATE[params.kind];
-
-  const conditions = [
-    eq(usuariosTable.statusAcesso, "active"),
-    eq(usuariosTable.ativo, true),
-    eq(usuariosTable.whatsappOptOut, false),
-    eq(usuariosTable.isAdmin, false),
-    sql`${usuariosTable.telefone} IS NOT NULL AND length(trim(${usuariosTable.telefone})) > 0`,
-    or(isNull(usuariosTable.acessoAte), sql`${usuariosTable.acessoAte} > NOW()`)!,
-  ];
-
-  if (params.usuarioId) {
-    conditions.push(eq(usuariosTable.id, params.usuarioId));
-  }
+  const titulo = params.titulo.slice(0, 200);
+  const pathSuffix = `comunidade`; // deep link simples; postId no body
 
   const usuarios = await db
     .select({
@@ -216,7 +238,17 @@ export async function notifyActiveSubscribersWhatsApp(
       telefone: usuariosTable.telefone,
     })
     .from(usuariosTable)
-    .where(and(...conditions));
+    .where(
+      and(
+        eq(usuariosTable.statusAcesso, "active"),
+        eq(usuariosTable.ativo, true),
+        eq(usuariosTable.isAdmin, false),
+        eq(usuariosTable.whatsappOptOut, false),
+        eq(usuariosTable.whatsappComunidadeOptIn, true),
+        sql`${usuariosTable.telefone} IS NOT NULL AND length(trim(${usuariosTable.telefone})) > 0`,
+        or(isNull(usuariosTable.acessoAte), sql`${usuariosTable.acessoAte} > NOW()`)!,
+      ),
+    );
 
   let sent = 0;
   let skipped = 0;
@@ -231,23 +263,47 @@ export async function notifyActiveSubscribersWhatsApp(
     try {
       await sendWhatsAppTemplate({
         to,
-        template,
-        bodyParams: [firstNameFromFullName(u.nome), params.titulo.slice(0, 200), `${detalhe}\n${link}`.slice(0, 1024)],
+        template: WA_TEMPLATES.comunidadeNovaPostagem,
+        bodyParams: [firstNameFromFullName(u.nome), `${titulo} (#${params.postId})`],
+        urlButtons: [{ index: 0, suffix: pathSuffix }],
         log,
       });
       sent++;
     } catch (error) {
       errors++;
-      const errMsg = error instanceof Error ? error.message : String(error);
-      log?.error({ errMsg, usuarioId: u.id }, "Falha notificação WhatsApp assinante");
+      log?.error(
+        { errMsg: error instanceof Error ? error.message : String(error), usuarioId: u.id },
+        "Falha WhatsApp comunidade",
+      );
     }
   }
 
-  log?.info({ kind: params.kind, sent, skipped, errors }, "Broadcast WhatsApp assinantes concluído");
+  log?.info({ sent, skipped, errors, postId: params.postId }, "Broadcast comunidade WhatsApp");
   return { sent, skipped, errors };
 }
 
-export function queueSendWelcomeWhatsApp(
+/** @deprecated use notifyComunidadeNovaPostagemWhatsApp */
+export async function notifyActiveSubscribersWhatsApp(
+  params: {
+    kind: "curso" | "comunidade" | "dia";
+    titulo: string;
+    detalhe?: string;
+    link?: string;
+    usuarioId?: number;
+  },
+  log?: Logger,
+): Promise<{ sent: number; skipped: number; errors: number }> {
+  if (params.kind === "comunidade") {
+    return notifyComunidadeNovaPostagemWhatsApp(
+      { titulo: params.titulo, postId: 0 },
+      log,
+    );
+  }
+  log?.warn({ kind: params.kind }, "Broadcast generico descontinuado na Fase 1 Letícia");
+  return { sent: 0, skipped: 0, errors: 0 };
+}
+
+export function queueSendCadastroIniciadoWhatsApp(
   params: {
     usuarioId: number;
     nome: string;
@@ -256,11 +312,15 @@ export function queueSendWelcomeWhatsApp(
   },
   log?: Logger,
 ): void {
-  sendWelcomeWhatsApp(params, log).catch((error) => {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    log?.error({ errMsg, usuarioId: params.usuarioId }, "Falha WhatsApp boas-vindas");
+  sendCadastroIniciadoWhatsApp(params, log).catch((error) => {
+    log?.error(
+      { errMsg: error instanceof Error ? error.message : String(error), usuarioId: params.usuarioId },
+      "Falha WhatsApp cadastro iniciado",
+    );
   });
 }
+
+/** Alias legado */
 
 export function queueSendPixPendingWhatsApp(
   params: {
@@ -268,33 +328,42 @@ export function queueSendPixPendingWhatsApp(
     nome: string;
     telefone?: string | null;
     checkoutToken: string;
+    mpPaymentId: string;
+    pixCopiaECola?: string | null;
+    valor?: string | null;
   },
   log?: Logger,
 ): void {
   sendPixPendingWhatsApp(params, log).catch((error) => {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    log?.error({ errMsg, usuarioId: params.usuarioId }, "Falha WhatsApp PIX pendente");
+    log?.error(
+      { errMsg: error instanceof Error ? error.message : String(error), usuarioId: params.usuarioId },
+      "Falha WhatsApp PIX pendente",
+    );
   });
 }
 
-export function queueSendAccessGrantedWhatsApp(
+export function queueSendAcessoAtivadoWhatsApp(
   params: {
     usuarioId: number;
     nome: string;
-    email: string;
     telefone?: string | null;
     checkoutToken?: string;
+    mpPaymentId?: string | null;
+    compraId?: number | null;
   },
   log?: Logger,
 ): void {
-  sendAccessGrantedWhatsApp(params, log).catch((error) => {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    log?.error({ errMsg, usuarioId: params.usuarioId }, "Falha WhatsApp acesso liberado");
+  sendAcessoAtivadoWhatsApp(params, log).catch((error) => {
+    log?.error(
+      { errMsg: error instanceof Error ? error.message : String(error), usuarioId: params.usuarioId },
+      "Falha WhatsApp acesso ativado",
+    );
   });
 }
 
+/** Alias legado */
+
 export async function setWhatsAppOptOutByPhone(waIdDigits: string, optOut: boolean): Promise<number> {
-  // Match telefone armazenado em vários formatos
   const digits = waIdDigits.replace(/\D/g, "");
   const withoutCountry = digits.startsWith("55") ? digits.slice(2) : digits;
 
@@ -315,3 +384,64 @@ export async function setWhatsAppOptOutByPhone(waIdDigits: string, optOut: boole
 
   return result.length;
 }
+
+export async function setWhatsAppComunidadeOptInByPhone(
+  waIdDigits: string,
+  optIn: boolean,
+): Promise<number> {
+  const digits = waIdDigits.replace(/\D/g, "");
+  const withoutCountry = digits.startsWith("55") ? digits.slice(2) : digits;
+
+  const result = await db
+    .update(usuariosTable)
+    .set({ whatsappComunidadeOptIn: optIn, atualizadoEm: new Date() })
+    .where(
+      and(
+        ne(usuariosTable.whatsappComunidadeOptIn, optIn),
+        or(
+          sql`regexp_replace(coalesce(${usuariosTable.telefone}, ''), '\\D', '', 'g') = ${digits}`,
+          sql`regexp_replace(coalesce(${usuariosTable.telefone}, ''), '\\D', '', 'g') = ${withoutCountry}`,
+          sql`regexp_replace(coalesce(${usuariosTable.telefone}, ''), '\\D', '', 'g') = ${`55${withoutCountry}`}`,
+        ),
+      ),
+    )
+    .returning({ id: usuariosTable.id });
+
+  return result.length;
+}
+
+export async function markJaPagueiByPhone(waIdDigits: string): Promise<number> {
+  const digits = waIdDigits.replace(/\D/g, "");
+  const withoutCountry = digits.startsWith("55") ? digits.slice(2) : digits;
+  const now = new Date();
+
+  const users = await db
+    .select({ id: usuariosTable.id })
+    .from(usuariosTable)
+    .where(
+      or(
+        sql`regexp_replace(coalesce(${usuariosTable.telefone}, ''), '\\D', '', 'g') = ${digits}`,
+        sql`regexp_replace(coalesce(${usuariosTable.telefone}, ''), '\\D', '', 'g') = ${withoutCountry}`,
+        sql`regexp_replace(coalesce(${usuariosTable.telefone}, ''), '\\D', '', 'g') = ${`55${withoutCountry}`}`,
+      ),
+    );
+
+  let updated = 0;
+  for (const u of users) {
+    const r = await db
+      .update(comprasMpTable)
+      .set({
+        waReminder2hSentAt: now,
+        waReminder24hSentAt: now,
+        atualizadoEm: now,
+      })
+      .where(and(eq(comprasMpTable.usuarioId, u.id), eq(comprasMpTable.status, "pending")))
+      .returning({ id: comprasMpTable.id });
+    updated += r.length;
+  }
+  return updated;
+}
+
+/** Alias legado (funnel / activateMpPurchase / cakto) */
+export const voidSendWelcomeWhatsApp = voidSendCadastroIniciadoWhatsApp;
+export const voidSendAccessGrantedWhatsApp = voidSendAcessoAtivadoWhatsApp;

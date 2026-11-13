@@ -12,6 +12,7 @@ import {
   visualizacoesComunidadeTable,
 } from "@workspace/db";
 import { eq, desc, and, sql } from "drizzle-orm";
+import { notifyComunidadeNovaPostagemWhatsApp } from "../lib/whatsapp";
 import { ObjectStorageService } from "../lib/objectStorage";
 
 const router = Router();
@@ -252,6 +253,16 @@ router.post("/", requireAdmin, async (req: AuthRequest, res: Response) => {
           }))
         );
       }
+    }
+
+
+    // WhatsApp marketing — so opt-in
+    if (post?.id) {
+      const tituloWa = tituloLimpo || (texto ? texto.slice(0, 80) : "Nova publicacao");
+      void notifyComunidadeNovaPostagemWhatsApp(
+        { titulo: tituloWa, postId: post.id },
+        req.log,
+      );
     }
 
     return res.status(201).json(post);

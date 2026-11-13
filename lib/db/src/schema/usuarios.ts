@@ -11,6 +11,8 @@ export const usuariosTable = pgTable("usuarios", {
   telefone: text("telefone"),
   /** true = não receber WhatsApp (opt-out via "parar" ou perfil). */
   whatsappOptOut: boolean("whatsapp_opt_out").notNull().default(false),
+  /** true = receber avisos de novas publicacoes da comunidade no WhatsApp. */
+  whatsappComunidadeOptIn: boolean("whatsapp_comunidade_opt_in").notNull().default(false),
   /** pending = aguardando pagamento; active = acesso pago; expired = prazo esgotado; revoked = reembolso/chargeback */
   statusAcesso: text("status_acesso").notNull().default("active"),
   /** Início do período de acesso (pagamento aprovado). Null = legado sem prazo. */

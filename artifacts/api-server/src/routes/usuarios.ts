@@ -106,7 +106,7 @@ router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
     }
-    const { nome, dataNascimento, sexo, whatsappOptOut, senhaAtual, novaSenha } = parsed.data;
+    const { nome, dataNascimento, sexo, whatsappOptOut, whatsappComunidadeOptIn, senhaAtual, novaSenha } = parsed.data;
     const updates: UsuarioUpdates = {};
 
     if (nome !== undefined) {
@@ -123,6 +123,10 @@ router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {
 
     if (whatsappOptOut !== undefined) {
       updates.whatsappOptOut = whatsappOptOut;
+    }
+
+    if (whatsappComunidadeOptIn !== undefined) {
+      updates.whatsappComunidadeOptIn = whatsappComunidadeOptIn;
     }
 
     if (novaSenha !== undefined && novaSenha !== "") {
@@ -154,6 +158,7 @@ router.put("/me", requireAuth, async (req: AuthRequest, res: Response) => {
         dataNascimento: usuariosTable.dataNascimento,
         sexo: usuariosTable.sexo,
         whatsappOptOut: usuariosTable.whatsappOptOut,
+        whatsappComunidadeOptIn: usuariosTable.whatsappComunidadeOptIn,
         fotoPerfil: usuariosTable.fotoPerfil,
         primeiroAcesso: usuariosTable.primeiroAcesso,
         ativo: usuariosTable.ativo,
@@ -279,6 +284,7 @@ type UsuarioUpdates = {
   dataNascimento?: string | null;
   sexo?: string | null;
   whatsappOptOut?: boolean;
+  whatsappComunidadeOptIn?: boolean;
   ativo?: boolean;
   isAdmin?: boolean;
   primeiroAcesso?: boolean;

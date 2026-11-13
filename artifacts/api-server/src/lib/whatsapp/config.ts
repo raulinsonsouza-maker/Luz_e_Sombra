@@ -11,6 +11,9 @@ export type WhatsAppConfig = {
   reminder24hHours: number;
   reminderCronIntervalMs: number;
   reminderCronEnabled: boolean;
+  pixMerchantName: string;
+  pixKey: string;
+  pixKeyType: "CPF" | "CNPJ" | "EMAIL" | "PHONE" | "EVP";
 };
 
 function parseFloatEnv(name: string, fallback: number): number {
@@ -33,6 +36,16 @@ export function getWhatsAppConfig(): WhatsAppConfig {
     "",
   );
 
+  const keyTypeRaw = (process.env.WHATSAPP_PIX_KEY_TYPE?.trim() || "EVP").toUpperCase();
+  const pixKeyType =
+    keyTypeRaw === "CPF" ||
+    keyTypeRaw === "CNPJ" ||
+    keyTypeRaw === "EMAIL" ||
+    keyTypeRaw === "PHONE" ||
+    keyTypeRaw === "EVP"
+      ? keyTypeRaw
+      : "EVP";
+
   return {
     enabled: process.env.WHATSAPP_ENABLED === "true",
     token: process.env.WHATSAPP_TOKEN?.trim() ?? "",
@@ -46,14 +59,13 @@ export function getWhatsAppConfig(): WhatsAppConfig {
     reminder24hHours: parseFloatEnv("WHATSAPP_REMINDER_24H_HOURS", 24),
     reminderCronIntervalMs: parseIntEnv("WHATSAPP_REMINDER_CRON_MS", 5 * 60 * 1000),
     reminderCronEnabled: process.env.WHATSAPP_REMINDER_CRON_ENABLED !== "false",
+    pixMerchantName: process.env.WHATSAPP_PIX_MERCHANT_NAME?.trim() || "Portal Iluminando",
+    pixKey: process.env.WHATSAPP_PIX_KEY?.trim() ?? "",
+    pixKeyType,
   };
 }
 
 export function isWhatsAppConfigured(): boolean {
   const cfg = getWhatsAppConfig();
-  return (
-    cfg.enabled &&
-    cfg.token.length > 0 &&
-    cfg.phoneNumberId.length > 0
-  );
+  return cfg.enabled && cfg.token.length > 0 && cfg.phoneNumberId.length > 0;
 }

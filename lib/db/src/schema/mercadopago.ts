@@ -54,6 +54,8 @@ export const comprasMpTable = pgTable("compras_mp", {
   waReminder2hSentAt: timestamp("wa_reminder_2h_sent_at"),
   waReminder24hSentAt: timestamp("wa_reminder_24h_sent_at"),
   waAccessGrantedSentAt: timestamp("wa_access_granted_sent_at"),
+  /** PIX copia-e-cola do MP para card WhatsApp. */
+  pixCopiaECola: text("pix_copia_e_cola"),
 }, (table) => ({
   checkoutTokenUnique: unique("uq_compras_mp_checkout_token").on(table.checkoutToken),
   usuarioIdx: index("idx_compras_mp_usuario_id").on(table.usuarioId),

@@ -2,20 +2,26 @@ export { getWhatsAppConfig, isWhatsAppConfigured } from "./config";
 export {
   sendWhatsAppTemplate,
   sendWhatsAppText,
+  sendWhatsAppPixOrderDetails,
   verifyWhatsAppSignature,
   WhatsAppApiError,
 } from "./client";
 export {
-  sendWelcomeWhatsApp,
+  sendCadastroIniciadoWhatsApp,
   sendPixPendingWhatsApp,
-  sendAccessGrantedWhatsApp,
+  sendAcessoAtivadoWhatsApp,
+  notifyComunidadeNovaPostagemWhatsApp,
   notifyActiveSubscribersWhatsApp,
-  queueSendWelcomeWhatsApp,
-  queueSendPixPendingWhatsApp,
-  queueSendAccessGrantedWhatsApp,
+  voidSendCadastroIniciadoWhatsApp,
+  voidSendWelcomeWhatsApp,
+  voidSendPixPendingWhatsApp,
+  voidSendAcessoAtivadoWhatsApp,
+  voidSendAccessGrantedWhatsApp,
   setWhatsAppOptOutByPhone,
-  type NotifyKind,
+  setWhatsAppComunidadeOptInByPhone,
+  markJaPagueiByPhone,
+  closeWhatsAppRemindersOnPaid,
 } from "./outbound";
 export { startWhatsAppReminderCron, stopWhatsAppReminderCron, runWhatsAppCheckoutReminders } from "./reminders";
-export { WA_TEMPLATES, WA_TEMPLATE_LANG } from "./templates";
+export { WA_TEMPLATES, WA_TEMPLATE_LANG, WA_TEMPLATE_BODIES } from "./templates";
 export { normalizeBrazilPhoneE164, toWhatsAppRecipient, firstNameFromFullName } from "./phone";

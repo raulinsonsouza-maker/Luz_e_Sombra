@@ -48,6 +48,7 @@ export const updateMeSchema = z
     dataNascimento: z.string().nullable().optional(),
     sexo: sexoClienteSchema.nullable().optional(),
     whatsappOptOut: z.boolean().optional(),
+    whatsappComunidadeOptIn: z.boolean().optional(),
     senhaAtual: z.string().optional(),
     novaSenha: z.string().optional(),
   })

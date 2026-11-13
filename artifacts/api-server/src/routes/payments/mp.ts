@@ -196,15 +196,24 @@ router.post(
             },
             req.log,
           ).then(() => markImmediatePendingReminderSent(checkoutToken));
-          queueSendPixPendingWhatsApp(
-            {
-              usuarioId: compra.usuarioId,
-              nome: compra.nome,
-              telefone: compra.telefone,
-              checkoutToken,
-            },
-            req.log,
-          );
+          const poiEarly = (payment.point_of_interaction ?? null) as
+            | { transaction_data?: { qr_code?: string; qr_code_base64?: string } }
+            | null;
+          const txEarly = poiEarly?.transaction_data ?? {};
+          const pixCode = typeof txEarly.qr_code === "string" ? txEarly.qr_code : null;
+          if (paymentId) {
+            queueSendPixPendingWhatsApp(
+              {
+                usuarioId: compra.usuarioId,
+                nome: compra.nome,
+                telefone: compra.telefone,
+                checkoutToken,
+                mpPaymentId: paymentId,
+                pixCopiaECola: pixCode,
+              },
+              req.log,
+            );
+          }
         }
         const poi = (payment.point_of_interaction ?? null) as
           | { transaction_data?: { qr_code?: string; qr_code_base64?: string } }
