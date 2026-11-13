@@ -443,5 +443,5 @@ export async function markJaPagueiByPhone(waIdDigits: string): Promise<number> {
 }
 
 /** Alias legado (funnel / activateMpPurchase / cakto) */
-export const voidSendWelcomeWhatsApp = voidSendCadastroIniciadoWhatsApp;
-export const voidSendAccessGrantedWhatsApp = voidSendAcessoAtivadoWhatsApp;
+export const queueSendWelcomeWhatsApp = queueSendCadastroIniciadoWhatsApp;
+export const queueSendAccessGrantedWhatsApp = queueSendAcessoAtivadoWhatsApp;
