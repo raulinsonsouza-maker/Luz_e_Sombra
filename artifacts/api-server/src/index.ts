@@ -1,7 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { startAbandonedCheckoutEmailCron } from "./lib/email/abandonedCheckoutReminders";
-import { startKommoReminderCron } from "./lib/kommo/reminders";
+import { startWhatsAppReminderCron } from "./lib/whatsapp";
 import { seedAdminIfNeeded } from "./lib/seed";
 
 const rawPort = process.env["PORT"];
@@ -20,7 +20,7 @@ if (Number.isNaN(port) || port <= 0) {
 
 async function start() {
   await seedAdminIfNeeded();
-  startKommoReminderCron(logger);
+  startWhatsAppReminderCron(logger);
   startAbandonedCheckoutEmailCron(logger);
 
   app.listen(port, (err) => {

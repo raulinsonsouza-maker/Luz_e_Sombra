@@ -48,6 +48,12 @@ export const comprasMpTable = pgTable("compras_mp", {
   /** Recuperação pós-cadastro sem pagamento. */
   emailReminder2hSentAt: timestamp("email_reminder_2h_sent_at"),
   emailReminder24hSentAt: timestamp("email_reminder_24h_sent_at"),
+  /** WhatsApp Cloud API — dedup de disparos. */
+  waWelcomeSentAt: timestamp("wa_welcome_sent_at"),
+  waPixPendingSentAt: timestamp("wa_pix_pending_sent_at"),
+  waReminder2hSentAt: timestamp("wa_reminder_2h_sent_at"),
+  waReminder24hSentAt: timestamp("wa_reminder_24h_sent_at"),
+  waAccessGrantedSentAt: timestamp("wa_access_granted_sent_at"),
 }, (table) => ({
   checkoutTokenUnique: unique("uq_compras_mp_checkout_token").on(table.checkoutToken),
   usuarioIdx: index("idx_compras_mp_usuario_id").on(table.usuarioId),

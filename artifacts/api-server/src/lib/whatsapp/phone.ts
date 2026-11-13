@@ -24,6 +24,13 @@ export function normalizeBrazilPhoneE164(value: string | null | undefined): stri
   return `+55${digits}`;
 }
 
+/** Cloud API espera dígitos com DDI, sem +. */
+export function toWhatsAppRecipient(value: string | null | undefined): string | null {
+  const e164 = normalizeBrazilPhoneE164(value);
+  if (!e164) return null;
+  return e164.replace(/\D/g, "");
+}
+
 export function firstNameFromFullName(nome: string): string {
   const trimmed = nome.trim();
   if (!trimmed) return "Cliente";

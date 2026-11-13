@@ -18,7 +18,11 @@ import {
   sendPaymentPendingReminderEmail,
   sendJourneyNudgeEmail,
 } from "../lib/email/retention";
-import { getKommoConfig, kommoLeadUrl } from "../lib/kommo";
+import {
+  isWhatsAppConfigured,
+  notifyActiveSubscribersWhatsApp,
+  type NotifyKind,
+} from "../lib/whatsapp";
 
 const router = Router();
 
@@ -152,6 +156,22 @@ router.get("/usuarios/:id/ficha", requireAdmin, async (req: AuthRequest, res: Re
       .where(eq(comprasCaktoTable.usuarioId, usuarioId))
       .limit(1);
 
+    const [compraMp] = await db
+      .select({
+        id: comprasMpTable.id,
+        status: comprasMpTable.status,
+        checkoutToken: comprasMpTable.checkoutToken,
+        waWelcomeSentAt: comprasMpTable.waWelcomeSentAt,
+        waPixPendingSentAt: comprasMpTable.waPixPendingSentAt,
+        waReminder2hSentAt: comprasMpTable.waReminder2hSentAt,
+        waReminder24hSentAt: comprasMpTable.waReminder24hSentAt,
+        waAccessGrantedSentAt: comprasMpTable.waAccessGrantedSentAt,
+      })
+      .from(comprasMpTable)
+      .where(eq(comprasMpTable.usuarioId, usuarioId))
+      .orderBy(desc(comprasMpTable.criadoEm))
+      .limit(1);
+
     const [gam] = await db
       .select()
       .from(gamificacaoTable)
@@ -176,13 +196,6 @@ router.get("/usuarios/:id/ficha", requireAdmin, async (req: AuthRequest, res: Re
 
     const totalAnalises = analisesConcluidas.filter((a) => a.concluida).length;
 
-    const kommoCfg = getKommoConfig();
-    const kommoLeadId = compra?.kommoLeadId ?? null;
-    const kommoUrl =
-      kommoLeadId && kommoCfg.subdomain
-        ? kommoLeadUrl(kommoCfg.subdomain, kommoLeadId)
-        : null;
-
     return res.json({
       usuario: {
         id: usuario.id,
@@ -191,19 +204,26 @@ router.get("/usuarios/:id/ficha", requireAdmin, async (req: AuthRequest, res: Re
         username: usuario.username,
         ativo: usuario.ativo,
         statusAcesso: usuario.statusAcesso,
+        telefone: usuario.telefone,
+        whatsappOptOut: usuario.whatsappOptOut,
         criadoEm: usuario.criadoEm,
         primeiroAcesso: usuario.primeiroAcesso,
       },
       compra: compra ?? null,
-      kommo: kommoLeadId
-        ? {
-            leadId: kommoLeadId,
-            contactId: compra?.kommoContactId ?? null,
-            lastEvent: compra?.kommoLastEvent ?? null,
-            lastSyncAt: compra?.kommoLastSyncAt ?? null,
-            url: kommoUrl,
-          }
-        : null,
+      compraMp: compraMp ?? null,
+      whatsapp: {
+        configured: isWhatsAppConfigured(),
+        optOut: usuario.whatsappOptOut,
+        flags: compraMp
+          ? {
+              welcome: compraMp.waWelcomeSentAt,
+              pixPending: compraMp.waPixPendingSentAt,
+              reminder2h: compraMp.waReminder2hSentAt,
+              reminder24h: compraMp.waReminder24hSentAt,
+              accessGranted: compraMp.waAccessGrantedSentAt,
+            }
+          : null,
+      },
       gamificacao: gam
         ? { xp: gam.xp, nivel: gam.nivel, streakDias: gam.streakDias, ultimoAcessoEm: gam.ultimoAcessoEm }
         : null,
@@ -370,6 +390,46 @@ router.post("/emails/pix-reminder/:usuarioId", requireAdmin, async (req: AuthReq
   } catch (err) {
     req.log?.error(err);
     return res.status(500).json({ error: "Erro ao enviar lembrete PIX" });
+  }
+});
+
+// POST /api/admin/whatsapp/notify — broadcast Marketing a assinantes ativos
+router.post("/whatsapp/notify", requireAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    if (!isWhatsAppConfigured()) {
+      return res.status(503).json({ error: "WhatsApp Cloud API não configurada" });
+    }
+
+    const { kind, titulo, detalhe, link, usuarioId } = req.body as {
+      kind?: NotifyKind;
+      titulo?: string;
+      detalhe?: string;
+      link?: string;
+      usuarioId?: number;
+    };
+
+    if (!kind || !["curso", "comunidade", "dia"].includes(kind)) {
+      return res.status(400).json({ error: "kind deve ser curso | comunidade | dia" });
+    }
+    if (!titulo?.trim()) {
+      return res.status(400).json({ error: "titulo obrigatório" });
+    }
+
+    const result = await notifyActiveSubscribersWhatsApp(
+      {
+        kind,
+        titulo: titulo.trim(),
+        detalhe,
+        link,
+        usuarioId: typeof usuarioId === "number" ? usuarioId : undefined,
+      },
+      req.log,
+    );
+
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    req.log?.error(err);
+    return res.status(500).json({ error: "Erro ao enviar WhatsApp" });
   }
 });
 

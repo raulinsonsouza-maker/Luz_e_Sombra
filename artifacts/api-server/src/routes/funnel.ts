@@ -12,7 +12,7 @@ import { eq } from "drizzle-orm";
 import { parseBody, funnelRegisterSchema } from "../lib/schemas";
 import { signToken } from "./auth";
 import { sendCheckoutWelcomeEmail } from "../lib/email";
-import { syncKommoOnRegister } from "../lib/kommo";
+import { queueSendWelcomeWhatsApp } from "../lib/whatsapp";
 import { nextPurchaseVariant } from "../lib/acesso/activateMpPurchase";
 import { PRECO_OFERTA, isAccessExpired } from "../lib/acesso/periodo";
 import { rateLimit } from "../lib/security/rateLimit";
@@ -210,7 +210,7 @@ router.post(
       ...utmFields,
     });
 
-    // Dual-write legado para Kommo / admin compras antigo
+    // Dual-write legado para admin compras antigo
     await db.insert(comprasCaktoTable).values({
       usuarioId: novoUsuario.id,
       checkoutToken,
@@ -231,14 +231,12 @@ router.post(
       req.log,
     );
 
-    syncKommoOnRegister(
+    queueSendWelcomeWhatsApp(
       {
         usuarioId: novoUsuario.id,
         nome: nome.trim(),
-        email: emailNorm,
         telefone: telefone.trim(),
         checkoutToken,
-        utm,
       },
       req.log,
     );

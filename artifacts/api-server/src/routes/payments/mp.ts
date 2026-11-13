@@ -22,6 +22,7 @@ import {
   markImmediatePendingReminderSent,
   wasImmediatePendingReminderSent,
 } from "../../lib/email/abandonedCheckoutReminders";
+import { queueSendPixPendingWhatsApp } from "../../lib/whatsapp";
 import { rateLimit } from "../../lib/security/rateLimit";
 import {
   buildMpPaymentBody,
@@ -93,6 +94,7 @@ router.post(
           usuarioId: comprasMpTable.usuarioId,
           email: usuariosTable.email,
           nome: usuariosTable.nome,
+          telefone: usuariosTable.telefone,
         })
         .from(comprasMpTable)
         .innerJoin(usuariosTable, eq(comprasMpTable.usuarioId, usuariosTable.id))
@@ -194,6 +196,15 @@ router.post(
             },
             req.log,
           ).then(() => markImmediatePendingReminderSent(checkoutToken));
+          queueSendPixPendingWhatsApp(
+            {
+              usuarioId: compra.usuarioId,
+              nome: compra.nome,
+              telefone: compra.telefone,
+              checkoutToken,
+            },
+            req.log,
+          );
         }
         const poi = (payment.point_of_interaction ?? null) as
           | { transaction_data?: { qr_code?: string; qr_code_base64?: string } }

@@ -7,7 +7,7 @@ import {
 import { and, count, desc, eq } from "drizzle-orm";
 import type { Logger } from "pino";
 import { sendAccessGrantedEmail, sendAccessRevokedEmail } from "../email";
-import { syncKommoOnAccessRevoked, syncKommoOnPaymentPaid } from "../kommo";
+import { queueSendAccessGrantedWhatsApp } from "../whatsapp";
 import {
   FUNDADORES_CAP,
   computeAccessWindow,
@@ -144,7 +144,7 @@ export async function activateMpPurchase(params: {
       .where(eq(comprasMpTable.id, compraId));
   }
 
-  // Espelha status na compra Cakto legada (mesmo token) para Kommo/admin antigo.
+  // Espelha status na compra Cakto legada (mesmo token) para admin antigo.
   if (params.checkoutToken) {
     await db
       .update(comprasCaktoTable)
@@ -178,7 +178,7 @@ export async function activateMpPurchase(params: {
       },
       params.log,
     );
-    syncKommoOnPaymentPaid(
+    queueSendAccessGrantedWhatsApp(
       {
         usuarioId: usuario.id,
         nome: usuario.nome,
@@ -271,7 +271,6 @@ export async function revokeMpPurchase(params: {
       { usuarioId: usuario.id, nome: usuario.nome, email: usuario.email },
       params.log,
     );
-    syncKommoOnAccessRevoked({ usuarioId: usuario.id }, params.log);
   }
 
   return { usuarioId: usuario.id, email: usuario.email, nome: usuario.nome };

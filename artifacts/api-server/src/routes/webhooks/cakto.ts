@@ -7,10 +7,7 @@ import {
 } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { sendAccessGrantedEmail, sendAccessRevokedEmail } from "../../lib/email";
-import {
-  syncKommoOnPaymentPaid,
-  syncKommoOnAccessRevoked,
-} from "../../lib/kommo";
+import { queueSendAccessGrantedWhatsApp } from "../../lib/whatsapp";
 import { computeAccessWindow } from "../../lib/acesso/periodo";
 import { verifyCaktoWebhookSecret } from "../../lib/security/caktoWebhookAuth";
 
@@ -294,7 +291,7 @@ router.post("/cakto", async (req: Request, res: Response) => {
             { usuarioId: usuario.id, nome: usuario.nome, email: usuario.email },
             req.log,
           );
-          syncKommoOnPaymentPaid(
+          queueSendAccessGrantedWhatsApp(
             {
               usuarioId: usuario.id,
               nome: usuario.nome,
@@ -316,7 +313,6 @@ router.post("/cakto", async (req: Request, res: Response) => {
           { usuarioId: revoked.usuarioId, nome: revoked.nome, email: revoked.email },
           req.log,
         );
-        syncKommoOnAccessRevoked({ usuarioId: revoked.usuarioId }, req.log);
       }
     }
 

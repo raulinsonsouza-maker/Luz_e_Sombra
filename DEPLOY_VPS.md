@@ -188,6 +188,15 @@ EMAIL_REPLY_TO=contato@portaliluminando.com.br
 APP_PUBLIC_URL=https://portaliluminando.com.br
 EMAIL_ENABLED=true
 
+# WhatsApp Cloud API (oficial Meta)
+WHATSAPP_ENABLED=false
+WHATSAPP_TOKEN=
+WHATSAPP_PHONE_NUMBER_ID=
+WHATSAPP_BUSINESS_ACCOUNT_ID=
+WHATSAPP_APP_SECRET=
+WHATSAPP_VERIFY_TOKEN=
+# Ver docs/whatsapp-cloud-api-setup.md
+
 BASE_PATH=/
 ```
 
