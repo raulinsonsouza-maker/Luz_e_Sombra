@@ -120,6 +120,13 @@
       "when": 1763400000000,
       "tag": "0017_whatsapp_leticia_fase1",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1763500000000,
+      "tag": "0018_whatsapp_comunidade_optin_all",
+      "breakpoints": true
     }
   ]
 }
