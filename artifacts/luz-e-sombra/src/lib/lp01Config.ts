@@ -115,16 +115,22 @@ export const LP01_TESTIMONIALS = {
       name: LP_TESTIMONIALS[0]?.name ?? "Mariana S.",
       role: "34 anos",
       text: "Em poucos dias eu vi onde me sabotava. Trabalho, relações, energia. Pela primeira vez não foi só achismo.",
+      image: "/lp01-media/depoimento-mariana.jpg",
+      rating: 5,
     },
     {
       name: LP_TESTIMONIALS[1]?.name ?? "Ricardo L.",
       role: "41 anos",
       text: "Eu achava que isso não era pra mim. Quando comecei a me ver com mais clareza, bateu com o que eu sinto no dia a dia.",
+      image: "/lp01-media/depoimento-ricardo.jpg",
+      rating: 5,
     },
     {
       name: LP_TESTIMONIALS[2]?.name ?? "Camila F.",
       role: "29 anos",
       text: "O que mais me pegou foi tudo conversando junto. E o Portal me ajudou a não abandonar no meio do caminho.",
+      image: "/lp01-media/depoimento-camila.jpg",
+      rating: 5,
     },
   ],
 };

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Check, Shield } from "lucide-react";
+import { ArrowRight, Check, Shield, Star } from "lucide-react";
 import LogoPortal from "@/components/LogoPortal";
 import LpHeroVideo from "@/components/lp/LpHeroVideo";
 import LpCheckoutSection from "@/components/checkout/LpCheckoutSection";
@@ -336,15 +336,36 @@ export default function Lp01LandingPage() {
             {LP01_TESTIMONIALS.items.map((t) => (
               <blockquote
                 key={t.name}
-                className="p-4 rounded-xl"
+                className="p-5 rounded-2xl flex flex-col"
                 style={{ background: "#fff", border: "1px solid rgba(47,37,27,0.08)" }}
               >
-                <p className="text-sm leading-snug mb-3" style={{ color: "rgba(47,37,27,0.7)" }}>
+                <div className="flex items-center gap-3 mb-3">
+                  <img
+                    src={t.image}
+                    alt={`Foto de ${t.name}`}
+                    width={48}
+                    height={48}
+                    className="w-12 h-12 rounded-full object-cover shrink-0"
+                    style={{ border: "2px solid rgba(200,165,107,0.45)" }}
+                    loading="lazy"
+                  />
+                  <div className="min-w-0">
+                    <cite className="not-italic block text-sm font-semibold truncate" style={{ color: "#2f251b" }}>
+                      {t.name}
+                    </cite>
+                    <p className="text-[11px]" style={{ color: "rgba(47,37,27,0.45)" }}>
+                      {t.role}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-0.5 mb-3" aria-label={`${t.rating} de 5 estrelas`}>
+                  {Array.from({ length: t.rating }).map((_, i) => (
+                    <Star key={i} size={14} fill="#c8a56b" stroke="#c8a56b" />
+                  ))}
+                </div>
+                <p className="text-sm leading-snug" style={{ color: "rgba(47,37,27,0.7)" }}>
                   “{t.text}”
                 </p>
-                <cite className="not-italic text-xs font-semibold" style={{ color: "#2f251b" }}>
-                  {t.name}
-                </cite>
               </blockquote>
             ))}
           </div>
