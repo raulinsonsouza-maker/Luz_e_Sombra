@@ -262,12 +262,6 @@ export default function MpPaymentBrick({
 
   return (
     <div className="space-y-4">
-      {payerEmail ? (
-        <p className="text-[11px] text-center truncate" style={{ color: "rgba(247,242,236,0.4)" }}>
-          {payerEmail}
-        </p>
-      ) : null}
-
       {!cpfLocked ? (
         <div>
           <label htmlFor="mp-cpf" className="block text-xs mb-1.5 font-medium" style={{ color: "rgba(247,242,236,0.55)" }}>

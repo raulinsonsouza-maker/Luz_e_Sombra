@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Check, Copy, Loader2, Shield } from "lucide-react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
@@ -35,6 +35,8 @@ type Props = {
   variant?: LpVariant;
   /** Sem faixa/título próprio (oferta + form na mesma seção da LP). */
   embedded?: boolean;
+  /** Conteúdo no topo do mesmo card (ex.: preço da oferta). */
+  header?: ReactNode;
 };
 
 export default function LpCheckoutSection({
@@ -42,6 +44,7 @@ export default function LpCheckoutSection({
   onTokenChange,
   variant = "control",
   embedded = false,
+  header,
 }: Props) {
   const [, navigate] = useLocation();
   const [config, setConfig] = useState<MpConfig | null>(null);
@@ -185,6 +188,7 @@ export default function LpCheckoutSection({
         border: "1px solid rgba(200,165,107,0.22)",
       }}
     >
+      {header ? <div className="mb-5">{header}</div> : null}
       {loadingConfig ? (
         <div className="flex justify-center py-16">
           <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#c8a56b" }} />

@@ -3,7 +3,6 @@ import { ArrowRight, Check, Shield, Star } from "lucide-react";
 import LogoPortal from "@/components/LogoPortal";
 import LpHeroVideo from "@/components/lp/LpHeroVideo";
 import LpCheckoutSection from "@/components/checkout/LpCheckoutSection";
-import Lp01ScarcityTimer from "@/components/lp01/Lp01ScarcityTimer";
 import Lp01Carousel from "@/components/lp01/Lp01Carousel";
 import { captureUtmsFromUrl } from "@/lib/utm";
 import { trackLpEvent } from "@/lib/lpAnalytics";
@@ -256,64 +255,37 @@ export default function Lp01LandingPage() {
         </div>
       </section>
 
-      {/* 5 — Oferta + checkout juntos */}
+      {/* 5 — Oferta + checkout no mesmo bloco */}
       <section
         id="oferta"
         className="py-10 sm:py-14 px-5 scroll-mt-20"
         style={{ background: "#0f0c09" }}
       >
-        <div className="max-w-xl mx-auto space-y-5">
-          <div
-            className="rounded-3xl px-5 py-5 sm:px-6 sm:py-6 space-y-4"
-            style={{
-              background: "linear-gradient(160deg, rgba(200,165,107,0.14), rgba(18,14,10,0.4))",
-              border: "1px solid rgba(200,165,107,0.28)",
-            }}
-          >
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <p className="text-[11px] font-bold tracking-[0.24em] uppercase" style={{ color: "rgba(200,165,107,0.75)" }}>
-                {LP01_OFFER.eyebrow}
-              </p>
-              <Lp01ScarcityTimer label={LP01_OFFER.timerLabel} compact />
-            </div>
-
-            <div className="text-center space-y-1">
-              <p className="text-sm" style={{ color: "rgba(247,242,236,0.55)" }}>
-                {LP01_OFFER.title}{" "}
-                <span
-                  className="inline-block align-middle text-[11px] font-semibold rounded-full px-2 py-0.5"
-                  style={{ background: "rgba(200,165,107,0.18)", color: "#e8d5b0" }}
-                >
-                  {LP01_OFFER.accessBadge}
-                </span>
-              </p>
-              <p className="font-tan-mon-cheri" style={{ fontSize: "clamp(2rem, 7vw, 2.75rem)", color: "#c8a56b", lineHeight: 1.05 }}>
-                {LP01_OFFER.installmentsHighlight}
-              </p>
-              <p className="text-xs" style={{ color: "rgba(247,242,236,0.45)" }}>
-                {LP01_OFFER.installmentsHint} · {LP01_OFFER.totalSoft}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {LP01_OFFER.includedPreview.map((line) => (
-                <span
-                  key={line}
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.2)", color: "rgba(247,242,236,0.7)" }}
-                >
-                  <Check size={11} style={{ color: "#c8a56b" }} />
-                  {line}
-                </span>
-              ))}
-            </div>
-          </div>
-
+        <div className="max-w-xl mx-auto">
           <LpCheckoutSection
             checkoutToken={checkoutToken}
             onTokenChange={setCheckoutToken}
             variant="lp01"
             embedded
+            header={
+              <div className="text-center space-y-1 pb-1" style={{ borderBottom: "1px solid rgba(200,165,107,0.15)" }}>
+                <p className="text-sm pb-1" style={{ color: "rgba(247,242,236,0.55)" }}>
+                  {LP01_OFFER.title}{" "}
+                  <span
+                    className="inline-block align-middle text-[11px] font-semibold rounded-full px-2 py-0.5"
+                    style={{ background: "rgba(200,165,107,0.18)", color: "#e8d5b0" }}
+                  >
+                    {LP01_OFFER.accessBadge}
+                  </span>
+                </p>
+                <p className="font-tan-mon-cheri" style={{ fontSize: "clamp(1.85rem, 6vw, 2.4rem)", color: "#c8a56b", lineHeight: 1.05 }}>
+                  {LP01_OFFER.installmentsHighlight}
+                </p>
+                <p className="text-xs pb-4" style={{ color: "rgba(247,242,236,0.45)" }}>
+                  {LP01_OFFER.installmentsHint} · {LP01_OFFER.totalSoft}
+                </p>
+              </div>
+            }
           />
         </div>
       </section>
