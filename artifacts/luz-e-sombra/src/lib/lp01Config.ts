@@ -100,10 +100,10 @@ export const LP01_CAROUSEL = {
   eyebrow: "Por dentro",
   title: "Assim é o Portal",
   slides: [
-    { src: "/lp-01/01-inicio.png", alt: "Tela inicial do Portal", caption: "Seu dia no Portal" },
-    { src: "/lp-01/02-caminho.png", alt: "Caminho de autoconhecimento", caption: "Seu caminho" },
-    { src: "/lp-01/03-leitura.png", alt: "Leitura do mês", caption: "Leituras claras" },
-    { src: "/lp-01/04-perfil.png", alt: "Seu perfil e padrões", caption: "Seu perfil" },
+    { src: "/lp01-media/01-inicio.png", alt: "Tela inicial do Portal", caption: "Seu dia no Portal" },
+    { src: "/lp01-media/02-caminho.png", alt: "Caminho de autoconhecimento", caption: "Seu caminho" },
+    { src: "/lp01-media/03-leitura.png", alt: "Leitura do mês", caption: "Leituras claras" },
+    { src: "/lp01-media/04-perfil.png", alt: "Seu perfil e padrões", caption: "Seu perfil" },
   ],
 } as const;
 
