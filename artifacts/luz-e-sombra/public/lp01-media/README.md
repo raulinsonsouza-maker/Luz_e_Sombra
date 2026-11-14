@@ -1,6 +1,7 @@
 ﻿# Prints do app (LP-01)
 
-Pasta `lp01-media` (não usar o nome `lp-01`: o nginx confundia com a rota `/lp-01` e dava 403).
+Pasta `lp01-media` (não usar pasta com o mesmo nome da rota SPA: o nginx confundia e dava 403).
+Rota da LP: `/portal` (legado `/lp-01` redireciona).
 
 - `01-inicio.png`
 - `02-caminho.png`

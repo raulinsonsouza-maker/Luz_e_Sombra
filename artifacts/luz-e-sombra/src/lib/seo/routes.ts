@@ -57,6 +57,7 @@ export const NOINDEX_EXACT = new Set([
   "/acesso-pos-compra",
   "/esqueci-senha",
   "/redefinir-senha",
+  "/portal",
   "/lp-01",
 ]);
 

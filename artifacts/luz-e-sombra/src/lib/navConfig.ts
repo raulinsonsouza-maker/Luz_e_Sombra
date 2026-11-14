@@ -67,6 +67,7 @@ export function isChromelessRoute(location: string): boolean {
   if (
     location === "/" ||
     location === "/vsl" ||
+    location === "/portal" ||
     location === "/lp-01" ||
     location === "/checkout" ||
     location === "/acesso-pos-compra" ||

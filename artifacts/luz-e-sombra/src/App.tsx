@@ -79,7 +79,8 @@ function Router() {
       <Switch>
         <Route path="/" component={LandingPage} />
         <Route path="/vsl" component={VslLandingPage} />
-        <Route path="/lp-01" component={Lp01LandingPage} />
+        <Route path="/portal" component={Lp01LandingPage} />
+        <Route path="/lp-01">{() => <Redirect to="/portal" />}</Route>
         <Route path="/checkout" component={CheckoutPage} />
         <Route path="/acesso-pos-compra" component={AcessoPosCompraPage} />
         <Route path="/login" component={LoginPage} />
