@@ -8,6 +8,8 @@ export interface UtmParams {
   campaign?: string;
   content?: string;
   term?: string;
+  /** Clique do Meta Ads — melhora atribuição. */
+  fbclid?: string;
 }
 
 export function captureUtmsFromUrl(): void {
@@ -19,14 +21,17 @@ export function captureUtmsFromUrl(): void {
   const campaign = params.get("utm_campaign");
   const content = params.get("utm_content");
   const term = params.get("utm_term");
+  const fbclid = params.get("fbclid");
   if (source) utm.source = source;
   if (medium) utm.medium = medium;
   if (campaign) utm.campaign = campaign;
   if (content) utm.content = content;
   if (term) utm.term = term;
+  if (fbclid) utm.fbclid = fbclid;
   if (Object.keys(utm).length === 0) return;
   try {
-    safeSessionStorage().setItem(UTM_STORAGE_KEY, JSON.stringify(utm));
+    const prev = getStoredUtms() ?? {};
+    safeSessionStorage().setItem(UTM_STORAGE_KEY, JSON.stringify({ ...prev, ...utm }));
   } catch {
     /* ignore */
   }

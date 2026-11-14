@@ -32,7 +32,11 @@ export default function Lp01LandingPage() {
     if (trackedView.current) return;
     trackedView.current = true;
     trackLpEvent("lp_view", "lp01");
-    trackMetaViewContent();
+    trackMetaViewContent({
+      content_name: "LP Portal",
+      content_ids: ["lp-portal"],
+      content_category: "Landing",
+    });
     try {
       const params = new URLSearchParams(window.location.search);
       const token = params.get("checkout") || params.get("token");

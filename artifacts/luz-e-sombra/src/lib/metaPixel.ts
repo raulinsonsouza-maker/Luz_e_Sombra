@@ -40,8 +40,8 @@ function contentPayload(extra?: FbqParams): FbqParams {
 }
 
 /** ViewContent — LP / oferta */
-export function trackMetaViewContent() {
-  fbqTrack("ViewContent", contentPayload());
+export function trackMetaViewContent(extra?: FbqParams) {
+  fbqTrack("ViewContent", contentPayload(extra));
 }
 
 /** Lead — cadastro concluído */
