@@ -1,6 +1,6 @@
 import { safeLocalStorage } from "@/lib/safeStorage";
 
-export type LpVariant = "control" | "vsl";
+export type LpVariant = "control" | "vsl" | "lp01";
 
 export type LpEventName =
   | "lp_view"

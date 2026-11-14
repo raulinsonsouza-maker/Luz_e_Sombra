@@ -11,7 +11,16 @@ import {
   LpFaqSection,
   LpFinalCtaSection,
 } from "@/components/lp/LpOfferSections";
-import { VSL_UNLOCK_KEY, VSL_COPY, LP_GATE_PERCENT, formatLpPriceLabel, LP_PORTAL_NAME, LP_JOURNEY_NAME, LP_CTA_LOGIN } from "@/lib/lpConfig";
+import LpCheckoutSection from "@/components/checkout/LpCheckoutSection";
+import {
+  VSL_UNLOCK_KEY,
+  VSL_COPY,
+  LP_GATE_PERCENT,
+  formatLpPriceLabel,
+  LP_PORTAL_NAME,
+  LP_JOURNEY_NAME,
+  LP_CTA_LOGIN,
+} from "@/lib/lpConfig";
 import { trackLpEvent } from "@/lib/lpAnalytics";
 import LogoPortal from "@/components/LogoPortal";
 import { captureUtmsFromUrl } from "@/lib/utm";
@@ -31,6 +40,7 @@ export default function VslLandingPage() {
   const [unlocked, setUnlocked] = useState(readUnlocked);
   const trackedView = useRef(false);
   const trackedUnlock = useRef(false);
+  const [checkoutToken, setCheckoutToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "authenticated") navigate(user?.isAdmin ? "/admin" : "/dashboard");
@@ -41,6 +51,27 @@ export default function VslLandingPage() {
     if (trackedView.current) return;
     trackedView.current = true;
     trackLpEvent("lp_view", "vsl");
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("checkout") || params.get("token");
+      if (token) {
+        setCheckoutToken(token);
+        safeSessionStorage().setItem("pending_checkout_token", token);
+        params.delete("checkout");
+        params.delete("token");
+        const qs = params.toString();
+        window.history.replaceState(
+          {},
+          "",
+          `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash || "#checkout"}`,
+        );
+      } else {
+        const pending = safeSessionStorage().getItem("pending_checkout_token");
+        if (pending) setCheckoutToken(pending);
+      }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   const handleUnlocked = useCallback(() => {
@@ -57,12 +88,11 @@ export default function VslLandingPage() {
 
   const goCheckout = useCallback(() => {
     if (!unlocked) return;
-    navigate("/#checkout");
-  }, [unlocked, navigate]);
+    document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [unlocked]);
 
   return (
     <div style={{ background: "#0f0c09", minHeight: "100vh" }}>
-      {/* Nav */}
       <nav
         className="sticky top-0 z-50 h-14 flex items-center"
         style={{
@@ -102,7 +132,6 @@ export default function VslLandingPage() {
         </div>
       </nav>
 
-      {/* Hero + Video */}
       <section className="px-5 pt-10 pb-8">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
@@ -141,13 +170,13 @@ export default function VslLandingPage() {
         </div>
       </section>
 
-      {/* Gated content */}
       <div className="relative">
         {!unlocked && (
           <div
             className="absolute inset-0 z-20 flex flex-col items-center justify-start pt-16 px-5"
             style={{
-              background: "linear-gradient(to bottom, rgba(15,12,9,0.3) 0%, rgba(15,12,9,0.92) 30%, rgba(15,12,9,0.98) 60%)",
+              background:
+                "linear-gradient(to bottom, rgba(15,12,9,0.3) 0%, rgba(15,12,9,0.92) 30%, rgba(15,12,9,0.98) 60%)",
               backdropFilter: "blur(6px)",
             }}
           >
@@ -161,7 +190,10 @@ export default function VslLandingPage() {
             >
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: "rgba(200,165,107,0.12)", border: "1px solid rgba(200,165,107,0.3)" }}
+                style={{
+                  background: "rgba(200,165,107,0.12)",
+                  border: "1px solid rgba(200,165,107,0.3)",
+                }}
               >
                 <Lock size={20} style={{ color: "#c8a56b" }} />
               </div>
@@ -189,6 +221,13 @@ export default function VslLandingPage() {
           <LpOfferSection onCheckout={goCheckout} variant="vsl" />
           <LpFaqSection variant="vsl" />
           <LpFinalCtaSection onCheckout={goCheckout} variant="vsl" />
+          {unlocked ? (
+            <LpCheckoutSection
+              checkoutToken={checkoutToken}
+              onTokenChange={setCheckoutToken}
+              variant="vsl"
+            />
+          ) : null}
         </div>
       </div>
 
@@ -200,7 +239,6 @@ export default function VslLandingPage() {
           {LP_PORTAL_NAME} · {LP_JOURNEY_NAME} · {formatLpPriceLabel()}
         </p>
       </footer>
-
     </div>
   );
 }

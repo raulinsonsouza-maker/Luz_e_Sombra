@@ -8,6 +8,7 @@ import BottomNav from "@/components/BottomNav";
 import SeoHead from "@/components/SeoHead";
 import LandingPage from "@/pages/LandingPage";
 import VslLandingPage from "@/pages/VslLandingPage";
+import Lp01LandingPage from "@/pages/Lp01LandingPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import AcessoPosCompraPage from "@/pages/AcessoPosCompraPage";
 import LoginPage from "@/pages/LoginPage";
@@ -78,6 +79,7 @@ function Router() {
       <Switch>
         <Route path="/" component={LandingPage} />
         <Route path="/vsl" component={VslLandingPage} />
+        <Route path="/lp-01" component={Lp01LandingPage} />
         <Route path="/checkout" component={CheckoutPage} />
         <Route path="/acesso-pos-compra" component={AcessoPosCompraPage} />
         <Route path="/login" component={LoginPage} />
