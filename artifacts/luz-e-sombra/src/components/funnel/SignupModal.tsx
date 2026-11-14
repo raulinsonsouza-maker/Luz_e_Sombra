@@ -13,9 +13,9 @@ import {
   formatBrazilDate,
   isValidBrazilDate,
 } from "@/lib/dataNascimento";
-import { LP_JOURNEY_NAME, LP_PORTAL_NAME } from "@/lib/lpConfig";
+import { LP_PORTAL_NAME } from "@/lib/lpConfig";
 import { safeSessionStorage } from "@/lib/safeStorage";
-import { TRATAMENTO, type SexoCliente } from "@workspace/copy-voz";
+import type { SexoCliente } from "@workspace/copy-voz";
 
 interface Props {
   open: boolean;
@@ -376,10 +376,10 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
           className="font-tan-mon-cheri text-2xl mb-1 pr-8"
           style={{ color: "#f7f2ec" }}
         >
-          Comece sua jornada
+          Crie seu acesso
         </h2>
         <p className="text-xs mb-6 leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
-          Cadastre-se para acessar a {LP_JOURNEY_NAME} no {LP_PORTAL_NAME}.
+          Cadastre-se para acessar o {LP_PORTAL_NAME}.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -397,7 +397,7 @@ export default function SignupModal({ open, onClose, variant, onRegistered }: Pr
               autoFocus
               className={inputClass}
               style={{ ...inputStyle, border: borderForError(nomeInvalido) }}
-              placeholder={`Como você quer ser ${sexo ? TRATAMENTO.chamada(sexo) : "chamada"}`}
+              placeholder="Seu nome completo"
             />
             {nomeInvalido && (
               <p className="text-xs mt-1.5" style={{ color: "#e88" }}>

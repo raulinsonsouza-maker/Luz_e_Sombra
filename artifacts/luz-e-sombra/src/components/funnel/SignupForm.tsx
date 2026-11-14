@@ -13,9 +13,10 @@ import {
   formatBrazilDate,
   isValidBrazilDate,
 } from "@/lib/dataNascimento";
-import { LP_JOURNEY_NAME, LP_PORTAL_NAME } from "@/lib/lpConfig";
+import { LP_PORTAL_NAME } from "@/lib/lpConfig";
 import { safeSessionStorage } from "@/lib/safeStorage";
-import { TRATAMENTO, type SexoCliente } from "@workspace/copy-voz";
+import type { SexoCliente } from "@workspace/copy-voz";
+import CheckoutSteps from "@/components/checkout/CheckoutSteps";
 
 interface Props {
   variant: LpVariant;
@@ -23,6 +24,7 @@ interface Props {
 }
 
 type EmailStatus = "idle" | "checking" | "available" | "unavailable";
+type FormStep = 1 | 2;
 
 const inputClass =
   "w-full px-4 py-3 rounded-xl text-sm outline-none transition-[border-color,box-shadow] focus:border-[rgba(200,165,107,0.55)] focus:ring-2 focus:ring-[rgba(200,165,107,0.15)]";
@@ -35,6 +37,11 @@ const inputStyle = {
 
 const labelClass = "block text-xs mb-1.5 font-medium tracking-wide";
 const labelColor = { color: "rgba(247,242,236,0.55)" } as const;
+
+const primaryBtnStyle = {
+  background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)",
+  color: "#fff",
+} as const;
 
 function borderForError(hasError: boolean) {
   return hasError ? "1px solid rgba(220,80,80,0.65)" : inputStyle.border;
@@ -102,6 +109,7 @@ function LpPasswordInput({
 }
 
 export default function SignupForm({ variant, onRegistered }: Props) {
+  const [step, setStep] = useState<FormStep>(1);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
@@ -176,11 +184,42 @@ export default function SignupForm({ variant, onRegistered }: Props) {
     return true;
   }
 
+  function validarPasso1(): boolean {
+    if (nome.trim().length < 2) {
+      toast.error("Informe seu nome completo.");
+      return false;
+    }
+    if (sexo !== "feminino" && sexo !== "masculino") {
+      setSexoErro("Selecione Mulher ou Homem.");
+      toast.error("Selecione Mulher ou Homem.");
+      return false;
+    }
+    setSexoErro(null);
+    if (!dataNascimento.trim()) {
+      setDataNascimentoErro("Informe sua data de nascimento.");
+      toast.error("Informe sua data de nascimento.");
+      return false;
+    }
+    if (!isValidBrazilDate(dataNascimento)) {
+      setDataNascimentoErro("Use o formato DD/MM/AAAA com uma data válida.");
+      toast.error("Data de nascimento inválida. Use DD/MM/AAAA.");
+      return false;
+    }
+    setDataNascimentoErro(null);
+    return true;
+  }
+
+  function handleContinuarPasso1(e: React.FormEvent) {
+    e.preventDefault();
+    if (!validarPasso1()) return;
+    setStep(2);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (nome.trim().length < 2) {
-      toast.error("Informe seu nome completo.");
+    if (!validarPasso1()) {
+      setStep(1);
       return;
     }
 
@@ -199,26 +238,6 @@ export default function SignupForm({ variant, onRegistered }: Props) {
       return;
     }
 
-    if (!dataNascimento.trim()) {
-      setDataNascimentoErro("Informe sua data de nascimento.");
-      toast.error("Informe sua data de nascimento.");
-      return;
-    }
-    if (!isValidBrazilDate(dataNascimento)) {
-      setDataNascimentoErro("Use o formato DD/MM/AAAA com uma data válida.");
-      toast.error("Data de nascimento inválida. Use DD/MM/AAAA.");
-      return;
-    }
-    setDataNascimentoErro(null);
-    const dataNascimentoIso = brazilDateToIso(dataNascimento);
-
-    if (sexo !== "feminino" && sexo !== "masculino") {
-      setSexoErro("Selecione Mulher ou Homem.");
-      toast.error("Selecione Mulher ou Homem.");
-      return;
-    }
-    setSexoErro(null);
-
     if (senha !== confirmarSenha) {
       toast.error("As senhas não coincidem.");
       return;
@@ -229,6 +248,8 @@ export default function SignupForm({ variant, onRegistered }: Props) {
       toast.error(senhaErro);
       return;
     }
+
+    const dataNascimentoIso = brazilDateToIso(dataNascimento);
 
     setEnviando(true);
     trackLpEvent("signup_start", variant);
@@ -270,239 +291,266 @@ export default function SignupForm({ variant, onRegistered }: Props) {
     }
   }
 
-  const nomePlaceholder = `Como você quer ser ${sexo ? TRATAMENTO.chamada(sexo) : "chamada"}`;
-
   return (
     <div>
+      <CheckoutSteps current={step} />
+
       <h3 className="font-tan-mon-cheri text-xl mb-1" style={{ color: "#f7f2ec" }}>
-        Comece sua jornada
+        {step === 1 ? "Sobre você" : "Crie seu acesso"}
       </h3>
       <p className="text-xs mb-6 leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
-        Cadastre-se para acessar a {LP_JOURNEY_NAME} no {LP_PORTAL_NAME}.
+        {step === 1
+          ? `Passo 1 de 3. Depois criamos seu acesso ao ${LP_PORTAL_NAME}.`
+          : "Passo 2 de 3. Em seguida, você escolhe como pagar."}
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-        <div>
-          <label htmlFor="signup-nome" className={labelClass} style={labelColor}>
-            Nome completo *
-          </label>
-          <input
-            id="signup-nome"
-            type="text"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            required
-            autoComplete="name"
-            className={inputClass}
-            style={{ ...inputStyle, border: borderForError(nomeInvalido) }}
-            placeholder={nomePlaceholder}
-          />
-          {nomeInvalido && (
-            <p className="text-xs mt-1.5" style={{ color: "#e88" }}>
-              Informe pelo menos 2 caracteres.
-            </p>
-          )}
-        </div>
-
-        <div>
-          <p className={labelClass} style={labelColor} id="signup-sexo-label">
-            Você é *
-          </p>
-          <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="signup-sexo-label">
-            {(
-              [
-                { value: "feminino" as const, label: "Mulher" },
-                { value: "masculino" as const, label: "Homem" },
-              ] as const
-            ).map((opt) => {
-              const selected = sexo === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => {
-                    setSexo(opt.value);
-                    setSexoErro(null);
-                  }}
-                  className="px-4 py-3 rounded-xl text-sm font-semibold transition-all"
-                  style={{
-                    background: selected ? "rgba(200,165,107,0.18)" : inputStyle.background,
-                    border: selected
-                      ? "1px solid rgba(200,165,107,0.55)"
-                      : borderForError(!!sexoErro),
-                    color: selected ? "#e8d5b0" : "#f7f2ec",
-                  }}
-                  aria-pressed={selected}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-          {sexoErro && (
-            <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
-              {sexoErro}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="signup-email" className={labelClass} style={labelColor}>
-            E-mail *
-          </label>
-          <input
-            id="signup-email"
-            type="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setEmailStatus("idle");
-              setEmailErro(null);
-              setEmailPending(false);
-            }}
-            onBlur={verificarEmail}
-            required
-            autoComplete="email"
-            inputMode="email"
-            className={inputClass}
-            style={{ ...inputStyle, border: borderForError(!!emailErro) }}
-            placeholder="seu@email.com"
-          />
-          {emailStatus === "checking" && (
-            <p className="text-xs mt-1.5 flex items-center gap-1.5" style={{ color: "rgba(247,242,236,0.4)" }}>
-              <Loader2 size={12} className="animate-spin" />
-              Verificando e-mail...
-            </p>
-          )}
-          {emailErro && (
-            <div className="mt-1.5 space-y-2" role="alert">
-              <p className="text-xs leading-relaxed" style={{ color: "#e88" }}>
-                {emailErro}
+      {step === 1 ? (
+        <form onSubmit={handleContinuarPasso1} className="space-y-4" noValidate>
+          <div>
+            <label htmlFor="signup-nome" className={labelClass} style={labelColor}>
+              Nome completo *
+            </label>
+            <input
+              id="signup-nome"
+              type="text"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              required
+              autoComplete="name"
+              className={inputClass}
+              style={{ ...inputStyle, border: borderForError(nomeInvalido) }}
+              placeholder="Seu nome completo"
+            />
+            {nomeInvalido && (
+              <p className="text-xs mt-1.5" style={{ color: "#e88" }}>
+                Informe pelo menos 2 caracteres.
               </p>
-              {emailPending && (
-                <Link
-                  href="/login"
-                  className="inline-flex text-xs font-semibold underline-offset-2 hover:underline"
-                  style={{ color: "#c8a56b" }}
-                >
-                  Entrar para continuar o pagamento
-                </Link>
-              )}
+            )}
+          </div>
+
+          <div>
+            <p className={labelClass} style={labelColor} id="signup-sexo-label">
+              Você é *
+            </p>
+            <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="signup-sexo-label">
+              {(
+                [
+                  { value: "feminino" as const, label: "Mulher" },
+                  { value: "masculino" as const, label: "Homem" },
+                ] as const
+              ).map((opt) => {
+                const selected = sexo === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      setSexo(opt.value);
+                      setSexoErro(null);
+                    }}
+                    className="px-4 py-3 rounded-xl text-sm font-semibold transition-all"
+                    style={{
+                      background: selected ? "rgba(200,165,107,0.18)" : inputStyle.background,
+                      border: selected
+                        ? "1px solid rgba(200,165,107,0.55)"
+                        : borderForError(!!sexoErro),
+                      color: selected ? "#e8d5b0" : "#f7f2ec",
+                    }}
+                    aria-pressed={selected}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
             </div>
-          )}
-          {emailStatus === "available" && (
-            <p className="text-xs mt-1.5" style={{ color: "#8c8" }}>
-              E-mail disponível.
-            </p>
-          )}
-        </div>
+            {sexoErro && (
+              <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
+                {sexoErro}
+              </p>
+            )}
+          </div>
 
-        <div>
-          <label htmlFor="signup-telefone" className={labelClass} style={labelColor}>
-            Celular (WhatsApp) *
-          </label>
-          <input
-            id="signup-telefone"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel"
-            value={telefone}
-            onChange={(e) => {
-              setTelefone(formatBrazilPhone(e.target.value));
-              setTelefoneErro(null);
-            }}
-            onBlur={validarTelefone}
-            required
-            maxLength={16}
-            className={inputClass}
-            style={{ ...inputStyle, border: borderForError(!!telefoneErro) }}
-            placeholder="(00) 00000-0000"
+          <div>
+            <label htmlFor="signup-data-nascimento" className={labelClass} style={labelColor}>
+              Data de nascimento *
+            </label>
+            <input
+              id="signup-data-nascimento"
+              type="text"
+              inputMode="numeric"
+              value={dataNascimento}
+              onChange={(e) => {
+                setDataNascimento(formatBrazilDate(e.target.value));
+                setDataNascimentoErro(null);
+              }}
+              required
+              autoComplete="bday"
+              maxLength={10}
+              placeholder="DD/MM/AAAA"
+              className={inputClass}
+              style={{
+                ...inputStyle,
+                border: borderForError(!!dataNascimentoErro),
+              }}
+            />
+            {dataNascimentoErro && (
+              <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
+                {dataNascimentoErro}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={nomeInvalido}
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm mt-1 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+            style={primaryBtnStyle}
+          >
+            Continuar
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <div>
+            <label htmlFor="signup-email" className={labelClass} style={labelColor}>
+              E-mail *
+            </label>
+            <input
+              id="signup-email"
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailStatus("idle");
+                setEmailErro(null);
+                setEmailPending(false);
+              }}
+              onBlur={verificarEmail}
+              required
+              autoComplete="email"
+              inputMode="email"
+              className={inputClass}
+              style={{ ...inputStyle, border: borderForError(!!emailErro) }}
+              placeholder="seu@email.com"
+            />
+            {emailStatus === "checking" && (
+              <p className="text-xs mt-1.5 flex items-center gap-1.5" style={{ color: "rgba(247,242,236,0.4)" }}>
+                <Loader2 size={12} className="animate-spin" />
+                Verificando e-mail...
+              </p>
+            )}
+            {emailErro && (
+              <div className="mt-1.5 space-y-2" role="alert">
+                <p className="text-xs leading-relaxed" style={{ color: "#e88" }}>
+                  {emailErro}
+                </p>
+                {emailPending && (
+                  <Link
+                    href="/login"
+                    className="inline-flex text-xs font-semibold underline-offset-2 hover:underline"
+                    style={{ color: "#c8a56b" }}
+                  >
+                    Entrar para continuar o pagamento
+                  </Link>
+                )}
+              </div>
+            )}
+            {emailStatus === "available" && (
+              <p className="text-xs mt-1.5" style={{ color: "#8c8" }}>
+                E-mail disponível.
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="signup-telefone" className={labelClass} style={labelColor}>
+              Celular (WhatsApp) *
+            </label>
+            <input
+              id="signup-telefone"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel"
+              value={telefone}
+              onChange={(e) => {
+                setTelefone(formatBrazilPhone(e.target.value));
+                setTelefoneErro(null);
+              }}
+              onBlur={validarTelefone}
+              required
+              maxLength={16}
+              className={inputClass}
+              style={{ ...inputStyle, border: borderForError(!!telefoneErro) }}
+              placeholder="(00) 00000-0000"
+            />
+            {telefoneErro && (
+              <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
+                {telefoneErro}
+              </p>
+            )}
+          </div>
+
+          <LpPasswordInput
+            id="signup-senha"
+            label="Senha *"
+            value={senha}
+            onChange={setSenha}
+            placeholder="Crie uma senha segura"
+            autoComplete="new-password"
+            hint={PASSWORD_HINT}
           />
-          {telefoneErro && (
-            <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
-              {telefoneErro}
-            </p>
-          )}
-        </div>
 
-        <div>
-          <label htmlFor="signup-data-nascimento" className={labelClass} style={labelColor}>
-            Data de nascimento *
-          </label>
-          <input
-            id="signup-data-nascimento"
-            type="text"
-            inputMode="numeric"
-            value={dataNascimento}
-            onChange={(e) => {
-              setDataNascimento(formatBrazilDate(e.target.value));
-              setDataNascimentoErro(null);
-            }}
-            required
-            autoComplete="bday"
-            maxLength={10}
-            placeholder="DD/MM/AAAA"
-            className={inputClass}
-            style={{
-              ...inputStyle,
-              border: borderForError(!!dataNascimentoErro),
-            }}
+          <LpPasswordInput
+            id="signup-confirmar"
+            label="Confirmar senha *"
+            value={confirmarSenha}
+            onChange={setConfirmarSenha}
+            placeholder="Repita a senha"
+            autoComplete="new-password"
+            hasError={senhasDiferentes}
           />
-          {dataNascimentoErro && (
-            <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
-              {dataNascimentoErro}
+          {senhasDiferentes && (
+            <p className="text-xs -mt-2" style={{ color: "#e88" }} role="alert">
+              As senhas não coincidem.
             </p>
           )}
-        </div>
 
-        <LpPasswordInput
-          id="signup-senha"
-          label="Senha *"
-          value={senha}
-          onChange={setSenha}
-          placeholder="Crie uma senha segura"
-          autoComplete="new-password"
-          hint={PASSWORD_HINT}
-        />
+          <div className="flex flex-col gap-2 pt-1">
+            <button
+              type="submit"
+              disabled={enviando || emailStatus === "checking" || senhasDiferentes}
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+              style={primaryBtnStyle}
+            >
+              {enviando ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Criando acesso...
+                </>
+              ) : (
+                "Ir para o pagamento"
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              disabled={enviando}
+              className="w-full py-3 rounded-xl text-sm font-medium transition-opacity disabled:opacity-50"
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(200,165,107,0.25)",
+                color: "rgba(247,242,236,0.65)",
+              }}
+            >
+              Voltar
+            </button>
+          </div>
 
-        <LpPasswordInput
-          id="signup-confirmar"
-          label="Confirmar senha *"
-          value={confirmarSenha}
-          onChange={setConfirmarSenha}
-          placeholder="Repita a senha"
-          autoComplete="new-password"
-          hasError={senhasDiferentes}
-        />
-        {senhasDiferentes && (
-          <p className="text-xs -mt-2" style={{ color: "#e88" }} role="alert">
-            As senhas não coincidem.
+          <p className="text-[11px] text-center leading-relaxed pt-1" style={{ color: "rgba(247,242,236,0.28)" }}>
+            Ao continuar, você concorda em receber comunicações sobre inscrição e pagamento.
           </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={enviando || emailStatus === "checking" || senhasDiferentes || nomeInvalido}
-          className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm mt-1 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-          style={{
-            background: "linear-gradient(135deg, #9c7742 0%, #c8a56b 50%, #9c7742 100%)",
-            color: "#fff",
-          }}
-        >
-          {enviando ? (
-            <>
-              <Loader2 size={18} className="animate-spin" />
-              Cadastrando...
-            </>
-          ) : (
-            "Continuar para pagamento"
-          )}
-        </button>
-
-        <p className="text-[11px] text-center leading-relaxed pt-1" style={{ color: "rgba(247,242,236,0.28)" }}>
-          Ao continuar, você concorda em receber comunicações sobre sua inscrição e pagamento.
-        </p>
-      </form>
+        </form>
+      )}
     </div>
   );
 }
