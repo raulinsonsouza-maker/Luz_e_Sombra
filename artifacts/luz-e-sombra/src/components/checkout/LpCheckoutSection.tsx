@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Shield } from "lucide-react";
+import { Check, Copy, Loader2, Shield } from "lucide-react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import SignupForm from "@/components/funnel/SignupForm";
@@ -227,20 +227,51 @@ export default function LpCheckoutSection({
             </div>
           ) : null}
           {pendingPix.qrCode ? (
-            <div className="space-y-2">
-              <code
-                className="block text-[11px] break-all rounded-xl px-3 py-3"
-                style={{ background: "rgba(255,255,255,0.04)", color: "rgba(247,242,236,0.65)" }}
-              >
-                {pendingPix.qrCode}
-              </code>
+            <div className="space-y-3">
               <button
                 type="button"
                 onClick={() => void copyPix()}
-                className="w-full rounded-xl py-3 text-sm font-semibold"
+                className="w-full flex items-center justify-center gap-2 rounded-xl py-4 text-sm font-bold transition-opacity"
                 style={{ background: "linear-gradient(135deg, #c8a56b, #9c7742)", color: "#1a140e" }}
               >
-                {copied ? "Copiado!" : "Copiar Pix"}
+                {copied ? (
+                  <>
+                    <Check size={18} />
+                    Código copiado
+                  </>
+                ) : (
+                  <>
+                    <Copy size={18} />
+                    Copiar código Pix
+                  </>
+                )}
+              </button>
+              <p className="text-[11px] text-center" style={{ color: "rgba(247,242,236,0.4)" }}>
+                Cole no app do seu banco para pagar
+              </p>
+              <button
+                type="button"
+                onClick={() => void copyPix()}
+                className="w-full text-left rounded-xl px-3 py-3 transition-opacity hover:opacity-90"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(200,165,107,0.2)",
+                }}
+                aria-label="Copiar código Pix"
+              >
+                <span
+                  className="block text-[11px] break-all line-clamp-3"
+                  style={{ color: "rgba(247,242,236,0.55)" }}
+                >
+                  {pendingPix.qrCode}
+                </span>
+                <span
+                  className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold"
+                  style={{ color: "#c8a56b" }}
+                >
+                  <Copy size={12} />
+                  {copied ? "Copiado" : "Toque para copiar"}
+                </span>
               </button>
             </div>
           ) : (
