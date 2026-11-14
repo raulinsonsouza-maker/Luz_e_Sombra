@@ -23,7 +23,13 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
-export default function Lp01ScarcityTimer({ label }: { label: string }) {
+type Props = {
+  label: string;
+  /** Compacto: só rótulo + tempo, sem caixa grande. */
+  compact?: boolean;
+};
+
+export default function Lp01ScarcityTimer({ label, compact = false }: Props) {
   const [deadline] = useState(readDeadline);
   const [left, setLeft] = useState(() => Math.max(0, deadline - Date.now()));
 
@@ -38,6 +44,20 @@ export default function Lp01ScarcityTimer({ label }: { label: string }) {
   const mm = Math.floor(totalSec / 60);
   const ss = totalSec % 60;
   const expired = left <= 0;
+  const time = expired ? "00:00" : `${pad(mm)}:${pad(ss)}`;
+
+  if (compact) {
+    return (
+      <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5" style={{ background: "rgba(200,165,107,0.12)", border: "1px solid rgba(200,165,107,0.35)" }}>
+        <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "rgba(200,165,107,0.8)" }}>
+          {expired ? "Finalize agora" : label}
+        </span>
+        <span className="font-tan-mon-cheri tabular-nums text-sm" style={{ color: "#f7f2ec" }} aria-live="polite">
+          {time}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -55,7 +75,7 @@ export default function Lp01ScarcityTimer({ label }: { label: string }) {
         style={{ fontSize: "clamp(2rem, 6vw, 2.75rem)", color: "#f7f2ec", letterSpacing: "0.06em" }}
         aria-live="polite"
       >
-        {expired ? "00:00" : `${pad(mm)}:${pad(ss)}`}
+        {time}
       </p>
     </div>
   );

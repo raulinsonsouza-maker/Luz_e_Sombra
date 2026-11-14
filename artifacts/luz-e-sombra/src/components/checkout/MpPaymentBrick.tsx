@@ -262,28 +262,11 @@ export default function MpPaymentBrick({
 
   return (
     <div className="space-y-4">
-      <div
-        className="rounded-2xl px-4 py-3.5 space-y-1"
-        style={{
-          background: "rgba(200,165,107,0.1)",
-          border: "1px solid rgba(200,165,107,0.28)",
-        }}
-      >
-        <p className="text-[11px] font-semibold tracking-[0.16em] uppercase" style={{ color: "rgba(200,165,107,0.75)" }}>
-          Como você prefere pagar
+      {payerEmail ? (
+        <p className="text-[11px] text-center truncate" style={{ color: "rgba(247,242,236,0.4)" }}>
+          {payerEmail}
         </p>
-        <p className="font-tan-mon-cheri" style={{ fontSize: "1.55rem", color: "#e8d5b0", lineHeight: 1.15 }}>
-          {LP_PRICE_INSTALLMENTS}x de {formatLpPrice(LP_PRICE_INSTALLMENT_VALUE)}
-        </p>
-        <p className="text-xs" style={{ color: "rgba(247,242,236,0.55)" }}>
-          no cartão · ou {formatLpPrice(amount)} à vista no PIX
-        </p>
-        {payerEmail ? (
-          <p className="text-[11px] pt-1 truncate" style={{ color: "rgba(247,242,236,0.35)" }}>
-            {payerEmail}
-          </p>
-        ) : null}
-      </div>
+      ) : null}
 
       {!cpfLocked ? (
         <div>

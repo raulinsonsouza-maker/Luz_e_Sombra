@@ -259,40 +259,54 @@ export default function Lp01LandingPage() {
       {/* 5 — Oferta + checkout juntos */}
       <section
         id="oferta"
-        className="py-12 sm:py-16 px-5 scroll-mt-20"
+        className="py-10 sm:py-14 px-5 scroll-mt-20"
         style={{ background: "#0f0c09" }}
       >
-        <div className="max-w-xl mx-auto space-y-8">
-          <div className="text-center space-y-4">
-            <p className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(200,165,107,0.65)" }}>
-              {LP01_OFFER.eyebrow}
-            </p>
-            <h2 className="font-tan-mon-cheri" style={{ fontSize: "clamp(1.5rem, 3.5vw, 2.1rem)", color: "#f7f2ec" }}>
-              {LP01_OFFER.title}
-            </h2>
-            <p className="text-sm" style={{ color: "rgba(247,242,236,0.5)" }}>
-              {LP01_OFFER.subtitle}
-            </p>
-            <div>
-              <p className="font-tan-mon-cheri" style={{ fontSize: "clamp(2.2rem, 6vw, 3rem)", color: "#c8a56b", lineHeight: 1.1 }}>
+        <div className="max-w-xl mx-auto space-y-5">
+          <div
+            className="rounded-3xl px-5 py-5 sm:px-6 sm:py-6 space-y-4"
+            style={{
+              background: "linear-gradient(160deg, rgba(200,165,107,0.14), rgba(18,14,10,0.4))",
+              border: "1px solid rgba(200,165,107,0.28)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <p className="text-[11px] font-bold tracking-[0.24em] uppercase" style={{ color: "rgba(200,165,107,0.75)" }}>
+                {LP01_OFFER.eyebrow}
+              </p>
+              <Lp01ScarcityTimer label={LP01_OFFER.timerLabel} compact />
+            </div>
+
+            <div className="text-center space-y-1">
+              <p className="text-sm" style={{ color: "rgba(247,242,236,0.55)" }}>
+                {LP01_OFFER.title}{" "}
+                <span
+                  className="inline-block align-middle text-[11px] font-semibold rounded-full px-2 py-0.5"
+                  style={{ background: "rgba(200,165,107,0.18)", color: "#e8d5b0" }}
+                >
+                  {LP01_OFFER.accessBadge}
+                </span>
+              </p>
+              <p className="font-tan-mon-cheri" style={{ fontSize: "clamp(2rem, 7vw, 2.75rem)", color: "#c8a56b", lineHeight: 1.05 }}>
                 {LP01_OFFER.installmentsHighlight}
               </p>
-              <p className="text-sm mt-1" style={{ color: "rgba(247,242,236,0.55)" }}>
-                {LP01_OFFER.installmentsHint}
-              </p>
-              <p className="text-xs mt-2" style={{ color: "rgba(247,242,236,0.38)" }}>
-                {LP01_OFFER.totalSoft}
+              <p className="text-xs" style={{ color: "rgba(247,242,236,0.45)" }}>
+                {LP01_OFFER.installmentsHint} · {LP01_OFFER.totalSoft}
               </p>
             </div>
-            <Lp01ScarcityTimer label={LP01_OFFER.timerLabel} />
-            <ul className="text-left space-y-1.5 max-w-xs mx-auto">
+
+            <div className="flex flex-wrap items-center justify-center gap-2">
               {LP01_OFFER.includedPreview.map((line) => (
-                <li key={line} className="flex items-start gap-2 text-sm" style={{ color: "rgba(247,242,236,0.65)" }}>
-                  <Check size={13} className="mt-0.5 shrink-0" style={{ color: "#c8a56b" }} />
+                <span
+                  key={line}
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,165,107,0.2)", color: "rgba(247,242,236,0.7)" }}
+                >
+                  <Check size={11} style={{ color: "#c8a56b" }} />
                   {line}
-                </li>
+                </span>
               ))}
-            </ul>
+            </div>
           </div>
 
           <LpCheckoutSection

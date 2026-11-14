@@ -79,20 +79,19 @@ export const LP01_BONUSES = {
 } as const;
 
 export const LP01_OFFER = {
-  eyebrow: "Oferta",
-  title: "Comece agora",
-  subtitle: `${LP_ACCESS_MONTHS} meses de acesso`,
+  eyebrow: "Oferta especial",
+  title: "Seu acesso por",
   /** Destaque principal */
   installmentsHighlight: `${LP_PRICE_INSTALLMENTS}x de ${formatLpPrice(LP_PRICE_INSTALLMENT_VALUE)}`,
   installmentsHint: "no cartão",
   /** Valor total com menos destaque */
-  totalSoft: `ou ${formatLpPrice(LP_PRICE)} à vista no PIX`,
-  timerLabel: "Esta condição expira em",
+  totalSoft: `ou ${formatLpPrice(LP_PRICE)} no PIX`,
+  accessBadge: `${LP_ACCESS_MONTHS} meses`,
+  timerLabel: "Expira em",
   includedPreview: [
-    "Acesso completo ao Portal",
-    "Leituras e síntese sobre você",
-    "Comunidade e convite do dia",
-    `${LP_ACCESS_MONTHS} meses no seu ritmo`,
+    "Portal completo",
+    "Leituras sobre você",
+    "Comunidade",
   ],
 } as const;
 
