@@ -105,7 +105,7 @@ export default function MpPaymentBrick({
 }: Props) {
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [method, setMethod] = useState<Method>("card");
+  const [method, setMethod] = useState<Method>("pix");
   const initialCpf = payerCpf && isValidCpf(payerCpf) ? formatCpf(payerCpf) : "";
   const [cpf, setCpf] = useState(initialCpf);
   const [cardNumber, setCardNumber] = useState("");
@@ -306,8 +306,8 @@ export default function MpPaymentBrick({
       <div className="grid grid-cols-2 gap-2">
         {(
           [
-            { id: "card" as const, label: `Cartão em ${LP_PRICE_INSTALLMENTS}x`, hint: formatLpPrice(LP_PRICE_INSTALLMENT_VALUE) },
             { id: "pix" as const, label: "PIX à vista", hint: formatLpPrice(amount) },
+            { id: "card" as const, label: `Cartão em ${LP_PRICE_INSTALLMENTS}x`, hint: formatLpPrice(LP_PRICE_INSTALLMENT_VALUE) },
           ] as const
         ).map((m) => {
           const on = method === m.id;

@@ -137,11 +137,20 @@ export default function LpCheckoutSection({
     };
   }, [token, pendingPix, navigate]);
 
-  function handleRegistered(checkoutToken: string) {
+  function handleRegistered(checkoutToken: string, cpfDigits?: string) {
     setToken(checkoutToken);
     onTokenChange?.(checkoutToken);
     try {
-      safeSessionStorage().setItem("pending_checkout_token", checkoutToken);
+      const storage = safeSessionStorage();
+      storage.setItem("pending_checkout_token", checkoutToken);
+      const fromArg = cpfDigits && isValidCpf(cpfDigits) ? digitsOnlyCpf(cpfDigits) : null;
+      const fromStore = storage.getItem(PENDING_CHECKOUT_CPF_KEY);
+      const resolved =
+        fromArg ?? (fromStore && isValidCpf(fromStore) ? digitsOnlyCpf(fromStore) : null);
+      if (resolved) {
+        setPayerCpf(resolved);
+        storage.setItem(PENDING_CHECKOUT_CPF_KEY, resolved);
+      }
       // Não persiste o token na URL (Referer/histórico) — só #checkout.
       const url = new URL(window.location.href);
       url.searchParams.delete("checkout");

@@ -25,7 +25,7 @@ import CheckoutSteps from "@/components/checkout/CheckoutSteps";
 
 interface Props {
   variant: LpVariant;
-  onRegistered: (checkoutToken: string) => void;
+  onRegistered: (checkoutToken: string, cpfDigits: string) => void;
 }
 
 type EmailStatus = "idle" | "checking" | "available" | "unavailable";
@@ -301,7 +301,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
       } catch {
         /* ignore */
       }
-      onRegistered(String(data.checkoutToken));
+      onRegistered(String(data.checkoutToken), digitsOnlyCpf(cpf));
     } catch {
       toastApiError("Erro de conexão. Tente novamente.");
       setEnviando(false);
