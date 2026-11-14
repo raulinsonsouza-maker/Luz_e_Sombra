@@ -9,6 +9,8 @@ export const usuariosTable = pgTable("usuarios", {
   nome: text("nome").notNull(),
   email: text("email").unique(),
   telefone: text("telefone"),
+  /** CPF só dígitos — usado no checkout Mercado Pago. */
+  cpf: text("cpf"),
   /** true = não receber WhatsApp (opt-out via "parar" ou perfil). */
   whatsappOptOut: boolean("whatsapp_opt_out").notNull().default(false),
   /** true = receber avisos de novas publicacoes da comunidade no WhatsApp. */

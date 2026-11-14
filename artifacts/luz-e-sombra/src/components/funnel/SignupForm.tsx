@@ -14,6 +14,12 @@ import {
   isValidBrazilDate,
 } from "@/lib/dataNascimento";
 import { safeSessionStorage } from "@/lib/safeStorage";
+import {
+  digitsOnlyCpf,
+  formatCpf,
+  isValidCpf,
+  PENDING_CHECKOUT_CPF_KEY,
+} from "@/lib/cpf";
 import type { SexoCliente } from "@workspace/copy-voz";
 import CheckoutSteps from "@/components/checkout/CheckoutSteps";
 
@@ -114,6 +120,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
   const [telefone, setTelefone] = useState("");
   const [dataNascimento, setDataNascimento] = useState("");
   const [sexo, setSexo] = useState<SexoCliente | "">("");
+  const [cpf, setCpf] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -121,6 +128,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
   const [emailErro, setEmailErro] = useState<string | null>(null);
   const [emailPending, setEmailPending] = useState(false);
   const [telefoneErro, setTelefoneErro] = useState<string | null>(null);
+  const [cpfErro, setCpfErro] = useState<string | null>(null);
   const [dataNascimentoErro, setDataNascimentoErro] = useState<string | null>(null);
   const [sexoErro, setSexoErro] = useState<string | null>(null);
 
@@ -237,6 +245,13 @@ export default function SignupForm({ variant, onRegistered }: Props) {
       return;
     }
 
+    if (!isValidCpf(cpf)) {
+      setCpfErro("Informe um CPF válido.");
+      toast.error("Informe um CPF válido.");
+      return;
+    }
+    setCpfErro(null);
+
     if (senha !== confirmarSenha) {
       toast.error("As senhas não coincidem.");
       return;
@@ -263,6 +278,7 @@ export default function SignupForm({ variant, onRegistered }: Props) {
           telefone: digitsOnlyPhone(telefone),
           dataNascimento: dataNascimentoIso,
           sexo,
+          cpf: digitsOnlyCpf(cpf),
           senha,
           variant,
           utm: getStoredUtms(),
@@ -279,7 +295,9 @@ export default function SignupForm({ variant, onRegistered }: Props) {
       trackMetaLead();
       trackMetaInitiateCheckout();
       try {
-        safeSessionStorage().setItem("pending_checkout_token", data.checkoutToken);
+        const storage = safeSessionStorage();
+        storage.setItem("pending_checkout_token", data.checkoutToken);
+        storage.setItem(PENDING_CHECKOUT_CPF_KEY, digitsOnlyCpf(cpf));
       } catch {
         /* ignore */
       }
@@ -476,6 +494,38 @@ export default function SignupForm({ variant, onRegistered }: Props) {
             {telefoneErro && (
               <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
                 {telefoneErro}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="signup-cpf" className={labelClass} style={labelColor}>
+              CPF *
+            </label>
+            <input
+              id="signup-cpf"
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              value={cpf}
+              onChange={(e) => {
+                setCpf(formatCpf(e.target.value));
+                setCpfErro(null);
+              }}
+              onBlur={() => {
+                if (cpf.trim() && !isValidCpf(cpf)) {
+                  setCpfErro("Informe um CPF válido.");
+                }
+              }}
+              required
+              maxLength={14}
+              className={inputClass}
+              style={{ ...inputStyle, border: borderForError(!!cpfErro) }}
+              placeholder="000.000.000-00"
+            />
+            {cpfErro && (
+              <p className="text-xs mt-1.5" style={{ color: "#e88" }} role="alert">
+                {cpfErro}
               </p>
             )}
           </div>

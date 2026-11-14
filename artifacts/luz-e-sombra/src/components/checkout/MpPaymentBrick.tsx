@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
-import { formatLpPrice, LP_PRICE_INSTALLMENTS } from "@/lib/lpConfig";
+import {
+  formatLpPrice,
+  LP_PRICE_INSTALLMENTS,
+  LP_PRICE_INSTALLMENT_VALUE,
+} from "@/lib/lpConfig";
 import { trackMetaAddPaymentInfo } from "@/lib/metaPixel";
+import { digitsOnlyCpf, formatCpf, isValidCpf } from "@/lib/cpf";
 
 declare global {
   interface Window {
@@ -29,6 +34,7 @@ type Props = {
   checkoutToken: string;
   payerEmail?: string | null;
   payerName?: string | null;
+  payerCpf?: string | null;
   onApproved: () => void;
   onPending: (payload: {
     paymentId?: string | null;
@@ -53,14 +59,6 @@ function digits(value: string): string {
   return value.replace(/\D/g, "");
 }
 
-function formatCpf(value: string): string {
-  const d = digits(value).slice(0, 11);
-  if (d.length <= 3) return d;
-  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
-  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
-  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
-}
-
 function formatCardNumber(value: string): string {
   return digits(value)
     .slice(0, 16)
@@ -72,20 +70,6 @@ function formatExpiry(value: string): string {
   const d = digits(value).slice(0, 4);
   if (d.length <= 2) return d;
   return `${d.slice(0, 2)}/${d.slice(2)}`;
-}
-
-function isValidCpf(raw: string): boolean {
-  const cpf = digits(raw);
-  if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-  const calc = (base: string, factor: number) => {
-    let total = 0;
-    for (let i = 0; i < base.length; i++) total += Number(base[i]) * (factor - i);
-    const rest = (total * 10) % 11;
-    return rest === 10 ? 0 : rest;
-  };
-  const d1 = calc(cpf.slice(0, 9), 10);
-  const d2 = calc(cpf.slice(0, 10), 11);
-  return d1 === Number(cpf[9]) && d2 === Number(cpf[10]);
 }
 
 async function loadMpSdk(): Promise<void> {
@@ -114,21 +98,25 @@ export default function MpPaymentBrick({
   checkoutToken,
   payerEmail,
   payerName,
+  payerCpf,
   onApproved,
   onPending,
   onError,
 }: Props) {
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [method, setMethod] = useState<Method>("pix");
-  const [cpf, setCpf] = useState("");
+  const [method, setMethod] = useState<Method>("card");
+  const initialCpf = payerCpf && isValidCpf(payerCpf) ? formatCpf(payerCpf) : "";
+  const [cpf, setCpf] = useState(initialCpf);
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiration, setCardExpiration] = useState("");
   const [securityCode, setSecurityCode] = useState("");
   const [cardholderName, setCardholderName] = useState(payerName ?? "");
-  const [installments, setInstallments] = useState(1);
+  const [installments, setInstallments] = useState(LP_PRICE_INSTALLMENTS);
   const [localError, setLocalError] = useState("");
   const [mp, setMp] = useState<MpSdk | null>(null);
+
+  const cpfLocked = Boolean(payerCpf && isValidCpf(payerCpf));
 
   const installmentOptions = useMemo(() => {
     const max = Math.max(1, LP_PRICE_INSTALLMENTS);
@@ -159,6 +147,12 @@ export default function MpPaymentBrick({
     if (payerName && !cardholderName) setCardholderName(payerName);
   }, [payerName, cardholderName]);
 
+  useEffect(() => {
+    if (payerCpf && isValidCpf(payerCpf)) {
+      setCpf(formatCpf(payerCpf));
+    }
+  }, [payerCpf]);
+
   async function createCardToken() {
     if (!mp) throw new Error("Checkout ainda carregando.");
     const exp = cardExpiration.replace(/\s/g, "");
@@ -171,7 +165,7 @@ export default function MpPaymentBrick({
       cardExpirationYear: year.length === 2 ? `20${year}` : year,
       securityCode: securityCode.trim(),
       identificationType: "CPF",
-      identificationNumber: digits(cpf),
+      identificationNumber: digitsOnlyCpf(cpf),
     });
     if (token.error || !token.id) {
       throw new Error(token.message || "Não foi possível validar o cartão.");
@@ -192,7 +186,7 @@ export default function MpPaymentBrick({
           email: payerEmail || undefined,
           identification: {
             type: "CPF",
-            number: digits(cpf),
+            number: digitsOnlyCpf(cpf),
           },
         },
       };
@@ -261,59 +255,78 @@ export default function MpPaymentBrick({
     );
   }
 
+  const payLabel =
+    method === "card"
+      ? `Pagar ${installments}x de ${formatLpPrice(amount / installments)}`
+      : `Pagar ${formatLpPrice(amount)} no PIX`;
+
   return (
     <div className="space-y-4">
-      <div className="flex items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold tracking-[0.18em] uppercase" style={{ color: "rgba(200,165,107,0.7)" }}>
-            Pagamento
-          </p>
-          <p className="text-sm mt-1" style={{ color: "rgba(247,242,236,0.55)" }}>
-            Total{" "}
-            <span className="font-semibold" style={{ color: "#e8d5b0" }}>
-              {formatLpPrice(amount)}
-            </span>
-          </p>
-        </div>
+      <div
+        className="rounded-2xl px-4 py-3.5 space-y-1"
+        style={{
+          background: "rgba(200,165,107,0.1)",
+          border: "1px solid rgba(200,165,107,0.28)",
+        }}
+      >
+        <p className="text-[11px] font-semibold tracking-[0.16em] uppercase" style={{ color: "rgba(200,165,107,0.75)" }}>
+          Como você prefere pagar
+        </p>
+        <p className="font-tan-mon-cheri" style={{ fontSize: "1.55rem", color: "#e8d5b0", lineHeight: 1.15 }}>
+          {LP_PRICE_INSTALLMENTS}x de {formatLpPrice(LP_PRICE_INSTALLMENT_VALUE)}
+        </p>
+        <p className="text-xs" style={{ color: "rgba(247,242,236,0.55)" }}>
+          no cartão · ou {formatLpPrice(amount)} à vista no PIX
+        </p>
         {payerEmail ? (
-          <p className="text-[11px] text-right max-w-[55%] truncate" style={{ color: "rgba(247,242,236,0.35)" }}>
+          <p className="text-[11px] pt-1 truncate" style={{ color: "rgba(247,242,236,0.35)" }}>
             {payerEmail}
           </p>
         ) : null}
       </div>
 
-      <div>
-        <label htmlFor="mp-cpf" className="block text-xs mb-1.5 font-medium" style={{ color: "rgba(247,242,236,0.55)" }}>
-          CPF
-        </label>
-        <input
-          id="mp-cpf"
-          inputMode="numeric"
-          autoComplete="off"
-          value={cpf}
-          onChange={(e) => setCpf(formatCpf(e.target.value))}
-          placeholder="000.000.000-00"
-          className={inputClass}
-          style={inputStyle}
-        />
-      </div>
+      {!cpfLocked ? (
+        <div>
+          <label htmlFor="mp-cpf" className="block text-xs mb-1.5 font-medium" style={{ color: "rgba(247,242,236,0.55)" }}>
+            CPF
+          </label>
+          <input
+            id="mp-cpf"
+            inputMode="numeric"
+            autoComplete="off"
+            value={cpf}
+            onChange={(e) => setCpf(formatCpf(e.target.value))}
+            placeholder="000.000.000-00"
+            className={inputClass}
+            style={inputStyle}
+          />
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-2">
-        {(["pix", "card"] as const).map((m) => {
-          const on = method === m;
+        {(
+          [
+            { id: "card" as const, label: `Cartão em ${LP_PRICE_INSTALLMENTS}x`, hint: formatLpPrice(LP_PRICE_INSTALLMENT_VALUE) },
+            { id: "pix" as const, label: "PIX à vista", hint: formatLpPrice(amount) },
+          ] as const
+        ).map((m) => {
+          const on = method === m.id;
           return (
             <button
-              key={m}
+              key={m.id}
               type="button"
-              onClick={() => setMethod(m)}
-              className="rounded-xl py-2.5 text-sm font-medium transition-colors"
+              onClick={() => setMethod(m.id)}
+              className="rounded-xl py-3 px-2 text-left transition-colors"
               style={{
                 background: on ? "rgba(200,165,107,0.18)" : "rgba(255,255,255,0.03)",
                 border: on ? "1px solid rgba(200,165,107,0.55)" : "1px solid rgba(200,165,107,0.18)",
                 color: on ? "#e8d5b0" : "rgba(247,242,236,0.55)",
               }}
             >
-              {m === "pix" ? "Pix" : "Cartão"}
+              <span className="block text-sm font-semibold leading-tight">{m.label}</span>
+              <span className="block text-[11px] mt-0.5" style={{ color: on ? "rgba(232,213,176,0.75)" : "rgba(247,242,236,0.35)" }}>
+                {m.hint}
+              </span>
             </button>
           );
         })}
@@ -392,7 +405,7 @@ export default function MpPaymentBrick({
               {installmentOptions.map((n) => (
                 <option key={n} value={n}>
                   {n}x de {formatLpPrice(amount / n)}
-                  {n === 1 ? " à vista" : ""}
+                  {n === LP_PRICE_INSTALLMENTS ? " (recomendado)" : n === 1 ? " à vista" : ""}
                 </option>
               ))}
             </select>
@@ -413,7 +426,7 @@ export default function MpPaymentBrick({
             Processando…
           </span>
         ) : (
-          "Pagar e liberar acesso"
+          payLabel
         )}
       </button>
 
@@ -422,10 +435,6 @@ export default function MpPaymentBrick({
           {localError}
         </p>
       ) : null}
-
-      <p className="text-[11px] text-center" style={{ color: "rgba(247,242,236,0.35)" }}>
-        Mercado Pago · pagamento seguro no navegador
-      </p>
     </div>
   );
 }

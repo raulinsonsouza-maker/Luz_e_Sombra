@@ -11,6 +11,7 @@ import {
   LP_ACCESS_MONTHS,
 } from "@/lib/lpConfig";
 import { safeSessionStorage } from "@/lib/safeStorage";
+import { digitsOnlyCpf, isValidCpf, PENDING_CHECKOUT_CPF_KEY } from "@/lib/cpf";
 import type { LpVariant } from "@/lib/lpAnalytics";
 
 type MpConfig = {
@@ -48,6 +49,14 @@ export default function LpCheckoutSection({
   const [token, setToken] = useState(tokenProp ?? "");
   const [payerEmail, setPayerEmail] = useState<string | null>(null);
   const [payerName, setPayerName] = useState<string | null>(null);
+  const [payerCpf, setPayerCpf] = useState<string | null>(() => {
+    try {
+      const stored = safeSessionStorage().getItem(PENDING_CHECKOUT_CPF_KEY);
+      return stored && isValidCpf(stored) ? digitsOnlyCpf(stored) : null;
+    } catch {
+      return null;
+    }
+  });
   const [pendingPix, setPendingPix] = useState<PixPending | null>(null);
   const [polling, setPolling] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -85,6 +94,15 @@ export default function LpCheckoutSection({
         if (!cancelled) {
           setPayerEmail(data.email ?? null);
           setPayerName(data.nome ?? null);
+          if (data.cpf && isValidCpf(data.cpf)) {
+            const cpfDigits = digitsOnlyCpf(data.cpf);
+            setPayerCpf(cpfDigits);
+            try {
+              safeSessionStorage().setItem(PENDING_CHECKOUT_CPF_KEY, cpfDigits);
+            } catch {
+              /* ignore */
+            }
+          }
           if (data.status === "paid") {
             navigate(`/acesso-pos-compra?token=${encodeURIComponent(token)}`);
           }
@@ -235,6 +253,7 @@ export default function LpCheckoutSection({
             checkoutToken={token}
             payerEmail={payerEmail}
             payerName={payerName}
+            payerCpf={payerCpf}
             onApproved={() => navigate(`/acesso-pos-compra?token=${encodeURIComponent(token)}`)}
             onPending={(payload) => {
               setPendingPix({

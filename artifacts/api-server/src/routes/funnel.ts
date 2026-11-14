@@ -138,7 +138,7 @@ router.post(
       return res.status(400).json({ error: parsed.error, detalhes: parsed.detalhes });
     }
 
-    const { nome, email, telefone, dataNascimento, sexo, senha, variant, utm } = parsed.data;
+    const { nome, email, telefone, dataNascimento, sexo, cpf, senha, variant, utm } = parsed.data;
     const emailNorm = email.trim().toLowerCase();
 
     const [emailExisting] = await db
@@ -184,6 +184,7 @@ router.post(
         telefone: telefone?.trim() || null,
         dataNascimento,
         sexo,
+        cpf,
         ativo: false,
         statusAcesso: "pending",
         primeiroAcesso: true,
@@ -325,6 +326,7 @@ router.get("/checkout-info", async (req: Request, res: Response) => {
       nome: row.nome,
       email: row.email,
       emailMasked: maskedEmail,
+      cpf: row.usuario.cpf ?? null,
       variant: row.variant,
       status: row.status,
       provider: row.provider,

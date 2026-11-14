@@ -42,6 +42,25 @@ const emailOptionalSchema = z
 
 const sexoClienteSchema = z.enum(["feminino", "masculino"]);
 
+function isValidCpfDigits(cpf: string): boolean {
+  if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+  const calc = (base: string, factor: number) => {
+    let total = 0;
+    for (let i = 0; i < base.length; i++) total += Number(base[i]) * (factor - i);
+    const rest = (total * 10) % 11;
+    return rest === 10 ? 0 : rest;
+  };
+  const d1 = calc(cpf.slice(0, 9), 10);
+  const d2 = calc(cpf.slice(0, 10), 11);
+  return d1 === Number(cpf[9]) && d2 === Number(cpf[10]);
+}
+
+const cpfSchema = z
+  .string()
+  .trim()
+  .transform((v) => v.replace(/\D/g, ""))
+  .refine((v) => isValidCpfDigits(v), "CPF inválido");
+
 export const updateMeSchema = z
   .object({
     nome: z.string().trim().min(1, "Nome não pode ser vazio").optional(),
@@ -156,6 +175,7 @@ export const funnelRegisterSchema = z.object({
   telefone: z.string().trim().min(10, "Celular é obrigatório"),
   dataNascimento: dataNascimentoIsoSchema,
   sexo: sexoClienteSchema,
+  cpf: cpfSchema,
   senha: senhaForteSchema,
   variant: z.enum(["control", "vsl", "lp01"]).default("control"),
   utm: z
