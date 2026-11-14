@@ -9,7 +9,6 @@ import {
   formatLpPrice,
   LP_PRICE,
   LP_ACCESS_MONTHS,
-  LP_PORTAL_NAME,
 } from "@/lib/lpConfig";
 import { safeSessionStorage } from "@/lib/safeStorage";
 import type { LpVariant } from "@/lib/lpAnalytics";
@@ -173,16 +172,14 @@ export default function LpCheckoutSection({
           </p>
         </div>
       ) : !token ? (
-        <div className="space-y-5">
-          <SignupForm variant={variant} onRegistered={handleRegistered} />
-          <div className="flex items-center justify-center gap-2 text-xs" style={{ color: "rgba(247,242,236,0.4)" }}>
-            <Shield size={14} />
-            Pagamento seguro
-          </div>
-        </div>
+        <SignupForm variant={variant} onRegistered={handleRegistered} />
       ) : pendingPix ? (
         <div className="space-y-4 py-2">
           <CheckoutSteps current={3} />
+          <div className="flex items-center justify-center gap-2 text-xs mb-1" style={{ color: "rgba(247,242,236,0.45)" }}>
+            <Shield size={14} />
+            Pagamento seguro Mercado Pago
+          </div>
           <div className="text-center space-y-2">
             <p className="text-sm font-medium" style={{ color: "#f7f2ec" }}>
               Escaneie ou copie o Pix
@@ -228,30 +225,26 @@ export default function LpCheckoutSection({
       ) : (
         <div className="space-y-5">
           <CheckoutSteps current={3} />
-          <div>
-            <h3 className="font-tan-mon-cheri text-xl mb-1" style={{ color: "#f7f2ec" }}>
-              Pagamento
-            </h3>
-            <p className="text-xs mb-5 leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
-              Passo 3 de 3. Escolha PIX ou cartão para liberar seu acesso ao {LP_PORTAL_NAME}.
-            </p>
-            <MpPaymentBrick
-              publicKey={config.publicKey}
-              amount={config.amount || LP_PRICE}
-              checkoutToken={token}
-              payerEmail={payerEmail}
-              payerName={payerName}
-              onApproved={() => navigate(`/acesso-pos-compra?token=${encodeURIComponent(token)}`)}
-              onPending={(payload) => {
-                setPendingPix({
-                  qrCode: payload.qrCode,
-                  qrBase64: payload.qrBase64,
-                });
-                toast.message("Pix gerado. Assim que confirmar, seu acesso abre.");
-              }}
-              onError={(message) => toast.error(message)}
-            />
+          <div className="flex items-center justify-center gap-2 text-xs" style={{ color: "rgba(247,242,236,0.45)" }}>
+            <Shield size={14} />
+            Pagamento seguro Mercado Pago
           </div>
+          <MpPaymentBrick
+            publicKey={config.publicKey}
+            amount={config.amount || LP_PRICE}
+            checkoutToken={token}
+            payerEmail={payerEmail}
+            payerName={payerName}
+            onApproved={() => navigate(`/acesso-pos-compra?token=${encodeURIComponent(token)}`)}
+            onPending={(payload) => {
+              setPendingPix({
+                qrCode: payload.qrCode,
+                qrBase64: payload.qrBase64,
+              });
+              toast.message("Pix gerado. Assim que confirmar, seu acesso abre.");
+            }}
+            onError={(message) => toast.error(message)}
+          />
         </div>
       )}
     </div>

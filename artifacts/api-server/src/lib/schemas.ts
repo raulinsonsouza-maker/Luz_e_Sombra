@@ -157,7 +157,7 @@ export const funnelRegisterSchema = z.object({
   dataNascimento: dataNascimentoIsoSchema,
   sexo: sexoClienteSchema,
   senha: senhaForteSchema,
-  variant: z.enum(["control", "vsl"]).default("control"),
+  variant: z.enum(["control", "vsl", "lp01"]).default("control"),
   utm: z
     .object({
       source: z.string().optional(),

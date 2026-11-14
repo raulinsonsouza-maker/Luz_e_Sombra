@@ -13,7 +13,6 @@ import {
   formatBrazilDate,
   isValidBrazilDate,
 } from "@/lib/dataNascimento";
-import { LP_PORTAL_NAME } from "@/lib/lpConfig";
 import { safeSessionStorage } from "@/lib/safeStorage";
 import type { SexoCliente } from "@workspace/copy-voz";
 import CheckoutSteps from "@/components/checkout/CheckoutSteps";
@@ -295,15 +294,6 @@ export default function SignupForm({ variant, onRegistered }: Props) {
     <div>
       <CheckoutSteps current={step} />
 
-      <h3 className="font-tan-mon-cheri text-xl mb-1" style={{ color: "#f7f2ec" }}>
-        {step === 1 ? "Sobre você" : "Crie seu acesso"}
-      </h3>
-      <p className="text-xs mb-6 leading-relaxed" style={{ color: "rgba(247,242,236,0.45)" }}>
-        {step === 1
-          ? `Passo 1 de 3. Depois criamos seu acesso ao ${LP_PORTAL_NAME}.`
-          : "Passo 2 de 3. Em seguida, você escolhe como pagar."}
-      </p>
-
       {step === 1 ? (
         <form onSubmit={handleContinuarPasso1} className="space-y-4" noValidate>
           <div>
@@ -545,10 +535,6 @@ export default function SignupForm({ variant, onRegistered }: Props) {
               Voltar
             </button>
           </div>
-
-          <p className="text-[11px] text-center leading-relaxed pt-1" style={{ color: "rgba(247,242,236,0.28)" }}>
-            Ao continuar, você concorda em receber comunicações sobre inscrição e pagamento.
-          </p>
         </form>
       )}
     </div>
