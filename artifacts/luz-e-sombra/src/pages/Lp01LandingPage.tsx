@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "wouter";
 import { ArrowRight, Check, Shield } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
 import LogoPortal from "@/components/LogoPortal";
 import LpHeroVideo from "@/components/lp/LpHeroVideo";
 import LpCheckoutSection from "@/components/checkout/LpCheckoutSection";
@@ -26,15 +24,9 @@ import {
 } from "@/lib/lp01Config";
 
 export default function Lp01LandingPage() {
-  const [, navigate] = useLocation();
-  const { status, user } = useAuth();
   const trackedView = useRef(false);
   const [checkoutToken, setCheckoutToken] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-
-  useEffect(() => {
-    if (status === "authenticated") navigate(user?.isAdmin ? "/admin" : "/dashboard");
-  }, [status, user, navigate]);
 
   useEffect(() => {
     captureUtmsFromUrl();

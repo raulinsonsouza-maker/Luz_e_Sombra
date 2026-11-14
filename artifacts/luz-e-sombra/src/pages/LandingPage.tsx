@@ -1,5 +1,4 @@
 import { useLocation } from "wouter";
-import { useAuth } from "@/context/AuthContext";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import {
@@ -25,14 +24,9 @@ import {
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
-  const { status, user } = useAuth();
   const trackedView = useRef(false);
   const [scrolled, setScrolled] = useState(false);
   const [checkoutToken, setCheckoutToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (status === "authenticated") navigate(user?.isAdmin ? "/admin" : "/dashboard");
-  }, [status, user, navigate]);
 
   useEffect(() => {
     captureUtmsFromUrl();

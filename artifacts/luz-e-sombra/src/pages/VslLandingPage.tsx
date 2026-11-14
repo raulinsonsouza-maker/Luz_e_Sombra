@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/context/AuthContext";
 import { Lock } from "lucide-react";
 import YouTubeGatedPlayer from "@/components/YouTubeGatedPlayer";
 import {
@@ -36,15 +35,10 @@ function readUnlocked(): boolean {
 
 export default function VslLandingPage() {
   const [, navigate] = useLocation();
-  const { status, user } = useAuth();
   const [unlocked, setUnlocked] = useState(readUnlocked);
   const trackedView = useRef(false);
   const trackedUnlock = useRef(false);
   const [checkoutToken, setCheckoutToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (status === "authenticated") navigate(user?.isAdmin ? "/admin" : "/dashboard");
-  }, [status, user, navigate]);
 
   useEffect(() => {
     captureUtmsFromUrl();
